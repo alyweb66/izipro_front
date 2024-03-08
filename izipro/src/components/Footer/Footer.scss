@@ -1,0 +1,13 @@
+@use '../../styles/variables' as v;
+
+footer {
+    background-color: v.$color-secondary-orange; // Couleur de fond
+    color: #fff; // Couleur du texte
+    padding: 20px; // Espacement intérieur
+    text-align: center; // Centrage du texte
+    font-size: 14px; // Taille de police
+    bottom: 0; // Collé au bas de la fenêtre
+    width: 100%; // Largeur pleine
+  }
+  
+ 

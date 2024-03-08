@@ -26,6 +26,8 @@ module.exports = {
   },
   plugins: ["react", "@typescript-eslint", "prettier"],
   rules: {
+    "comma-dangle": ["error", "always-multiline"],
+    "semi": ["error", "always"],
     "react/react-in-jsx-scope": 0,
     "react/jsx-filename-extension": [
       2,
