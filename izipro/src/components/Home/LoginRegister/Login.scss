@@ -2,12 +2,12 @@
 
 .login-container {
     max-width: 50rem;
-    margin: 2rem auto;
+    margin: 1rem auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 21vh;
+    height: 20vh;
     font-family: v.$font;
     border-radius: 10px;
     background: #ffffff;
@@ -18,7 +18,11 @@
 
   .title {
     font-size: 24px;
+    font-size: 1.5rem;
+    font-weight: 500;
     margin-bottom: 10px;
+    color: v.$color-primary-blue;
+
   }
   
   .input-container {

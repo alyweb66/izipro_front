@@ -8,9 +8,7 @@ function Home() {
     return (
         <div className="home">
             <Login />
-            <p className='create-account'>Créer un compte</p>
             <Register />
-            <p className='presentation'>↓ Plus d'informations ↓</p>
             <Presentation />
             <Footer />
         </div>

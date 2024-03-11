@@ -11,6 +11,16 @@
     
 }
 
+.title-presentation {
+    text-align: center;
+    font-size: 2.1rem;
+    font-weight: 500;
+   color: transparent;
+   background-image: linear-gradient(to left,v.$color-primary-orange 40%, v.$color-primary-blue 60%,);
+   -webkit-background-clip: text;
+   background-clip: text;
+   margin-bottom: 1rem;
+}
 
 .particular {
     height: 40vh;
@@ -55,6 +65,9 @@
     .content {
         text-align: center;
         font-family: v.$font;
+        font-size: 1.5rem;
+        font-weight: 500;
+        color: v.$color-primary-blue;
     
     }
 }

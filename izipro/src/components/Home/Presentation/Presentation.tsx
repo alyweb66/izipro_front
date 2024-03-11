@@ -3,6 +3,7 @@ import './Presentation.scss';
 function Presentation() {
   return (
     <div className="presentation-container">
+        <h2 className='title-presentation'>"La solution pour connecter efficacement particuliers et professionnels."</h2>
         <div className="particular">
             <div className="image image-1">
             </div>
