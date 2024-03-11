@@ -1,0 +1,24 @@
+@use 'sass:color';
+@use '../../styles/variables' as v;
+
+.menu {
+    display: flex;
+    justify-content: center;
+    
+
+
+    &-image {
+        margin-top: 0.5rem;
+        width: 60px;
+        height: 60px;
+    }
+ 
+    &-title {
+        color: v.$color-primary-blue;
+        font-family: v.$font;
+        font-weight: v.$font-title-weight;
+        font-size: 3rem;
+    
+    }
+}
+

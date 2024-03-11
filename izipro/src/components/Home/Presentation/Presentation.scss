@@ -1,0 +1,119 @@
+@use '../../../styles/variables' as v;
+
+
+.presentation-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-width: 60rem;
+    margin: 2rem auto;
+    font-family: v.$font;
+    
+}
+
+.title-presentation {
+    text-align: center;
+    font-size: 2.1rem;
+    font-weight: 500;
+   color: transparent;
+   background-image: linear-gradient(to left,v.$color-primary-orange 40%, v.$color-primary-blue 60%,);
+   -webkit-background-clip: text;
+   background-clip: text;
+   margin-bottom: 1rem;
+}
+
+.particular {
+    height: 40vh;
+    width: 49%;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow:  22px 22px 44px #d4d4d4,
+    -22px -22px 44px #ffffff;
+    
+    .image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        animation: fade 30s infinite;
+    }
+    
+    .image-1 {
+        background-image: url('/images/Maman-deborde.jpeg');
+        animation-delay: 1s;
+    }
+    
+    .image-2 {
+        background-image: url('/images/Homme-deborde.jpeg');
+        animation-delay: 15s;
+    }
+
+}
+
+.content-container {
+    padding: 0 2rem;
+    width: 49%;
+    display: flex;
+    align-items: center;
+
+    .content {
+        text-align: center;
+        font-family: v.$font;
+        font-size: 1.5rem;
+        font-weight: 500;
+        color: v.$color-primary-blue;
+    
+    }
+}
+
+.particular-pro {
+    height: 40vh;
+    width: 49%;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow:  22px 22px 44px #d4d4d4,
+    -22px -22px 44px #ffffff;
+    
+    .image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        animation: fade 30s infinite;
+    }
+    
+    .image-1 {
+        background-image: url('/images/Soudure-protail.jpeg');
+        animation-delay: 1s;
+    }
+    
+    .image-2 {
+        background-image: url('/images/Femme-couture.jpeg');
+        animation-delay: 15s;
+    }
+    .image-3 {
+        background-image: url('/public/images/Femme-projet.jpeg');
+        animation-delay: 15s;
+    }
+
+}
+
+
+
+@keyframes fade {
+    0% {opacity: 0;}
+    50% {opacity: 1;}
+    100% {opacity: 0;}
+}
