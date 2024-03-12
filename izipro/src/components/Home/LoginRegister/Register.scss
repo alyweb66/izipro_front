@@ -15,24 +15,39 @@
     }
 }
 
-.register-container {
-    max-width: 60rem;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin: 1rem auto;
-  
+.error-password{
+    color: v.$color-error;
+    font-size: 1rem;
+    font-weight: 600;
+    margin:auto;
+    text-align: center;
 }
 
+.user-created{
+    color: v.$color-validation;
+    font-size: 1rem;
+    font-weight: 600;
+    margin:auto;
+    text-align: center;
+}
 
-.category {
+.register-container {
+  max-width: 60rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 1rem auto;
+  }
+  
+  
+  .category {
     text-align: center ;
     font-size: 1.5rem;
     font-weight: 500;
     color: v.$color-primary-blue;
-}
-
-.register {
+  }
+  
+  .register {
     padding: 1rem;
     width: 48%;;
     display: flex;
@@ -43,7 +58,7 @@
     border-radius: 10px;
     background: #ffffff;
     box-shadow:  22px 22px 44px #d4d4d4,
-             -22px -22px 44px #ffffff;
+             -10px -2px 44px #ffffff;
 }
 
 .input {
