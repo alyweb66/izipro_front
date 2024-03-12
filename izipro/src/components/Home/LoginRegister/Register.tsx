@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { REGISTER_USER_MUTATION, REGISTER_PRO_USER_MUTATION } from '../../GraphQL/Mutations';
@@ -28,8 +27,10 @@ function Register() {
   const [createProUser, { error: proUserError}] = useMutation(REGISTER_PRO_USER_MUTATION);
   
   const handleRegister = (event: React.FormEvent<HTMLFormElement>, isProfessional: boolean) => {
+    // reset the state
     setUserCreated(false);
     setError('');
+
     event.preventDefault();
     
     // Check if the email is valid
@@ -38,7 +39,7 @@ function Register() {
       return;
     }
     
-    
+    // Check if the password and confirm password are the same
     if (password !== confirmPassword) {
       setError('Les mots de passe ne correspondent pas');
       return;
@@ -107,8 +108,8 @@ function Register() {
   return (
     <div>
       <p className='create-account' ><span onClick={toggleRegisterVisibility}>Créer un compte</span></p>
-      {error && <p className='error-password'>{error}</p>}
-      {proUserError && <p className='error-password'>{'Siret invalide'}</p>}
+      {error && <p className='error-register'>{error}</p>}
+      {proUserError && <p className='error-register'>{'Siret inconnu'}</p>}
       {userCreated && <p className='user-created'>Utilisateur créé avec succès, un email de validation vous a été envoyé </p>}
       {isRegisterVisible && (
         <div className="register-container">
