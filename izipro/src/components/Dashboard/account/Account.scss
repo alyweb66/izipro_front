@@ -1,0 +1,26 @@
+@use '../../../styles/variables' as v;
+
+.account-container {
+    max-width: 80rem;
+    background-color: white;
+    display: flex;
+
+    .account-form {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+
+        .label {
+            font-size: 1rem;
+            font-weight: 500;
+            color: v.$color-primary-orange;
+
+            .input-label {
+                margin-bottom: 0.5rem;
+                border: none;
+            }
+        }
+    }
+
+}
