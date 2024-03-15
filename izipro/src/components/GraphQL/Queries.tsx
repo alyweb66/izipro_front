@@ -12,6 +12,7 @@ query Query {
     city
     siret
     denomination
+    role
   }
 }
 `;

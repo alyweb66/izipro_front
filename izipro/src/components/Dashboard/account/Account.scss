@@ -11,6 +11,12 @@
         flex-wrap: wrap;
         justify-content: space-around;
 
+        .user-modification {
+            color: v.$color-validation;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
         .label {
             font-size: 1rem;
             font-weight: 500;

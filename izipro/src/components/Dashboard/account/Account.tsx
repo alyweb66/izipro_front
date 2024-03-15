@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
 import { GET_USER_DATA } from '../../GraphQL/Queries';
 import { useMutation, useQuery } from '@apollo/client';
@@ -6,110 +6,129 @@ import { UPDATE_USER_MUTATION } from '../../GraphQL/Mutations';
 
 import './Account.scss';
 
+type UserState = {
+	id: number;
+	first_name: string;
+	last_name: string;
+	email: string;
+	address: string;
+	postal_code: string;
+	city: string;
+	siret: string;
+	denomination: string;
+	role: string;
+}
+
 function Account() {
-
-	const [first_name, setFirstName] = userDataStore((state) => [state.first_name, state.setFirstName]);
-	const [last_name, setLastName] = userDataStore((state) => [state.last_name, state.setLastName]);
-	const [email, setEmail] = userDataStore((state) => [state.email, state.setEmail]);
-	const [address, setAddress] = userDataStore((state) => [state.address, state.setAddress]);
-	const [postal_code, setPostalCode] = userDataStore((state) => [state.postal_code, state.setPostalCode]);
-	const [city, setCity] = userDataStore((state) => [state.city, state.setCity]);
-	const [siret, setSiret] = userDataStore((state) => [state.siret, state.setSiret]);
-	const [denomination, setDenomination] = userDataStore((state) => [state.denomination, state.setDenomination]);
-
-	const [initialData, setInitialData] = userDataStore((state) => [state.initialData, state.setInitialData]);
-	const setAll = userDataStore((state) => state.setAll);
-
-	// Query to get the user data
+	// Get the user data
 	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
 
+	const role = userDataStore((state) => state.role);
+
+	const [first_name, setFirstName] = useState(getUserData?.user.first_name || '');
+	const [last_name, setLastName] = useState(getUserData?.user.last_name || '');
+	const [email, setEmail] = useState(getUserData?.user.email || '');
+	const [address, setAddress] = useState(getUserData?.user.address || '');
+	const [postal_code, setPostalCode] = useState(getUserData?.user.postal_code || '');
+	const [city, setCity] = useState(getUserData?.user.city || '');
+	const [siret, setSiret] = useState(getUserData?.user.siret || '');
+	const [denomination, setDenomination] = useState(getUserData?.user.denomination || '');
+
+	const [message, setMessage] = useState(false);
+	
+	// Set the changing user data
+	const [userData, setUserData] = useState(getUserData?.user || {} as UserState);
+	// Store data
+	const [initialData, setInitialData] = userDataStore((state) => [state.initialData, state.setInitialData]);
+	const setAll = userDataStore((state) => state.setAll);
 	
 	// Mutation to update the user data
-	const [updateUser, { error: updateUserError, data: updateUserData }] = useMutation(UPDATE_USER_MUTATION);
+	const [updateUser, { error: updateUserError }] = useMutation(UPDATE_USER_MUTATION);
+
+	// Set the user data to state
+	useEffect(() => {
+		const newUserData  = {
+			first_name: first_name,
+			last_name: last_name,
+			email: email,
+			address: address,
+			postal_code: postal_code,
+			city: city,
+			siret: siret,
+			denomination: denomination,
+		};
 	
+		setUserData(newUserData);
+	}, [first_name, last_name, email, address, postal_code, city, siret, denomination]);
+	
+	// Set the user data to the store
 	useEffect(() => {
 		if (getUserData?.user) {
-			console.log('setinital',getUserData?.user);
-			
-			setInitialData(getUserData.user);
-			setAll(getUserData.user);
-	
+			// Change the null values to empty strings
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const userData: UserState = Object.entries(getUserData.user).reduce((acc: any, [key, value]) => {
+				acc[key as keyof UserState] = value === null ? '' : value;
+				return acc;
+			}, {} as UserState);
+		
+			setInitialData(userData);
+			setAll(userData);
 		}
 		
-		/* console.log('data', getUserData);
-		setFirstName(getUserData?.user.first_name || '');
-		setLastName(getUserData?.user.last_name || '');
-		setEmail(getUserData?.user.email || '');
-		setAddress(getUserData?.user.address || '');
-		setPostalCode(getUserData?.user.postal_code || '');
-		setCity(getUserData?.user.city || '');
-		setSiret(getUserData?.user.siret || '');
-		setDenomination(getUserData?.user.denomination || ''); */
 
 		if (getUserError) {
 			console.log(getUserError);
 		}
-
 
 	}, [getUserData]);
 
 	
 	const handleAccountSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		type UserState = {
-			id: number;
-			first_name: string;
-			last_name: string;
-			email: string;
-			address: string;
-			postal_code: string;
-			city: string;
-			siret: string;
-			denomination: string;
-		}
-		// Obtenez uniquement les champs qui ont changé
+		// Compare the initial data with the new data and get the changed fields
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const changedFields = (Object.keys(initialData) as Array<keyof UserState>).reduce((result: any, key: keyof UserState) => {
-			const state = userDataStore.getState() as UserState;
+			
+			const state = userData as UserState;
+		
 			if (initialData[key] !== state[key]) {
 				result[key] = state[key];
 			}
-			return result;
+		
+			return result ;
 		}, {});
-
-		updateUser({
-			variables: {
-				input: changedFields,
-				/* input: {
-					first_name: first_name,
-					last_name: last_name,
-					email: email,
-					address: address,
-					postal_code: postal_code,
-					city: city,
-					siret: Number(siret),
-					denomination: denomination
-				}, */
-			},
-		}).then((response) => {
-			console.log('update user',updateUser);
+		// Delete the role and id fields
+		delete changedFields.role && delete changedFields.id;
+		
+		// Check if there are changed values, if yes use mutation
+		const keys =Object.keys(changedFields).filter(key => changedFields[key] !== undefined && changedFields[key] !== null);
+		// if there are changed values, use mutation
+		if (keys.length > 0) {
 			
-			setFirstName(updateUserData?.updateUser.first_name);
-			setLastName(updateUserData?.updateUser.last_name);
-			setEmail(updateUserData?.updateUser.email);
-			setAddress(updateUserData?.updateUser.address);
-			setPostalCode(updateUserData?.updateUser.postal_code);
-			setCity(updateUserData?.updateUser.city);
-			setSiret(updateUserData?.updateUser.siret);
-			setDenomination(updateUserData?.updateUser.denomination);
-			console.log(response);
-		});
+			updateUser({
+				variables: {
+					input: changedFields,
+				},
+			}).then((response): void => {
+			
+				const { updateUser } = response.data;
+				// Set the new user data to the store
+				setAll(updateUser);
 
-		if (updateUserError) {
-			console.log(updateUserError);
+				if (updateUser) {
+					setMessage(true);
+					setTimeout(() => {
+						setMessage(false);
+					
+					},5000);
+				}
+			});
+
+			if (updateUserError) {
+				console.log(updateUserError);
+			}
 		}
 	};
-
 	return (
 		<div className="account-container">
 			<form className="account-form" onSubmit={handleAccountSubmit} >
@@ -118,8 +137,8 @@ function Account() {
 					<input className="input-label" 
 						type="text" 
 						name="first_name"						
-						value={first_name} 
-						placeholder={first_name}
+						value={first_name || ''} 
+						placeholder={first_name || ''}
 						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)} 
 						aria-label="Prénom"
 					/>
@@ -130,8 +149,8 @@ function Account() {
 						className="input-label" 
 						type="text" 
 						name="last_name"
-						value={last_name}
-						placeholder={last_name} 
+						value={last_name || ''}
+						placeholder={last_name || ''}
 						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
 						aria-label="Nom"
 					/>
@@ -142,8 +161,8 @@ function Account() {
 						className="input-label" 
 						type="text" 
 						name="email"
-						value={email}
-						placeholder={email} 
+						value={email || ''}
+						placeholder={email || ''} 
 						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
 						aria-label="Email"
 					/>
@@ -154,8 +173,8 @@ function Account() {
 						className="input-label" 
 						type="text"
 						name="address" 
-						value={address}
-						placeholder={address} 
+						value={address || ''}
+						placeholder={address || ''} 
 						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddress(event.target.value)} 
 						aria-label="Adresse"
 					/>
@@ -166,8 +185,8 @@ function Account() {
 						className="input-label" 
 						type="text" 
 						name="postal_code"
-						value={postal_code}
-						placeholder={postal_code} 
+						value={postal_code || ''}
+						placeholder={postal_code || ''} 
 						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCode(event.target.value)} 
 						aria-label="Code postal"
 					/>
@@ -178,41 +197,44 @@ function Account() {
 						className="input-label" 
 						type="text" 
 						name="city"
-						value={city}
-						placeholder={city} 
+						value={city || ''}
+						placeholder={city || ''} 
 						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCity(event.target.value)}
 						aria-label="Ville"
 					/>
 				</label>
-				<label className="label">
-					Siret:
-					<input 
-						className="input-label" 
-						type="text" 
-						name="siret"
-						value={siret}
-						placeholder={siret} 
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
-						aria-label="Siret"
-					/>
-				</label>
-				<label className="label">
-					Dénomination:
-					<input 
-						className="input-label" 
-						type="text"
-						name="denomination" 
-						value={denomination }
-						placeholder={denomination}
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenomination(event.target.value)} 
-						aria-label="Dénomination"
-					/>
-				</label>
-
+				{role === 'pro' && (
+					<div>
+						<label className="label">
+							Siret:
+							<input 
+								className="input-label" 
+								type="text" 
+								name="siret"
+								value={siret || ''}
+								placeholder={siret || ''} 
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
+								aria-label="Siret"
+							/>
+						</label>
+						<label className="label">
+							Dénomination:
+							<input 
+								className="input-label" 
+								type="text"
+								name="denomination" 
+								value={denomination || ''}
+								placeholder={denomination || ''}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenomination(event.target.value)} 
+								aria-label="Dénomination"
+							/>
+						</label>
+					</div>
+				)}
+				{message === true && <p className="user-modification">Modifications éfféctué</p>}
 				<button className="account-button" type="submit">Valider les modifications</button>
 			</form>
 		</div>
 	);
 }
-
 export default Account;

@@ -1,18 +1,36 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Account from './account/Account';
+import { useQuery } from '@apollo/client';
+import { GET_USER_DATA } from '../GraphQL/Queries';
+import { userDataStore } from '../../store/UserData';
 
 import './Dashboard.scss';
 
 function Dashboard() {
-	
+
+	const setAll = userDataStore((state) => state.setAll);
+
+	// Query to get the user data
+	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
+
 	const navigate = useNavigate();
 	// condition if user not logged in
 	useEffect(() => {
+		// if user not logged in, redirect to login page
 		if (document.cookie === '') {
 			navigate('/');
 		}
-	}),[navigate];
+		// if user logged in, set the user data to the store
+		setAll(getUserData?.user);
+
+		if (getUserError) {
+			console.log(getUserError);
+		}
+
+	}),[];
+
+
 
 	const [selectedTab, setSelectedTab] = useState('My Profile');
 
