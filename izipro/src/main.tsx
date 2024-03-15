@@ -7,8 +7,9 @@ import './styles/index.scss';
 
 // create a client
 const client = new ApolloClient({
-  uri: 'http://localhost:4000/',
-  cache: new InMemoryCache(),
+	uri: 'http://localhost:3000/',
+	credentials: 'include',
+	cache: new InMemoryCache(),
 });
 
 // create a root
@@ -18,7 +19,7 @@ const root = ReactDOM.createRoot(
 
 // render element in the DOM
 root.render(
-  <ApolloProvider client={client}>
-    <RouterProvider router={router} />
-  </ApolloProvider>,
+	<ApolloProvider client={client}>
+		<RouterProvider router={router} />
+	</ApolloProvider>,
 );

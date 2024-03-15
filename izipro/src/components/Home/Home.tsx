@@ -5,14 +5,14 @@ import Footer from '../Footer/Footer';
 import './Home.scss';
 
 function Home() {
-    return (
-        <div className="home">
-            <Login />
-            <Register />
-            <Presentation />
-            <Footer />
-        </div>
-    );
+	return (
+		<div className="home">
+			<Login />
+			<Register />
+			<Presentation />
+			<Footer />
+		</div>
+	);
 }
 
 export default Home;

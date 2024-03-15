@@ -17,3 +17,25 @@ export const REGISTER_PRO_USER_MUTATION = gql`
         }
     }
 `;
+
+export const LOGIN_USER_MUTATION = gql`
+    mutation Login($input: loginInput!) {
+        login(input: $input)
+    }
+`;
+
+export const UPDATE_USER_MUTATION = gql`
+    mutation Mutation($input: UpdateUserInput!) {
+        updateUser(input: $input) {
+            id
+            first_name
+            last_name
+            email
+            address
+            postal_code
+            city
+            siret
+            denomination
+    }
+}
+`;
