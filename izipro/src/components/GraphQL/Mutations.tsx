@@ -24,6 +24,12 @@ export const LOGIN_USER_MUTATION = gql`
     }
 `;
 
+export const LOGOUT_USER_MUTATION = gql`
+    mutation Mutation($logoutId: Int!) {
+  logout(id: $logoutId)
+    }
+`;
+
 export const UPDATE_USER_MUTATION = gql`
     mutation Mutation($input: UpdateUserInput!) {
         updateUser(input: $input) {
