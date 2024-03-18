@@ -34,9 +34,11 @@ type UserDataStore = UserDataProps & {
 	initialData: UserDataProps;
 	setInitialData: (data: UserDataProps) => void;
 	setAll: (data: UserDataProps) => void;
+	resetUserData: () => void;
 
 }
 
+// store creation for user login
 export const userIsLoggedStore = create<isLoggedUserProps>((set) => ({
 	isLogged: false,
 	setIsLogged: (isLogged) => set({ isLogged }),
@@ -53,7 +55,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	city: '',
 	siret: '',
 	denomination: '',
-	role:'',
+	role: '',
 
 	initialData: {
 		id: 0,
@@ -65,7 +67,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 		city: '',
 		siret: '',
 		denomination: '',
-		role:''
+		role: ''
 	},
 
 	setAll: (data) => {
@@ -99,7 +101,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	setCity: (city) => set({ city }),
 	setSiret: (siret) => set({ siret }),
 	setDenomination: (denomination) => set({ denomination }),
-	setRole: (role) => set ({ role }),
+	setRole: (role) => set({ role }),
 
 	resetUserData: () => set({ id: 0, first_name: '', last_name: '', email: '', address: '', postal_code: '', city: '', siret: '', denomination: '' })
 

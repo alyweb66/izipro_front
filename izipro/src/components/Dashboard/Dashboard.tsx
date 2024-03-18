@@ -9,17 +9,18 @@ import './Dashboard.scss';
 
 function Dashboard() {
 
+	const [selectedTab, setSelectedTab] = useState('My Profile');
+	
+	//store 
 	const setAll = userDataStore((state) => state.setAll);
-
-	const isLogged = userIsLoggedStore((state) => state.setIsLogged);
-
+	const isLogged = userIsLoggedStore((state) => state.isLogged);
+	
 	// Query to get the user data
 	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
 
 	const navigate = useNavigate();
 	// condition if user not logged in
 	useEffect(() => {
-		
 	
 		// if user not logged in, redirect to login page
 		if (!document.cookie && !isLogged) {
@@ -34,11 +35,6 @@ function Dashboard() {
 
 
 	}),[];
-
-
-
-	const [selectedTab, setSelectedTab] = useState('My Profile');
-
 
 
 	return(

@@ -30,7 +30,6 @@ function Login() {
 			},
 		}).then((response) => {
 			if (response.data?.login === true) {
-				console.log('logged in');
 				setIsLogged(true);
 				navigate('/dashboard');
 			}
