@@ -15,6 +15,11 @@ type UserDataProps = {
 
 }
 
+type isLoggedUserProps = {
+	isLogged: boolean;
+	setIsLogged: (login: boolean) => void;
+}
+
 type UserDataStore = UserDataProps & {
 	setId: (id: number) => void;
 	setFirstName: (first_name: string | '') => void;
@@ -31,6 +36,11 @@ type UserDataStore = UserDataProps & {
 	setAll: (data: UserDataProps) => void;
 
 }
+
+export const userIsLoggedStore = create<isLoggedUserProps>((set) => ({
+	isLogged: false,
+	setIsLogged: (isLogged) => set({ isLogged }),
+}));
 
 // store creation for user data
 export const userDataStore = create<UserDataStore>((set) => ({

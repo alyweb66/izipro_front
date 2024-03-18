@@ -2,14 +2,18 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FormEvent, useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { LOGIN_USER_MUTATION } from '../../GraphQL/Mutations';
+import { userIsLoggedStore } from '../../../store/UserData';
+
 import './Login.scss';
 
 function Login() {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
+	const [activeSession, setActiveSession] = useState(false);
 
 	const navigate = useNavigate();
 
+	const setIsLogged  = userIsLoggedStore((state) => state.setIsLogged);
 	
 	const [login, { error }] = useMutation(LOGIN_USER_MUTATION);
 	
@@ -21,12 +25,13 @@ function Login() {
 				input: {
 					email,
 					password,
+					activeSession,
 				},
 			},
 		}).then((response) => {
-			console.log(response);
 			if (response.data?.login === true) {
 				console.log('logged in');
+				setIsLogged(true);
 				navigate('/dashboard');
 			}
 		});
@@ -62,6 +67,16 @@ function Login() {
 				/>
 				<button type="submit" className='button'>Se connecter</button>
 			</form>
+			<label className="checkbox-session-container">
+				<input 
+					className='input-checkbox-session'
+					checked={activeSession} 
+					type="checkbox"
+					onChange={() => setActiveSession(!activeSession)}
+				/>
+				<div className="checkmark"></div>
+				<span>Garder ma session active</span>
+			</label>
 			<Link to={'/Forgot'} className='link'>Mot de passe oublié?</Link>
 
 		</div>
