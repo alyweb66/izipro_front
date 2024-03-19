@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
-import { GET_USER_DATA } from '../../GraphQL/Queries';
+import { GET_USER_DATA } from '../../GraphQL/UserQueries';
 import { useMutation, useQuery } from '@apollo/client';
-import { UPDATE_USER_MUTATION } from '../../GraphQL/Mutations';
+import { UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
 
 import './Account.scss';
 

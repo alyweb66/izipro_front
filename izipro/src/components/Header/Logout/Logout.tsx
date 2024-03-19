@@ -1,6 +1,6 @@
 import { userDataStore, userIsLoggedStore } from '../../../store/UserData';
 import { useMutation } from '@apollo/client';
-import { LOGOUT_USER_MUTATION } from '../../GraphQL/Mutations';
+import { LOGOUT_USER_MUTATION } from '../../GraphQL/UserMutations';
 import { useNavigate } from 'react-router-dom';
 import './Logout.scss';
 

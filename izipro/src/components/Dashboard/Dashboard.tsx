@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Account from './Account/Account';
 import Request from './Request/Request';
 import { useQuery } from '@apollo/client';
-import { GET_USER_DATA } from '../GraphQL/Queries';
+import { GET_USER_DATA } from '../GraphQL/UserQueries';
 import { userDataStore, userIsLoggedStore } from '../../store/UserData';
 
 import './Dashboard.scss';
