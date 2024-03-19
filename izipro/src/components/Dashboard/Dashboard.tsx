@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Account from './account/Account';
+import Account from './Account/Account';
+import Request from './Request/Request';
 import { useQuery } from '@apollo/client';
 import { GET_USER_DATA } from '../GraphQL/Queries';
 import { userDataStore, userIsLoggedStore } from '../../store/UserData';
@@ -49,7 +50,7 @@ function Dashboard() {
 			</nav>
 
 			<div className="content-container">
-				{selectedTab === 'Request' && <div>Demande</div>}
+				{selectedTab === 'Request' && <Request/>}
 				{selectedTab === 'My requests' && <div>Mes demandes</div>}
 				{selectedTab === 'My conversations' && <div>Mes échanges</div>}
 				{selectedTab === 'My profile' && <Account />}

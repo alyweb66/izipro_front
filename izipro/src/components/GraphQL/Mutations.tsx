@@ -31,8 +31,8 @@ export const LOGOUT_USER_MUTATION = gql`
 `;
 
 export const UPDATE_USER_MUTATION = gql`
-    mutation Mutation($input: UpdateUserInput!) {
-        updateUser(input: $input) {
+    mutation Mutation($updateUserId: Int!, $input: UpdateUserInput!) {
+  updateUser(id: $updateUserId, input: $input) {
             id
             first_name
             last_name

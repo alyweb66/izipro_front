@@ -22,9 +22,9 @@ type UserState = {
 function Account() {
 	// Get the user data
 	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
+	console.log('userdata', getUserData);
 
-	const role = userDataStore((state) => state.role);
-
+	const id = useState(getUserData?.user.id || 0);
 	const [first_name, setFirstName] = useState(getUserData?.user.first_name || '');
 	const [last_name, setLastName] = useState(getUserData?.user.last_name || '');
 	const [email, setEmail] = useState(getUserData?.user.email || '');
@@ -33,12 +33,12 @@ function Account() {
 	const [city, setCity] = useState(getUserData?.user.city || '');
 	const [siret, setSiret] = useState(getUserData?.user.siret || '');
 	const [denomination, setDenomination] = useState(getUserData?.user.denomination || '');
-
+	// Message modification account
 	const [message, setMessage] = useState(false);
-	
 	// Set the changing user data
 	const [userData, setUserData] = useState(getUserData?.user || {} as UserState);
 	// Store data
+	const role = userDataStore((state) => state.role);
 	const [initialData, setInitialData] = userDataStore((state) => [state.initialData, state.setInitialData]);
 	const setAll = userDataStore((state) => state.setAll);
 	
@@ -104,9 +104,10 @@ function Account() {
 		const keys =Object.keys(changedFields).filter(key => changedFields[key] !== undefined && changedFields[key] !== null);
 		// if there are changed values, use mutation
 		if (keys.length > 0) {
-			
+	
 			updateUser({
 				variables: {
+					updateUserId: id[0],
 					input: changedFields,
 				},
 			}).then((response): void => {
