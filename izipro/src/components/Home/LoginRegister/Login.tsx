@@ -45,9 +45,9 @@ function Login() {
 		login({
 			variables: {
 				input: {
-					cleanEmail,
-					cleanPassword,
-					activeSession,
+					email: cleanEmail,
+					password: cleanPassword,
+					activeSession: activeSession,
 				},
 			},
 		}).then((response) => {

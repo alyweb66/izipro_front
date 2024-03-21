@@ -144,7 +144,8 @@ function Request() {
 					type="text" 
 					placeholder="Titre de la demande"
 					value={titleRequest}
-					onChange={(event) => setTitleRequest(event.target.value)} 
+					onChange={(event) => setTitleRequest(event.target.value)}
+					maxLength={50} 
 				/>
 
 				<textarea 

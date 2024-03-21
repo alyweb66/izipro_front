@@ -3,6 +3,7 @@ import { userDataStore } from '../../../store/UserData';
 import { GET_USER_DATA } from '../../GraphQL/UserQueries';
 import { useMutation, useQuery } from '@apollo/client';
 import { UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
+import DOMPurify from 'dompurify';
 
 import './Account.scss';
 
@@ -46,15 +47,25 @@ function Account() {
 
 	// Set the user data to state
 	useEffect(() => {
+		//sanitize the input
+		const cleanFirstName = DOMPurify.sanitize(first_name);
+		const cleanLastName = DOMPurify.sanitize(last_name);
+		const cleanEmail = DOMPurify.sanitize(email);
+		const cleanAddress = DOMPurify.sanitize(address);
+		const cleanPostalCode = DOMPurify.sanitize(postal_code);
+		const cleanCity = DOMPurify.sanitize(city);
+		const cleanSiret = DOMPurify.sanitize(siret);
+		const cleanDenomination = DOMPurify.sanitize(denomination);
+
 		const newUserData  = {
-			first_name: first_name,
-			last_name: last_name,
-			email: email,
-			address: address,
-			postal_code: postal_code,
-			city: city,
-			siret: siret,
-			denomination: denomination,
+			first_name: cleanFirstName,
+			last_name: cleanLastName,
+			email: cleanEmail,
+			address: cleanAddress,
+			postal_code: cleanPostalCode,
+			city: cleanCity,
+			siret: cleanSiret,
+			denomination: cleanDenomination,
 		};
 	
 		setUserData(newUserData);
@@ -141,6 +152,7 @@ function Account() {
 						placeholder={first_name || ''}
 						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)} 
 						aria-label="Prénom"
+						maxLength={50}
 					/>
 				</label>
 				<label className="label">
@@ -153,6 +165,7 @@ function Account() {
 						placeholder={last_name || ''}
 						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
 						aria-label="Nom"
+						maxLength={50}
 					/>
 				</label>
 				<label className="label">
@@ -165,6 +178,7 @@ function Account() {
 						placeholder={email || ''} 
 						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
 						aria-label="Email"
+						maxLength={50}
 					/>
 				</label>
 				<label className="label">
@@ -177,6 +191,7 @@ function Account() {
 						placeholder={address || ''} 
 						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddress(event.target.value)} 
 						aria-label="Adresse"
+						maxLength={100}
 					/>
 				</label>
 				<label className="label">
@@ -189,6 +204,7 @@ function Account() {
 						placeholder={postal_code || ''} 
 						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCode(event.target.value)} 
 						aria-label="Code postal"
+						maxLength={10}
 					/>
 				</label>
 				<label className="label">
@@ -201,6 +217,7 @@ function Account() {
 						placeholder={city || ''} 
 						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCity(event.target.value)}
 						aria-label="Ville"
+						maxLength={20}
 					/>
 				</label>
 				{role === 'pro' && (
@@ -215,6 +232,7 @@ function Account() {
 								placeholder={siret || ''} 
 								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
 								aria-label="Siret"
+								maxLength={14}
 							/>
 						</label>
 						<label className="label">
@@ -227,6 +245,7 @@ function Account() {
 								placeholder={denomination || ''}
 								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenomination(event.target.value)} 
 								aria-label="Dénomination"
+								maxLength={50}
 							/>
 						</label>
 					</div>
