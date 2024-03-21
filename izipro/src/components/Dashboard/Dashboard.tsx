@@ -22,7 +22,6 @@ function Dashboard() {
 	const navigate = useNavigate();
 	// condition if user not logged in
 	useEffect(() => {
-	
 		// if user not logged in, redirect to login page
 		if (!document.cookie && !isLogged) {
 			navigate('/');
@@ -31,7 +30,7 @@ function Dashboard() {
 		setAll(getUserData?.user);
 
 		if (getUserError) {
-			console.log(getUserError);
+			throw new Error ('Error while fetching user data');
 		}
 
 

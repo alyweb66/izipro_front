@@ -39,7 +39,7 @@ function Logout() {
 
 
 		if (error) {
-			console.log(error);
+			throw new Error('Error while logging out');
 		} 
         
 	};

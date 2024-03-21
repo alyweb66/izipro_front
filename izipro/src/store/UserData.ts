@@ -1,4 +1,7 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+//import { activeSessionStore } from './ActiveSession';
+
 
 type UserDataProps = {
 	id: number;
@@ -20,6 +23,8 @@ type isLoggedUserProps = {
 	setIsLogged: (login: boolean) => void;
 }
 
+
+
 type UserDataStore = UserDataProps & {
 	setId: (id: number) => void;
 	setFirstName: (first_name: string | '') => void;
@@ -38,11 +43,6 @@ type UserDataStore = UserDataProps & {
 
 }
 
-// store creation for user login
-export const userIsLoggedStore = create<isLoggedUserProps>((set) => ({
-	isLogged: false,
-	setIsLogged: (isLogged) => set({ isLogged }),
-}));
 
 // store creation for user data
 export const userDataStore = create<UserDataStore>((set) => ({
@@ -106,4 +106,15 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	resetUserData: () => set({ id: 0, first_name: '', last_name: '', email: '', address: '', postal_code: '', city: '', siret: '', denomination: '' })
 
 }));
+
+  
+// store creation for user login
+export const userIsLoggedStore = create<isLoggedUserProps>() (
+	persist((set) => ({
+		isLogged: false,
+		setIsLogged: (isLogged) => set({ isLogged }),
+	}), { 
+		name: 'isLogged', 
+	})
+);
 

@@ -7,17 +7,20 @@ import { userIsLoggedStore } from '../../../store/UserData';
 import './Login.scss';
 
 function Login() {
+	// State
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [activeSession, setActiveSession] = useState(false);
 	const [messageError, setMessageError] = useState('');
 
-	const navigate = useNavigate();
+	// Store
+	const setIsLogged = userIsLoggedStore((state) => state.setIsLogged);
 
-	const setIsLogged  = userIsLoggedStore((state) => state.setIsLogged);
+	const navigate = useNavigate();
 	
 	const [login, { error }] = useMutation(LOGIN_USER_MUTATION);
-	
+
+	// Error login message
 	useEffect(() => {
 		let timer: number | undefined;
 		if (error) {

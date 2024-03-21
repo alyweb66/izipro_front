@@ -96,11 +96,9 @@ function Register() {
 
 		// handle errors
 		if (userError) {
-			console.log(userError.graphQLErrors[0].extensions);
-			return 'Submission error!';
+			throw new Error('Submission error!');
 		} else if (proUserError) {
-			console.log(proUserError.graphQLErrors[0].extensions);
-			return 'Submission error!';
+			throw new Error('Submission error!');
 		}
    
 	};

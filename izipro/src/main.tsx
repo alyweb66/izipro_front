@@ -17,6 +17,7 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
+
 // render element in the DOM
 root.render(
 	<ApolloProvider client={client}>

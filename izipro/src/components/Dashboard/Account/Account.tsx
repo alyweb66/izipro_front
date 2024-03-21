@@ -22,7 +22,6 @@ type UserState = {
 function Account() {
 	// Get the user data
 	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
-	console.log('userdata', getUserData);
 
 	const id = useState(getUserData?.user.id || 0);
 	const [first_name, setFirstName] = useState(getUserData?.user.first_name || '');
@@ -77,7 +76,7 @@ function Account() {
 		
 
 		if (getUserError) {
-			console.log(getUserError);
+			throw new Error('Error while fetching user data');
 		}
 
 	}, [getUserData]);
@@ -126,7 +125,7 @@ function Account() {
 			});
 
 			if (updateUserError) {
-				console.log(updateUserError);
+				throw new Error('Error while updating user data');
 			}
 		}
 	};
