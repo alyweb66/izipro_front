@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { REGISTER_USER_MUTATION, REGISTER_PRO_USER_MUTATION } from '../../GraphQL/UserMutations';
 import validator from 'validator';
+import DOMPurify from 'dompurify';
 import './Register.scss';
 
 
@@ -58,17 +59,22 @@ function Register() {
 			return;
 		}
 
+		const cleanEmail = DOMPurify.sanitize(email);
+		const cleanProEmail = DOMPurify.sanitize(proEmail);
+		const cleanSiret = DOMPurify.sanitize(siret);
+		const cleanPassword = DOMPurify.sanitize(password);
+		const cleanProPassword = DOMPurify.sanitize(proPassword);
 		// send the data to the server
 		const variables = isProfessional ? {
 			input: {
-				email: proEmail,
-				password: proPassword,
-				siret: Number(siret)
+				email: cleanProEmail,
+				password: cleanProPassword,
+				siret: Number(cleanSiret)
 			}
 		} : {
 			input: {
-				email: email,
-				password: password
+				email: cleanEmail,
+				password: cleanPassword
 			}
 		};
 
@@ -121,6 +127,7 @@ function Register() {
 							placeholder="Adresse e-mail"
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
 							aria-label="Adresse e-mail"
+							maxLength={50}
 							required
 						/>
 						<input
@@ -131,6 +138,7 @@ function Register() {
 							placeholder="Mot de passe"
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
 							aria-label="Mot de passe"
+							maxLength={60}
 							required
 						/>
 						<input
@@ -141,6 +149,7 @@ function Register() {
 							placeholder="Confirmer mot de passe"
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(event.target.value)}
 							aria-label="Confirmer mot de passe"
+							maxLength={60}
 							required
 						/>
 						<button type="submit" className="register-button">Enregistrer</button>
@@ -168,6 +177,7 @@ function Register() {
 							placeholder="Adresse e-mail"
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProEmail(event.target.value)}
 							aria-label="Adresse e-mail"
+							maxLength={50}
 							required
 						/>
 						<input
@@ -178,6 +188,7 @@ function Register() {
 							placeholder="Mot de passe"
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProPassword(event.target.value)}
 							aria-label="Mot de passe"
+							maxLength={60}
 							required
 						/>
 						<input
@@ -188,6 +199,7 @@ function Register() {
 							placeholder="Confirmer mot de passe"
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProConfirmPassword(event.target.value)}
 							aria-label="Confirmer mot de passe"
+							maxLength={60}
 							required
 						/>
 						<input
@@ -198,6 +210,7 @@ function Register() {
 							placeholder="Siret (14 chiffres)"
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
 							aria-label="siret"
+							maxLength={14}
 							required
 						/>
 						<button type="submit" className='register-button'>Enregistrer</button>

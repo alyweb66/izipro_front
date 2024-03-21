@@ -3,6 +3,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { LOGIN_USER_MUTATION } from '../../GraphQL/UserMutations';
 import { userIsLoggedStore } from '../../../store/UserData';
+import DOMPurify from 'dompurify';
 
 import './Login.scss';
 
@@ -37,11 +38,15 @@ function Login() {
 	const handleLogin = (event: FormEvent<HTMLFormElement>) =>{
 		event.preventDefault();
         
+		// sanitize input
+		const cleanEmail = DOMPurify.sanitize(email);
+		const cleanPassword = DOMPurify.sanitize(password);
+
 		login({
 			variables: {
 				input: {
-					email,
-					password,
+					cleanEmail,
+					cleanPassword,
 					activeSession,
 				},
 			},
@@ -66,6 +71,7 @@ function Login() {
 					placeholder="Adresse e-mail"
 					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
 					aria-label="Adresse e-mail"
+					maxLength={50}
 					required
 				/>
 				<input
@@ -76,6 +82,7 @@ function Login() {
 					placeholder="Mot de passe"
 					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
 					aria-label="Mot de passe"
+					maxLength={60}
 					required
 				/>
 				<button type="submit" className='button'>Se connecter</button>

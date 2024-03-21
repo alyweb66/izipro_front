@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import './Request.scss';
 import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY } from '../../GraphQL/RequestQueries';
 import { useMutation, useQuery } from '@apollo/client';
@@ -17,7 +17,6 @@ type jobProps = {
     description: string;
 }
 
-
 function Request() {
 	//state
 	const [urgent, setUrgent] = useState(false);
@@ -26,6 +25,7 @@ function Request() {
 	const [titleRequest, setTitleRequest] = useState('');
 	const [descriptionRequest, setDescriptionRequest] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
+	const [successMessage, setSuccessMessage] = useState('');
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -35,11 +35,10 @@ function Request() {
 	
 	// fetch categories 
 	const { error: categoryError, data: categoriesData} = useQuery(GET_JOB_CATEGORY);
-
-	
 	if (categoryError) {
 		throw new Error('Error while fetching categories data');
 	}
+
 	// fetch jobs
 	const { error: jobError, data: jobData} = useQuery(GET_JOBS_BY_CATEGORY,
 		{
@@ -57,7 +56,7 @@ function Request() {
 	const handleSubmitRequest = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
-	
+		// check if all fields are filled
 		let timer: number | undefined;
 		if (!titleRequest && !descriptionRequest && !selectedJob) {
 			setErrorMessage('Veuiilez remplir tous les champs');
@@ -67,10 +66,10 @@ function Request() {
 		} else {
 			clearTimeout(timer);
 		}
-	
+		
+		// sanitize input
 		const cleanTitle = DOMPurify.sanitize(titleRequest ?? '');
 		const cleanDescription = DOMPurify.sanitize(descriptionRequest ?? '');
-
 
 		createRequest({
 			variables: {
@@ -85,13 +84,14 @@ function Request() {
 			}
 		}).then((response) => {
 			console.log(response);
+			if (response.data.createRequest) {
+				setSuccessMessage('Demande envoyée avec succès');
+			}
 		});
 
 		if (requestError) {
 			throw new Error('Error while creating request');
 		}
-
-
 	};
 
 	return (
@@ -158,6 +158,7 @@ function Request() {
 						
 				</textarea>
 				{errorMessage && <p className="error-message">{errorMessage}</p>}
+				{successMessage && <p className="success-message">{successMessage}</p>}
 				<button className="request_submit" type="submit">Envoyer</button>
 			</form>
 
