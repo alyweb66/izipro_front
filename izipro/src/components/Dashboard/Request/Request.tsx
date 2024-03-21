@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './Request.scss';
 import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY } from '../../GraphQL/RequestQueries';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
+import { REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
+import { userDataStore } from '../../../store/UserData';
+import DOMPurify from 'dompurify';
 
 type CategoryPros = {
 	id: number;
@@ -17,10 +20,18 @@ type jobProps = {
 
 function Request() {
 	//state
+	const [urgent, setUrgent] = useState(false);
 	const [selectedCategory, setSelectedCategory] = useState('');
 	const [selectedJob, setSelectedJob] = useState('');
-	const [urgent, setUrgent] = useState(false);
-	console.log(urgent);
+	const [titleRequest, setTitleRequest] = useState('');
+	const [descriptionRequest, setDescriptionRequest] = useState('');
+	const [errorMessage, setErrorMessage] = useState('');
+
+	//store
+	const id = userDataStore((state) => state.id);
+
+	// mutation
+	const [createRequest, { error: requestError }] = useMutation(REQUEST_MUTATION);
 	
 	// fetch categories 
 	const { error: categoryError, data: categoriesData} = useQuery(GET_JOB_CATEGORY);
@@ -39,17 +50,55 @@ function Request() {
 
 		});
 
-		
 	if (jobError) {
 		throw new Error('Error while fetching jobs');
 	}
 
+	const handleSubmitRequest = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+
+	
+		let timer: number | undefined;
+		if (!titleRequest && !descriptionRequest && !selectedJob) {
+			setErrorMessage('Veuiilez remplir tous les champs');
+			timer = setTimeout(() => {
+				setErrorMessage('');
+			}, 5000); // 5000ms = 5s
+		} else {
+			clearTimeout(timer);
+		}
+	
+		const cleanTitle = DOMPurify.sanitize(titleRequest ?? '');
+		const cleanDescription = DOMPurify.sanitize(descriptionRequest ?? '');
+
+
+		createRequest({
+			variables: {
+				input: {
+					urgent: urgent,
+					title: cleanTitle,
+					message: cleanDescription,
+					localization: 'Paris',
+					job_id: Number(selectedJob),
+					user_id: id
+				}
+			}
+		}).then((response) => {
+			console.log(response);
+		});
+
+		if (requestError) {
+			throw new Error('Error while creating request');
+		}
+
+
+	};
 
 	return (
 		<div className="request-container">
-			<form className="request-form">
+			<form className="request-form" onSubmit={handleSubmitRequest}>
 				<button 
-					className="urgent-button"
+					className={`urgent-button ${urgent ? 'urgent-button-active' : ''}`}
 					onClick={(event) => {
 						event.preventDefault();
 						setUrgent(!urgent);}
@@ -90,8 +139,25 @@ function Request() {
 					))}
 
 				</select>
-				<input className="inpout-request" type="text" placeholder="Titre de la demande" />
-				<textarea className="text-request" name="description" id="description" placeholder="Description de la demande"></textarea>
+				<input 
+					className="input-request" 
+					type="text" 
+					placeholder="Titre de la demande"
+					value={titleRequest}
+					onChange={(event) => setTitleRequest(event.target.value)} 
+				/>
+
+				<textarea 
+					className="text-request" 
+					name="description" 
+					id="description" 
+					placeholder="Description de la demande"
+					value={descriptionRequest}
+					onChange={(event) => setDescriptionRequest(event.target.value)}
+				>
+						
+				</textarea>
+				{errorMessage && <p className="error-message">{errorMessage}</p>}
 				<button className="request_submit" type="submit">Envoyer</button>
 			</form>
 
