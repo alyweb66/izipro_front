@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 import './Root.scss';
 
 function Root() {
+
 	return (
 		<div className="root">
 			<Header /> 

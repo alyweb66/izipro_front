@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Account from './account/Account';
+import Account from './Account/Account';
+import Request from './Request/Request';
 import { useQuery } from '@apollo/client';
-import { GET_USER_DATA } from '../GraphQL/Queries';
+import { GET_USER_DATA } from '../GraphQL/UserQueries';
 import { userDataStore, userIsLoggedStore } from '../../store/UserData';
 
 import './Dashboard.scss';
@@ -21,7 +22,6 @@ function Dashboard() {
 	const navigate = useNavigate();
 	// condition if user not logged in
 	useEffect(() => {
-	
 		// if user not logged in, redirect to login page
 		if (!document.cookie && !isLogged) {
 			navigate('/');
@@ -30,7 +30,7 @@ function Dashboard() {
 		setAll(getUserData?.user);
 
 		if (getUserError) {
-			console.log(getUserError);
+			throw new Error ('Error while fetching user data');
 		}
 
 
@@ -49,7 +49,7 @@ function Dashboard() {
 			</nav>
 
 			<div className="content-container">
-				{selectedTab === 'Request' && <div>Demande</div>}
+				{selectedTab === 'Request' && <Request/>}
 				{selectedTab === 'My requests' && <div>Mes demandes</div>}
 				{selectedTab === 'My conversations' && <div>Mes échanges</div>}
 				{selectedTab === 'My profile' && <Account />}

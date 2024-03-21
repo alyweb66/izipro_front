@@ -1,10 +1,11 @@
 import Logout from './Logout/Logout';
-import { userIsLoggedStore } from '../../store/UserData';
 
 import './Header.scss';
+import { userIsLoggedStore } from '../../store/UserData';
 
 function Header() {
-	//store
+
+	//const [isLogged, setIsLogged] = useState(localStorage.getItem('isLogged'));
 	const isLogged = userIsLoggedStore((state) => state.isLogged);
 
 	return (

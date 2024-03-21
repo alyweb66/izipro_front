@@ -1,0 +1,18 @@
+@use '../../../styles/variables' as v;
+
+.request-container {
+
+    .request-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .error-message {
+            color: red;
+            font-size: 0.8rem;
+        }
+        .urgent-button-active {
+            background-color: red;
+        }
+    }
+}

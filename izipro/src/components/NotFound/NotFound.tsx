@@ -5,7 +5,6 @@ function NotFound() {
 	// use the `useRouteError` hook to get the error
 	const error = useRouteError();
 
-	console.log(error);
 
 	function getErrorMessage(e: unknown): string {
 		if (isRouteErrorResponse(e)) {
