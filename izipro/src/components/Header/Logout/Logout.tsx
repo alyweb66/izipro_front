@@ -1,4 +1,4 @@
-import { userDataStore, userIsLoggedStore } from '../../../store/UserData';
+import { userDataStore } from '../../../store/UserData';
 import { useMutation } from '@apollo/client';
 import { LOGOUT_USER_MUTATION } from '../../GraphQL/UserMutations';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,7 @@ function Logout() {
 	//store
 	const  id = userDataStore((state) => state.id);
 	const resetUserData = userDataStore((state) => state.resetUserData);
-	const setIsLogged = userIsLoggedStore((state) => state.setIsLogged);
+
 
 	// mutation to logout user
 	const [logout, { error }] = useMutation(LOGOUT_USER_MUTATION);
@@ -27,8 +27,10 @@ function Logout() {
 
 		// clear user data store
 		resetUserData();
-		// set isLogged to false
-		setIsLogged(false);
+		// clear local storage and session storage
+		localStorage.clear();
+		sessionStorage.clear();
+	
 		// clear the cookie
 		if (document.cookie) {
 			document.cookie = 'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
