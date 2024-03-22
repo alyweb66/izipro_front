@@ -10,7 +10,7 @@ import bcrypt from 'bcryptjs';
 
 function Home() {
 	const navigate = useNavigate();
-
+	
 	const hasheIsLogged = localStorage.getItem('ayl');
 	useEffect(() => {
 		if (hasheIsLogged) {

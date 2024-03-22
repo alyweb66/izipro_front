@@ -14,6 +14,12 @@ type UserFormProps = {
     proUserError: string;
 }
 
+type ConfirmEmailProps = {
+	isEmailConfirmed: boolean;
+	setIsEmailConfirmed: (isEmailConfirmed: boolean) => void;
+}
+
+
 type UserFormStore = UserFormProps & {
     setEmail: (email: string) => void;
     setPassword: (password: string) => void;
@@ -27,6 +33,11 @@ type UserFormStore = UserFormProps & {
     setError: (error: string) => void;
     setProUserError: (proUserError: string) => void;
 }
+// store creation for email confirmation
+export const confirmEmailStore = create<ConfirmEmailProps>((set) => ({
+	isEmailConfirmed: false,
+	setIsEmailConfirmed: (isEmailConfirmed) => set({ isEmailConfirmed })
+}));
 // store creation for login and register function
 export const userFormStore = create<UserFormStore>((set) => ({
 	email: '',

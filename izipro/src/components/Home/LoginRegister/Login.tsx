@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs';
 
 
 import './Login.scss';
+import { confirmEmailStore } from '../../../store/LoginRegister';
 // secret key for encryption
 
 
@@ -17,8 +18,8 @@ function Login() {
 	const [password, setPassword] = useState('');
 	const [activeSession, setActiveSession] = useState(false);
 	const [messageError, setMessageError] = useState('');
-
-
+	// Store
+	const [isEmailConfirmed, setIsEmailConfirmed] = confirmEmailStore((state) => [state.isEmailConfirmed, state.setIsEmailConfirmed]);
 
 	const navigate = useNavigate();
 	
@@ -64,6 +65,7 @@ function Login() {
 				} else {
 					sessionStorage.setItem('ayl', hasheIsLogged );
 				}
+				setIsEmailConfirmed(false);
 				navigate('/dashboard');
 			} 
 		});
@@ -73,6 +75,7 @@ function Login() {
 	return (
 		<div className='login-container'>
 			<p className='title'> Se connecter</p>
+			{isEmailConfirmed && <p className='login-success'>Votre adresse e-mail a été confirmée, vous pouvez maintenant vous connecter</p>}
 			<form className='input-container' onSubmit={handleLogin}>
 				<input
 					type="email"
