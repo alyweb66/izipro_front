@@ -83,7 +83,6 @@ function Request() {
 				}
 			}
 		}).then((response) => {
-			console.log(response);
 			if (response.data.createRequest) {
 				setSuccessMessage('Demande envoyée avec succès');
 			}

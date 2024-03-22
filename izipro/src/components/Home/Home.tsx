@@ -15,9 +15,6 @@ function Home() {
 	useEffect(() => {
 		if (hasheIsLogged) {
 			const isLogged = bcrypt.compareSync('true', hasheIsLogged);
-			//const decryptResult = await decrypt();
-			console.log(isLogged);
-
 			// if user not logged in, redirect to login page
 			if (isLogged) {
 				navigate('/dashboard');

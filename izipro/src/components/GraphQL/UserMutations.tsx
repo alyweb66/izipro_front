@@ -51,3 +51,15 @@ export const CONFIRM_EMAIL_MUTATION = gql`
         confirmRegisterEmail(input: $input)
     }
 `;
+
+export const FORGOT_PASSWORD_MUTATION = gql`
+    mutation ChangePassword($input: ForgotPasswordInput!) {
+        forgotPassword(input: $input)
+}
+`;
+
+export const VALIDATE_FORGOT_PASSWORD_MUTATION = gql`
+    mutation ValidateForgotPassword($input: ValidateForgotPasswordInput!) {
+        validateForgotPassword(input: $input)
+    }
+`;

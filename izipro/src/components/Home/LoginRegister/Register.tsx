@@ -59,22 +59,17 @@ function Register() {
 			return;
 		}
 
-		const cleanEmail = DOMPurify.sanitize(email);
-		const cleanProEmail = DOMPurify.sanitize(proEmail);
-		const cleanSiret = DOMPurify.sanitize(siret);
-		const cleanPassword = DOMPurify.sanitize(password);
-		const cleanProPassword = DOMPurify.sanitize(proPassword);
 		// send the data to the server
 		const variables = isProfessional ? {
 			input: {
-				email: cleanProEmail,
-				password: cleanProPassword,
-				siret: Number(cleanSiret)
+				email: DOMPurify.sanitize(proEmail),
+				password: DOMPurify.sanitize(proPassword),
+				siret: Number(DOMPurify.sanitize(siret))
 			}
 		} : {
 			input: {
-				email: cleanEmail,
-				password: cleanPassword
+				email: DOMPurify.sanitize(email),
+				password: DOMPurify.sanitize(password)
 			}
 		};
 

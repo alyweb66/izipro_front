@@ -1,29 +1,36 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FormEvent, useEffect, useState } from 'react';
 import { useMutation } from '@apollo/client';
-import { LOGIN_USER_MUTATION } from '../../GraphQL/UserMutations';
+import { FORGOT_PASSWORD_MUTATION, LOGIN_USER_MUTATION } from '../../GraphQL/UserMutations';
 import DOMPurify from 'dompurify';
 // @ts-expect-error bcrypt is not typed
 import bcrypt from 'bcryptjs';
+import validator from 'validator';
+import { confirmEmailStore } from '../../../store/LoginRegister';
 
 
 import './Login.scss';
-import { confirmEmailStore } from '../../../store/LoginRegister';
+import { changeForgotPasswordStore } from '../../../store/UserData';
 // secret key for encryption
 
 
 function Login() {
 	// State
 	const [email, setEmail] = useState('');
+	const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [activeSession, setActiveSession] = useState(false);
 	const [messageError, setMessageError] = useState('');
+	const [message, setMessage] = useState('');
+	const [emailModal, setEmailModal] = useState(false);
 	// Store
 	const [isEmailConfirmed, setIsEmailConfirmed] = confirmEmailStore((state) => [state.isEmailConfirmed, state.setIsEmailConfirmed]);
-
+	const [isChangePassword, setIsChangePassword] = changeForgotPasswordStore((state) => [state.isChangePassword, state.setIsChangePassword]);
 	const navigate = useNavigate();
-	
+
+	// Mutation
 	const [login, { error }] = useMutation(LOGIN_USER_MUTATION);
+	const [forgotPassword, { error: forgotPasswordError }] = useMutation(FORGOT_PASSWORD_MUTATION);
 
 	// Error login message
 	useEffect(() => {
@@ -41,16 +48,12 @@ function Login() {
 	
 	const handleLogin = (event: FormEvent<HTMLFormElement>) =>{
 		event.preventDefault();
-        
-		// sanitize input
-		const cleanEmail = DOMPurify.sanitize(email);
-		const cleanPassword = DOMPurify.sanitize(password);
 
 		login({
 			variables: {
 				input: {
-					email: cleanEmail,
-					password: cleanPassword,
+					email: DOMPurify.sanitize(email),
+					password: DOMPurify.sanitize(password),
 					activeSession: activeSession,
 				},
 			},
@@ -65,6 +68,7 @@ function Login() {
 				} else {
 					sessionStorage.setItem('ayl', hasheIsLogged );
 				}
+				setIsChangePassword(false);
 				setIsEmailConfirmed(false);
 				navigate('/dashboard');
 			} 
@@ -72,9 +76,44 @@ function Login() {
 
 	};
 
+	const handleForgotPassword = () => {
+	
+		setEmailModal(true);
+	};
+
+	const handleSubmitForgotPassowd = (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+
+		//check if the email is valid
+		if (!validator.isEmail(forgotPasswordEmail)) {
+			setMessageError('Adresse e-mail invalide');
+			return;
+		}
+
+		forgotPassword({
+			variables: {
+				input: {
+					email: DOMPurify.sanitize(forgotPasswordEmail),
+				},
+			},
+		}).then((response) => {
+			if (response.data?.forgotPassword === true) {
+				setMessage('Un e-mail a été envoyé pour réinitialiser votre mot de passe');
+			}
+		});
+
+		if (forgotPasswordError) {
+			throw new Error('Bad request');
+		}
+
+		setEmailModal(false);
+	};
+
 	return (
 		<div className='login-container'>
 			<p className='title'> Se connecter</p>
+			{message && <p className='login-success'>{message}</p>}
+			{isChangePassword && <p className='login-success'>Votre mot de passe a été modifié, vous pouvez maintenant vous connecter</p>}
 			{isEmailConfirmed && <p className='login-success'>Votre adresse e-mail a été confirmée, vous pouvez maintenant vous connecter</p>}
 			<form className='input-container' onSubmit={handleLogin}>
 				<input
@@ -112,7 +151,29 @@ function Login() {
 				<div className="checkmark"></div>
 				<span>Garder ma session active</span>
 			</label>
-			<Link to={'/Forgot'} className='link'>Mot de passe oublié?</Link>
+			<span 
+				className='link' 
+				onClick={handleForgotPassword}
+			>
+				Mot de passe oublié?</span>
+			{emailModal && (
+				<div className='email-modal'>
+					<form className="forgot-password-form" onSubmit={handleSubmitForgotPassowd}>
+						<input
+							type="email"
+							name="email"
+							value={forgotPasswordEmail}
+							className="input"
+							placeholder="Adresse e-mail"
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setForgotPasswordEmail(event.target.value)}
+							aria-label="Adresse e-mail"
+							maxLength={50}
+							required
+						/>
+						<button type="submit" className="button">Valider</button>
+					</form>
+				</div>
+			)}
 
 		</div>
 	);

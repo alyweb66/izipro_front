@@ -14,8 +14,6 @@ function ConfirmEmail() {
 	// Mutation
 	const [confirmRegisterEmail, {error: confirmMailError}] = useMutation(CONFIRM_EMAIL_MUTATION);
 
-	console.log('token', token);
-
 	useEffect(() =>{
 		confirmRegisterEmail({
 			variables:{
@@ -23,8 +21,7 @@ function ConfirmEmail() {
 					token: token
 				}
 			}
-		}).then((response) => {
-			console.log('response', response);
+		}).then(() => {
 			setIsEmailConfirmed(true);
 			navigate('/');
 		});
