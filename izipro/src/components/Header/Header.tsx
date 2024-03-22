@@ -1,12 +1,26 @@
 import Logout from './Logout/Logout';
-
 import './Header.scss';
-import { userIsLoggedStore } from '../../store/UserData';
+import { useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+// @ts-expect-error bcrypt is not typed
+import bcrypt from 'bcryptjs';
 
 function Header() {
+	// State
+	const [isLogged, setIsLogged] = useState(false);
 
-	//const [isLogged, setIsLogged] = useState(localStorage.getItem('isLogged'));
-	const isLogged = userIsLoggedStore((state) => state.isLogged);
+	const location = useLocation();
+	// condition if user not logged in
+	const hasheIsLogged = localStorage.getItem('ayl') || sessionStorage.getItem('ayl');
+	useEffect(() => {
+		if (location.pathname === '/dashboard' && hasheIsLogged) {
+			const isLogged = bcrypt.compareSync('true', hasheIsLogged);
+			setIsLogged(isLogged);
+		} else {
+			setIsLogged(false);
+		}
+	}, [location.pathname, hasheIsLogged]);
+
 
 	return (
 		<header className="menu" id="header">

@@ -2,10 +2,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FormEvent, useEffect, useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { LOGIN_USER_MUTATION } from '../../GraphQL/UserMutations';
-import { userIsLoggedStore } from '../../../store/UserData';
 import DOMPurify from 'dompurify';
+// @ts-expect-error bcrypt is not typed
+import bcrypt from 'bcryptjs';
+
 
 import './Login.scss';
+// secret key for encryption
+
 
 function Login() {
 	// State
@@ -14,8 +18,7 @@ function Login() {
 	const [activeSession, setActiveSession] = useState(false);
 	const [messageError, setMessageError] = useState('');
 
-	// Store
-	const setIsLogged = userIsLoggedStore((state) => state.setIsLogged);
+
 
 	const navigate = useNavigate();
 	
@@ -51,8 +54,16 @@ function Login() {
 				},
 			},
 		}).then((response) => {
+			// if login is successful, redirect to dashboard
 			if (response.data?.login === true) {
-				setIsLogged(true);
+				const salt = bcrypt.genSaltSync(10);
+				const hasheIsLogged = bcrypt.hashSync('true', salt);
+				// if user wants to keep the session active, store the hash in local storage
+				if (activeSession) {
+					localStorage.setItem('ayl', hasheIsLogged);
+				} else {
+					sessionStorage.setItem('ayl', hasheIsLogged );
+				}
 				navigate('/dashboard');
 			} 
 		});
