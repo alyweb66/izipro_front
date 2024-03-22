@@ -45,3 +45,9 @@ export const UPDATE_USER_MUTATION = gql`
     }
 }
 `;
+
+export const CONFIRM_EMAIL_MUTATION = gql`
+    mutation ConfirmRegisterEmail($input: ConfirmRegisterEmailInput!) {
+        confirmRegisterEmail(input: $input)
+    }
+`;
