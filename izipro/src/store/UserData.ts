@@ -16,9 +16,6 @@ type UserDataProps = {
 }
 
 
-
-
-
 type UserDataStore = UserDataProps & {
 	setId: (id: number) => void;
 	setFirstName: (first_name: string | '') => void;
@@ -36,6 +33,16 @@ type UserDataStore = UserDataProps & {
 	resetUserData: () => void;
 
 }
+
+type ChangeForgotPasswordProps = {
+	isChangePassword: boolean;
+	setIsChangePassword: (isChangePassword: boolean) => void;
+}
+
+export const changeForgotPasswordStore = create<ChangeForgotPasswordProps>((set) => ({
+	isChangePassword: false,
+	setIsChangePassword: (isChangePassword) => set({ isChangePassword })
+}));
 
 
 // store creation for user data
@@ -83,8 +90,6 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	},
 
 	setInitialData: (data) => set({ initialData: data }),
-
-
 
 	setId: (id) => set({ id }),
 	setFirstName: (first_name) => set({ first_name }),
