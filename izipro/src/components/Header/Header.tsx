@@ -2,8 +2,7 @@ import Logout from './Logout/Logout';
 import './Header.scss';
 import { useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-// @ts-expect-error bcrypt is not typed
-import bcrypt from 'bcryptjs';
+
 
 function Header() {
 	// State
@@ -11,15 +10,17 @@ function Header() {
 
 	const location = useLocation();
 	// condition if user not logged in
-	const hasheIsLogged = localStorage.getItem('ayl') || sessionStorage.getItem('ayl');
+	const isLoggedValue = localStorage.getItem('ayl') || sessionStorage.getItem('ayl');
 	useEffect(() => {
-		if (location.pathname === '/dashboard' && hasheIsLogged) {
-			const isLogged = bcrypt.compareSync('true', hasheIsLogged);
-			setIsLogged(isLogged);
+		if (location.pathname === '/dashboard' && isLoggedValue) {
+		
+			const newIsLogged = isLoggedValue === 'true' ? true : false;
+			setIsLogged(newIsLogged );
+	
 		} else {
 			setIsLogged(false);
 		}
-	}, [location.pathname, hasheIsLogged]);
+	}, [location.pathname, isLoggedValue]);
 
 
 	return (
