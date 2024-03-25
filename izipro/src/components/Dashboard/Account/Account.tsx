@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
 import { GET_USER_DATA } from '../../GraphQL/UserQueries';
 import { useMutation, useQuery } from '@apollo/client';
-import { UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
+import { CHANGE_PASSWORD_MUTATION, UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
 import DOMPurify from 'dompurify';
+import validator from 'validator';
 
 import './Account.scss';
 
@@ -33,8 +34,12 @@ function Account() {
 	const [city, setCity] = useState(getUserData?.user.city || '');
 	const [siret, setSiret] = useState(getUserData?.user.siret || '');
 	const [denomination, setDenomination] = useState(getUserData?.user.denomination || '');
+	const [oldPassword, setOldPassword] = useState('');
+	const [newPassword, setNewPassword] = useState('');
+	const [confirmNewPassword, setConfirmNewPassword] = useState('');
 	// Message modification account
-	const [message, setMessage] = useState(false);
+	const [message, setMessage] = useState('');
+	const [error, setError] = useState('');	
 	// Set the changing user data
 	const [userData, setUserData] = useState(getUserData?.user || {} as UserState);
 	// Store data
@@ -44,6 +49,7 @@ function Account() {
 	
 	// Mutation to update the user data
 	const [updateUser, { error: updateUserError }] = useMutation(UPDATE_USER_MUTATION);
+	const [changePassword, { error: changePasswordError }] = useMutation(CHANGE_PASSWORD_MUTATION);
 
 	// Set the user data to state
 	useEffect(() => {
@@ -92,7 +98,7 @@ function Account() {
 
 	}, [getUserData]);
 
-	
+	// Handle the account submit
 	const handleAccountSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		// Compare the initial data with the new data and get the changed fields
@@ -127,9 +133,9 @@ function Account() {
 				setAll(updateUser);
 
 				if (updateUser) {
-					setMessage(true);
+					setMessage('Modifications éfféctué');
 					setTimeout(() => {
-						setMessage(false);
+						setMessage('');
 					
 					},5000);
 				}
@@ -140,8 +146,47 @@ function Account() {
 			}
 		}
 	};
+
+	// Handle the new password submit
+	const handleSubmitNewPassword = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		// Check if the new password and the confirm new password are the same
+		if (newPassword !== confirmNewPassword) {
+			setError('Les mots de passe ne correspondent pas');
+			return;
+		}
+		// Check if the new password is strong
+		if (!validator.isStrongPassword(newPassword)) {
+			setError('Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial');
+			return;
+		}
+		// Change the password
+		changePassword({
+			variables: {
+				changePasswordId: id[0],
+				input: {
+					oldPassword: DOMPurify.sanitize(oldPassword),
+					newPassword: DOMPurify.sanitize(newPassword),
+				},
+			},
+		}).then((response) => {
+			if (response.data?.changePassword) {
+				setMessage('Mot de passe modifié');
+				setTimeout(() => {
+					setMessage('');
+				}, 5000);
+			}
+		});
+
+		if (changePasswordError) {
+			throw new Error('Error while changing password');
+		}
+
+	};
 	return (
 		<div className="account-container">
+			{error && <p className="user-modification-error">{error}</p>}
+			{message && <p className="user-modification-message">{message}</p>}
 			<form className="account-form" onSubmit={handleAccountSubmit} >
 				<label className="label">
 					Prénom:
@@ -250,8 +295,47 @@ function Account() {
 						</label>
 					</div>
 				)}
-				{message === true && <p className="user-modification">Modifications éfféctué</p>}
+				
 				<button className="account-button" type="submit">Valider les modifications</button>
+			</form>
+			<form className="account-form" onSubmit={handleSubmitNewPassword}>
+				<input
+					type="oldPassword"
+					name="oldPassword"
+					value={oldPassword}
+					className="input"
+					placeholder="Ancien mot de passe"
+					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setOldPassword(event.target.value)}
+					aria-label="Ancien mot de passe"
+					maxLength={60}
+					required
+				/>
+				<input
+					type="newPassword"
+					name="newPassword"
+					value={newPassword}
+					className="input"
+					placeholder="Nouveau mot de passe"
+					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewPassword(event.target.value)}
+					aria-label="Nouveau mot de passe"
+					maxLength={60}
+					required
+				/>
+				<input
+					type="newPassword"
+					name="confirmNewPassword"
+					value={confirmNewPassword}
+					className="input"
+					placeholder="Confirmer le nouveau mot de passe"
+					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(event.target.value)}
+					aria-label="Confirmer le nouveau mot de passe"
+					maxLength={60}
+					required
+				/>
+				<button className="account-button" type="submit">
+					Valider le nouveau mot de passe
+				</button>
+
 			</form>
 		</div>
 	);
