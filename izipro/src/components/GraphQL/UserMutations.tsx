@@ -63,3 +63,9 @@ export const VALIDATE_FORGOT_PASSWORD_MUTATION = gql`
         validateForgotPassword(input: $input)
     }
 `;
+
+export const CHANGE_PASSWORD_MUTATION = gql`
+    mutation ChangePassword($changePasswordId: Int!, $input: ChangePasswordInput!) {
+        changePassword(id: $changePasswordId, input: $input)
+}
+`;

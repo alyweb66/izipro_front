@@ -5,8 +5,7 @@ import Request from './Request/Request';
 import { useQuery } from '@apollo/client';
 import { GET_USER_DATA } from '../GraphQL/UserQueries';
 import { userDataStore } from '../../store/UserData';
-// @ts-expect-error bcrypt is not typed
-import bcrypt from 'bcryptjs';
+
 
 
 import './Dashboard.scss';
@@ -23,23 +22,18 @@ function Dashboard() {
 
 	const navigate = useNavigate();
 	// condition if user not logged in
-	const hasheIsLogged = localStorage.getItem('ayl') || sessionStorage.getItem('ayl');
+	const isLogged = localStorage.getItem('ayl') || sessionStorage.getItem('ayl');
+	console.log('hasheIsLogged', isLogged);
+	
 	
 	useEffect(() => {
 		
 		// check if user is logged in
-		if (hasheIsLogged) {
-			const isLogged = bcrypt.compareSync('true', hasheIsLogged);
-			// if user not logged in, redirect to login page
-			if (!isLogged) {
-				navigate('/');
-			} 
-		} else {
+		if (!isLogged) {
 			navigate('/');
+			// if user logged in, set the user data to the store
+			setAll(getUserData?.user);
 		}
-		// if user logged in, set the user data to the store
-		setAll(getUserData?.user);
-	
 
 		if (getUserError) {
 			throw new Error ('Error while fetching user data');

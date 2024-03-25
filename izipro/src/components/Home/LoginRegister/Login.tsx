@@ -3,18 +3,17 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { FORGOT_PASSWORD_MUTATION, LOGIN_USER_MUTATION } from '../../GraphQL/UserMutations';
 import DOMPurify from 'dompurify';
-// @ts-expect-error bcrypt is not typed
-import bcrypt from 'bcryptjs';
 import validator from 'validator';
 import { confirmEmailStore } from '../../../store/LoginRegister';
+import { changeForgotPasswordStore } from '../../../store/UserData';
 
 
 import './Login.scss';
-import { changeForgotPasswordStore } from '../../../store/UserData';
 // secret key for encryption
 
 
 function Login() {
+
 	// State
 	const [email, setEmail] = useState('');
 	const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
@@ -60,13 +59,12 @@ function Login() {
 		}).then((response) => {
 			// if login is successful, redirect to dashboard
 			if (response.data?.login === true) {
-				const salt = bcrypt.genSaltSync(10);
-				const hasheIsLogged = bcrypt.hashSync('true', salt);
+		
 				// if user wants to keep the session active, store the hash in local storage
 				if (activeSession) {
-					localStorage.setItem('ayl', hasheIsLogged);
+					localStorage.setItem('ayl', 'true');
 				} else {
-					sessionStorage.setItem('ayl', hasheIsLogged );
+					sessionStorage.setItem('ayl', 'true' );
 				}
 				setIsChangePassword(false);
 				setIsEmailConfirmed(false);
