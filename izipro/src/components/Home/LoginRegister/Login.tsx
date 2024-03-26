@@ -59,7 +59,7 @@ function Login() {
 		}).then((response) => {
 			// if login is successful, redirect to dashboard
 			if (response.data?.login === true) {
-		
+	
 				// if user wants to keep the session active, store the hash in local storage
 				if (activeSession) {
 					localStorage.setItem('ayl', 'true');

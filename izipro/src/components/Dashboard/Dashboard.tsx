@@ -6,11 +6,10 @@ import { useQuery } from '@apollo/client';
 import { GET_USER_DATA } from '../GraphQL/UserQueries';
 import { userDataStore } from '../../store/UserData';
 
-
-
 import './Dashboard.scss';
 
 function Dashboard() {
+	const navigate = useNavigate();
 
 	const [selectedTab, setSelectedTab] = useState('My Profile');
 	
@@ -20,18 +19,16 @@ function Dashboard() {
 	// Query to get the user data
 	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
 
-	const navigate = useNavigate();
 	// condition if user not logged in
 	const isLogged = localStorage.getItem('ayl') || sessionStorage.getItem('ayl');
-	console.log('hasheIsLogged', isLogged);
-	
-	
+
 	useEffect(() => {
 		
 		// check if user is logged in
 		if (!isLogged) {
 			navigate('/');
 			// if user logged in, set the user data to the store
+		} else {
 			setAll(getUserData?.user);
 		}
 
