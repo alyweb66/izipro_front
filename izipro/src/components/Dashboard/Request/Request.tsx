@@ -142,7 +142,7 @@ function Request() {
 			fetchGeocoding();
 
 		} else {
-
+			// Get user's location by browser if no address
 			if (navigator.geolocation) {
 				navigator.geolocation.getCurrentPosition(
 					(position) => {
@@ -152,7 +152,7 @@ function Request() {
 						});
 					},
 					(error) => {
-						setError(error.message);
+						throw new Error(error.message);
 					},
 				);
 			} else {
