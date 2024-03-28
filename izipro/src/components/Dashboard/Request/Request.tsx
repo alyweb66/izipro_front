@@ -43,6 +43,8 @@ function Request() {
 	const [file, setFile] = useState<File[]>([]);
 	const [fileError, setFileError] = useState('');
 	console.log(file);
+	console.log('urlfile', urlFile);
+	
 	
 
 	// map
@@ -107,9 +109,14 @@ function Request() {
 
 	// remove file
 	const handleRemove = (index: number) => {
+		// Remove file from file list
 		const newFiles = [...file];
 		newFiles.splice(index, 1);
 		setFile(newFiles);
+		// Remove file from urlFile list
+		const newUrlFileList = [...urlFile];
+		newUrlFileList.splice(index, 1);
+		setUrlFile(newUrlFileList);
 	};
 	// Submit request
 	const handleSubmitRequest = (event: React.FormEvent<HTMLFormElement>) => {
@@ -125,7 +132,13 @@ function Request() {
 
 		} else {
 			clearTimeout(timer);
+			
+			const sendFile = file.map(file => ({
+				file,
+			})); 
 
+			console.log('sendFile', sendFile);
+			
 			createRequest({
 				variables: {
 					input: {
@@ -136,9 +149,7 @@ function Request() {
 						range: radius / 1000,
 						job_id: Number(selectedJob),
 						user_id: id,
-						media: file.map(file => ({
-							file,
-						}))
+						media: sendFile
 					}
 				}
 			}).then((response) => {
@@ -154,8 +165,6 @@ function Request() {
 			clearTimeout(timer);
 
 		}
-
-
 		if (requestError) {
 			throw new Error('Error while creating request');
 		}
