@@ -37,10 +37,14 @@ function Request() {
 	const [descriptionRequest, setDescriptionRequest] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 	const [successMessage, setSuccessMessage] = useState('');
+
 	// file upload
+	const [urlFile, setUrlFile] = useState<File[]>([]);
 	const [file, setFile] = useState<File[]>([]);
 	const [fileError, setFileError] = useState('');
-	console.log('file', file);
+	console.log(file);
+	
+
 	// map
 	const [radius, setRadius] = useState(0); // Radius in meters
 	const [location, setLocation] = useState<LocationProps>({ lng: null, lat: null });
@@ -92,12 +96,12 @@ function Request() {
 			}
 			return true;
 		});
-
+		setFileError('');
 		if (validFiles) {
 			const urls = validFiles.map(file => URL.createObjectURL(file));
 			const fileObjects = urls.map(url => new File([url], url));
-		
-			setFile([...file, ...fileObjects]);
+			setFile([...file, ...validFiles]);
+			setUrlFile([...urlFile, ...fileObjects]);
 		}
 	};
 
@@ -131,7 +135,10 @@ function Request() {
 						localization: location,
 						range: radius / 1000,
 						job_id: Number(selectedJob),
-						user_id: id
+						user_id: id,
+						media: file.map(file => ({
+							file,
+						}))
 					}
 				}
 			}).then((response) => {
@@ -366,7 +373,7 @@ function Request() {
 				{errorMessage && <p className="error-message">{errorMessage}</p>}
 				{successMessage && <p className="success-message">{successMessage}</p>}
 				{fileError && <p className="error-message">{fileError}</p>}
-				{file.map((file, index) =>(
+				{urlFile.map((file, index) =>(
 					<div key={index} style={{ position: 'relative', display: 'inline-block' }}>
 						<img 
 							style={{ width: '100px', height: '100px', objectFit: 'cover' }}
