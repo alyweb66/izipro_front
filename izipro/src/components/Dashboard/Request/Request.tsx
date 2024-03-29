@@ -132,12 +132,11 @@ function Request() {
 
 		} else {
 			clearTimeout(timer);
-			
+
+			// map file to send to graphql
 			const sendFile = file.map(file => ({
 				file,
 			})); 
-
-			console.log('sendFile', sendFile);
 			
 			createRequest({
 				variables: {
@@ -153,6 +152,7 @@ function Request() {
 					}
 				}
 			}).then((response) => {
+				
 				if (response.data.createRequest) {
 					setSuccessMessage('Demande envoyée avec succès');
 					timer = setTimeout(() => {
@@ -160,6 +160,12 @@ function Request() {
 					}, 5000); // 5000ms = 5s
 					setTitleRequest('');
 					setDescriptionRequest('');
+					setFile([]);
+					setUrlFile([]);
+					setRadius(0);
+					setSelectedCategory('');
+					setSelectedJob('');
+					setUrgent(false);
 				}
 			});
 			clearTimeout(timer);
