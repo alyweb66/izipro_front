@@ -51,6 +51,7 @@ function Account() {
 	const [updateUser, { error: updateUserError }] = useMutation(UPDATE_USER_MUTATION);
 	const [changePassword, { error: changePasswordError }] = useMutation(CHANGE_PASSWORD_MUTATION);
 
+	
 	// Set the user data to state
 	useEffect(() => {
 		//sanitize the input
