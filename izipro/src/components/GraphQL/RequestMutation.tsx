@@ -13,3 +13,9 @@ export const REQUEST_MUTATION = gql`
         }
     }
 `;
+
+export const DELETE_REQUEST_MUTATION = gql`
+    mutation Mutation($input: DeleteRequestInput!) {
+        deleteRequest(input: $input)
+    }
+`;
