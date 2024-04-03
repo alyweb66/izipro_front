@@ -41,10 +41,10 @@ function MyRequest() {
 			variables: { requestsId: id }
 		}
 	);
-	console.log(getUserRequestsData);
-	console.log('requests', requests);
-
+		
+	// useEffect to update the requests
 	useEffect(() => {
+		
 		if (getUserRequestsData) {
 			setRequests(getUserRequestsData.user.requests);
 
@@ -56,7 +56,7 @@ function MyRequest() {
 	if (getUserRequestsError) {
 		throw new Error('Error while fetching user requests');
 	}
-
+	// Function to delete a request
 	const handleDeleteRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number, imageNames: string[]) => {
 		event.preventDefault();
 		deleteRequest({
@@ -69,8 +69,8 @@ function MyRequest() {
 					}
 				}
 		}).then((response) => {
-			console.log('response', response);
 			if (response.data.deleteRequest) {
+				// Remove the request from the state
 				setRequests(requests.filter(request => request.id !== requestId));
 			}
 		});

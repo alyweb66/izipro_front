@@ -24,21 +24,22 @@ export const GET_JOBS_BY_CATEGORY = gql`
 export const GET_USER_REQUESTS = gql`
     query User($requestsId: Int) {
     user {
-        requests(id: $requestsId) {
         id
-        urgent
-        title
-        message
-        localization
-        range
-        user_id
-        job_id
-        job 
-        media {
-            url
-            name
-        }
-        created_at
+        requests(id: $requestsId) {
+            id
+            urgent
+            title
+            message
+            localization
+            range
+            user_id
+            job_id
+            job 
+            media {
+                url
+                name
+            }
+            created_at
         }
     }
 }

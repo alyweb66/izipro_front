@@ -5,25 +5,16 @@ import { useMutation, useQuery } from '@apollo/client';
 import { CHANGE_PASSWORD_MUTATION, UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
 import DOMPurify from 'dompurify';
 import validator from 'validator';
+import { UserDataProps } from '../../../Type/User';
 
 import './Account.scss';
 
-type UserState = {
-	id: number;
-	first_name: string;
-	last_name: string;
-	email: string;
-	address: string;
-	postal_code: string;
-	city: string;
-	siret: string;
-	denomination: string;
-	role: string;
-}
 
 function Account() {
 	// Get the user data
 	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
+	console.log(getUserData?.user);
+	
 
 	const id = useState(getUserData?.user.id || 0);
 	const [first_name, setFirstName] = useState(getUserData?.user.first_name || '');
@@ -41,38 +32,52 @@ function Account() {
 	const [message, setMessage] = useState('');
 	const [error, setError] = useState('');	
 	// Set the changing user data
-	const [userData, setUserData] = useState(getUserData?.user || {} as UserState);
+	const [userData, setUserData] = useState(getUserData?.user || {} as UserDataProps);
 	// Store data
 	const role = userDataStore((state) => state.role);
 	const [initialData, setInitialData] = userDataStore((state) => [state.initialData, state.setInitialData]);
 	const setAll = userDataStore((state) => state.setAll);
 	
 	// Mutation to update the user data
-	const [updateUser, { error: updateUserError }] = useMutation(UPDATE_USER_MUTATION);
+	const [updateUser, { error: updateUserError }] = useMutation(UPDATE_USER_MUTATION, {
+		update(cache, {data: { updateUser}}) {
+			cache.modify({
+				fields: {
+					user(existingUser = {}) {
+						return { ...existingUser, ...updateUser.user };
+					},
+				},
+			}); 
+		}
+	});
 	const [changePassword, { error: changePasswordError }] = useMutation(CHANGE_PASSWORD_MUTATION);
 
+	useEffect(() => {
+		if (getUserData?.user) {
+			setFirstName(getUserData.user.first_name);
+			setLastName(getUserData.user.last_name);
+			setEmail(getUserData.user.email);
+			setAddress(getUserData.user.address);
+			setPostalCode(getUserData.user.postal_code);
+			setCity(getUserData.user.city);
+			setSiret(getUserData.user.siret);
+			setDenomination(getUserData.user.denomination);
+			setUserData(getUserData.user);
+		}
+	}, [getUserData]);
 	
 	// Set the user data to state
 	useEffect(() => {
 		//sanitize the input
-		const cleanFirstName = DOMPurify.sanitize(first_name);
-		const cleanLastName = DOMPurify.sanitize(last_name);
-		const cleanEmail = DOMPurify.sanitize(email);
-		const cleanAddress = DOMPurify.sanitize(address);
-		const cleanPostalCode = DOMPurify.sanitize(postal_code);
-		const cleanCity = DOMPurify.sanitize(city);
-		const cleanSiret = DOMPurify.sanitize(siret);
-		const cleanDenomination = DOMPurify.sanitize(denomination);
-
 		const newUserData  = {
-			first_name: cleanFirstName,
-			last_name: cleanLastName,
-			email: cleanEmail,
-			address: cleanAddress,
-			postal_code: cleanPostalCode,
-			city: cleanCity,
-			siret: cleanSiret,
-			denomination: cleanDenomination,
+			first_name: DOMPurify.sanitize(first_name),
+			last_name: DOMPurify.sanitize(last_name),
+			email: DOMPurify.sanitize(email),
+			address: DOMPurify.sanitize(address),
+			postal_code: DOMPurify.sanitize(postal_code),
+			city: DOMPurify.sanitize(city),
+			siret: DOMPurify.sanitize(siret),
+			denomination: DOMPurify.sanitize(denomination),
 		};
 	
 		setUserData(newUserData);
@@ -83,10 +88,10 @@ function Account() {
 		if (getUserData?.user) {
 			// Change the null values to empty strings
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const userData: UserState = Object.entries(getUserData.user).reduce((acc: any, [key, value]) => {
-				acc[key as keyof UserState] = value === null ? '' : value;
+			const userData: UserDataProps = Object.entries(getUserData.user).reduce((acc: any, [key, value]) => {
+				acc[key as keyof UserDataProps] = value === null ? '' : value;
 				return acc;
-			}, {} as UserState);
+			}, {} as UserDataProps);
 		
 			setInitialData(userData);
 			setAll(userData);
@@ -104,9 +109,9 @@ function Account() {
 		event.preventDefault();
 		// Compare the initial data with the new data and get the changed fields
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const changedFields = (Object.keys(initialData) as Array<keyof UserState>).reduce((result: any, key: keyof UserState) => {
+		const changedFields = (Object.keys(initialData) as Array<keyof UserDataProps>).reduce((result: any, key: keyof UserDataProps) => {
 			
-			const state = userData as UserState;
+			const state = userData as UserDataProps;
 		
 			if (initialData[key] !== state[key]) {
 				result[key] = state[key];
