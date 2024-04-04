@@ -70,6 +70,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 				city: data.city,
 				siret: data.siret,
 				denomination: data.denomination,
+				role: data.role
 
 			}));
 		}

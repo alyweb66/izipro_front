@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
 import { GET_USER_DATA } from '../../GraphQL/UserQueries';
 import { useMutation, useQuery } from '@apollo/client';
+import SettingAccount from './SettingAccount/SettingAccount';
 import { CHANGE_PASSWORD_MUTATION, UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
 import DOMPurify from 'dompurify';
 import validator from 'validator';
@@ -13,9 +14,8 @@ import './Account.scss';
 function Account() {
 	// Get the user data
 	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
-	console.log(getUserData?.user);
-	
 
+	//state
 	const id = useState(getUserData?.user.id || 0);
 	const [first_name, setFirstName] = useState(getUserData?.user.first_name || '');
 	const [last_name, setLastName] = useState(getUserData?.user.last_name || '');
@@ -28,13 +28,13 @@ function Account() {
 	const [oldPassword, setOldPassword] = useState('');
 	const [newPassword, setNewPassword] = useState('');
 	const [confirmNewPassword, setConfirmNewPassword] = useState('');
+	const [role, setRole] = useState(getUserData?.user.role || '');
 	// Message modification account
 	const [message, setMessage] = useState('');
 	const [error, setError] = useState('');	
 	// Set the changing user data
 	const [userData, setUserData] = useState(getUserData?.user || {} as UserDataProps);
 	// Store data
-	const role = userDataStore((state) => state.role);
 	const [initialData, setInitialData] = userDataStore((state) => [state.initialData, state.setInitialData]);
 	const setAll = userDataStore((state) => state.setAll);
 	
@@ -52,6 +52,7 @@ function Account() {
 	});
 	const [changePassword, { error: changePasswordError }] = useMutation(CHANGE_PASSWORD_MUTATION);
 
+	// Set the user data to state
 	useEffect(() => {
 		if (getUserData?.user) {
 			setFirstName(getUserData.user.first_name);
@@ -63,10 +64,11 @@ function Account() {
 			setSiret(getUserData.user.siret);
 			setDenomination(getUserData.user.denomination);
 			setUserData(getUserData.user);
+			setRole(getUserData.user.role);
 		}
 	}, [getUserData]);
 	
-	// Set the user data to state
+	// Set the new user data to state
 	useEffect(() => {
 		//sanitize the input
 		const newUserData  = {
@@ -78,6 +80,7 @@ function Account() {
 			city: DOMPurify.sanitize(city),
 			siret: DOMPurify.sanitize(siret),
 			denomination: DOMPurify.sanitize(denomination),
+			role: DOMPurify.sanitize(role),
 		};
 	
 		setUserData(newUserData);
@@ -119,6 +122,25 @@ function Account() {
 		
 			return result ;
 		}, {});
+		
+		if (changedFields.siret && changedFields.siret.length !== 14) {
+			setError('Siret invalide');
+			setTimeout(() => {
+				setError('');
+			
+			},5000);
+			return;
+		}
+
+		if (changedFields.email) {
+			setMessage('Un email de confirmation a été envoyé, le nouvel email sera effectif après confirmation');
+			setTimeout(() => {
+				setMessage('');
+			
+			},5000);
+			return;
+		}
+		
 		// Delete the role and id fields
 		delete changedFields.role && delete changedFields.id;
 		
@@ -190,160 +212,163 @@ function Account() {
 
 	};
 	return (
-		<div className="account-container">
-			{error && <p className="user-modification-error">{error}</p>}
-			{message && <p className="user-modification-message">{message}</p>}
-			<form className="account-form" onSubmit={handleAccountSubmit} >
-				<label className="label">
+		<>
+			<div className="account-container">
+				{error && <p className="user-modification-error">{error}</p>}
+				{message && <p className="user-modification-message">{message}</p>}
+				<form className="account-form" onSubmit={handleAccountSubmit} >
+					<label className="label">
 					Prénom:
-					<input className="input-label" 
-						type="text" 
-						name="first_name"						
-						value={first_name || ''} 
-						placeholder={first_name || ''}
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)} 
-						aria-label="Prénom"
-						maxLength={50}
-					/>
-				</label>
-				<label className="label">
+						<input className="input-label" 
+							type="text" 
+							name="first_name"						
+							value={first_name || ''} 
+							placeholder={first_name || ''}
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)} 
+							aria-label="Prénom"
+							maxLength={50}
+						/>
+					</label>
+					<label className="label">
 					Nom:
-					<input 
-						className="input-label" 
-						type="text" 
-						name="last_name"
-						value={last_name || ''}
-						placeholder={last_name || ''}
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
-						aria-label="Nom"
-						maxLength={50}
-					/>
-				</label>
-				<label className="label">
+						<input 
+							className="input-label" 
+							type="text" 
+							name="last_name"
+							value={last_name || ''}
+							placeholder={last_name || ''}
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
+							aria-label="Nom"
+							maxLength={50}
+						/>
+					</label>
+					<label className="label">
 					Email:
-					<input 
-						className="input-label" 
-						type="text" 
-						name="email"
-						value={email || ''}
-						placeholder={email || ''} 
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
-						aria-label="Email"
-						maxLength={50}
-					/>
-				</label>
-				<label className="label">
+						<input 
+							className="input-label" 
+							type="text" 
+							name="email"
+							value={email || ''}
+							placeholder={email || ''} 
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
+							aria-label="Email"
+							maxLength={50}
+						/>
+					</label>
+					<label className="label">
 					Adresse:
-					<input 
-						className="input-label" 
-						type="text"
-						name="address" 
-						value={address || ''}
-						placeholder={address || ''} 
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddress(event.target.value)} 
-						aria-label="Adresse"
-						maxLength={100}
-					/>
-				</label>
-				<label className="label">
+						<input 
+							className="input-label" 
+							type="text"
+							name="address" 
+							value={address || ''}
+							placeholder={address || ''} 
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddress(event.target.value)} 
+							aria-label="Adresse"
+							maxLength={100}
+						/>
+					</label>
+					<label className="label">
 					Code postal:
-					<input 
-						className="input-label" 
-						type="text" 
-						name="postal_code"
-						value={postal_code || ''}
-						placeholder={postal_code || ''} 
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCode(event.target.value)} 
-						aria-label="Code postal"
-						maxLength={10}
-					/>
-				</label>
-				<label className="label">
+						<input 
+							className="input-label" 
+							type="text" 
+							name="postal_code"
+							value={postal_code || ''}
+							placeholder={postal_code || ''} 
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCode(event.target.value)} 
+							aria-label="Code postal"
+							maxLength={10}
+						/>
+					</label>
+					<label className="label">
 					Ville:
-					<input 
-						className="input-label" 
-						type="text" 
-						name="city"
-						value={city || ''}
-						placeholder={city || ''} 
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCity(event.target.value)}
-						aria-label="Ville"
-						maxLength={20}
-					/>
-				</label>
-				{role === 'pro' && (
-					<div>
-						<label className="label">
+						<input 
+							className="input-label" 
+							type="text" 
+							name="city"
+							value={city || ''}
+							placeholder={city || ''} 
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCity(event.target.value)}
+							aria-label="Ville"
+							maxLength={20}
+						/>
+					</label>
+					{role === 'pro' && (
+						<div>
+							<label className="label">
 							Siret:
-							<input 
-								className="input-label" 
-								type="text" 
-								name="siret"
-								value={siret || ''}
-								placeholder={siret || ''} 
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
-								aria-label="Siret"
-								maxLength={14}
-							/>
-						</label>
-						<label className="label">
+								<input 
+									className="input-label" 
+									type="text" 
+									name="siret"
+									value={siret || ''}
+									placeholder={siret || ''} 
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
+									aria-label="Siret"
+									maxLength={14}
+								/>
+							</label>
+							<label className="label">
 							Dénomination:
-							<input 
-								className="input-label" 
-								type="text"
-								name="denomination" 
-								value={denomination || ''}
-								placeholder={denomination || ''}
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenomination(event.target.value)} 
-								aria-label="Dénomination"
-								maxLength={50}
-							/>
-						</label>
-					</div>
-				)}
+								<input 
+									className="input-label" 
+									type="text"
+									name="denomination" 
+									value={denomination || ''}
+									placeholder={denomination || ''}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenomination(event.target.value)} 
+									aria-label="Dénomination"
+									maxLength={50}
+								/>
+							</label>
+						</div>
+					)}
 				
-				<button className="account-button" type="submit">Valider les modifications</button>
-			</form>
-			<form className="account-form" onSubmit={handleSubmitNewPassword}>
-				<input
-					type="oldPassword"
-					name="oldPassword"
-					value={oldPassword}
-					className="input"
-					placeholder="Ancien mot de passe"
-					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setOldPassword(event.target.value)}
-					aria-label="Ancien mot de passe"
-					maxLength={60}
-					required
-				/>
-				<input
-					type="newPassword"
-					name="newPassword"
-					value={newPassword}
-					className="input"
-					placeholder="Nouveau mot de passe"
-					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewPassword(event.target.value)}
-					aria-label="Nouveau mot de passe"
-					maxLength={60}
-					required
-				/>
-				<input
-					type="newPassword"
-					name="confirmNewPassword"
-					value={confirmNewPassword}
-					className="input"
-					placeholder="Confirmer le nouveau mot de passe"
-					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(event.target.value)}
-					aria-label="Confirmer le nouveau mot de passe"
-					maxLength={60}
-					required
-				/>
-				<button className="account-button" type="submit">
+					<button className="account-button" type="submit">Valider les modifications</button>
+				</form>
+				<form className="account-form" onSubmit={handleSubmitNewPassword}>
+					<input
+						type="oldPassword"
+						name="oldPassword"
+						value={oldPassword}
+						className="input"
+						placeholder="Ancien mot de passe"
+						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setOldPassword(event.target.value)}
+						aria-label="Ancien mot de passe"
+						maxLength={60}
+						required
+					/>
+					<input
+						type="newPassword"
+						name="newPassword"
+						value={newPassword}
+						className="input"
+						placeholder="Nouveau mot de passe"
+						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewPassword(event.target.value)}
+						aria-label="Nouveau mot de passe"
+						maxLength={60}
+						required
+					/>
+					<input
+						type="newPassword"
+						name="confirmNewPassword"
+						value={confirmNewPassword}
+						className="input"
+						placeholder="Confirmer le nouveau mot de passe"
+						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(event.target.value)}
+						aria-label="Confirmer le nouveau mot de passe"
+						maxLength={60}
+						required
+					/>
+					<button className="account-button" type="submit">
 					Valider le nouveau mot de passe
-				</button>
+					</button>
 
-			</form>
-		</div>
+				</form>
+			</div>
+			<SettingAccount />
+		</>
 	);
 }
 export default Account;

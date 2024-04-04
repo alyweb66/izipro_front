@@ -31,17 +31,19 @@ function MyRequest() {
 
 	// store
 	const id = userDataStore((state) => state.id);
+	console.log(id);
+	
 
 	//mutation
 	const [ deleteRequest, {error: deleteRequestError} ] = useMutation(DELETE_REQUEST_MUTATION);
 
 	// Query to get the user requests
-	const { error: getUserRequestsError, data: getUserRequestsData } = useQuery(GET_USER_REQUESTS,
-		{
-			variables: { requestsId: id }
-		}
-	);
-		
+	const { error: getUserRequestsError, data: getUserRequestsData } = useQuery(GET_USER_REQUESTS, {
+		variables: { requestsId: id },
+		fetchPolicy: 'network-only'
+	});
+	
+
 	// useEffect to update the requests
 	useEffect(() => {
 		

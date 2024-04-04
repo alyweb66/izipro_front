@@ -1,31 +1,19 @@
 import { useEffect, useState } from 'react';
-import './Request.scss';
-import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY } from '../../GraphQL/RequestQueries';
-import { useMutation, useQuery } from '@apollo/client';
+import { useQueryCategory, useQueryJobs } from '../../Hook/Query';
+import { useMutation } from '@apollo/client';
 import { REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
 import { userDataStore } from '../../../store/UserData';
+import { LocationProps } from '../../../Type/User';
+import { CategoryPros, JobProps } from '../../../Type/Request';
 import DOMPurify from 'dompurify';
 import Map from 'react-map-gl';
 //@ts-expect-error no types for mapbox-gl
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
+import './Request.scss';
 
-type CategoryPros = {
-	id: number;
-	name: string;
-}
 
-type jobProps = {
-	id: number;
-	name: string;
-	description: string;
-}
-
-type LocationProps = {
-	lat: number | null;
-	lng: number | null;
-}
 
 function Request() {
 	//state
@@ -62,23 +50,11 @@ function Request() {
 	const [createRequest, { error: requestError }] = useMutation(REQUEST_MUTATION);
 
 	// fetch categories 
-	const { error: categoryError, data: categoriesData } = useQuery(GET_JOB_CATEGORY);
-	if (categoryError) {
-		throw new Error('Error while fetching categories data');
-	}
+	const categoriesData = useQueryCategory();
 
 	// fetch jobs
-	const { error: jobError, data: jobData } = useQuery(GET_JOBS_BY_CATEGORY,
-		{
-			variables: {
-				categoryId: Number(selectedCategory)
-			},
-			skip: !selectedCategory
-		});
+	const jobData  = useQueryJobs(selectedCategory);
 
-	if (jobError) {
-		throw new Error('Error while fetching jobs');
-	}
 	// file upload
 	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const files = event.target.files;
@@ -325,7 +301,7 @@ function Request() {
 						onChange={(event) => setSelectedJob(event.target.value)}
 					>
 						<option value="">Métiers</option>
-						{jobData && jobData.category.jobs.map((job: jobProps, index: number) => (
+						{jobData && jobData.category.jobs.map((job: JobProps, index: number) => (
 
 							<option
 								key={index}

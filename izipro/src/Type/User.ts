@@ -12,4 +12,9 @@ type UserDataProps = {
 
 }
 
-export type { UserDataProps };
+type LocationProps = {
+	lat: number | null;
+	lng: number | null;
+}
+
+export type { UserDataProps, LocationProps };
