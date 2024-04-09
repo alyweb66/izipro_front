@@ -10,6 +10,8 @@ type UserDataProps = {
 	denomination: string | null;
 	role: string;
 	jobs: Array<{ job_id: number}>;
+	settings: Array<{ range: number}>;
+	
 
 }
 

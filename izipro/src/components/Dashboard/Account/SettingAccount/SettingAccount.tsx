@@ -1,31 +1,39 @@
-import { useQueryCategory, useQueryJobData, useQueryJobs, useQueryUserData } from '../../../Hook/Query';
+
+import { useQueryCategory, useQueryJobData, useQueryJobs } from '../../../Hook/Query';
 import { CategoryPros, JobProps } from '../../../../Type/Request';
-import { DELETE_USER_HAS_JOB, USER_HAS_JOB_MUTATION } from '../../../GraphQL/UserMutations';
+import { DELETE_USER_HAS_JOB_MUTATION, USER_HAS_JOB_MUTATION, USER_SETTING_MUTATION } from '../../../GraphQL/UserMutations';
 import './SettingAccount.scss';
 import { useEffect, useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { userDataStore } from '../../../../store/UserData';
 
+
 function SettingAccount() {
+
+	//store
+	const id = userDataStore((state) => state.id);
+	const [jobs, setJobs] = userDataStore((state) => [state.jobs || [], state.setJobs]);
+	const [settings, setSettings] = userDataStore((state) => [state.settings || [], state.setSettings]);
+
+
 	// State
 	const [selectedCategory, setSelectedCategory] = useState('');
 	const [wishListJob, setWishListJob] = useState<JobProps[]>([]);
 	const [selectedJob, setSelectedJob] = useState<JobProps[]>([]);
-	
-	//const [newJob, setNewJob] = useState<JobProps[]>([]);
+	const [radius, setRadius] = useState(settings[0]?.range || 0);
 
-	
-	//store
-	const id = userDataStore((state) => state.id);
-	const [jobs, setJobs] = userDataStore((state) => [state.jobs || [], state.setJobs]);
-	console.log('jobs', jobs);
+	// set radius with the value from the database
+	useEffect(() => {
+		setRadius(settings[0]?.range || 0);
+	}, [settings]);
+
 
 	// fetch jobs
 	const categoriesData = useQueryCategory();
 	const jobData  = useQueryJobs(selectedCategory);
 	const jobDataName = useQueryJobData(jobs);
-	console.log('jobDataName', jobDataName);
 
+	// set job with the value from the database
 	useEffect(() => {
 		setSelectedJob(jobDataName);
 	}, [jobDataName]);
@@ -33,7 +41,8 @@ function SettingAccount() {
 
 	// mutation
 	const [createUserJob, { error: errorCreateUserJob }] = useMutation(USER_HAS_JOB_MUTATION);
-	const [deleteUserJob, { error: errorDeleteUserJob }] = useMutation(DELETE_USER_HAS_JOB);
+	const [deleteUserJob, { error: errorDeleteUserJob }] = useMutation(DELETE_USER_HAS_JOB_MUTATION);
+	const [userSetting, { error: errorUserSetting}] = useMutation(USER_SETTING_MUTATION);
 	
 	// function to remove list job before submit
 	const handleRemoveListJob = (id: number, event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -55,7 +64,7 @@ function SettingAccount() {
 				}
 			}
 		}).then((response) => {
-			console.log('response', response);
+	
 			if (response.data.deleteUserJob.length >= 0) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const newJob = response.data.deleteUserJob.map((job: any) => ({job_id:job.job_id}));
@@ -69,7 +78,6 @@ function SettingAccount() {
 		
 	};
 
-	
 	// function to submit job
 	const handleSubmitJob = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -81,7 +89,6 @@ function SettingAccount() {
 			submitJobId = [...new Set(submitJobId)];
 		
 		}
-		console.log('submitJobId', submitJobId);
 
 		// Remove jobs that are already in selectedJob
 		let filteredJobId;
@@ -99,12 +106,11 @@ function SettingAccount() {
 				}
 			}
 		}).then((response): void => {
-			console.log('response', response.data);
+		
 			const { createUserJob } = response.data;
 			if (createUserJob) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const newJob = createUserJob.map((job: any) => ({job_id:job.job_id}));
-				console.log('newJob', newJob);
 		
 				//setNewJob(newJob);
 				if (jobs.length === 0) {
@@ -121,8 +127,28 @@ function SettingAccount() {
 			throw new Error('Error while adding job');
 		}
 	};
-	
 
+	// function to validate the range
+	const handleValidateRange = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		event.preventDefault();
+
+		userSetting({
+			variables: {
+				userSettingId: id,
+				input: {
+					range: radius,
+					user_id: id
+				}
+			}
+		}).then(() => {
+			setSettings([{range: radius}]);
+		});
+
+		if (errorUserSetting) {
+			throw new Error('Error while setting user');
+		}
+
+	};
 
 	return (
 		<div className="setting-account">
@@ -183,6 +209,23 @@ function SettingAccount() {
 
 
 			</form>
+			
+			<label htmlFor="radius">
+				<p>Selectionnez une distance:</p>
+				{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
+			</label>
+			<input
+				id="radius"
+				type="range"
+				min="0"
+				max="100000"
+				step="5000"
+				value={radius}
+				onChange={e => setRadius(Number(e.target.value))}
+			/>
+			<button onClick={handleValidateRange}>Valider</button>
+	
+	
 		</div>
 	);
 }

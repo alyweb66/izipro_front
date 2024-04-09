@@ -5,7 +5,11 @@ import { GET_USER_DATA } from '../GraphQL/UserQueries';
 
 // fetch user data
 export const useQueryUserData = () => {
-	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
+	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA, {
+		fetchPolicy: 'network-only'
+	}
+	);
+	
 	if (getUserError) {
 		throw new Error('Error while fetching user data');
 	}
@@ -44,10 +48,10 @@ export const useQueryJobs = (selectedCategory: string) => {
 // fetch job data
 export const useQueryJobData = (jobId:{job_id: number}[] ) => {
 
-	console.log('jobId', jobId.length);
+	
 	const jobIdArray = jobId.map((job) => job.job_id);
 	
-	if (jobIdArray.length === 0) {
+	if (!jobIdArray) {
 		return;
 	
 	}

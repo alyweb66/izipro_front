@@ -6,7 +6,8 @@ import SettingAccount from './SettingAccount/SettingAccount';
 import { CHANGE_PASSWORD_MUTATION, UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
 import DOMPurify from 'dompurify';
 import validator from 'validator';
-import { UserDataProps } from '../../../Type/User';
+import { LocationProps, UserDataProps } from '../../../Type/User';
+import { Localization } from '../../Hook/Localization';
 
 import './Account.scss';
 
@@ -108,7 +109,7 @@ function Account() {
 	}, [getUserData]);
 
 	// Handle the account submit
-	const handleAccountSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+	const handleAccountSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		// Compare the initial data with the new data and get the changed fields
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -143,9 +144,24 @@ function Account() {
 		
 		// Delete the role and id fields
 		delete changedFields.role && delete changedFields.id;
-		
+
 		// Check if there are changed values, if yes use mutation
 		const keys =Object.keys(changedFields).filter(key => changedFields[key] !== undefined && changedFields[key] !== null);
+
+		// if address, city and postal_code are changed, update the location
+		if (keys.includes('address') || keys.includes('city') || keys.includes('postal_code')) {
+			const location = await Localization(changedFields.address, changedFields.city, changedFields.postal_code);
+			console.log('location', location);
+			updateUser({
+				variables: {
+					updateUserId: id[0],
+					input: location,
+				},
+			});
+			
+			
+			//Localization(location.address, location.city, location.postal_code);
+		}
 		// if there are changed values, use mutation
 		if (keys.length > 0) {
 	

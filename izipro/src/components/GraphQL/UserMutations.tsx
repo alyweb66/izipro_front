@@ -80,7 +80,7 @@ export const USER_HAS_JOB_MUTATION = gql`
     }
 `;
 
-export const DELETE_USER_HAS_JOB = gql`
+export const DELETE_USER_HAS_JOB_MUTATION = gql`
     mutation Mutation($input: UserJobInput!) {
         deleteUserJob(input: $input) {
             id
@@ -88,4 +88,12 @@ export const DELETE_USER_HAS_JOB = gql`
             job_id
         }
     }
+`;
+
+export const USER_SETTING_MUTATION = gql`
+    mutation Mutation($userSettingId: Int!, $input: UserSettingsInput!) {
+        userSetting(id: $userSettingId, input: $input) {
+            range
+        }
+}
 `;

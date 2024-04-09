@@ -17,6 +17,7 @@ type UserDataStore = UserDataProps & {
 	setInitialData: (data: UserDataProps) => void;
 	setAll: (data: UserDataProps) => void;
 	setJobs: (jobs: Array<{ job_id: number}>) => void;
+	setSettings: (settings: Array<{ range: number}>) => void;
 	resetUserData: () => void;
 
 }
@@ -44,7 +45,8 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	siret: '',
 	denomination: '',
 	role: '',
-	jobs: [{ job_id: 0}],
+	jobs: [],
+	settings: [],
 
 	initialData: {
 		id: 0,
@@ -57,7 +59,8 @@ export const userDataStore = create<UserDataStore>((set) => ({
 		siret: '',
 		denomination: '',
 		role: '',
-		jobs: []
+		jobs: [],
+		settings: []
 	},
 
 	setAll: (data) => {
@@ -74,7 +77,8 @@ export const userDataStore = create<UserDataStore>((set) => ({
 				siret: data.siret,
 				denomination: data.denomination,
 				role: data.role,
-				jobs: data.jobs
+				jobs: data.jobs,
+				settings: data.settings
 
 			}));
 		}
@@ -93,8 +97,9 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	setDenomination: (denomination) => set({ denomination }),
 	setRole: (role) => set({ role }),
 	setJobs: (jobs) => set({ jobs }),
+	setSettings: (settings) => set({ settings }),
 
-	resetUserData: () => set({ id: 0, first_name: '', last_name: '', email: '', address: '', postal_code: '', city: '', siret: '', denomination: '', jobs: []})
+	resetUserData: () => set({ id: 0, first_name: '', last_name: '', email: '', address: '', postal_code: '', city: '', siret: '', denomination: '', jobs: [], settings: [] })
 
 }));
 
