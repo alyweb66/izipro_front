@@ -13,6 +13,9 @@ query Query {
     siret
     denomination
     role
+    jobs{
+      job_id
+    }
   }
 }
 `;

@@ -72,6 +72,20 @@ export const CHANGE_PASSWORD_MUTATION = gql`
 
 export const USER_HAS_JOB_MUTATION = gql`
     mutation Mutation($input: UserJobInput!) {
-        createUserJob(input: $input)
+        createUserJob(input: $input) {
+            id
+            user_id
+            job_id
+        }
+    }
+`;
+
+export const DELETE_USER_HAS_JOB = gql`
+    mutation Mutation($input: UserJobInput!) {
+        deleteUserJob(input: $input) {
+            id
+            user_id
+            job_id
+        }
     }
 `;

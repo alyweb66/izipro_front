@@ -9,6 +9,7 @@ type UserDataProps = {
 	siret: string;
 	denomination: string | null;
 	role: string;
+	jobs: Array<{ job_id: number}>;
 
 }
 

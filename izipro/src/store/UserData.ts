@@ -16,6 +16,7 @@ type UserDataStore = UserDataProps & {
 	initialData: UserDataProps;
 	setInitialData: (data: UserDataProps) => void;
 	setAll: (data: UserDataProps) => void;
+	setJobs: (jobs: Array<{ job_id: number}>) => void;
 	resetUserData: () => void;
 
 }
@@ -43,6 +44,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	siret: '',
 	denomination: '',
 	role: '',
+	jobs: [],
 
 	initialData: {
 		id: 0,
@@ -54,7 +56,8 @@ export const userDataStore = create<UserDataStore>((set) => ({
 		city: '',
 		siret: '',
 		denomination: '',
-		role: ''
+		role: '',
+		jobs: []
 	},
 
 	setAll: (data) => {
@@ -70,7 +73,8 @@ export const userDataStore = create<UserDataStore>((set) => ({
 				city: data.city,
 				siret: data.siret,
 				denomination: data.denomination,
-				role: data.role
+				role: data.role,
+				jobs: data.jobs
 
 			}));
 		}
@@ -88,8 +92,9 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	setSiret: (siret) => set({ siret }),
 	setDenomination: (denomination) => set({ denomination }),
 	setRole: (role) => set({ role }),
+	setJobs: (jobs) => set({ jobs }),
 
-	resetUserData: () => set({ id: 0, first_name: '', last_name: '', email: '', address: '', postal_code: '', city: '', siret: '', denomination: '' })
+	resetUserData: () => set({ id: 0, first_name: '', last_name: '', email: '', address: '', postal_code: '', city: '', siret: '', denomination: '', jobs: []})
 
 }));
 

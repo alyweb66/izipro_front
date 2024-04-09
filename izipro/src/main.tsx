@@ -10,7 +10,7 @@ import './styles/index.scss';
 // create a client
 const client = new ApolloClient({
 	cache: new InMemoryCache(),
-	link: createUploadLink({uri: 'http://localhost:3003/', credentials: 'include', headers: {'Apollo-Require-Preflight': 'true'}})
+	link: createUploadLink({uri: 'http://localhost:3000/', credentials: 'include', headers: {'Apollo-Require-Preflight': 'true'}})
 });
 
 // create a root

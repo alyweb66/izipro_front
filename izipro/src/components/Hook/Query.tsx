@@ -1,5 +1,18 @@
 import { useQuery } from '@apollo/client';
 import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY } from '../GraphQL/RequestQueries';
+import { GET_JOB_DATA } from '../GraphQL/Job';
+import { GET_USER_DATA } from '../GraphQL/UserQueries';
+
+// fetch user data
+export const useQueryUserData = () => {
+	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
+	if (getUserError) {
+		throw new Error('Error while fetching user data');
+	}
+
+	return getUserData;
+};		
+
 
 // fetch categories 
 export const useQueryCategory = () => {
@@ -13,6 +26,7 @@ export const useQueryCategory = () => {
 
 // fetch jobs
 export const useQueryJobs = (selectedCategory: string) => {
+	
 	const { error: jobError, data: jobData } = useQuery(GET_JOBS_BY_CATEGORY,
 		{
 			variables: {
@@ -25,4 +39,30 @@ export const useQueryJobs = (selectedCategory: string) => {
 		throw new Error('Error while fetching jobs');
 	}
 	return jobData;
+};
+
+// fetch job data
+export const useQueryJobData = (jobId:{job_id: number}[] ) => {
+
+	console.log('jobId', jobId.length);
+	const jobIdArray = jobId.map((job) => job.job_id);
+	
+	if (jobIdArray.length === 0) {
+		return;
+	
+	}
+
+	const {error: jobError, data: jobData } = useQuery(GET_JOB_DATA,
+		{
+			variables: {
+				ids: jobIdArray
+			},
+		});
+
+	const jobs = jobData?.jobs;
+
+	if (jobError) {
+		throw new Error('Error while fetching job data');
+	}
+	return jobs;
 };

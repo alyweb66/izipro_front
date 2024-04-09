@@ -11,7 +11,6 @@ function Home() {
 
 	// condition if user not logged in
 	const isLogged = localStorage.getItem('ayl') || sessionStorage.getItem('ayl');
-	console.log(isLogged);
 	
 	useEffect(() => {
 		if (isLogged) {
