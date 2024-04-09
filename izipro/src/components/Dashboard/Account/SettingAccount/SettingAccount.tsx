@@ -12,20 +12,17 @@ function SettingAccount() {
 	const [wishListJob, setWishListJob] = useState<JobProps[]>([]);
 	const [selectedJob, setSelectedJob] = useState<JobProps[]>([]);
 	
-	const [newJob, setNewJob] = useState<JobProps[]>([]);
-	//console.log('wishListJob', wishListJob);
-	//console.log('selectedJob', selectedJob);
+	//const [newJob, setNewJob] = useState<JobProps[]>([]);
 
+	
 	//store
 	const id = userDataStore((state) => state.id);
-	const [jobs, setJobs] = userDataStore((state) => [state.jobs, state.setJobs]);
-	//const [jobDataId, setJobDataId] = useState<number[]>([]);
+	const [jobs, setJobs] = userDataStore((state) => [state.jobs || [], state.setJobs]);
 	console.log('jobs', jobs);
-	
+
 	// fetch jobs
 	const categoriesData = useQueryCategory();
 	const jobData  = useQueryJobs(selectedCategory);
-		
 	const jobDataName = useQueryJobData(jobs);
 	console.log('jobDataName', jobDataName);
 
@@ -38,9 +35,10 @@ function SettingAccount() {
 	const [createUserJob, { error: errorCreateUserJob }] = useMutation(USER_HAS_JOB_MUTATION);
 	const [deleteUserJob, { error: errorDeleteUserJob }] = useMutation(DELETE_USER_HAS_JOB);
 	
-
 	// function to remove list job before submit
-	const handleRemoveListJob = (id: number) => {
+	const handleRemoveListJob = (id: number, event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		event.preventDefault();
+		event?.stopPropagation();
 		setWishListJob(wishListJob.filter((job) => job.id !== id));
 
 	};
@@ -71,16 +69,18 @@ function SettingAccount() {
 		
 	};
 
-	// get unique job id to submit
-	let submitJobId: number[] = [];
-	if (wishListJob !== undefined && wishListJob.length > 0) {
-		submitJobId = wishListJob.filter(job => job).map((job) => job.id);
-		submitJobId = [...new Set(submitJobId)];
-		
-	}
+	
 	// function to submit job
 	const handleSubmitJob = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+
+		// get unique job id to submit
+		let submitJobId: number[] = [];
+		if (wishListJob !== undefined && wishListJob.length > 0) {
+			submitJobId = wishListJob.filter(job => job).map((job) => job.id);
+			submitJobId = [...new Set(submitJobId)];
+		
+		}
 		console.log('submitJobId', submitJobId);
 
 		// Remove jobs that are already in selectedJob
@@ -105,8 +105,13 @@ function SettingAccount() {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const newJob = createUserJob.map((job: any) => ({job_id:job.job_id}));
 				console.log('newJob', newJob);
-			
-				setNewJob(newJob);
+		
+				//setNewJob(newJob);
+				if (jobs.length === 0) {
+					setJobs(newJob);
+				} else {
+					setJobs(newJob);
+				}
 			}
 			setWishListJob([]);
 			
@@ -116,10 +121,7 @@ function SettingAccount() {
 			throw new Error('Error while adding job');
 		}
 	};
-
-	/* useEffect(() => {
-		setJobs(newJob);
-	}, [newJob]); */
+	
 
 
 	return (
@@ -164,7 +166,7 @@ function SettingAccount() {
 					{wishListJob && wishListJob.map((job: JobProps, index: number) => (
 						<li key={index}>
 							{job.name}
-							<button onClick={() => handleRemoveListJob(job.id)}>X</button>
+							<button onClick={(event) => handleRemoveListJob(job.id, event)}>X</button>
 						</li>
 					))}
 				</ul>

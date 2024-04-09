@@ -44,7 +44,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	siret: '',
 	denomination: '',
 	role: '',
-	jobs: [],
+	jobs: [{ job_id: 0}],
 
 	initialData: {
 		id: 0,
