@@ -6,18 +6,19 @@ import SettingAccount from './SettingAccount/SettingAccount';
 import { CHANGE_PASSWORD_MUTATION, UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
 import DOMPurify from 'dompurify';
 import validator from 'validator';
-import { LocationProps, UserDataProps } from '../../../Type/User';
+import { UserDataProps } from '../../../Type/User';
 import { Localization } from '../../Hook/Localization';
 
 import './Account.scss';
 
 
 function Account() {
+
 	// Get the user data
 	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
+	console.log('getUserData', getUserData);
 
 	//state
-	const id = useState(getUserData?.user.id || 0);
 	const [first_name, setFirstName] = useState(getUserData?.user.first_name || '');
 	const [last_name, setLastName] = useState(getUserData?.user.last_name || '');
 	const [email, setEmail] = useState(getUserData?.user.email || '');
@@ -36,6 +37,7 @@ function Account() {
 	// Set the changing user data
 	const [userData, setUserData] = useState(getUserData?.user || {} as UserDataProps);
 	// Store data
+	const id = userDataStore((state) => state.id);
 	const [initialData, setInitialData] = userDataStore((state) => [state.initialData, state.setInitialData]);
 	const setAll = userDataStore((state) => state.setAll);
 	
@@ -152,13 +154,22 @@ function Account() {
 		if (keys.includes('address') || keys.includes('city') || keys.includes('postal_code')) {
 			const location = await Localization(changedFields.address, changedFields.city, changedFields.postal_code);
 			console.log('location', location);
+			console.log('id', id);
+			
 			updateUser({
 				variables: {
-					updateUserId: id[0],
-					input: location,
+					updateUserId: id,
+					input: {
+						localization: 
+							location
+						
+					}
 				},
 			});
-			
+
+			if (updateUserError) {
+				throw new Error('Error while updating user data');
+			}
 			
 			//Localization(location.address, location.city, location.postal_code);
 		}
@@ -167,7 +178,7 @@ function Account() {
 	
 			updateUser({
 				variables: {
-					updateUserId: id[0],
+					updateUserId: id,
 					input: changedFields,
 				},
 			}).then((response): void => {
@@ -282,6 +293,7 @@ function Account() {
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddress(event.target.value)} 
 							aria-label="Adresse"
 							maxLength={100}
+							required
 						/>
 					</label>
 					<label className="label">
@@ -295,6 +307,7 @@ function Account() {
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCode(event.target.value)} 
 							aria-label="Code postal"
 							maxLength={10}
+							required
 						/>
 					</label>
 					<label className="label">
@@ -308,6 +321,7 @@ function Account() {
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCity(event.target.value)}
 							aria-label="Ville"
 							maxLength={20}
+							required
 						/>
 					</label>
 					{role === 'pro' && (

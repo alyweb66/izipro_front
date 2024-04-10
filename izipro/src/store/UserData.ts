@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { UserDataProps } from '../Type/User';
+import { LocationProps } from '../Type/User';
 
 
 type UserDataStore = UserDataProps & {
@@ -10,6 +11,7 @@ type UserDataStore = UserDataProps & {
 	setAddress: (address: string | '') => void;
 	setPostalCode: (postal_code: string | '') => void;
 	setCity: (city: string | '') => void;
+	setLocalization: (localization: LocationProps) => void;
 	setSiret: (siret: string) => void;
 	setDenomination: (denomination: string | '') => void;
 	setRole: (role: string | '') => void;
@@ -42,6 +44,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	address: '',
 	postal_code: '',
 	city: '',
+	localization: {lat: null, lng: null},
 	siret: '',
 	denomination: '',
 	role: '',
@@ -56,6 +59,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 		address: '',
 		postal_code: '',
 		city: '',
+		localization: {lat: null, lng: null},
 		siret: '',
 		denomination: '',
 		role: '',
@@ -74,6 +78,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 				address: data.address,
 				postal_code: data.postal_code,
 				city: data.city,
+				localization: data.localization,
 				siret: data.siret,
 				denomination: data.denomination,
 				role: data.role,
@@ -93,13 +98,14 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	setAddress: (address) => set({ address }),
 	setPostalCode: (postal_code) => set({ postal_code }),
 	setCity: (city) => set({ city }),
+	setLocalization: (localization) => set({ localization }),
 	setSiret: (siret) => set({ siret }),
 	setDenomination: (denomination) => set({ denomination }),
 	setRole: (role) => set({ role }),
 	setJobs: (jobs) => set({ jobs }),
 	setSettings: (settings) => set({ settings }),
 
-	resetUserData: () => set({ id: 0, first_name: '', last_name: '', email: '', address: '', postal_code: '', city: '', siret: '', denomination: '', jobs: [], settings: [] })
+	resetUserData: () => set({ id: 0, first_name: '', last_name: '', email: '', address: '', postal_code: '', city: '', localization: {lat: null, lng: null} , siret: '', denomination: '', jobs: [], settings: [] })
 
 }));
 
