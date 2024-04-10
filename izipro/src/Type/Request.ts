@@ -1,3 +1,23 @@
+type Request = {
+	id: number
+    urgent: boolean
+    title: string
+    message: string
+    lng: number
+	lat: number
+    range: number
+    user_id: number
+    job_id: number
+    job: string
+    media: [{
+		url: string
+		name: string
+	
+	}]
+    created_at: string
+};
+
+
 type CategoryPros = {
 	id: number;
 	name: string;
@@ -9,4 +29,4 @@ type JobProps = {
 	description: string;
 }
 
-export type { CategoryPros, JobProps };
+export type { CategoryPros, JobProps, Request };

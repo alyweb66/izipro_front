@@ -30,7 +30,8 @@ export const GET_USER_REQUESTS = gql`
             urgent
             title
             message
-            localization
+            lng
+            lat
             range
             user_id
             job_id

@@ -2,27 +2,9 @@ import { useEffect, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
 import { useMutation, useQuery } from '@apollo/client';
 import { GET_USER_REQUESTS } from '../../GraphQL/RequestQueries';
+import { Request } from '../../../Type/Request';
 import './MyRequest.scss';
 import { DELETE_REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
-
-type Request = {
-	id: number
-    urgent: boolean
-    title: string
-    message: string
-    localization: string
-    range: number
-    user_id: number
-    job_id: number
-    job: string
-    media: [{
-		url: string
-		name: string
-	
-	}]
-    created_at: string
-};
-
 
 
 function MyRequest() {
