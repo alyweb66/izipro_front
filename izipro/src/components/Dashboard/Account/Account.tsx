@@ -25,6 +25,10 @@ function Account() {
 	const [address, setAddress] = useState(getUserData?.user.address || '');
 	const [postal_code, setPostalCode] = useState(getUserData?.user.postal_code || '');
 	const [city, setCity] = useState(getUserData?.user.city || '');
+	const [lng, setLng] = useState(getUserData?.user.lng || null);
+	const [lat, setLat] = useState(getUserData?.user.lat || null);
+
+	
 	const [siret, setSiret] = useState(getUserData?.user.siret || '');
 	const [denomination, setDenomination] = useState(getUserData?.user.denomination || '');
 	const [oldPassword, setOldPassword] = useState('');
@@ -40,6 +44,9 @@ function Account() {
 	const id = userDataStore((state) => state.id);
 	const [initialData, setInitialData] = userDataStore((state) => [state.initialData, state.setInitialData]);
 	const setAll = userDataStore((state) => state.setAll);
+	console.log('initialData', initialData);
+	console.log('userData', userData);
+	
 	
 	// Mutation to update the user data
 	const [updateUser, { error: updateUserError }] = useMutation(UPDATE_USER_MUTATION, {
@@ -64,6 +71,8 @@ function Account() {
 			setAddress(getUserData.user.address);
 			setPostalCode(getUserData.user.postal_code);
 			setCity(getUserData.user.city);
+			setLng(getUserData.user.lng);
+			setLat(getUserData.user.lat);
 			setSiret(getUserData.user.siret);
 			setDenomination(getUserData.user.denomination);
 			setUserData(getUserData.user);
@@ -81,13 +90,15 @@ function Account() {
 			address: DOMPurify.sanitize(address),
 			postal_code: DOMPurify.sanitize(postal_code),
 			city: DOMPurify.sanitize(city),
+			lng,
+			lat,
 			siret: DOMPurify.sanitize(siret),
 			denomination: DOMPurify.sanitize(denomination),
 			role: DOMPurify.sanitize(role),
 		};
 	
 		setUserData(newUserData);
-	}, [first_name, last_name, email, address, postal_code, city, siret, denomination]);
+	}, [first_name, last_name, email, address, postal_code, city, lng, lat, siret, denomination]);
 	
 	// Set the user data to the store
 	useEffect(() => {
@@ -110,21 +121,34 @@ function Account() {
 
 	}, [getUserData]);
 
+
 	// Handle the account submit
 	const handleAccountSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		// fetch the location
+		let newUserData = {} as UserDataProps;
+		if (address && city && postal_code) {
+			const location = await Localization(address, city, postal_code);
+			// Add lng and lat to userData
+			// Create a copy of userData
+			newUserData = { ...userData };
+			newUserData.lng = location?.lng;
+			newUserData.lat = location?.lat;
+			setLng(location?.lng);
+			setLat(location?.lat);
+		}
+	
 		// Compare the initial data with the new data and get the changed fields
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const changedFields = (Object.keys(initialData) as Array<keyof UserDataProps>).reduce((result: any, key: keyof UserDataProps) => {
 			
-			const state = userData as UserDataProps;
-		
-			if (initialData[key] !== state[key]) {
-				result[key] = state[key];
+			if (initialData[key] !== newUserData[key]) {
+				result[key] = newUserData[key];
 			}
-		
+			
 			return result ;
 		}, {});
+		console.log('changedFields', changedFields);
 		
 		if (changedFields.siret && changedFields.siret.length !== 14) {
 			setError('Siret invalide');
@@ -150,29 +174,6 @@ function Account() {
 		// Check if there are changed values, if yes use mutation
 		const keys =Object.keys(changedFields).filter(key => changedFields[key] !== undefined && changedFields[key] !== null);
 
-		// if address, city and postal_code are changed, update the location
-		if (keys.includes('address') || keys.includes('city') || keys.includes('postal_code')) {
-			const location = await Localization(changedFields.address, changedFields.city, changedFields.postal_code);
-			console.log('location', location);
-			console.log('id', id);
-			
-			updateUser({
-				variables: {
-					updateUserId: id,
-					input: {
-						localization: 
-							location
-						
-					}
-				},
-			});
-
-			if (updateUserError) {
-				throw new Error('Error while updating user data');
-			}
-			
-			//Localization(location.address, location.city, location.postal_code);
-		}
 		// if there are changed values, use mutation
 		if (keys.length > 0) {
 	

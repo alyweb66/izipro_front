@@ -1,7 +1,3 @@
-type LocationProps = {
-	lat: number | null;
-	lng: number | null;
-}
 
 type UserDataProps = {
 	id: number;
@@ -11,7 +7,8 @@ type UserDataProps = {
 	address: string | null;
 	postal_code: string | null;
 	city: string | null;
-	localization: LocationProps | null;
+	lng: number | null;
+	lat: number | null;
 	siret: string;
 	denomination: string | null;
 	role: string;
@@ -22,4 +19,4 @@ type UserDataProps = {
 }
 
 
-export type { UserDataProps, LocationProps };
+export type { UserDataProps };

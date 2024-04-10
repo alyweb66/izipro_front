@@ -16,6 +16,17 @@ import './Request.scss';
 
 
 function Request() {
+
+	//store
+	const id = userDataStore((state) => state.id);
+	const address = userDataStore((state) => state.address);
+	const city = userDataStore((state) => state.city);
+	const localization = userDataStore((state) => state.localization);
+	const first_name = userDataStore((state) => state.first_name);
+	const last_name = userDataStore((state) => state.last_name);
+	const postal_code = userDataStore((state) => state.postal_code);
+	console.log('localization', localization);
+
 	//state
 	const [urgent, setUrgent] = useState(false);
 	const [selectedCategory, setSelectedCategory] = useState('');
@@ -32,19 +43,19 @@ function Request() {
 
 	// map
 	const [radius, setRadius] = useState(0); // Radius in meters
-	const [location, setLocation] = useState<LocationProps>({ lng: null, lat: null });
+	//const [location, setLocation] = useState(localization);
 	const [error, setError] = useState('');
 	const [map, setMap] = useState<mapboxgl.Map | null>(null);
 	const [zoom, setZoom] = useState(10);
 
-
-	//store
-	const id = userDataStore((state) => state.id);
-	const address = userDataStore((state) => state.address);
-	const city = userDataStore((state) => state.city);
-	const first_name = userDataStore((state) => state.first_name);
-	const last_name = userDataStore((state) => state.last_name);
-	const postal_code = userDataStore((state) => state.postal_code);
+	
+	/* useEffect(() => {
+		const lng = localization?.lng;
+		const lat = localization?.lat;
+		if (lng && lat) {
+			setLocation(localization?.lat && localization?.lng ? localization : null);
+		}
+	}, [localization]); */
 
 	// mutation
 	const [createRequest, { error: requestError }] = useMutation(REQUEST_MUTATION);
@@ -150,11 +161,12 @@ function Request() {
 	};
 
 	// location
-	useEffect(() => {
+	//useEffect(() => {
 
-		if (address && city && postal_code) {
-			// transform address to coordinates with Mapbox API
-			const fetchGeocoding = async () => {
+	//if (localization?.lat && localization?.lng) {
+	//setLocation(localization);
+	// transform address to coordinates with Mapbox API
+	/* const fetchGeocoding = async () => {
 				const formattedAddress = `${address}, ${postal_code} ${city}`;
 				const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(formattedAddress)}.json?access_token=pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg`;
 
@@ -169,32 +181,15 @@ function Request() {
 					throw new Error('Unable to geocode address');
 				}
 			};
-			fetchGeocoding();
+			fetchGeocoding(); */
 
-		} else {
-			// Get user's location by browser if no address
-			if (navigator.geolocation) {
-				navigator.geolocation.getCurrentPosition(
-					(position) => {
-						setLocation({
-							lat: position.coords.latitude,
-							lng: position.coords.longitude,
-						});
-					},
-					(error) => {
-						throw new Error(error.message);
-					},
-				);
-			} else {
-				// Geolocation is not supported
-				setError('Geolocation is not supported by your browser');
-			}
-		}
-	}, [address, city, postal_code]);
+	// Get user's location by browser if no address
+	//}
+	//}, [localization]);
 
 	// radius on map
 	useEffect(() => {
-		if (map && location.lat && location.lng) {
+		if (map && location && location.lat && location.lng) {
 			// Remove existing circles
 			if (map.getLayer('radius-circle') && map.getSource('radius-circle')) {
 				map.removeLayer('radius-circle');
@@ -313,7 +308,7 @@ function Request() {
 						))}
 
 					</select>
-					{location.lng && location.lat && (
+					{localization && localization.lng && localization.lat && (
 						<>
 							<label htmlFor="radius">
 								<p>Selectionnez une distance:</p>
@@ -331,8 +326,8 @@ function Request() {
 							<Map
 								mapboxAccessToken="pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg"
 								initialViewState={{
-									longitude: location.lng,
-									latitude: location.lat,
+									longitude: localization.lng,
+									latitude: localization.lat,
 									zoom: zoom
 								}}
 								zoom={zoom}

@@ -10,7 +10,8 @@ export const GET_USER_DATA = gql`
       address
       postal_code
       city
-      localization
+      lng
+      lat
       siret
       denomination
       role

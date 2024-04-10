@@ -40,6 +40,8 @@ export const UPDATE_USER_MUTATION = gql`
             address
             postal_code
             city
+            lng
+            lat
             siret
             denomination
     }
