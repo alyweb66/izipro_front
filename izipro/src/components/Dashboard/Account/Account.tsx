@@ -16,7 +16,6 @@ function Account() {
 
 	// Get the user data
 	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
-	console.log('getUserData', getUserData);
 
 	//state
 	const [first_name, setFirstName] = useState(getUserData?.user.first_name || '');
@@ -27,26 +26,24 @@ function Account() {
 	const [city, setCity] = useState(getUserData?.user.city || '');
 	const [lng, setLng] = useState(getUserData?.user.lng || null);
 	const [lat, setLat] = useState(getUserData?.user.lat || null);
-
-	
 	const [siret, setSiret] = useState(getUserData?.user.siret || '');
 	const [denomination, setDenomination] = useState(getUserData?.user.denomination || '');
 	const [oldPassword, setOldPassword] = useState('');
 	const [newPassword, setNewPassword] = useState('');
 	const [confirmNewPassword, setConfirmNewPassword] = useState('');
 	const [role, setRole] = useState(getUserData?.user.role || '');
+
 	// Message modification account
 	const [message, setMessage] = useState('');
 	const [error, setError] = useState('');	
+
 	// Set the changing user data
 	const [userData, setUserData] = useState(getUserData?.user || {} as UserDataProps);
+
 	// Store data
 	const id = userDataStore((state) => state.id);
 	const [initialData, setInitialData] = userDataStore((state) => [state.initialData, state.setInitialData]);
 	const setAll = userDataStore((state) => state.setAll);
-	console.log('initialData', initialData);
-	console.log('userData', userData);
-	
 	
 	// Mutation to update the user data
 	const [updateUser, { error: updateUserError }] = useMutation(UPDATE_USER_MUTATION, {
@@ -219,7 +216,7 @@ function Account() {
 		// Change the password
 		changePassword({
 			variables: {
-				changePasswordId: id[0],
+				changePasswordId: id,
 				input: {
 					oldPassword: DOMPurify.sanitize(oldPassword),
 					newPassword: DOMPurify.sanitize(newPassword),

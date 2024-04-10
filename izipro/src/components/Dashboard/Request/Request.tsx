@@ -3,7 +3,6 @@ import { useQueryCategory, useQueryJobs } from '../../Hook/Query';
 import { useMutation } from '@apollo/client';
 import { REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
 import { userDataStore } from '../../../store/UserData';
-import { LocationProps } from '../../../Type/User';
 import { CategoryPros, JobProps } from '../../../Type/Request';
 import DOMPurify from 'dompurify';
 import Map from 'react-map-gl';
@@ -21,11 +20,12 @@ function Request() {
 	const id = userDataStore((state) => state.id);
 	const address = userDataStore((state) => state.address);
 	const city = userDataStore((state) => state.city);
-	const localization = userDataStore((state) => state.localization);
+	const lng = userDataStore((state) => state.lng);
+	const lat = userDataStore((state) => state.lat);
 	const first_name = userDataStore((state) => state.first_name);
 	const last_name = userDataStore((state) => state.last_name);
 	const postal_code = userDataStore((state) => state.postal_code);
-	console.log('localization', localization);
+	console.log('localization', lng, lat);
 
 	//state
 	const [urgent, setUrgent] = useState(false);
@@ -44,18 +44,9 @@ function Request() {
 	// map
 	const [radius, setRadius] = useState(0); // Radius in meters
 	//const [location, setLocation] = useState(localization);
-	const [error, setError] = useState('');
 	const [map, setMap] = useState<mapboxgl.Map | null>(null);
 	const [zoom, setZoom] = useState(10);
 
-	
-	/* useEffect(() => {
-		const lng = localization?.lng;
-		const lat = localization?.lat;
-		if (lng && lat) {
-			setLocation(localization?.lat && localization?.lng ? localization : null);
-		}
-	}, [localization]); */
 
 	// mutation
 	const [createRequest, { error: requestError }] = useMutation(REQUEST_MUTATION);
@@ -128,7 +119,8 @@ function Request() {
 						urgent: urgent,
 						title: DOMPurify.sanitize(titleRequest ?? ''),
 						message: DOMPurify.sanitize(descriptionRequest ?? ''),
-						localization: location,
+						lng: lng,
+						lat: lat,
 						range: radius / 1000,
 						job_id: Number(selectedJob),
 						user_id: id,
@@ -160,36 +152,10 @@ function Request() {
 		}
 	};
 
-	// location
-	//useEffect(() => {
-
-	//if (localization?.lat && localization?.lng) {
-	//setLocation(localization);
-	// transform address to coordinates with Mapbox API
-	/* const fetchGeocoding = async () => {
-				const formattedAddress = `${address}, ${postal_code} ${city}`;
-				const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(formattedAddress)}.json?access_token=pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg`;
-
-				const response = await fetch(url);
-				const data = await response.json();
-
-				if (data.features && data.features.length > 0) {
-					const [longitude, latitude] = data.features[0].geometry.coordinates;
-					setLocation({ lng: longitude, lat: latitude });
-					return { latitude, longitude };
-				} else {
-					throw new Error('Unable to geocode address');
-				}
-			};
-			fetchGeocoding(); */
-
-	// Get user's location by browser if no address
-	//}
-	//}, [localization]);
 
 	// radius on map
 	useEffect(() => {
-		if (map && location && location.lat && location.lng) {
+		if (map && lat && lng) {
 			// Remove existing circles
 			if (map.getLayer('radius-circle') && map.getSource('radius-circle')) {
 				map.removeLayer('radius-circle');
@@ -206,7 +172,7 @@ function Request() {
 						type: 'Feature',
 						geometry: {
 							type: 'Point',
-							coordinates: [location.lng, location.lat]
+							coordinates: [lng, lat]
 						}
 					}
 				},
@@ -224,8 +190,9 @@ function Request() {
 				}
 			});
 		}
-	}, [map, location, radius]);
+	}, [map, lng, lat, radius]);
 
+	// Get map instance
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const handleMapLoaded = (event: any) => {
 		setMap(event.target);
@@ -264,7 +231,6 @@ function Request() {
 			( <p>Veuillez renseigner votre nom, prénom et adresse dans votre compte pour faire une demande</p>)}
 			{address && city && postal_code && first_name && last_name && (
 				<form className="request-form" onSubmit={handleSubmitRequest}>
-					{error && <p className="error-message">{error}</p>}
 					<button
 						className={`urgent-button ${urgent ? 'urgent-button-active' : ''}`}
 						onClick={(event) => {
@@ -308,7 +274,7 @@ function Request() {
 						))}
 
 					</select>
-					{localization && localization.lng && localization.lat && (
+					{lng && lat && (
 						<>
 							<label htmlFor="radius">
 								<p>Selectionnez une distance:</p>
@@ -326,8 +292,8 @@ function Request() {
 							<Map
 								mapboxAccessToken="pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg"
 								initialViewState={{
-									longitude: localization.lng,
-									latitude: localization.lat,
+									longitude: lng,
+									latitude: lat,
 									zoom: zoom
 								}}
 								zoom={zoom}
