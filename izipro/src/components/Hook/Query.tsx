@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client';
-import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY } from '../GraphQL/RequestQueries';
+import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
 import { GET_JOB_DATA } from '../GraphQL/Job';
 import { GET_USER_DATA } from '../GraphQL/UserQueries';
 
@@ -48,19 +48,14 @@ export const useQueryJobs = (selectedCategory: string) => {
 // fetch job data
 export const useQueryJobData = (jobId:{job_id: number}[] ) => {
 
-	
 	const jobIdArray = jobId.map((job) => job.job_id);
 	
-	if (!jobIdArray) {
-		return;
-	
-	}
-
 	const {error: jobError, data: jobData } = useQuery(GET_JOB_DATA,
 		{
 			variables: {
 				ids: jobIdArray
 			},
+			skip: !jobIdArray
 		});
 
 	const jobs = jobData?.jobs;
@@ -69,4 +64,48 @@ export const useQueryJobData = (jobId:{job_id: number}[] ) => {
 		throw new Error('Error while fetching job data');
 	}
 	return jobs;
+};
+
+export const  useQueryUserRequests = (id: number, offset: number, limit: number) => {
+	console.log('id', id, 'offset', offset, 'limit', limit);
+	
+	const { error: getUserRequestsError, data: getUserRequestsData, fetchMore } = useQuery(GET_USER_REQUESTS, {
+		variables: {
+			requestsId: id,
+			offset: offset,
+			limit: limit 
+		},
+	
+	});
+
+	if (getUserRequestsError) {
+		throw new Error('Error while fetching user requests');
+	}
+
+	return {getUserRequestsData, fetchMore};
+};
+
+export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, limit: number) => {
+	/* console.log('jobId', jobId);
+	console.log('offset', offset, 'limit', limit); */
+	
+
+	const jobIdArray = jobId.map((job) => job.job_id);
+	//console.log('jobIdArray', jobIdArray);
+
+	const { error: requestError, data: requestData } = useQuery(GET_REQUEST_BY_JOB,
+		{
+			variables: {
+				ids: jobIdArray,
+				offset: offset,
+				limit: limit
+			},
+			skip: !jobIdArray
+		}
+	);
+
+	if (requestError) {
+		throw new Error('Error while fetching requests by jobs');
+	}
+	return requestData;
 };

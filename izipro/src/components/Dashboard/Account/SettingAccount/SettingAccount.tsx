@@ -14,7 +14,7 @@ function SettingAccount() {
 	const id = userDataStore((state) => state.id);
 	const [jobs, setJobs] = userDataStore((state) => [state.jobs || [], state.setJobs]);
 	const [settings, setSettings] = userDataStore((state) => [state.settings || [], state.setSettings]);
-
+	const role = userDataStore((state) => state.role);
 
 	// State
 	const [selectedCategory, setSelectedCategory] = useState('');
@@ -27,7 +27,6 @@ function SettingAccount() {
 		setRadius(settings[0]?.range || 0);
 	}, [settings]);
 
-
 	// fetch jobs
 	const categoriesData = useQueryCategory();
 	const jobData  = useQueryJobs(selectedCategory);
@@ -37,7 +36,6 @@ function SettingAccount() {
 	useEffect(() => {
 		setSelectedJob(jobDataName);
 	}, [jobDataName]);
-
 
 	// mutation
 	const [createUserJob, { error: errorCreateUserJob }] = useMutation(USER_HAS_JOB_MUTATION);
@@ -152,80 +150,82 @@ function SettingAccount() {
 
 	return (
 		<div className="setting-account">
-			<form action="" onSubmit={handleSubmitJob}>
-				<select
-					className="job-select"
-					name="job"
-					id="job"
-					value={selectedCategory}
-					onChange={(event) => setSelectedCategory(event.target.value)}
-				>
-					<option value="">Catégorie</option>
-					{categoriesData && categoriesData.categories.map((category: CategoryPros, index: number) => (
-						<option key={index} value={category.id}>
-							{category.name}
-						</option>
-
-					))}
-				</select>
-				<select
-					className="category_select"
-					name="job"
-					id="job"
-					value={JSON.stringify(selectedJob)}
-					onChange={(event) => setWishListJob([JSON.parse(event.target.value), ...wishListJob])}
-				>
-					<option value="">Métiers</option>
-					{jobData && jobData.category.jobs.map((job: JobProps, index: number) => (
-
-						<option
-							key={index}
-							value={JSON.stringify({ id: job.id, name: job.name })}
-							title={job.description}
+			{role === 'pro' && (
+				<>
+					<form action="" onSubmit={handleSubmitJob}>
+						<select
+							className="job-select"
+							name="job"
+							id="job"
+							value={selectedCategory}
+							onChange={(event) => setSelectedCategory(event.target.value)}
 						>
-							{job.name}
-						</option>
-					))}
+							<option value="">Catégorie</option>
+							{categoriesData && categoriesData.categories.map((category: CategoryPros, index: number) => (
+								<option key={index} value={category.id}>
+									{category.name}
+								</option>
 
-				</select>
-				<ul>
-					{wishListJob && wishListJob.map((job: JobProps, index: number) => (
-						<li key={index}>
-							{job.name}
-							<button onClick={(event) => handleRemoveListJob(job.id, event)}>X</button>
-						</li>
-					))}
-				</ul>
-				<button type='submit'>valider les métiers</button>
-				<ul>
-					Vos métiers séléctionné
-					{selectedJob && selectedJob.map((job: JobProps, index: number) => (
-						<li key={index}>
-							{job.name}
-							<button onClick={(event) => handleDeleteJob(job.id, event)}>X</button>
-						</li>
-					))}
-				</ul>
+							))}
+						</select>
+						<select
+							className="category_select"
+							name="job"
+							id="job"
+							value={JSON.stringify(selectedJob)}
+							onChange={(event) => setWishListJob([JSON.parse(event.target.value), ...wishListJob])}
+						>
+							<option value="">Métiers</option>
+							{jobData && jobData.category.jobs.map((job: JobProps, index: number) => (
+
+								<option
+									key={index}
+									value={JSON.stringify({ id: job.id, name: job.name })}
+									title={job.description}
+								>
+									{job.name}
+								</option>
+							))}
+
+						</select>
+						<ul>
+							{wishListJob && wishListJob.map((job: JobProps, index: number) => (
+								<li key={index}>
+									{job.name}
+									<button onClick={(event) => handleRemoveListJob(job.id, event)}>X</button>
+								</li>
+							))}
+						</ul>
+						<button type='submit'>valider les métiers</button>
+						<ul>
+						Vos métiers séléctionné
+							{selectedJob && selectedJob.map((job: JobProps, index: number) => (
+								<li key={index}>
+									{job.name}
+									<button onClick={(event) => handleDeleteJob(job.id, event)}>X</button>
+								</li>
+							))}
+						</ul>
 
 
-			</form>
-			
-			<label htmlFor="radius">
-				<p>Selectionnez une distance:</p>
-				{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
-			</label>
-			<input
-				id="radius"
-				type="range"
-				min="0"
-				max="100000"
-				step="5000"
-				value={radius}
-				onChange={e => setRadius(Number(e.target.value))}
-			/>
-			<button onClick={handleValidateRange}>Valider</button>
-	
-	
+					</form>
+				
+					<label htmlFor="radius">
+						<p>Selectionnez une distance:</p>
+						{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
+					</label>
+					<input
+						id="radius"
+						type="range"
+						min="0"
+						max="100000"
+						step="5000"
+						value={radius}
+						onChange={e => setRadius(Number(e.target.value))}
+					/>
+					<button onClick={handleValidateRange}>Valider</button>
+				</>
+			)}
 		</div>
 	);
 }

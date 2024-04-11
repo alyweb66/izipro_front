@@ -1,45 +1,52 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
-import { useMutation, useQuery } from '@apollo/client';
-import { GET_USER_REQUESTS } from '../../GraphQL/RequestQueries';
-import { Request } from '../../../Type/Request';
+import { useMutation } from '@apollo/client';
+import { RequestProps } from '../../../Type/Request';
 import './MyRequest.scss';
 import { DELETE_REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
+import { useQueryUserRequests } from '../../Hook/Query';
 
 
 function MyRequest() {
 	//state
-	const [requests, setRequests] = useState<Request[]>([]);
+	const [requests, setRequests] = useState<RequestProps[]>([]);
+	const [offset, setOffset] = useState(0);
+	const [loading, setLoading] = useState(false);
+	const scrollPosition = useRef(0);
+	const limit = 4;
 
 	// store
 	const id = userDataStore((state) => state.id);
-	console.log(id);
-	
 
 	//mutation
 	const [ deleteRequest, {error: deleteRequestError} ] = useMutation(DELETE_REQUEST_MUTATION);
 
 	// Query to get the user requests
-	const { error: getUserRequestsError, data: getUserRequestsData } = useQuery(GET_USER_REQUESTS, {
-		variables: { requestsId: id },
-		fetchPolicy: 'network-only'
-	});
-	
+	const {getUserRequestsData, fetchMore} = useQueryUserRequests(id, offset, limit);
+	console.log('getUserRequestsData', getUserRequestsData);
 
-	// useEffect to update the requests
 	useEffect(() => {
-		
+		// Restore scroll position
+		window.scrollTo(0, scrollPosition.current);
+	}, [requests]);
+
+	// useEffect to update the requests state
+	useEffect(() => {
 		if (getUserRequestsData) {
-			setRequests(getUserRequestsData.user.requests);
-
+			// Save scroll position
+			scrollPosition.current = window.scrollY;
+			// If offset is 0, it's the first query, so just replace the queries
+			if (offset === 0) {
+				setRequests(getUserRequestsData.user.requests);
+			} else {
+			
+				setRequests(prevRequests => [...prevRequests, ...getUserRequestsData.user.requests]);
+			}
+			
 		}
-
 
 	}, [getUserRequestsData]);
 
-	if (getUserRequestsError) {
-		throw new Error('Error while fetching user requests');
-	}
 	// Function to delete a request
 	const handleDeleteRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number, imageNames: string[]) => {
 		event.preventDefault();
@@ -64,7 +71,35 @@ function MyRequest() {
 		}
 		
 	};
+	
+	// Function to handle scroll event
+	const handleScroll = () => {
+		if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100) {
+		// Reached the bottom of the page
+			if (!loading) {
+				setLoading(true);
+				fetchMore({
+					variables: {
+						offset: requests.length // Next offset
+					},
+					updateQuery: (prev, { fetchMoreResult }) => {
+						if (!fetchMoreResult) return prev;
+						setOffset(prevOffset => prevOffset + fetchMoreResult.user.requests.length); // Update offset
+						setLoading(false);
+					}
+				});
+			}
+		}
+	};
+	// useEffect to add event listener to handle scroll event
+	useEffect(() => {
+		window.addEventListener('scroll', handleScroll);
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+		};
+	}, [loading]);
 
+  
 	return (
 		<div className="my_request-container">
 			{!requests[0] && <p>Vous n&apos;avez pas de demande</p>}
@@ -72,7 +107,6 @@ function MyRequest() {
 				<div> 
 					{requests.map((request, index) => (
 						<div key={index}>
-							{/* Add a key prop */}
 							<h1>{request.title}</h1>
 							<p>{request.created_at}</p>
 							<h2>{request.job}</h2>

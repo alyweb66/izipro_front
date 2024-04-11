@@ -145,7 +145,6 @@ function Account() {
 			
 			return result ;
 		}, {});
-		console.log('changedFields', changedFields);
 		
 		if (changedFields.siret && changedFields.siret.length !== 14) {
 			setError('Siret invalide');

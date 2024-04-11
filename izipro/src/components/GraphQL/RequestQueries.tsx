@@ -22,10 +22,33 @@ export const GET_JOBS_BY_CATEGORY = gql`
 `;
 
 export const GET_USER_REQUESTS = gql`
-    query User($requestsId: Int) {
-    user {
-        id
-        requests(id: $requestsId) {
+    query User($requestsId: Int!, $offset: Int!, $limit: Int!) {
+        user {
+            id
+            requests(id: $requestsId, offset: $offset, limit: $limit) {
+                id
+                urgent
+                title
+                message
+                lng
+                lat
+                range
+                user_id
+                job_id
+                job 
+                media {
+                    url
+                    name
+                }
+                created_at
+            }
+        }
+}
+`;
+
+export const GET_REQUEST_BY_JOB = gql`
+    query RequestsByJob($ids: [Int!], $offset: Int, $limit: Int) {
+        requestsByJob(ids: $ids, offset: $offset, limit: $limit) {
             id
             urgent
             title
@@ -35,13 +58,13 @@ export const GET_USER_REQUESTS = gql`
             range
             user_id
             job_id
-            job 
+            job
             media {
-                url
-                name
+            url
+            name
             }
             created_at
         }
     }
-}
+
 `;

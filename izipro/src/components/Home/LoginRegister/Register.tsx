@@ -69,7 +69,6 @@ function Register() {
 				}
 			}
 		}).then((response) => {
-			console.log('response', response);
 			
 			if (response.data.createProUser.id) {
 				setUserCreated(true);

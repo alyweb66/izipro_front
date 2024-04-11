@@ -1,4 +1,4 @@
-type Request = {
+type RequestProps = {
 	id: number
     urgent: boolean
     title: string
@@ -29,4 +29,4 @@ type JobProps = {
 	description: string;
 }
 
-export type { CategoryPros, JobProps, Request };
+export type { CategoryPros, JobProps, RequestProps };

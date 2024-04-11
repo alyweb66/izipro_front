@@ -25,7 +25,6 @@ function Request() {
 	const first_name = userDataStore((state) => state.first_name);
 	const last_name = userDataStore((state) => state.last_name);
 	const postal_code = userDataStore((state) => state.postal_code);
-	console.log('localization', lng, lat);
 
 	//state
 	const [urgent, setUrgent] = useState(false);
