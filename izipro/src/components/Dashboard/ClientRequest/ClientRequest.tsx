@@ -3,6 +3,8 @@ import { userDataStore } from '../../../store/UserData';
 import './clientRequest.scss';
 import { useQueryRequestByJob } from '../../Hook/Query';
 import { RequestProps } from '../../../Type/Request';
+import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
+import { useMutation } from '@apollo/client';
 
 function ClientRequest () {
 	
@@ -12,6 +14,9 @@ function ClientRequest () {
 	//store
 	const id = userDataStore((state) => state.id);
 	const jobs = userDataStore((state) => state.jobs);
+
+	// mutation
+	const [hideRequest, {error: hideRequestError}] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 
 	
 	const offset = 0;
@@ -26,6 +31,31 @@ function ClientRequest () {
 		}
 	}, [getRequestsByJob]);
 
+	const handleHideRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
+		event.preventDefault();
+		hideRequest({
+			variables: {
+				input: {
+					user_id: id,
+					request_id: requestId
+				}
+			}
+		}).then((response) => {
+			console.log('response', response.data);
+
+			if (response.data.createHiddenClientRequest) {
+				setClientRequests((prevClientRequests) => {
+					if (prevClientRequests) {
+						return prevClientRequests.filter((request) => request.id !== requestId);
+					}
+					return null;
+				});
+			}
+		});
+		if (hideRequestError) {
+			throw new Error('Error while hiding request');
+		}
+	};
 
 
 	return (
@@ -33,19 +63,19 @@ function ClientRequest () {
 			{!clientRequests && <p>Vous n&apos;avez pas de demande</p>}
 			{clientRequests && (
 				<div> 
-					{clientRequests.map((request, index: Key | null | undefined) => (
-						<div key={index}>
+					{clientRequests.map((request) => (
+						<div key={request.id}>
 							{/* Add a key prop */}
 							<h1>{request.title}</h1>
 							<p>{request.created_at}</p>
 							<h2>{request.job}</h2>
 							<p>{request.message}</p>
 							<div>
-								{request.media.map((image, index) => (
-									<img key={index} src={image.url} alt={image.name} />
+								{request.media.map((media, index) => (
+									<img key={index} src={media.url} alt={media.name} />
 								))}
 							</div>
-							<button type='button' onClick={(event) => {handleDeleteRequest(event, requestsByJob.id, requestsByJob.media.map(image => image.name));}}>Supprimer la demande</button>
+							<button type='button' onClick={(event) => {handleHideRequest(event, request.id);}}>Delete</button>
 						</div>
 					))}
 				</div>

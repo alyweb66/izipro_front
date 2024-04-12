@@ -97,5 +97,14 @@ export const USER_SETTING_MUTATION = gql`
         userSetting(id: $userSettingId, input: $input) {
             range
         }
-}
+    }
+`;
+
+export const USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION = gql`
+    mutation CreateHiddenClientRequest($input: UserHasHiddenClientRequestInput!) {
+        createHiddenClientRequest(input: $input) {
+            user_id
+            request_id
+        }
+    }
 `;
