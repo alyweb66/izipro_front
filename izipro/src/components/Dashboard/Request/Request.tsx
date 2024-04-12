@@ -120,7 +120,7 @@ function Request() {
 						message: DOMPurify.sanitize(descriptionRequest ?? ''),
 						lng: lng,
 						lat: lat,
-						range: radius / 1000,
+						range: radius,
 						job_id: Number(selectedJob),
 						user_id: id,
 						media: sendFile

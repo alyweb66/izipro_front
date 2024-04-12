@@ -5,10 +5,7 @@ import { GET_USER_DATA } from '../GraphQL/UserQueries';
 
 // fetch user data
 export const useQueryUserData = () => {
-	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA, {
-		fetchPolicy: 'network-only'
-	}
-	);
+	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
 	
 	if (getUserError) {
 		throw new Error('Error while fetching user data');
@@ -16,7 +13,6 @@ export const useQueryUserData = () => {
 
 	return getUserData;
 };		
-
 
 // fetch categories 
 export const useQueryCategory = () => {

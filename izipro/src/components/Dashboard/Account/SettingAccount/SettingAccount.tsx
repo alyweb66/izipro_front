@@ -147,6 +147,7 @@ function SettingAccount() {
 		}
 
 	};
+console.log('settings', settings[0]);
 
 	return (
 		<div className="setting-account">

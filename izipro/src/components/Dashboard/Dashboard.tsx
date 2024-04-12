@@ -21,12 +21,9 @@ function Dashboard() {
 	
 	// Query to get the user data
 	const getUserData = useQueryUserData();
-	console.log('userdata', getUserData?.user);
 	
-
 	// condition if user not logged in
 	const isLogged = localStorage.getItem('ayl') || sessionStorage.getItem('ayl');
-
 
 	// function to check if user is logged in
 	useEffect(() => {
@@ -44,11 +41,17 @@ function Dashboard() {
 		if (!isLogged) {
 			navigate('/');
 			// if user logged in, set the user data to the store
-		} else {
+		} 
+
+	});
+
+	useEffect(() => {
+		if (getUserData) {
+			console.log('userdata', getUserData?.user);
+			
 			setAll(getUserData?.user);
 		}
-
-	}),[];
+	},[getUserData]);
 
 
 	return(

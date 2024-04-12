@@ -1,10 +1,12 @@
-import { Key, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
 import './clientRequest.scss';
 import { useQueryRequestByJob } from '../../Hook/Query';
 import { RequestProps } from '../../../Type/Request';
 import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
 import { useMutation } from '@apollo/client';
+// @ts-expect-error turf is not typed
+import * as turf from '@turf/turf';
 
 function ClientRequest () {
 	
@@ -14,6 +16,9 @@ function ClientRequest () {
 	//store
 	const id = userDataStore((state) => state.id);
 	const jobs = userDataStore((state) => state.jobs);
+	const lng = userDataStore((state) => state.lng);
+	const lat = userDataStore((state) => state.lat);
+	const settings = userDataStore((state) => state.settings);
 
 	// mutation
 	const [hideRequest, {error: hideRequestError}] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
@@ -23,13 +28,38 @@ function ClientRequest () {
 	const limit = 10;
 	// get requests by job
 	const getRequestsByJob = useQueryRequestByJob(jobs, offset, limit);
+	console.log('getRequestsByJob', getRequestsByJob);
 
+	console.log('settings', settings[0].range);
 	
 	useEffect(() => {
 		if (getRequestsByJob) {
-			setClientRequests(getRequestsByJob.requestsByJob);
+			
+			
+			setClientRequests(
+				getRequestsByJob.requestsByJob.filter((request: RequestProps) => {
+					// Define the two points
+					const requestPoint = turf.point([request.lng, request.lat]);
+					const userPoint = turf.point([lng, lat]);
+					// Calculate the distance in kilometers (default)
+					const distance = turf.distance(requestPoint, userPoint);
+					console.log('distance', distance);
+
+					// If the distance is greater than the request range or the user range, remove the request from the list
+					if ((distance < request.range / 1000 || request.range === 0) &&
+					(distance < settings[0].range / 1000 || settings[0].range === 0)) {
+						return request;
+					}
+					
+				})
+			);
+				
 		}
-	}, [getRequestsByJob]);
+		//setClientRequests(getRequestsByJob.requestsByJob);
+		
+	}, [getRequestsByJob, settings]);
+	console.log('clientRequests', clientRequests);
+	
 
 	const handleHideRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
 		event.preventDefault();

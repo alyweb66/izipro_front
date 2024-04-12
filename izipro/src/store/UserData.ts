@@ -51,7 +51,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	denomination: '',
 	role: '',
 	jobs: [],
-	settings: [],
+	settings: [{range: 0}],
 
 	initialData: {
 		id: 0,
@@ -67,7 +67,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 		denomination: '',
 		role: '',
 		jobs: [],
-		settings: []
+		settings: [{range: 0}]
 	},
 
 	setAll: (data) => {
@@ -92,9 +92,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 			}));
 		}
 	},
-
 	setInitialData: (data) => set({ initialData: data }),
-
 	setId: (id) => set({ id }),
 	setFirstName: (first_name) => set({ first_name }),
 	setLastName: (last_name) => set({ last_name }),
