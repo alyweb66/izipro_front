@@ -10,6 +10,7 @@ type RequestProps = {
     job_id: number
     job: string
     media: [{
+        id: number
 		url: string
 		name: string
 	

@@ -37,6 +37,7 @@ export const GET_USER_REQUESTS = gql`
                 job_id
                 job 
                 media {
+                    id
                     url
                     name
                 }
