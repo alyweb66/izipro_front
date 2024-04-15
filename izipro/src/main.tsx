@@ -3,7 +3,7 @@ import { ApolloClient, InMemoryCache, ApolloProvider, DefaultOptions } from '@ap
 // @ts-expect-error - no types available
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
-import { split, HttpLink } from '@apollo/client';
+import { split } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient } from 'graphql-ws';
 import ReactDOM from 'react-dom/client';
