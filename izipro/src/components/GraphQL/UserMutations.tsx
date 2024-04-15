@@ -40,6 +40,8 @@ export const UPDATE_USER_MUTATION = gql`
             address
             postal_code
             city
+            lng
+            lat
             siret
             denomination
     }
@@ -68,4 +70,41 @@ export const CHANGE_PASSWORD_MUTATION = gql`
     mutation ChangePassword($changePasswordId: Int!, $input: ChangePasswordInput!) {
         changePassword(id: $changePasswordId, input: $input)
 }
+`;
+
+export const USER_HAS_JOB_MUTATION = gql`
+    mutation Mutation($input: UserJobInput!) {
+        createUserJob(input: $input) {
+            id
+            user_id
+            job_id
+        }
+    }
+`;
+
+export const DELETE_USER_HAS_JOB_MUTATION = gql`
+    mutation Mutation($input: UserJobInput!) {
+        deleteUserJob(input: $input) {
+            id
+            user_id
+            job_id
+        }
+    }
+`;
+
+export const USER_SETTING_MUTATION = gql`
+    mutation Mutation($userSettingId: Int!, $input: UserSettingsInput!) {
+        userSetting(id: $userSettingId, input: $input) {
+            range
+        }
+    }
+`;
+
+export const USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION = gql`
+    mutation CreateHiddenClientRequest($input: UserHasHiddenClientRequestInput!) {
+        createHiddenClientRequest(input: $input) {
+            user_id
+            request_id
+        }
+    }
 `;

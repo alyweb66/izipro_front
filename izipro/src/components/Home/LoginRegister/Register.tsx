@@ -26,16 +26,76 @@ function Register() {
 	// Mutation to register a user
 	const [createUser, { error: userError }] = useMutation(REGISTER_USER_MUTATION);
 	const [createProUser, { error: proUserError}] = useMutation(REGISTER_PRO_USER_MUTATION);
-  
-	const handleRegister = (event: React.FormEvent<HTMLFormElement>, isProfessional: boolean) => {
+
+	// function to handle the registration of a pro user
+	const handleProRegister = (event: React.FormEvent<HTMLFormElement>) => {
 		// reset the state
 		setUserCreated(false);
 		setError('');
 
 		event.preventDefault();
-    
+
 		// Check if the email is valid
-		if ((email && !validator.isEmail(email)) || (proEmail && !validator.isEmail(proEmail))) {
+		if (proEmail && !validator.isEmail(proEmail)) {
+			setError('Adresse e-mail invalide');
+			return;
+		}
+    
+		// Check if the password and confirm password are the same
+		if (proPassword && (proPassword !== proConfirmPassword)) {
+			setError('Les mots de passe ne correspondent pas');
+			return;
+		}
+    
+		// Check if the password is strong
+		if (proPassword && !validator.isStrongPassword(proPassword)) {
+			setError('Mot de passe faible, doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial');
+			return;
+		}
+ 
+    
+		// Check if the siret is valid
+		if (siret && siret.length !== 14) {
+			setError('Siret invalide');
+			return;
+		}
+
+		createProUser({
+			variables: {
+				input: {
+					email: DOMPurify.sanitize(proEmail),
+					password: DOMPurify.sanitize(proPassword),
+					siret: Number(DOMPurify.sanitize(siret))
+				}
+			}
+		}).then((response) => {
+			
+			if (response.data.createProUser.id) {
+				setUserCreated(true);
+			} 
+			setProEmail('');
+			setProPassword('');
+			setProConfirmPassword('');
+			setSiret('');
+		});
+
+		// handle errors
+		if (proUserError) {
+			throw new Error('Submission error!');
+		}
+   
+	};
+
+	// function to handle the registration of a user
+	const handleRegister = (event: React.FormEvent<HTMLFormElement>) => {
+		// reset the state
+		setUserCreated(false);
+		setError('');
+
+		event.preventDefault();
+
+		// Check if the email is valid
+		if (email && !validator.isEmail(email)) {
 			setError('Adresse e-mail invalide');
 			return;
 		}
@@ -45,62 +105,34 @@ function Register() {
 			setError('Les mots de passe ne correspondent pas');
 			return;
 		}
-    
+
 		// Check if the password is strong
-		if ((password && !validator.isStrongPassword(password)) || (proPassword && !validator.isStrongPassword(proPassword))) {
+		if (password && !validator.isStrongPassword(password)) {
 			setError('Mot de passe faible, doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial');
 			return;
 		}
  
-    
-		// Check if the siret is valid
-		if (isProfessional && siret && siret.length !== 14) {
-			setError('Siret invalide');
-			return;
-		}
-
-		// send the data to the server
-		const variables = isProfessional ? {
-			input: {
-				email: DOMPurify.sanitize(proEmail),
-				password: DOMPurify.sanitize(proPassword),
-				siret: Number(DOMPurify.sanitize(siret))
+		createUser({ 
+			variables: {
+				input: {
+					email: DOMPurify.sanitize(email),
+					password: DOMPurify.sanitize(password)
+				}
 			}
-		} : {
-			input: {
-				email: DOMPurify.sanitize(email),
-				password: DOMPurify.sanitize(password)
-			}
-		};
-
-		if (isProfessional) {
-			createProUser({ variables }).then((response) => {
-				if (response.data.createProUser.id) {
-					setUserCreated(true);
-				} 
-				setEmail('');
-				setPassword('');
-				setConfirmPassword('');
-				setSiret('');
-			});
-
-		} else {
-			createUser({ variables }).then((response) => {
-				if (response.data.createUser.id) {
-					setUserCreated(true);
-				} 
-				setEmail('');
-				setPassword('');
-				setConfirmPassword('');
-			});
-		}
-
+		}).then((response) => {
+			
+			if (response.data.createUser.id) {
+				setUserCreated(true);
+			} 
+			setEmail('');
+			setPassword('');
+			setConfirmPassword('');
+		});
+					
 		// handle errors
 		if (userError) {
 			throw new Error('Submission error!');
-		} else if (proUserError) {
-			throw new Error('Submission error!');
-		}
+		} 
    
 	};
 
@@ -112,7 +144,7 @@ function Register() {
 			{userCreated && <p className='user-created'>Utilisateur créé avec succès, un email de validation vous a été envoyé </p>}
 			{isRegisterVisible && (
 				<div className="register-container">
-					<form className="register" onSubmit={(event) => handleRegister(event, false)}>
+					<form className="register" onSubmit={(event) => handleRegister(event)}>
 						<p className="category">Particulier</p>
 						<input
 							type="email"
@@ -162,7 +194,7 @@ function Register() {
               Continuer avec Facebook
 						</button>
 					</form>
-					<form className="register" onSubmit={(event) => handleRegister(event, true)}>
+					<form className="register" onSubmit={(event) => handleProRegister(event)}>
 						<p className='category'>Professionnel</p>
 						<input
 							type="email"

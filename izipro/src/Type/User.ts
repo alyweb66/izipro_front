@@ -1,3 +1,4 @@
+
 type UserDataProps = {
 	id: number;
 	first_name: string | null;
@@ -6,10 +7,16 @@ type UserDataProps = {
 	address: string | null;
 	postal_code: string | null;
 	city: string | null;
+	lng: number | null;
+	lat: number | null;
 	siret: string;
 	denomination: string | null;
 	role: string;
+	jobs: Array<{ job_id: number}>;
+	settings: Array<{ range: number}>;
+	
 
 }
+
 
 export type { UserDataProps };

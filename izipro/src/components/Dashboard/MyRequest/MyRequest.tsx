@@ -1,34 +1,21 @@
 import { useEffect, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
-import { useMutation, useQuery } from '@apollo/client';
-import { GET_USER_REQUESTS } from '../../GraphQL/RequestQueries';
+import { useMutation } from '@apollo/client';
+import { RequestProps } from '../../../Type/Request';
 import './MyRequest.scss';
 import { DELETE_REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
-
-type Request = {
-	id: number
-    urgent: boolean
-    title: string
-    message: string
-    localization: string
-    range: number
-    user_id: number
-    job_id: number
-    job: string
-    media: [{
-		url: string
-		name: string
-	
-	}]
-    created_at: string
-};
-
-
+import { useQueryUserRequests } from '../../Hook/Query';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 function MyRequest() {
-	//state
-	const [requests, setRequests] = useState<Request[]>([]);
 
+	//state
+	const [requests, setRequests] = useState<RequestProps[]>([]);
+	const [offset, setOffset] = useState(0);
+	const [loading, setLoading] = useState(false);
+	// Create a state for the scroll position
+	const limit = 2;
+	
 	// store
 	const id = userDataStore((state) => state.id);
 
@@ -36,26 +23,20 @@ function MyRequest() {
 	const [ deleteRequest, {error: deleteRequestError} ] = useMutation(DELETE_REQUEST_MUTATION);
 
 	// Query to get the user requests
-	const { error: getUserRequestsError, data: getUserRequestsData } = useQuery(GET_USER_REQUESTS,
-		{
-			variables: { requestsId: id }
-		}
-	);
-		
-	// useEffect to update the requests
+	const {getUserRequestsData, fetchMore} = useQueryUserRequests(id, offset, limit);
+	console.log('getUserRequestsData', getUserRequestsData);
+	
+	// useEffect to update the requests state
 	useEffect(() => {
-		
 		if (getUserRequestsData) {
-			setRequests(getUserRequestsData.user.requests);
-
+			// If offset is 0, it's the first query, so just replace the queries
+			if (offset === 0) {
+				setRequests(getUserRequestsData.user.requests);
+			} 
 		}
-
-
 	}, [getUserRequestsData]);
+	// Restore scroll position after the component has been rendered
 
-	if (getUserRequestsError) {
-		throw new Error('Error while fetching user requests');
-	}
 	// Function to delete a request
 	const handleDeleteRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number, imageNames: string[]) => {
 		event.preventDefault();
@@ -85,22 +66,47 @@ function MyRequest() {
 		<div className="my_request-container">
 			{!requests[0] && <p>Vous n&apos;avez pas de demande</p>}
 			{getUserRequestsData && (
-				<div> 
-					{requests.map((request, index) => (
-						<div key={index}>
-							{/* Add a key prop */}
-							<h1>{request.title}</h1>
-							<p>{request.created_at}</p>
-							<h2>{request.job}</h2>
-							<p>{request.message}</p>
-							<div>
-								{request.media.map((image, index) => (
-									<img key={index} src={image.url} alt={image.name} />
-								))}
+				<div > 
+					<InfiniteScroll
+						dataLength={requests.length}
+						next={ () => {
+							if (!loading) {
+								setLoading(true); // Save scroll position before loading more data
+								fetchMore({
+									variables: {
+										offset: requests.length // Next offset
+									},
+									updateQuery: (prev, { fetchMoreResult }) => {
+										if (!fetchMoreResult) return prev;
+										setRequests(prevRequests => [...prevRequests, ...fetchMoreResult.user.requests]);
+										setOffset(prevOffset => prevOffset + fetchMoreResult.user.requests.length); // Update offset
+										setLoading(false);
+										
+									}
+								});
+							}
+						}}
+						hasMore={true}
+						loader={<h4>Loading...</h4>}
+					>
+						{requests.map((request) => (
+							<div key={request.id}>
+								<h1>{request.title}</h1>
+								<p>{request.created_at}</p>
+								<h2>{request.job}</h2>
+								<p>{request.message}</p>
+								<div>
+								
+									{request.media.map((media) => (
+										<img key={media.id} src={media.url} alt={media.name} />
+									))}
+								
+								</div>
+								<button type='button' onClick={(event) => {handleDeleteRequest(event, request.id, request.media.map(image => image.name));}}>Supprimer la demande</button>
 							</div>
-							<button type='button' onClick={(event) => {handleDeleteRequest(event, request.id, request.media.map(image => image.name));}}>Supprimer la demande</button>
-						</div>
-					))}
+						))}
+					</InfiniteScroll>
+				
 				</div>
 			)}
 		</div>

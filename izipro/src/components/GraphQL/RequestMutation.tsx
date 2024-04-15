@@ -7,7 +7,8 @@ export const REQUEST_MUTATION = gql`
             urgent
             title
             message
-            localization
+            lng
+            lat
             user_id
             job_id
         }

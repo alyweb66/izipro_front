@@ -1,33 +1,31 @@
 import { useEffect, useState } from 'react';
-import './Request.scss';
-import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY } from '../../GraphQL/RequestQueries';
-import { useMutation, useQuery } from '@apollo/client';
+import { useQueryCategory, useQueryJobs } from '../../Hook/Query';
+import { useMutation } from '@apollo/client';
 import { REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
 import { userDataStore } from '../../../store/UserData';
+import { CategoryPros, JobProps } from '../../../Type/Request';
 import DOMPurify from 'dompurify';
 import Map from 'react-map-gl';
 //@ts-expect-error no types for mapbox-gl
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
+import './Request.scss';
 
-type CategoryPros = {
-	id: number;
-	name: string;
-}
 
-type jobProps = {
-	id: number;
-	name: string;
-	description: string;
-}
-
-type LocationProps = {
-	lat: number | null;
-	lng: number | null;
-}
 
 function Request() {
+
+	//store
+	const id = userDataStore((state) => state.id);
+	const address = userDataStore((state) => state.address);
+	const city = userDataStore((state) => state.city);
+	const lng = userDataStore((state) => state.lng);
+	const lat = userDataStore((state) => state.lat);
+	const first_name = userDataStore((state) => state.first_name);
+	const last_name = userDataStore((state) => state.last_name);
+	const postal_code = userDataStore((state) => state.postal_code);
+
 	//state
 	const [urgent, setUrgent] = useState(false);
 	const [selectedCategory, setSelectedCategory] = useState('');
@@ -44,41 +42,20 @@ function Request() {
 
 	// map
 	const [radius, setRadius] = useState(0); // Radius in meters
-	const [location, setLocation] = useState<LocationProps>({ lng: null, lat: null });
-	const [error, setError] = useState('');
+	//const [location, setLocation] = useState(localization);
 	const [map, setMap] = useState<mapboxgl.Map | null>(null);
 	const [zoom, setZoom] = useState(10);
 
-
-	//store
-	const id = userDataStore((state) => state.id);
-	const address = userDataStore((state) => state.address);
-	const city = userDataStore((state) => state.city);
-	const first_name = userDataStore((state) => state.first_name);
-	const last_name = userDataStore((state) => state.last_name);
-	const postal_code = userDataStore((state) => state.postal_code);
 
 	// mutation
 	const [createRequest, { error: requestError }] = useMutation(REQUEST_MUTATION);
 
 	// fetch categories 
-	const { error: categoryError, data: categoriesData } = useQuery(GET_JOB_CATEGORY);
-	if (categoryError) {
-		throw new Error('Error while fetching categories data');
-	}
+	const categoriesData = useQueryCategory();
 
 	// fetch jobs
-	const { error: jobError, data: jobData } = useQuery(GET_JOBS_BY_CATEGORY,
-		{
-			variables: {
-				categoryId: Number(selectedCategory)
-			},
-			skip: !selectedCategory
-		});
+	const jobData  = useQueryJobs(selectedCategory);
 
-	if (jobError) {
-		throw new Error('Error while fetching jobs');
-	}
 	// file upload
 	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const files = event.target.files;
@@ -141,8 +118,9 @@ function Request() {
 						urgent: urgent,
 						title: DOMPurify.sanitize(titleRequest ?? ''),
 						message: DOMPurify.sanitize(descriptionRequest ?? ''),
-						localization: location,
-						range: radius / 1000,
+						lng: lng,
+						lat: lat,
+						range: radius,
 						job_id: Number(selectedJob),
 						user_id: id,
 						media: sendFile
@@ -173,52 +151,10 @@ function Request() {
 		}
 	};
 
-	// location
-	useEffect(() => {
-
-		if (address && city && postal_code) {
-			// transform address to coordinates with Mapbox API
-			const fetchGeocoding = async () => {
-				const formattedAddress = `${address}, ${postal_code} ${city}`;
-				const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(formattedAddress)}.json?access_token=pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg`;
-
-				const response = await fetch(url);
-				const data = await response.json();
-
-				if (data.features && data.features.length > 0) {
-					const [longitude, latitude] = data.features[0].geometry.coordinates;
-					setLocation({ lng: longitude, lat: latitude });
-					return { latitude, longitude };
-				} else {
-					throw new Error('Unable to geocode address');
-				}
-			};
-			fetchGeocoding();
-
-		} else {
-			// Get user's location by browser if no address
-			if (navigator.geolocation) {
-				navigator.geolocation.getCurrentPosition(
-					(position) => {
-						setLocation({
-							lat: position.coords.latitude,
-							lng: position.coords.longitude,
-						});
-					},
-					(error) => {
-						throw new Error(error.message);
-					},
-				);
-			} else {
-				// Geolocation is not supported
-				setError('Geolocation is not supported by your browser');
-			}
-		}
-	}, [address, city, postal_code]);
 
 	// radius on map
 	useEffect(() => {
-		if (map && location.lat && location.lng) {
+		if (map && lat && lng) {
 			// Remove existing circles
 			if (map.getLayer('radius-circle') && map.getSource('radius-circle')) {
 				map.removeLayer('radius-circle');
@@ -235,7 +171,7 @@ function Request() {
 						type: 'Feature',
 						geometry: {
 							type: 'Point',
-							coordinates: [location.lng, location.lat]
+							coordinates: [lng, lat]
 						}
 					}
 				},
@@ -253,8 +189,9 @@ function Request() {
 				}
 			});
 		}
-	}, [map, location, radius]);
+	}, [map, lng, lat, radius]);
 
+	// Get map instance
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const handleMapLoaded = (event: any) => {
 		setMap(event.target);
@@ -293,7 +230,6 @@ function Request() {
 			( <p>Veuillez renseigner votre nom, prénom et adresse dans votre compte pour faire une demande</p>)}
 			{address && city && postal_code && first_name && last_name && (
 				<form className="request-form" onSubmit={handleSubmitRequest}>
-					{error && <p className="error-message">{error}</p>}
 					<button
 						className={`urgent-button ${urgent ? 'urgent-button-active' : ''}`}
 						onClick={(event) => {
@@ -325,7 +261,7 @@ function Request() {
 						onChange={(event) => setSelectedJob(event.target.value)}
 					>
 						<option value="">Métiers</option>
-						{jobData && jobData.category.jobs.map((job: jobProps, index: number) => (
+						{jobData && jobData.category.jobs.map((job: JobProps, index: number) => (
 
 							<option
 								key={index}
@@ -337,7 +273,7 @@ function Request() {
 						))}
 
 					</select>
-					{location.lng && location.lat && (
+					{lng && lat && (
 						<>
 							<label htmlFor="radius">
 								<p>Selectionnez une distance:</p>
@@ -355,8 +291,8 @@ function Request() {
 							<Map
 								mapboxAccessToken="pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg"
 								initialViewState={{
-									longitude: location.lng,
-									latitude: location.lat,
+									longitude: lng,
+									latitude: lat,
 									zoom: zoom
 								}}
 								zoom={zoom}

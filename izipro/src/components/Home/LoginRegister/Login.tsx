@@ -64,7 +64,7 @@ function Login() {
 				if (activeSession) {
 					localStorage.setItem('ayl', 'true');
 				} else {
-					sessionStorage.setItem('ayl', 'true' );
+					localStorage.setItem('ayl', 'session');
 				}
 				setIsChangePassword(false);
 				setIsEmailConfirmed(false);

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { UserDataProps } from '../Type/User';
 
 
+
 type UserDataStore = UserDataProps & {
 	setId: (id: number) => void;
 	setFirstName: (first_name: string | '') => void;
@@ -10,12 +11,16 @@ type UserDataStore = UserDataProps & {
 	setAddress: (address: string | '') => void;
 	setPostalCode: (postal_code: string | '') => void;
 	setCity: (city: string | '') => void;
+	setLng: (lng: number) => void;
+	setLat: (lat: number) => void;
 	setSiret: (siret: string) => void;
 	setDenomination: (denomination: string | '') => void;
 	setRole: (role: string | '') => void;
 	initialData: UserDataProps;
 	setInitialData: (data: UserDataProps) => void;
 	setAll: (data: UserDataProps) => void;
+	setJobs: (jobs: Array<{ job_id: number}>) => void;
+	setSettings: (settings: Array<{ range: number}>) => void;
 	resetUserData: () => void;
 
 }
@@ -40,9 +45,13 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	address: '',
 	postal_code: '',
 	city: '',
+	lng:0,
+	lat:0,
 	siret: '',
 	denomination: '',
 	role: '',
+	jobs: [],
+	settings: [{range: 0}],
 
 	initialData: {
 		id: 0,
@@ -52,9 +61,13 @@ export const userDataStore = create<UserDataStore>((set) => ({
 		address: '',
 		postal_code: '',
 		city: '',
+		lng:0,
+		lat:0,
 		siret: '',
 		denomination: '',
-		role: ''
+		role: '',
+		jobs: [],
+		settings: [{range: 0}]
 	},
 
 	setAll: (data) => {
@@ -68,15 +81,18 @@ export const userDataStore = create<UserDataStore>((set) => ({
 				address: data.address,
 				postal_code: data.postal_code,
 				city: data.city,
+				lng: data.lng,
+				lat: data.lat,
 				siret: data.siret,
 				denomination: data.denomination,
+				role: data.role,
+				jobs: data.jobs,
+				settings: data.settings
 
 			}));
 		}
 	},
-
 	setInitialData: (data) => set({ initialData: data }),
-
 	setId: (id) => set({ id }),
 	setFirstName: (first_name) => set({ first_name }),
 	setLastName: (last_name) => set({ last_name }),
@@ -84,11 +100,15 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	setAddress: (address) => set({ address }),
 	setPostalCode: (postal_code) => set({ postal_code }),
 	setCity: (city) => set({ city }),
+	setLng: (lng) => set({ lng }),
+	setLat: (lat) => set({ lat }),
 	setSiret: (siret) => set({ siret }),
 	setDenomination: (denomination) => set({ denomination }),
 	setRole: (role) => set({ role }),
+	setJobs: (jobs) => set({ jobs }),
+	setSettings: (settings) => set({ settings }),
 
-	resetUserData: () => set({ id: 0, first_name: '', last_name: '', email: '', address: '', postal_code: '', city: '', siret: '', denomination: '' })
+	resetUserData: () => set({ id: 0, first_name: '', last_name: '', email: '', address: '', postal_code: '', city: '', lng:0, lat:0 , siret: '', denomination: '', jobs: [], settings: [] })
 
 }));
 
