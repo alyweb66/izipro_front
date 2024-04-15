@@ -28,10 +28,8 @@ function ClientRequest () {
 	const limit = 10;
 	// get requests by job
 	const getRequestsByJob = useQueryRequestByJob(jobs, offset, limit);
-	console.log('getRequestsByJob', getRequestsByJob);
 
-	console.log('settings', settings[0].range);
-	
+	// useEffect to filter the requests by the user's location and the request's location
 	useEffect(() => {
 		if (getRequestsByJob) {
 			
@@ -44,12 +42,13 @@ function ClientRequest () {
 					// Calculate the distance in kilometers (default)
 					const distance = turf.distance(requestPoint, userPoint);
 					console.log('distance', distance);
-
-					// If the distance is greater than the request range or the user range, remove the request from the list
-					if ((distance < request.range / 1000 || request.range === 0) &&
-					(distance < settings[0].range / 1000 || settings[0].range === 0)) {
-						return request;
-					}
+					console.log('request.range', request.range);
+					
+					// If the distance is greater than the request range or the user range
+					return (
+						(distance < request.range / 1000 || request.range === 0) &&
+						(distance < settings[0].range / 1000 || settings[0].range === 0)
+					);
 					
 				})
 			);
@@ -58,9 +57,11 @@ function ClientRequest () {
 		//setClientRequests(getRequestsByJob.requestsByJob);
 		
 	}, [getRequestsByJob, settings]);
+	console.log('getRequestsByJob', getRequestsByJob);
+	
 	console.log('clientRequests', clientRequests);
 	
-
+	// Function to hide a request
 	const handleHideRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
 		event.preventDefault();
 		hideRequest({
@@ -71,7 +72,6 @@ function ClientRequest () {
 				}
 			}
 		}).then((response) => {
-			console.log('response', response.data);
 
 			if (response.data.createHiddenClientRequest) {
 				setClientRequests((prevClientRequests) => {
