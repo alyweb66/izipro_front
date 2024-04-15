@@ -4,9 +4,10 @@ import './clientRequest.scss';
 import { useQueryRequestByJob } from '../../Hook/Query';
 import { RequestProps } from '../../../Type/Request';
 import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
-import { useMutation } from '@apollo/client';
+import { useMutation, useSubscription } from '@apollo/client';
 // @ts-expect-error turf is not typed
 import * as turf from '@turf/turf';
+import { REQUEST_SUBSCRIPTION } from '../../GraphQL/Subscription';
 
 function ClientRequest () {
 	
@@ -23,11 +24,16 @@ function ClientRequest () {
 	// mutation
 	const [hideRequest, {error: hideRequestError}] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 
+	//subscription
+	/* 	const {data} = useSubscription(REQUEST_SUBSCRIPTION, {
+		variables: { ids: jobs.map(job => job.job_id).filter(id => id != null) },
+	}); */
+
 	
 	const offset = 0;
 	const limit = 10;
 	// get requests by job
-	const getRequestsByJob = useQueryRequestByJob(jobs, offset, limit);
+	const {getRequestsByJob, subscribeToMore} = useQueryRequestByJob(jobs, offset, limit);
 
 	// useEffect to filter the requests by the user's location and the request's location
 	useEffect(() => {
@@ -57,9 +63,94 @@ function ClientRequest () {
 		//setClientRequests(getRequestsByJob.requestsByJob);
 		
 	}, [getRequestsByJob, settings]);
-	console.log('getRequestsByJob', getRequestsByJob);
-	
-	console.log('clientRequests', clientRequests);
+
+	useEffect(() => {
+		console.log(subscribeToMore);
+		
+		/* if (data && data.requestAdded) {
+			console.log('data', data);
+			
+			// Handle the new request
+			// For example, you can add it to your local state
+			setClientRequests(prevRequests => [...prevRequests, data.requestAdded]);
+		} */
+		if (subscribeToMore) {
+			console.log('subscribeToMore', subscribeToMore);
+			
+			subscribeToMore({
+				document: REQUEST_SUBSCRIPTION,
+				//variables: { ids: jobs.map(job => job.job_id).filter(id => id != null) },
+				updateQuery: (prev, { subscriptionData }) => {
+					console.log('subscriptionData', subscriptionData);
+
+					if (!subscriptionData.data) return prev;
+					const  requestAdded  = subscriptionData.data.requestAdded[0];
+					
+					// Define the two points
+					const requestPoint = turf.point([requestAdded.lng, requestAdded.lat]);
+					const userPoint = turf.point([lng, lat]);
+					// Calculate the distance in kilometers (default)
+					const distance = turf.distance(requestPoint, userPoint);
+					console.log('distance', distance);
+					console.log('request.range', requestAdded.range);
+
+					// If the distance is greater than the request range or the user range
+					if ((distance < requestAdded.range / 1000 || requestAdded.range === 0) &&
+						(distance < settings[0].range / 1000 || settings[0].range === 0)) {
+						// Your code here
+						const newRequest = requestAdded;
+						
+						// Add the new request to the list of requests
+						setClientRequests((prev) => {
+							console.log('prev', prev);
+							
+							if (prev) {
+								return [...prev, newRequest];
+							}
+							return null;
+						});
+						//return { ...prev, requestsByJob: [...prev.requestsByJob, newRequest] };
+					}	
+					
+				},
+			});
+		
+		}
+	}, [ subscribeToMore]);
+
+	/* 	useEffect(() => {
+		if (subscribeToMore) {
+			console.log('subscribeToMore', subscribeToMore);
+			
+			subscribeToMore({
+				document: REQUEST_SUBSCRIPTION,
+				variables: { ids: jobs.map(job => job.job_id) },
+				updateQuery: (prev, { subscriptionData }) => {
+					console.log('subscriptionData', subscriptionData);
+
+					if (!subscriptionData.data) return prev;
+					// Define the two points
+					const requestPoint = turf.point([subscriptionData.lng, subscriptionData.lat]);
+					const userPoint = turf.point([lng, lat]);
+					// Calculate the distance in kilometers (default)
+					const distance = turf.distance(requestPoint, userPoint);
+					console.log('distance', distance);
+					console.log('request.range', subscriptionData.range);
+
+					// If the distance is greater than the request range or the user range
+					if ((distance < subscriptionData.range / 1000 || subscriptionData.range === 0) &&
+						(distance < settings[0].range / 1000 || settings[0].range === 0)) {
+						// Your code here
+						const newRequest = subscriptionData.data.requestAdded;
+						
+						// Add the new request to the list of requests
+						return { ...prev, requestsByJob: [...prev.requestsByJob, newRequest] };
+					
+					}
+				},
+			});
+		}
+	}, [subscribeToMore]); */
 	
 	// Function to hide a request
 	const handleHideRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {

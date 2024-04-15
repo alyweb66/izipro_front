@@ -88,8 +88,8 @@ export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, l
 
 	const jobIdArray = jobId.map((job) => job.job_id);
 	//console.log('jobIdArray', jobIdArray);
-	
-	const { subscribeToMore, error: requestError, data: requestData } = useQuery(GET_REQUEST_BY_JOB,
+
+	const { subscribeToMore, error: requestError, data: getRequestsByJob } = useQuery(GET_REQUEST_BY_JOB,
 		{
 			variables: {
 				ids: jobIdArray,
@@ -99,10 +99,9 @@ export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, l
 			skip: !jobIdArray
 		}
 	);
-	console.log('coucou');
 
 	if (requestError) {
 		throw new Error('Error while fetching requests by jobs');
 	}
-	return {requestData, subscribeToMore};
+	return {getRequestsByJob, subscribeToMore};
 };
