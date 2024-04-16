@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
 import { useMutation } from '@apollo/client';
 import { RequestProps } from '../../../Type/Request';
@@ -11,9 +11,10 @@ function MyRequest() {
 
 	//state
 	const [requests, setRequests] = useState<RequestProps[]>([]);
-	const [offset, setOffset] = useState(0);
 	const [loading, setLoading] = useState(false);
 	// Create a state for the scroll position
+	//const [offset, setOffset] = useState(0);
+	const offsetRef = useRef(0);
 	const limit = 2;
 	
 	// store
@@ -23,14 +24,14 @@ function MyRequest() {
 	const [ deleteRequest, {error: deleteRequestError} ] = useMutation(DELETE_REQUEST_MUTATION);
 
 	// Query to get the user requests
-	const {getUserRequestsData, fetchMore} = useQueryUserRequests(id, offset, limit);
+	const {getUserRequestsData, fetchMore} = useQueryUserRequests(id, 0, limit);
 	console.log('getUserRequestsData', getUserRequestsData);
 	
 	// useEffect to update the requests state
 	useEffect(() => {
 		if (getUserRequestsData) {
 			// If offset is 0, it's the first query, so just replace the queries
-			if (offset === 0) {
+			if (offsetRef.current === 0) {
 				setRequests(getUserRequestsData.user.requests);
 			} 
 		}
@@ -78,8 +79,9 @@ function MyRequest() {
 									},
 									updateQuery: (prev, { fetchMoreResult }) => {
 										if (!fetchMoreResult) return prev;
-										setRequests(prevRequests => [...prevRequests, ...fetchMoreResult.user.requests]);
-										setOffset(prevOffset => prevOffset + fetchMoreResult.user.requests.length); // Update offset
+										setRequests(prevRequests => [...(prevRequests || []), ...fetchMoreResult.user.requests]);
+										offsetRef.current = offsetRef.current + fetchMoreResult.user.requests.length;
+										//setOffset(prevOffset => prevOffset + fetchMoreResult.user.requests.length); // Update offset
 										setLoading(false);
 										
 									}

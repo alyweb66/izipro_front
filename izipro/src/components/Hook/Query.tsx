@@ -3,6 +3,7 @@ import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY, GET_REQUEST_BY_JOB, GET_USER_RE
 import { GET_JOB_DATA } from '../GraphQL/Job';
 import { GET_USER_DATA } from '../GraphQL/UserQueries';
 
+
 // fetch user data
 export const useQueryUserData = () => {
 	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
@@ -82,14 +83,11 @@ export const  useQueryUserRequests = (id: number, offset: number, limit: number)
 };
 
 export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, limit: number) => {
-	/* console.log('jobId', jobId);
-	console.log('offset', offset, 'limit', limit); */
 	
-
 	const jobIdArray = jobId.map((job) => job.job_id);
 	//console.log('jobIdArray', jobIdArray);
 
-	const { subscribeToMore, error: requestError, data: getRequestsByJob } = useQuery(GET_REQUEST_BY_JOB,
+	const { subscribeToMore, error: requestError, data: getRequestsByJob, fetchMore } = useQuery(GET_REQUEST_BY_JOB,
 		{
 			variables: {
 				ids: jobIdArray,
@@ -103,5 +101,5 @@ export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, l
 	if (requestError) {
 		throw new Error('Error while fetching requests by jobs');
 	}
-	return {getRequestsByJob, subscribeToMore};
+	return {getRequestsByJob, subscribeToMore, fetchMore};
 };
