@@ -76,10 +76,10 @@ function ClientRequest () {
 		} */
 		if (subscribeToMore) {
 			console.log('subscribeToMore', subscribeToMore);
-			
+		
 			subscribeToMore({
 				document: REQUEST_SUBSCRIPTION,
-				//variables: { ids: jobs.map(job => job.job_id).filter(id => id != null) },
+				variables: { ids: jobs.map(job => job.job_id).filter(id => id != null) },
 				updateQuery: (prev, { subscriptionData }) => {
 					console.log('subscriptionData', subscriptionData);
 
@@ -91,32 +91,34 @@ function ClientRequest () {
 					const userPoint = turf.point([lng, lat]);
 					// Calculate the distance in kilometers (default)
 					const distance = turf.distance(requestPoint, userPoint);
-					console.log('distance', distance);
-					console.log('request.range', requestAdded.range);
+					console.log('distance subscribe', distance);
+					console.log('request.range subscribe', requestAdded.range);
 
 					// If the distance is greater than the request range or the user range
 					if ((distance < requestAdded.range / 1000 || requestAdded.range === 0) &&
 						(distance < settings[0].range / 1000 || settings[0].range === 0)) {
-						// Your code here
-						const newRequest = requestAdded;
 						
 						// Add the new request to the list of requests
 						setClientRequests((prev) => {
-							console.log('prev', prev);
-							
-							if (prev) {
-								return [...prev, newRequest];
+							if (!prev) {
+								prev = [];
 							}
-							return null;
+							
+							if (!prev.some(request => request.id === requestAdded.id)) {
+								console.log('Request added', requestAdded);
+								return [ requestAdded ,...prev ];
+							}
+							
+							return prev;
 						});
-						//return { ...prev, requestsByJob: [...prev.requestsByJob, newRequest] };
-					}	
+					}
 					
 				},
 			});
 		
 		}
 	}, [ subscribeToMore]);
+
 
 	/* 	useEffect(() => {
 		if (subscribeToMore) {
@@ -178,7 +180,7 @@ function ClientRequest () {
 		}
 	};
 
-
+	console.log('clientRequest', clientRequests);
 	return (
 		<div className="my_request-container">
 			{!clientRequests && <p>Vous n&apos;avez pas de demande</p>}
@@ -186,14 +188,13 @@ function ClientRequest () {
 				<div> 
 					{clientRequests.map((request) => (
 						<div key={request.id}>
-							{/* Add a key prop */}
 							<h1>{request.title}</h1>
 							<p>{request.created_at}</p>
 							<h2>{request.job}</h2>
 							<p>{request.message}</p>
 							<div>
-								{request.media.map((media, index) => (
-									<img key={index} src={media.url} alt={media.name} />
+								{request.media.map((media) => (
+									media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
 								))}
 							</div>
 							<button type='button' onClick={(event) => {handleHideRequest(event, request.id);}}>Delete</button>

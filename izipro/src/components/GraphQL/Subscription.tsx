@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 export const REQUEST_SUBSCRIPTION = gql`
-    subscription ClientRequests {
-        requestAdded {
+    subscription ClientRequests($ids: [Int!]) {
+        requestAdded(ids: $ids) {
             id
             urgent
             title

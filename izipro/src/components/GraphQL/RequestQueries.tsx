@@ -61,8 +61,9 @@ export const GET_REQUEST_BY_JOB = gql`
             job_id
             job
             media {
-            url
-            name
+                id
+                url
+                name
             }
             created_at
         }

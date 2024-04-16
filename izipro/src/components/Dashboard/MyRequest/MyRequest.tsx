@@ -98,7 +98,7 @@ function MyRequest() {
 								<div>
 								
 									{request.media.map((media) => (
-										<img key={media.id} src={media.url} alt={media.name} />
+										media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
 									))}
 								
 								</div>
