@@ -4,7 +4,7 @@ import './clientRequest.scss';
 import { useQueryRequestByJob } from '../../Hook/Query';
 import { RequestProps } from '../../../Type/Request';
 import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
-import { useMutation, useSubscription } from '@apollo/client';
+import { useMutation} from '@apollo/client';
 import InfiniteScroll from 'react-infinite-scroll-component';
 // @ts-expect-error turf is not typed
 import * as turf from '@turf/turf';
@@ -75,7 +75,7 @@ function ClientRequest () {
 	// useEffect to filter the requests by the user's location and the request's location
 	useEffect(() => {
 		if (getRequestsByJob) {
-			console.log('couocu');
+	
 			// Filter the requests
 			RangeFilter(getRequestsByJob.requestsByJob);
 			offsetRef.current += getRequestsByJob.requestsByJob.length;
@@ -87,7 +87,6 @@ function ClientRequest () {
 	useEffect(() => {
 		
 		if (subscribeToMore) {
-			console.log('subscribeToMore', subscribeToMore);
 		
 			subscribeToMore({
 				document: REQUEST_SUBSCRIPTION,
@@ -151,7 +150,6 @@ function ClientRequest () {
 			throw new Error('Error while hiding request');
 		}
 	};
-console.log('clientRequests', clientRequests);
 
 	return (
 		<div className="my_request-container">

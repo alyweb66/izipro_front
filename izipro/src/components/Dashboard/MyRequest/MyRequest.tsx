@@ -25,7 +25,7 @@ function MyRequest() {
 
 	// Query to get the user requests
 	const {getUserRequestsData, fetchMore} = useQueryUserRequests(id, 0, limit);
-	console.log('getUserRequestsData', getUserRequestsData);
+
 	
 	// useEffect to update the requests state
 	useEffect(() => {

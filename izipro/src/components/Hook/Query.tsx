@@ -64,7 +64,6 @@ export const useQueryJobData = (jobId:{job_id: number}[] ) => {
 };
 
 export const  useQueryUserRequests = (id: number, offset: number, limit: number) => {
-	console.log('id', id, 'offset', offset, 'limit', limit);
 	
 	const { error: getUserRequestsError, data: getUserRequestsData, fetchMore } = useQuery(GET_USER_REQUESTS, {
 		variables: {
@@ -85,7 +84,6 @@ export const  useQueryUserRequests = (id: number, offset: number, limit: number)
 export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, limit: number) => {
 	
 	const jobIdArray = jobId.map((job) => job.job_id);
-	//console.log('jobIdArray', jobIdArray);
 
 	const { subscribeToMore, error: requestError, data: getRequestsByJob, fetchMore } = useQuery(GET_REQUEST_BY_JOB,
 		{

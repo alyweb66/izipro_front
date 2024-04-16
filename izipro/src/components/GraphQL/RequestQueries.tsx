@@ -32,6 +32,7 @@ export const GET_USER_REQUESTS = gql`
                 message
                 lng
                 lat
+                city
                 range
                 user_id
                 job_id
@@ -56,6 +57,7 @@ export const GET_REQUEST_BY_JOB = gql`
             message
             lng
             lat
+            city
             range
             user_id
             job_id
