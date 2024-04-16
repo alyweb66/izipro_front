@@ -30,8 +30,11 @@ export const GET_USER_REQUESTS = gql`
                 urgent
                 title
                 message
+                first_name
+                last_name
                 lng
                 lat
+                city
                 range
                 user_id
                 job_id
@@ -54,15 +57,19 @@ export const GET_REQUEST_BY_JOB = gql`
             urgent
             title
             message
+            first_name
+            last_name
             lng
             lat
+            city
             range
             user_id
             job_id
             job
             media {
-            url
-            name
+                id
+                url
+                name
             }
             created_at
         }

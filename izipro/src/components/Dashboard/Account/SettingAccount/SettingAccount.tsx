@@ -22,11 +22,6 @@ function SettingAccount() {
 	const [selectedJob, setSelectedJob] = useState<JobProps[]>([]);
 	const [radius, setRadius] = useState(settings[0]?.range || 0);
 
-	// set radius with the value from the database
-	useEffect(() => {
-		setRadius(settings[0]?.range || 0);
-	}, [settings]);
-
 	// fetch jobs
 	const categoriesData = useQueryCategory();
 	const jobData  = useQueryJobs(selectedCategory);
@@ -34,6 +29,8 @@ function SettingAccount() {
 
 	// set job with the value from the database
 	useEffect(() => {
+	
+		
 		setSelectedJob(jobDataName);
 	}, [jobDataName]);
 
@@ -147,7 +144,6 @@ function SettingAccount() {
 		}
 
 	};
-console.log('settings', settings[0]);
 
 	return (
 		<div className="setting-account">

@@ -3,6 +3,9 @@ type RequestProps = {
     urgent: boolean
     title: string
     message: string
+    first_name: string
+    last_name: string
+    city: string
     lng: number
 	lat: number
     range: number

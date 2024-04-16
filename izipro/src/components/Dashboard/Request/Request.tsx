@@ -118,6 +118,7 @@ function Request() {
 						urgent: urgent,
 						title: DOMPurify.sanitize(titleRequest ?? ''),
 						message: DOMPurify.sanitize(descriptionRequest ?? ''),
+						city: city,
 						lng: lng,
 						lat: lat,
 						range: radius,

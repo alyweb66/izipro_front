@@ -44,6 +44,7 @@ function Account() {
 	const id = userDataStore((state) => state.id);
 	const [initialData, setInitialData] = userDataStore((state) => [state.initialData, state.setInitialData]);
 	const setAll = userDataStore((state) => state.setAll);
+	const setAccount = userDataStore((state) => state.setAccount);
 	
 	// Mutation to update the user data
 	const [updateUser, { error: updateUserError }] = useMutation(UPDATE_USER_MUTATION, {
@@ -61,6 +62,7 @@ function Account() {
 
 	// Set the user data to state
 	useEffect(() => {
+		
 		if (getUserData?.user) {
 			setFirstName(getUserData.user.first_name);
 			setLastName(getUserData.user.last_name);
@@ -99,6 +101,7 @@ function Account() {
 	
 	// Set the user data to the store
 	useEffect(() => {
+
 		if (getUserData?.user) {
 			// Change the null values to empty strings
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -119,9 +122,11 @@ function Account() {
 	}, [getUserData]);
 
 
+
 	// Handle the account submit
 	const handleAccountSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+
 		// fetch the location
 		let newUserData = {} as UserDataProps;
 		if (address && city && postal_code) {
@@ -182,7 +187,7 @@ function Account() {
 			
 				const { updateUser } = response.data;
 				// Set the new user data to the store
-				setAll(updateUser);
+				setAccount(updateUser);
 
 				if (updateUser) {
 					setMessage('Modifications éfféctué');
@@ -202,6 +207,7 @@ function Account() {
 	// Handle the new password submit
 	const handleSubmitNewPassword = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+
 		// Check if the new password and the confirm new password are the same
 		if (newPassword !== confirmNewPassword) {
 			setError('Les mots de passe ne correspondent pas');

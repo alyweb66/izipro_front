@@ -7,6 +7,7 @@ export const REQUEST_MUTATION = gql`
             urgent
             title
             message
+            city
             lng
             lat
             user_id

@@ -19,6 +19,7 @@ type UserDataStore = UserDataProps & {
 	initialData: UserDataProps;
 	setInitialData: (data: UserDataProps) => void;
 	setAll: (data: UserDataProps) => void;
+	setAccount: (data: UserDataProps) => void;
 	setJobs: (jobs: Array<{ job_id: number}>) => void;
 	setSettings: (settings: Array<{ range: number}>) => void;
 	resetUserData: () => void;
@@ -68,6 +69,24 @@ export const userDataStore = create<UserDataStore>((set) => ({
 		role: '',
 		jobs: [],
 		settings: [{range: 0}]
+	},
+
+	setAccount: (data) => {
+		if (data) {
+			set(state => ({
+				...state,
+				first_name: data.first_name,
+				last_name: data.last_name,
+				email: data.email,
+				address: data.address,
+				postal_code: data.postal_code,
+				city: data.city,
+				lng: data.lng,
+				lat: data.lat,
+				siret: data.siret,
+				denomination: data.denomination,
+			}));
+		}
 	},
 
 	setAll: (data) => {
