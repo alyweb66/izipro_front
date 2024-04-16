@@ -17,7 +17,7 @@ function ClientRequest () {
 
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
-	const limit = 5;
+	const limit = 3;
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -168,6 +168,9 @@ function ClientRequest () {
 							<div key={request.id}>
 								<h1>{request.title}</h1>
 								<p>{request.created_at}</p>
+								<p>{request.first_name}</p>
+								<p>{request.last_name}</p>
+								<p>{request.city}</p>
 								<h2>{request.job}</h2>
 								<p>{request.message}</p>
 								<div>

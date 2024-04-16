@@ -95,6 +95,9 @@ function MyRequest() {
 							<div key={request.id}>
 								<h1>{request.title}</h1>
 								<p>{request.created_at}</p>
+								<p>{request.first_name}</p>
+								<p>{request.last_name}</p>
+								<p>{request.city}</p>
 								<h2>{request.job}</h2>
 								<p>{request.message}</p>
 								<div>

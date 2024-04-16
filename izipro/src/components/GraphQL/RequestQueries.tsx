@@ -30,6 +30,8 @@ export const GET_USER_REQUESTS = gql`
                 urgent
                 title
                 message
+                first_name
+                last_name
                 lng
                 lat
                 city
@@ -55,6 +57,8 @@ export const GET_REQUEST_BY_JOB = gql`
             urgent
             title
             message
+            first_name
+            last_name
             lng
             lat
             city

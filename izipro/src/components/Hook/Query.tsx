@@ -66,6 +66,7 @@ export const useQueryJobData = (jobId:{job_id: number}[] ) => {
 export const  useQueryUserRequests = (id: number, offset: number, limit: number) => {
 	
 	const { error: getUserRequestsError, data: getUserRequestsData, fetchMore } = useQuery(GET_USER_REQUESTS, {
+		fetchPolicy: 'network-only',
 		variables: {
 			requestsId: id,
 			offset: offset,
@@ -85,16 +86,16 @@ export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, l
 	
 	const jobIdArray = jobId.map((job) => job.job_id);
 
-	const { subscribeToMore, error: requestError, data: getRequestsByJob, fetchMore } = useQuery(GET_REQUEST_BY_JOB,
-		{
-			variables: {
-				ids: jobIdArray,
-				offset: offset,
-				limit: limit
-			},
-			skip: !jobIdArray
-		}
-	);
+	const { subscribeToMore, error: requestError, data: getRequestsByJob, fetchMore } = useQuery(GET_REQUEST_BY_JOB, {
+		
+		fetchPolicy: 'network-only',
+		variables: {
+			ids: jobIdArray,
+			offset: offset,
+			limit: limit
+		},
+		skip: !jobIdArray
+	});
 
 	if (requestError) {
 		throw new Error('Error while fetching requests by jobs');
