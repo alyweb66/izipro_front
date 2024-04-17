@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Account from './Account/Account';
 import Request from './Request/Request';
 import MyRequest from './MyRequest/MyRequest';
+import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import { userDataStore } from '../../store/UserData';
 import { useQueryUserData } from '../Hook/Query';
@@ -53,6 +54,9 @@ function Dashboard() {
 		}
 	},[getUserData]);
 
+	const handleMyConvesationNavigate = () => {
+		setSelectedTab('My conversations');
+	};
 
 	return(
 		<div className='dashboard-container'>
@@ -71,9 +75,9 @@ function Dashboard() {
 			<div className="content-container">
 				{selectedTab === 'Request' && <Request/>}
 				{selectedTab === 'My requests' && <MyRequest/>}
-				{selectedTab === 'My conversations' && <div>Mes échanges</div>}
+				{selectedTab === 'My conversations' && <MyConversation/>}
 				{selectedTab === 'My profile' && <Account />}
-				{selectedTab === 'Client request' && <ClientRequest />}
+				{selectedTab === 'Client request' && <ClientRequest onDetailsClick={handleMyConvesationNavigate} />}
 
 			</div>	
 		</div>

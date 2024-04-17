@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
+import { requestDataStore } from '../../../store/Request';
 import './clientRequest.scss';
 import { useQueryRequestByJob } from '../../Hook/Query';
 import { RequestProps } from '../../../Type/Request';
@@ -10,7 +11,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import * as turf from '@turf/turf';
 import { REQUEST_SUBSCRIPTION } from '../../GraphQL/Subscription';
 
-function ClientRequest () {
+function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	
 	// State
 	const [clientRequests, setClientRequests] = useState<RequestProps[] | null>(null);
@@ -25,6 +26,7 @@ function ClientRequest () {
 	const lng = userDataStore((state) => state.lng);
 	const lat = userDataStore((state) => state.lat);
 	const settings = userDataStore((state) => state.settings);
+	const setRequest = requestDataStore((state) => state.setRequest);
 
 	// mutation
 	const [hideRequest, {error: hideRequestError}] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
@@ -165,7 +167,7 @@ function ClientRequest () {
 						loader={<h4>Loading...</h4>}
 					>
 						{clientRequests.map((request) => (
-							<div key={request.id}>
+							<div className="request-details" key={request.id} onClick={() => {onDetailsClick(); setRequest(request);}}>
 								<h1>{request.title}</h1>
 								<p>{request.created_at}</p>
 								<p>{request.first_name}</p>
