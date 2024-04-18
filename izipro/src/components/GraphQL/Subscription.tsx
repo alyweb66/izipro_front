@@ -10,6 +10,8 @@ export const REQUEST_SUBSCRIPTION = gql`
             lng
             lat
             city
+            first_name
+            last_name
             range
             user_id
             job_id

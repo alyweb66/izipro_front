@@ -12,8 +12,8 @@ function MyRequest() {
 	//state
 	const [requests, setRequests] = useState<RequestProps[]>([]);
 	const [loading, setLoading] = useState(false);
+
 	// Create a state for the scroll position
-	//const [offset, setOffset] = useState(0);
 	const offsetRef = useRef(0);
 	const limit = 2;
 	

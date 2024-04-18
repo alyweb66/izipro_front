@@ -19,6 +19,11 @@ type RequestProps = {
 	
 	}]
     created_at: string
+    conversation: [{
+        id: number
+        user_1: number
+        user_2: number
+    }]
 };
 
 type RequestSoreProps = {
@@ -43,6 +48,11 @@ type RequestSoreProps = {
         
         }]
         created_at: string
+        conversation: [{
+            id: number
+            user_1: number
+            user_2: number
+        }]
     }
 };
 

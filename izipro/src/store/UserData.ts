@@ -127,7 +127,21 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	setJobs: (jobs) => set({ jobs }),
 	setSettings: (settings) => set({ settings }),
 
-	resetUserData: () => set({ id: 0, first_name: '', last_name: '', email: '', address: '', postal_code: '', city: '', lng:0, lat:0 , siret: '', denomination: '', jobs: [], settings: [] })
+	resetUserData: () => set({ 
+		id: 0, 
+		first_name: '', 
+		last_name: '', 
+		email: '', 
+		address: '', 
+		postal_code: '', 
+		city: '', 
+		lng:0, 
+		lat:0 , 
+		siret: '', 
+		denomination: '', 
+		jobs: [], 
+		settings: []
+	})
 
 }));
 

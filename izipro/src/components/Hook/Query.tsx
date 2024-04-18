@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client';
 import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
 import { GET_JOB_DATA } from '../GraphQL/Job';
-import { GET_USER_DATA } from '../GraphQL/UserQueries';
+import { GET_USER_DATA, GET_USER_REQUEST_BY_CONVERSATIONS } from '../GraphQL/UserQueries';
 
 
 // fetch user data
@@ -101,4 +101,24 @@ export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, l
 		throw new Error('Error while fetching requests by jobs');
 	}
 	return {getRequestsByJob, subscribeToMore, fetchMore};
+};
+
+export const useQueryUserConversations = (offset: number, limit: number) => {
+
+	const {loading, error: conversationError, data, fetchMore} = useQuery(GET_USER_REQUEST_BY_CONVERSATIONS, {
+		fetchPolicy: 'network-only',
+		variables: {
+			offset: offset,
+			limit: limit
+		},
+	
+	});
+
+	if (conversationError) {
+		throw new Error('Error while fetching user conversations');
+	}
+	if (!data) {
+		return [];
+	}
+	return {loading, data, fetchMore};
 };

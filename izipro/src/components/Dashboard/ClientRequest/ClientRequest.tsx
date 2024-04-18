@@ -18,7 +18,6 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
-	const limit = 3;
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -43,18 +42,22 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 				const distance = turf.distance(requestPoint, userPoint);
 
 				return (
+					// Check if the request is in the user's range
 					(distance < request.range / 1000 || request.range === 0) &&
-					(distance < settings[0].range / 1000 || settings[0].range === 0)
+					// Check if the request is in the user's settings range
+					(distance < settings[0].range / 1000 || settings[0].range === 0) &&
+					// Check if the user is already in conversation with the request
+					(!request.conversation[0] || (request.conversation[0].user_1 !== id && request.conversation[0].user_2 !== id))
 				);
 			});
 
-			setClientRequests((prev) => [...filteredRequests, ...(prev || [])]);
+			setClientRequests((prevState) => [...filteredRequests, ...(prevState || [])]);
 			offsetRef.current = offsetRef.current + filteredRequests.length;
 
 		} else {
 			// If the function is called from the query, we need to add the new requests to the bottom of the list
-			setClientRequests((prev) => [
-				...prev || [],
+			setClientRequests((prevState) => [
+				...prevState || [],
 				...requests.filter((request: RequestProps) => {
 					// Define the two points
 					const requestPoint = turf.point([request.lng, request.lat]);
@@ -64,7 +67,9 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	
 					return (
 						(distance < request.range / 1000 || request.range === 0) &&
-				(distance < settings[0].range / 1000 || settings[0].range === 0)
+				(distance < settings[0].range / 1000 || settings[0].range === 0) &&
+				// Check if the user is already in conversation with the request
+				(!request.conversation[0] || (request.conversation[0].user_1 !== id && request.conversation[0].user_2 !== id))
 					);
 				})
 			]);
@@ -72,7 +77,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	}
 
 	// get requests by job
-	const {getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, limit);
+	const {getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 3);
 
 	// useEffect to filter the requests by the user's location and the request's location
 	useEffect(() => {
