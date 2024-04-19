@@ -25,6 +25,7 @@ function Dashboard() {
 	
 	// condition if user not logged in
 	const isLogged = localStorage.getItem('ayl') || sessionStorage.getItem('ayl');
+	
 
 	// function to check if user is logged in
 	useEffect(() => {

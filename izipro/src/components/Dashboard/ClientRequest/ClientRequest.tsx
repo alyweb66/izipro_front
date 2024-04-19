@@ -116,20 +116,18 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	// Function to load more requests with infinite scroll
 	function addRequest() {
 		fetchMore({
-			
 			variables: {
-				offset: offsetRef.current // Next offset
+				offset: offsetRef.current, // Next offset
 			},
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			updateQuery: (prev: RequestProps, { fetchMoreResult }: any) => {
-			
-				if (!fetchMoreResult) return prev;
-				RangeFilter(fetchMoreResult.requestsByJob);
-				offsetRef.current = offsetRef.current + fetchMoreResult.requestsByJob.length;
-				
-		
+		}).then(fetchMoreResult => {
+			const data = fetchMoreResult.data; // Access the 'data' property
+			if (data) {
+				RangeFilter(data.requestsByJob); // Access the 'requestsByJob' property
+				offsetRef.current = offsetRef.current + data.requestsByJob.length;
 			}
 		});
+		
 	}
 	
 	// Function to hide a request

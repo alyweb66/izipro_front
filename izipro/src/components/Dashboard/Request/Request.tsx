@@ -9,6 +9,7 @@ import Map from 'react-map-gl';
 //@ts-expect-error no types for mapbox-gl
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { useFileHandler } from '../../Hook/useFileHandler';
 
 import './Request.scss';
 
@@ -36,9 +37,7 @@ function Request() {
 	const [successMessage, setSuccessMessage] = useState('');
 
 	// file upload
-	const [urlFile, setUrlFile] = useState<File[]>([]);
-	const [file, setFile] = useState<File[]>([]);
-	const [fileError, setFileError] = useState('');
+	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
 
 	// map
 	const [radius, setRadius] = useState(0); // Radius in meters
@@ -55,31 +54,6 @@ function Request() {
 
 	// fetch jobs
 	const jobData  = useQueryJobs(selectedCategory);
-
-	// file upload
-	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const files = event.target.files;
-		const maxFileSize = 1048576; // 1MB in bytes
-		// filter pdf files that are too large
-		const validFiles = Array.from(files!).filter(file => {
-			if (file.name.endsWith('.pdf')) {
-				if (file.size > maxFileSize) {
-					setFileError(`File ${file.name} is too large, please select a file smaller than 1MB.`);
-				
-					return false;
-				}
-				return true;
-			}
-			return true;
-		});
-		setFileError('');
-		if (validFiles) {
-			const urls = validFiles.map(file => URL.createObjectURL(file));
-			const fileObjects = urls.map(url => new File([url], url));
-			setFile([...file, ...validFiles]);
-			setUrlFile([...urlFile, ...fileObjects]);
-		}
-	};
 
 	// remove file
 	const handleRemove = (index: number) => {
@@ -111,6 +85,7 @@ function Request() {
 			const sendFile = file.map(file => ({
 				file,
 			})); 
+			
 			
 			createRequest({
 				variables: {

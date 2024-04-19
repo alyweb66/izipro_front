@@ -22,9 +22,30 @@ export const REQUEST_SUBSCRIPTION = gql`
                 name
             }
             created_at
+            conversation {
+                user_1
+                user_2
+            }
         }
     }
 `;
 
+export const MESSAGE_SUBSCRIPTION = gql`
+    subscription Subscription($ids: [Int!]) {
+        messageAdded(id: $id) {
+            id
+            content
+            user_id
+            conversation_id
+            request_id
+            created_at
+            media {
+                id
+                url
+                name
+            }
+        }
+    }
+`;
 
 

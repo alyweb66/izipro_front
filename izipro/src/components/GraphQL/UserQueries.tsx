@@ -57,3 +57,23 @@ export const GET_USER_REQUEST_BY_CONVERSATIONS = gql`
     }
   }
 `;
+
+export const GET_MESSAGES_BY_CONVERSATION = gql`
+  query User($messagesId: Int!, $conversationId: Int!, $offset: Int!, $limit: Int!) {
+      user {
+        messages(id: $messagesId, conversationId: $conversationId, offset: $offset, limit: $limit) {
+          id
+          content
+          user_id
+          conversation_id
+          request_id
+          created_at
+          media {
+            id
+            url
+            name
+          }
+        }
+      }
+}
+`;

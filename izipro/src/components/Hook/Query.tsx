@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client';
 import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
 import { GET_JOB_DATA } from '../GraphQL/Job';
-import { GET_USER_DATA, GET_USER_REQUEST_BY_CONVERSATIONS } from '../GraphQL/UserQueries';
+import { GET_MESSAGES_BY_CONVERSATION, GET_USER_DATA, GET_USER_REQUEST_BY_CONVERSATIONS } from '../GraphQL/UserQueries';
 
 
 // fetch user data
@@ -105,13 +105,13 @@ export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, l
 
 export const useQueryUserConversations = (offset: number, limit: number) => {
 
+
 	const {loading, error: conversationError, data, fetchMore} = useQuery(GET_USER_REQUEST_BY_CONVERSATIONS, {
 		fetchPolicy: 'network-only',
 		variables: {
 			offset: offset,
 			limit: limit
 		},
-	
 	});
 
 	if (conversationError) {
@@ -121,4 +121,22 @@ export const useQueryUserConversations = (offset: number, limit: number) => {
 		return [];
 	}
 	return {loading, data, fetchMore};
+};
+
+export const useQueryMessagesByConversation = (messagesId: number, conversationId: number, offset: number, limit: number) => {
+	
+	const {  subscribeToMore,error: messageError, data: messageData, fetchMore: fetchMoreMessage } = useQuery(GET_MESSAGES_BY_CONVERSATION, {
+		variables: {
+			messagesId: messagesId,
+			conversationId: conversationId,
+			offset: offset,
+			limit: limit
+		},
+		skip: !messagesId || !conversationId
+	});
+
+	if (messageError) {
+		throw new Error('Error while fetching messages by conversation');
+	}
+	return {subscribeToMore, messageData, fetchMoreMessage};
 };

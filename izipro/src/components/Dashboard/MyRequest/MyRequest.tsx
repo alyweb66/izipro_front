@@ -12,6 +12,7 @@ function MyRequest() {
 	//state
 	const [requests, setRequests] = useState<RequestProps[]>([]);
 	const [loading, setLoading] = useState(false);
+	console.log('requests', requests);
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
@@ -72,20 +73,16 @@ function MyRequest() {
 						dataLength={requests.length}
 						next={ () => {
 							if (!loading) {
-								setLoading(true); // Save scroll position before loading more data
 								fetchMore({
 									variables: {
 										offset: requests.length // Next offset
 									},
-									updateQuery: (prev, { fetchMoreResult }) => {
-										if (!fetchMoreResult) return prev;
-										setRequests(prevRequests => [...(prevRequests || []), ...fetchMoreResult.user.requests]);
-										offsetRef.current = offsetRef.current + fetchMoreResult.user.requests.length;
-										//setOffset(prevOffset => prevOffset + fetchMoreResult.user.requests.length); // Update offset
-										setLoading(false);
-										
-									}
+								}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
+									setRequests(prevRequests => [...(prevRequests || []), ...fetchMoreResult.data.user.requests]);
+									offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
+									setLoading(false);
 								});
+								
 							}
 						}}
 						hasMore={true}
