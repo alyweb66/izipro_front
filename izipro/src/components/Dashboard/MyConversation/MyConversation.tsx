@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useRef, useState } from 'react';
 import './MyConversation.scss';
-import { requestDataStore } from '../../../store/Request';
+import { requestDataStore, requestConversationStore } from '../../../store/Request';
 import { RequestProps } from '../../../Type/Request';
 import { CONVERSATION_MUTATION, MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
 import { useMutation } from '@apollo/client';
@@ -28,27 +29,30 @@ function MyConversation() {
 	//state
 	const [messageValue, setMessageValue] = useState('');
 	//const [messages, setMessages] = useState<string[]>([]);
-	const [requestConversation, setRequestConversation] = useState<RequestProps[] | null>(null);
+	//const [requestConversation, setRequestConversation] = useState<RequestProps[] | null>(null);
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
+	//const [conversationIdState, setConversationIdState] = useState<number>(0);
 
-	//ref offset request
+	//useRef
 	const offsetRef = useRef(0);
+	const conversationIdRef = useRef(0);
 
 	//store
 	const id = userDataStore((state) => state.id);
-	const request = requestDataStore((state) => state.request);
+	const [request, setRequest] = requestDataStore((state) => [state.request, state.setRequest]);
 	const resetRequest = requestDataStore((state) => state.resetRequest);
+	const [requestsConversationStore, setRequestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 	const [messageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
-	const [ subscriptionStore, setSubscriptionStore ] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
+	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const role = userDataStore((state) => state.role);
 
 	//mutation
 	const [conversation, { error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
 	const [message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
-	const [subscriptionMutation, {error: subscriptionError}] = useMutation(SUBSCRIPTION_MUTATION);
+	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 
 	//query
-	const { loading, data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
+	const { data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
 	const conversationId = selectedRequest?.conversation[0].id ?? 0;
 	const { subscribeToMore, messageData } = useQueryMessagesByConversation(id, conversationId, 0, 10);
 
@@ -58,100 +62,151 @@ function MyConversation() {
 	// useEffect to update the message store
 	useEffect(() => {
 		if (messageData) {
-			console.log('messageData', messageData);
-			const messages: MessageProps[] = messageData.user.messages;
-			console.log('messages', messages);
 
+			const messages: MessageProps[] = messageData.user.messages;
+	
 			messageDataStore.setState(prevState => {
 				const newMessages = messages.filter(
 					(newMessage) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
 				);
-	
+
 				return {
 					...prevState,
 					messages: [...prevState.messages, ...newMessages]
 				};
 			});
-
-			//setMessageStore(messageData.user.messages);
 		}
 	}, [messageData]);
-	console.log('messageStore', messageStore);
-
 
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
-		
-		if (subscribeToMore) {
-			console.log('subscribeToMore');
-			const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest');
-			console.log('Subscription', Subscription?.subscriber_id);
-			
-		
-			subscribeToMore({
-				document: MESSAGE_SUBSCRIPTION,
-				variables: { 
-					conversation_ids: Subscription?.subscriber_id,
-				},
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				updateQuery: (prev: MessageProps , { subscriptionData }: { subscriptionData: any }) => {
-					console.log('prev', prev);
-					console.log('subscriptionData', subscriptionData.data.messageAdded);
-					
 
-					if (!subscriptionData.data) return prev;
-					
-					messageDataStore.setState(prevState => {
-						const newMessages = subscriptionData.data.messageAdded.filter(
-							(newMessage: MessageProps) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
-						);
-			
-						return {
-							...prevState,
-							messages: [...prevState.messages, ...newMessages]
-						};
-					});
-					
-				},
-			});
+		if (subscribeToMore) {
+			const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest');
 		
+			if (Subscription?.subscriber_id) {
+				subscribeToMore({
+					document: MESSAGE_SUBSCRIPTION,
+					variables: {
+						conversation_ids: Subscription?.subscriber_id,
+					},
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					updateQuery: (prev: MessageProps, { subscriptionData }: { subscriptionData: any }) => {
+			
+						if (!subscriptionData.data) return prev;
+						console.log('meessage subscription', subscriptionData.data.messageAdded);
+						
+						messageDataStore.setState(prevState => {
+							const newMessages = subscriptionData.data.messageAdded.filter(
+								(newMessage: MessageProps) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
+							);
+
+							return {
+								...prevState,
+								messages: [...prevState.messages, ...newMessages]
+							};
+						});
+
+					},
+				});
+			}
+
 		}
-	}, [ subscribeToMore, subscriptionStore]);
+	}, [subscribeToMore, subscriptionStore]);
+console.log('messageStore', messageStore);
 
 	// useEffect to update the data to the requests state
 	useEffect(() => {
 		if (data && data.user) {
 			console.log('data', data);
 
-			const requestsConversations = data.user.requestsConversations;
-			setRequestConversation(requestsConversations); // Fix: Pass an array as the argument
+			const requestsConversations: RequestProps[] = data.user.requestsConversations;
+			setRequestsConversationStore(requestsConversations); // Fix: Pass an array as the argument
 			offsetRef.current = requestsConversations.length;
+
 		}
 	}, [data]);
-
-	// useEffect to update the new request selection to the state
-	useEffect(() => {
-		if (request.id > 0 && !loading) {
-			setRequestConversation(prevState => [request, ...(prevState || [])]);
-		}
-	}, [request, loading]);
 
 	// cleane the request store if the component is unmounted
 	useEffect(() => {
 		return () => {
+			// remove request.id in requestsConversationStore
+			requestConversationStore.setState(prevState => ({
+				...prevState,
+				requestsConversationStore: prevState.requests.filter(request => request.id !== request.id)
+			})),
 			resetRequest();
 		};
 	}, []);
+	console.log('conversationIdRef', conversationIdRef.current);
+
+	function sendMessage(requestId: number, newClientRequest = false) {
+		// find conversation id where request is equal to the request id if newclientRequest is false
+		let conversationId;
+		if (!newClientRequest) {
+			conversationId = requestsConversationStore?.find((request) => request.id === requestId)?.conversation[0].id;
+		} else if (newClientRequest) {
+			conversationId = conversationIdRef.current;
+		}
+		console.log('conversationId', conversationId);
+
+
+		// map file to send to graphql
+		const sendFile = file.map(file => ({
+			file,
+		}));
+		// create message
+		// if the message is not empty or the file is not empty
+		if (conversationId ?? 0 > 0) {
+			if (messageValue.trim() !== '' || sendFile.length > 0) {
+				message({
+					variables: {
+						id: id,
+						input: {
+							content: messageValue,
+							user_id: id,
+							conversation_id: conversationId,
+							media: sendFile
+						}
+					}
+				}).then(() => {
+					console.log('then message');
+				
+					setMessageValue('');
+					conversationIdRef.current = 0;
+					// if the request is a new client request, add the request to the requestsConversationStore
+					if (newClientRequest) {
+						console.log('request', request);
+					
+						const addNewRequestConversation = [request, ...requestsConversationStore];
+						setRequestsConversationStore(addNewRequestConversation);
+						resetRequest();
+					}
+
+					setFile([]);
+					console.log('request after concatenation', requestsConversationStore);
+
+				});
+			}
+		}
+		if (createMessageError) {
+			throw new Error('Error creating message');
+		}
+	}
 
 	// Function to send message and create conversation
 	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>, requestId: number) => {
 		event.preventDefault();
 		// create conversation 
-		if (request.id > 0 && role === 'pro') {
-			console.log('coucou');
-			console.log('requestId', requestId);
+		console.log(request.id);
+		console.log('role', role);
+		console.log(requestId);
+		
+		
+		
+		if (request.id === requestId && role === 'pro') {
+			console.log('go to create conversation');
 			
-
 			conversation({
 				variables: {
 					id: id,
@@ -161,131 +216,107 @@ function MyConversation() {
 						request_id: requestId,
 					}
 				}
+
 			}).then((response) => {
+			
 				if (response.data.createConversation) {
-					const conversation = response.data.createConversation;
-					console.log('response conversation', conversation);
-					// put the conversation data in the request
-					setRequestConversation((prevState) =>
-						prevState?.map(item =>
-							item.id === request.id
-								? {
-									...item, conversation: [{
-										id: conversation.id,
-										user_1: conversation.user_1,
-										user_2: conversation.user_2
-									}]
-								}
-								: item
-						) || null // Fix: Add a fallback value of null
-					);
-					// update the subscription store
-					// replace the old subscription with the new one
-					const newSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) => {
-						if (subscription.subscriber !== 'messageRequest') {
-							console.log('create subscription');
-							
-							subscriptionMutation({
-								variables: {
-									input: {
-										user_id: id,
-										subscriber: 'messageRequest',
-										subscriber_id: [conversation.id]
-									}
-								}
-							}).then((response) => {
-								// eslint-disable-next-line @typescript-eslint/no-unused-vars
-								const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-								
-								// replace the old subscription with the new one
-								const messageRequestSubscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest'); 
-								if (!messageRequestSubscription) {
-									subscriptionStore.concat(subscriptionWithoutTimestamps);
-								} else {
-									subscriptionStore.map((subscription: SubscriptionProps) => 
-										subscription.subscriber === 'messageRequest' ? subscriptionWithoutTimestamps : subscription
-									);
-								}
-							});
-							
-							if (subscriptionError) {
-								throw new Error('Error while subscribing to conversation');
-							}
-						}
-						if (subscription.subscriber === 'messageRequest') {
-							// recover the old subscription and add the new conversation id in the array of subscription.subscriber_id
-							let newSubscriptionIds;
-							const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest');
-							if (conversation && Array.isArray(conversation.subscriber_id)) {
-								newSubscriptionIds = [...conversation.subscriber_id, conversationId]; 
-							}
-							
-							subscriptionMutation({
-								variables: {
-									input: {
-										user_id: id,
-										subscriber: 'messageRequest',
-										subscriber_id: newSubscriptionIds
-									}
-								}
-							}).then((response) => {
-								// eslint-disable-next-line @typescript-eslint/no-unused-vars
-								const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-								// replace the old subscription with the new one
-								const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) => 
-									subscription.subscriber === 'messageRequest' ? subscriptionWithoutTimestamps : subscription
-								);
-								if (newSubscriptionStore) {
-									setSubscriptionStore(addSubscriptionStore);
-								}
-							});
-						}
-						
-					});
+					const conversation: RequestProps['conversation'] = [response.data.createConversation];
+					conversationIdRef.current = conversation[0].id;
+					console.log('convRef', conversationIdRef.current);
 					
+					// put the conversation data in the request
+					const updateRequest: RequestProps = { ...request, conversation: conversation };
+					setRequest(updateRequest);
+					setSelectedRequest(updateRequest);
 				}
-				resetRequest();
+
+				// update the subscription store
+				// replace the old subscription with the new one
+				if (!subscriptionStore.some(subscription => subscription.subscriber === 'messageRequest')) {
+					console.log('withour messageRequest', subscriptionStore);
+						
+					subscriptionMutation({
+						variables: {
+							input: {
+								user_id: id,
+								subscriber: 'messageRequest',
+								subscriber_id: [conversationIdRef.current]
+							}
+						}
+
+					}).then((response) => {
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
+						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+						// replace the old subscription with the new one
+						const messageRequestSubscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest');
+						// If there are no subscriptions, add the new conversation id in the array of subscription.subscriber_id
+						if (!messageRequestSubscription) {
+							subscriptionStore.concat(subscriptionWithoutTimestamps);
+						} else {
+							// replace the old subscription with the new one
+							subscriptionStore.map((subscription: SubscriptionProps) =>
+								subscription.subscriber === 'messageRequest' ? subscriptionWithoutTimestamps : subscription
+							);
+						}
+
+						const newClientRequest = true;
+						sendMessage(requestId, newClientRequest);
+					});
+
+					if (subscriptionError) {
+						throw new Error('Error while subscribing to conversation');
+					}
+				} else if (subscriptionStore.some(subscription => subscription.subscriber === 'messageRequest')) {
+
+					console.log('with messageRequest', subscriptionStore);
+						
+					// recover the old subscription and add the new conversation id in the array of subscription.subscriber_id
+					let newSubscriptionIds;
+					const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest');
+					if (conversation && Array.isArray(conversation.subscriber_id)) {
+						newSubscriptionIds = [...conversation.subscriber_id, conversationIdRef.current];
+					}
+
+					subscriptionMutation({
+						variables: {
+							input: {
+								user_id: id,
+								subscriber: 'messageRequest',
+								subscriber_id: newSubscriptionIds
+							}
+						}
+
+					}).then((response) => {
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
+						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+						// replace the old subscription with the new one
+						const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
+							subscription.subscriber === 'messageRequest' ? subscriptionWithoutTimestamps : subscription
+						);
+
+						if (addSubscriptionStore) {
+							setSubscriptionStore(addSubscriptionStore);
+						}
+
+						const newClientRequest = true;
+						sendMessage(requestId, newClientRequest);
+					});
+				}
+				
 
 			});
-			console.log('subscriptionStore', subscriptionStore);
 
 			if (createConversationError) {
-				console.log('Error creating conversation', createConversationError.message);
-
 				throw new Error('Error creating conversation',);
 			}
 		}
-
-		// find conversation id where request is equal to the request id
-		const conversationId = requestConversation?.find((request) => request.id === requestId)?.conversation[0].id;
-		console.log('conversationId', conversationId);
 		
-		// map file to send to graphql
-		const sendFile = file.map(file => ({
-			file,
-		})); 
-		// create message
-		// if the message is not empty or the file is not empty
-		if (messageValue.trim() !== '' || sendFile.length > 0) {
-			message({
-				variables: {
-					id: id,
-					input: {
-						content: messageValue,
-						user_id: id,
-						conversation_id: conversationId,
-						media: sendFile
-					}
-				}
-			}).then(() => {
-				setMessageValue('');
-				setFile([]);
-			});
-		}
-		if (createMessageError) {
-			throw new Error('Error creating message');
-		}
+		console.log('direct message');
+		
+		sendMessage(requestId);
 	};
+
+
 
 	// Function to load more requests with infinite scroll
 	function addRequest() {
@@ -294,28 +325,35 @@ function MyConversation() {
 				offset: offsetRef.current, // Next offset
 			},
 		}).then((fetchMoreResult: { data: { user: { requestsConversations: RequestProps[] } } }) => {
-			console.log('fetchMoreResult', fetchMoreResult);
+			
 			const request = fetchMoreResult.data.user.requestsConversations;
 
 			if (!fetchMoreResult.data) return;
 			if (request) {
-				setRequestConversation((prevRequests: RequestProps[] | null) => [...(prevRequests || []), ...request]);
+				const addRequest = [...(requestsConversationStore || []), ...request];
+				setRequestsConversationStore(addRequest);
 			}
 			offsetRef.current = offsetRef.current + request.length;
 		});
 	}
+
+	console.log('requestsConversationStore', requestsConversationStore);
+	console.log('subscriptionStore', subscriptionStore);
+	console.log('selectedRequest', selectedRequest);
+	
+	
 	return (
 		<div className="my-conversation-container">
 			<div className="my-client-request">Demandes clients
 				<InfiniteScroll
-					dataLength={requestConversation?.length || 0}
+					dataLength={requestsConversationStore?.length || 0}
 					next={() => {
 						addRequest();
 					}}
 					hasMore={true}
 					loader={<h4>Loading...</h4>}
 				>
-					{requestConversation?.map((request) => (
+					{request && request.id > 0 &&
 						<div className="request-details" key={request.id} onClick={() => setSelectedRequest(request)} >
 							<h1>{request.title}</h1>
 							<p>{request.created_at}</p>
@@ -325,7 +363,22 @@ function MyConversation() {
 							<h2>{request.job}</h2>
 							<p>{request.message}</p>
 							<div>
-								{request.media.map((media) => (
+								{request.media?.map((media) => (
+									media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
+								))}
+							</div>
+						</div>}
+					{requestsConversationStore?.map((requestConversation) => (
+						<div className="request-details" key={requestConversation.id} onClick={() => setSelectedRequest(requestConversation)} >
+							<h1>{requestConversation.title}</h1>
+							<p>{requestConversation.created_at}</p>
+							<p>{requestConversation.first_name}</p>
+							<p>{requestConversation.last_name}</p>
+							<p>{requestConversation.city}</p>
+							<h2>{requestConversation.job}</h2>
+							<p>{requestConversation.message}</p>
+							<div>
+								{requestConversation.media?.map((media) => (
 									media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
 								))}
 							</div>

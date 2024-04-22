@@ -1,9 +1,17 @@
 import { create } from 'zustand';
-import { RequestSoreProps } from '../Type/Request';
+import { RequestSoreProps, RequestProps } from '../Type/Request';
 
 type RequestStore = RequestSoreProps & {
     setRequest: (data: RequestSoreProps['request']) => void;
+
 	resetRequest: () => void;
+	
+}
+
+type RequestConversationStore = {
+	requests: RequestProps[];
+	setRequestConversation: (data: RequestProps[]) => void;
+	resetRequestConversation: () => void;
 }
 
 export const requestDataStore = create<RequestStore>((set) => ({
@@ -59,3 +67,10 @@ export const requestDataStore = create<RequestStore>((set) => ({
 	
 }));
 
+export const requestConversationStore = create<RequestConversationStore>((set) => ({
+	requests:[],
+	setRequestConversation: (data) => set({ requests: data }),
+	resetRequestConversation: () => set({ requests: []})
+	
+	
+}));

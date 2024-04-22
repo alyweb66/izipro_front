@@ -1,8 +1,4 @@
 type MessageProps = {
-	//id: number;
-	//content: string;
-	//conversation_id: number;
-  
         id: number
         content: string
         user_id: number
