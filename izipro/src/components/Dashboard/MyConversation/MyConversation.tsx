@@ -94,8 +94,6 @@ function MyConversation() {
 					updateQuery: (prev: MessageProps, { subscriptionData }: { subscriptionData: any }) => {
 			
 						if (!subscriptionData.data) return prev;
-						console.log('meessage subscription', subscriptionData.data.messageAdded);
-						
 						messageDataStore.setState(prevState => {
 							const newMessages = subscriptionData.data.messageAdded.filter(
 								(newMessage: MessageProps) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
@@ -113,7 +111,7 @@ function MyConversation() {
 
 		}
 	}, [subscribeToMore, subscriptionStore]);
-console.log('messageStore', messageStore);
+
 
 	// useEffect to update the data to the requests state
 	useEffect(() => {
@@ -138,7 +136,7 @@ console.log('messageStore', messageStore);
 			resetRequest();
 		};
 	}, []);
-	console.log('conversationIdRef', conversationIdRef.current);
+
 
 	function sendMessage(requestId: number, newClientRequest = false) {
 		// find conversation id where request is equal to the request id if newclientRequest is false
@@ -148,8 +146,6 @@ console.log('messageStore', messageStore);
 		} else if (newClientRequest) {
 			conversationId = conversationIdRef.current;
 		}
-		console.log('conversationId', conversationId);
-
 
 		// map file to send to graphql
 		const sendFile = file.map(file => ({
@@ -170,22 +166,18 @@ console.log('messageStore', messageStore);
 						}
 					}
 				}).then(() => {
-					console.log('then message');
 				
 					setMessageValue('');
 					conversationIdRef.current = 0;
 					// if the request is a new client request, add the request to the requestsConversationStore
 					if (newClientRequest) {
-						console.log('request', request);
-					
+
 						const addNewRequestConversation = [request, ...requestsConversationStore];
 						setRequestsConversationStore(addNewRequestConversation);
 						resetRequest();
 					}
 
 					setFile([]);
-					console.log('request after concatenation', requestsConversationStore);
-
 				});
 			}
 		}
@@ -198,15 +190,9 @@ console.log('messageStore', messageStore);
 	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>, requestId: number) => {
 		event.preventDefault();
 		// create conversation 
-		console.log(request.id);
-		console.log('role', role);
-		console.log(requestId);
-		
-		
-		
+
 		if (request.id === requestId && role === 'pro') {
-			console.log('go to create conversation');
-			
+
 			conversation({
 				variables: {
 					id: id,
@@ -222,7 +208,6 @@ console.log('messageStore', messageStore);
 				if (response.data.createConversation) {
 					const conversation: RequestProps['conversation'] = [response.data.createConversation];
 					conversationIdRef.current = conversation[0].id;
-					console.log('convRef', conversationIdRef.current);
 					
 					// put the conversation data in the request
 					const updateRequest: RequestProps = { ...request, conversation: conversation };
@@ -233,8 +218,7 @@ console.log('messageStore', messageStore);
 				// update the subscription store
 				// replace the old subscription with the new one
 				if (!subscriptionStore.some(subscription => subscription.subscriber === 'messageRequest')) {
-					console.log('withour messageRequest', subscriptionStore);
-						
+
 					subscriptionMutation({
 						variables: {
 							input: {
@@ -267,9 +251,7 @@ console.log('messageStore', messageStore);
 						throw new Error('Error while subscribing to conversation');
 					}
 				} else if (subscriptionStore.some(subscription => subscription.subscriber === 'messageRequest')) {
-
-					console.log('with messageRequest', subscriptionStore);
-						
+	
 					// recover the old subscription and add the new conversation id in the array of subscription.subscriber_id
 					let newSubscriptionIds;
 					const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest');
@@ -310,9 +292,7 @@ console.log('messageStore', messageStore);
 				throw new Error('Error creating conversation',);
 			}
 		}
-		
-		console.log('direct message');
-		
+
 		sendMessage(requestId);
 	};
 
@@ -337,9 +317,7 @@ console.log('messageStore', messageStore);
 		});
 	}
 
-	console.log('requestsConversationStore', requestsConversationStore);
-	console.log('subscriptionStore', subscriptionStore);
-	console.log('selectedRequest', selectedRequest);
+
 	
 	
 	return (
