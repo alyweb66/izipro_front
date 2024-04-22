@@ -10,7 +10,10 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useFileHandler } from '../../Hook/useFileHandler';
 import { messageDataStore } from '../../../store/message';
 import { MessageProps, MessageStoreProps } from '../../../Type/message';
-import { REQUEST_SUBSCRIPTION } from '../../GraphQL/Subscription';
+import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
+import { subscriptionDataStore } from '../../../store/subscription';
+import { SubscriptionProps } from '../../../Type/Subscription';
+import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 
 type useQueryUserConversationsProps = {
 	loading: boolean;
@@ -19,11 +22,12 @@ type useQueryUserConversationsProps = {
 	fetchMore: (options: { variables: { offset: number } }) => void;
 };
 
+
 function MyConversation() {
 
 	//state
 	const [messageValue, setMessageValue] = useState('');
-	const [messages, setMessages] = useState<string[]>([]);
+	//const [messages, setMessages] = useState<string[]>([]);
 	const [requestConversation, setRequestConversation] = useState<RequestProps[] | null>(null);
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 
@@ -34,16 +38,19 @@ function MyConversation() {
 	const id = userDataStore((state) => state.id);
 	const request = requestDataStore((state) => state.request);
 	const resetRequest = requestDataStore((state) => state.resetRequest);
-	const [messageStore, setMessageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
+	const [messageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
+	const [ subscriptionStore, setSubscriptionStore ] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
+	const role = userDataStore((state) => state.role);
 
 	//mutation
 	const [conversation, { error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
 	const [message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
+	const [subscriptionMutation, {error: subscriptionError}] = useMutation(SUBSCRIPTION_MUTATION);
 
 	//query
 	const { loading, data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
 	const conversationId = selectedRequest?.conversation[0].id ?? 0;
-	const  { subscribeToMore, messageData } = useQueryMessagesByConversation(id, conversationId, 0, 10);
+	const { subscribeToMore, messageData } = useQueryMessagesByConversation(id, conversationId, 0, 10);
 
 	// file upload
 	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
@@ -69,29 +76,47 @@ function MyConversation() {
 			//setMessageStore(messageData.user.messages);
 		}
 	}, [messageData]);
+	console.log('messageStore', messageStore);
 
-	// useEffect to subscribe to new requests
+
+	// useEffect to subscribe to new message requests
 	useEffect(() => {
 		
 		if (subscribeToMore) {
+			console.log('subscribeToMore');
+			const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest');
+			console.log('Subscription', Subscription?.subscriber_id);
+			
 		
 			subscribeToMore({
-				document: REQUEST_SUBSCRIPTION,
-				variables: { request_ids: jobs.map(job => job.job_id).filter(id => id != null) },
+				document: MESSAGE_SUBSCRIPTION,
+				variables: { 
+					conversation_ids: Subscription?.subscriber_id,
+				},
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				updateQuery: (prev: RequestProps , { subscriptionData }: { subscriptionData: any }) => {
+				updateQuery: (prev: MessageProps , { subscriptionData }: { subscriptionData: any }) => {
+					console.log('prev', prev);
+					console.log('subscriptionData', subscriptionData.data.messageAdded);
 					
 
 					if (!subscriptionData.data) return prev;
-					const  requestAdded  = subscriptionData.data.requestAdded[0];
 					
-					RangeFilter([requestAdded], true);
+					messageDataStore.setState(prevState => {
+						const newMessages = subscriptionData.data.messageAdded.filter(
+							(newMessage: MessageProps) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
+						);
+			
+						return {
+							...prevState,
+							messages: [...prevState.messages, ...newMessages]
+						};
+					});
 					
 				},
 			});
 		
 		}
-	}, [ subscribeToMore]);
+	}, [ subscribeToMore, subscriptionStore]);
 
 	// useEffect to update the data to the requests state
 	useEffect(() => {
@@ -119,11 +144,13 @@ function MyConversation() {
 	}, []);
 
 	// Function to send message and create conversation
-	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>, conversationId: number) => {
+	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>, requestId: number) => {
 		event.preventDefault();
 		// create conversation 
-		if (request.id > 0) {
+		if (request.id > 0 && role === 'pro') {
 			console.log('coucou');
+			console.log('requestId', requestId);
+			
 
 			conversation({
 				variables: {
@@ -131,13 +158,13 @@ function MyConversation() {
 					input: {
 						user_1: id,
 						user_2: request.user_id,
-						request_id: request.id,
+						request_id: requestId,
 					}
 				}
 			}).then((response) => {
-				console.log('response', response);
 				if (response.data.createConversation) {
 					const conversation = response.data.createConversation;
+					console.log('response conversation', conversation);
 					// put the conversation data in the request
 					setRequestConversation((prevState) =>
 						prevState?.map(item =>
@@ -152,10 +179,75 @@ function MyConversation() {
 								: item
 						) || null // Fix: Add a fallback value of null
 					);
+					// update the subscription store
+					// replace the old subscription with the new one
+					const newSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) => {
+						if (subscription.subscriber !== 'messageRequest') {
+							console.log('create subscription');
+							
+							subscriptionMutation({
+								variables: {
+									input: {
+										user_id: id,
+										subscriber: 'messageRequest',
+										subscriber_id: [conversation.id]
+									}
+								}
+							}).then((response) => {
+								// eslint-disable-next-line @typescript-eslint/no-unused-vars
+								const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+								
+								// replace the old subscription with the new one
+								const messageRequestSubscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest'); 
+								if (!messageRequestSubscription) {
+									subscriptionStore.concat(subscriptionWithoutTimestamps);
+								} else {
+									subscriptionStore.map((subscription: SubscriptionProps) => 
+										subscription.subscriber === 'messageRequest' ? subscriptionWithoutTimestamps : subscription
+									);
+								}
+							});
+							
+							if (subscriptionError) {
+								throw new Error('Error while subscribing to conversation');
+							}
+						}
+						if (subscription.subscriber === 'messageRequest') {
+							// recover the old subscription and add the new conversation id in the array of subscription.subscriber_id
+							let newSubscriptionIds;
+							const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest');
+							if (conversation && Array.isArray(conversation.subscriber_id)) {
+								newSubscriptionIds = [...conversation.subscriber_id, conversationId]; 
+							}
+							
+							subscriptionMutation({
+								variables: {
+									input: {
+										user_id: id,
+										subscriber: 'messageRequest',
+										subscriber_id: newSubscriptionIds
+									}
+								}
+							}).then((response) => {
+								// eslint-disable-next-line @typescript-eslint/no-unused-vars
+								const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+								// replace the old subscription with the new one
+								const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) => 
+									subscription.subscriber === 'messageRequest' ? subscriptionWithoutTimestamps : subscription
+								);
+								if (newSubscriptionStore) {
+									setSubscriptionStore(addSubscriptionStore);
+								}
+							});
+						}
+						
+					});
+					
 				}
 				resetRequest();
 
 			});
+			console.log('subscriptionStore', subscriptionStore);
 
 			if (createConversationError) {
 				console.log('Error creating conversation', createConversationError.message);
@@ -163,13 +255,17 @@ function MyConversation() {
 				throw new Error('Error creating conversation',);
 			}
 		}
-		setMessages([...(messages || []), messageValue]);
 
+		// find conversation id where request is equal to the request id
+		const conversationId = requestConversation?.find((request) => request.id === requestId)?.conversation[0].id;
+		console.log('conversationId', conversationId);
+		
 		// map file to send to graphql
 		const sendFile = file.map(file => ({
 			file,
 		})); 
 		// create message
+		// if the message is not empty or the file is not empty
 		if (messageValue.trim() !== '' || sendFile.length > 0) {
 			message({
 				variables: {
@@ -181,15 +277,12 @@ function MyConversation() {
 						media: sendFile
 					}
 				}
-			}).then((response) => {
-				if (response.data.createMessage) {
-					console.log('response', response);
-					setMessageValue('');
-				}
+			}).then(() => {
+				setMessageValue('');
+				setFile([]);
 			});
 		}
 		if (createMessageError) {
-			console.log('Error creating message', createMessageError.message);
 			throw new Error('Error creating message');
 		}
 	};
@@ -248,12 +341,12 @@ function MyConversation() {
 						<h2>Messages for {selectedRequest.title}</h2>
 						{Array.isArray(messageStore) &&
 							messageStore
-								.filter((message: MessageProps) => message.conversation_id === selectedRequest.conversation[0].id)
-								.map((message: MessageProps, index) => (
-									<div className="message" key={index}>{message.content}</div>
+								.filter((message) => message.conversation_id === selectedRequest.conversation[0].id)
+								.map((message: MessageStoreProps, index) => (
+									<div className={`${message.user_id}`} key={index}>{message.content}</div>
 								))
 						}
-						<form onSubmit={(event) => handleMessageSubmit(event, selectedRequest.conversation[0].id)}>
+						<form onSubmit={(event) => handleMessageSubmit(event, selectedRequest.id)}>
 							<input
 								type="text"
 								value={messageValue}

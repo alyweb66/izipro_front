@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
 import { requestDataStore } from '../../../store/Request';
+import { subscriptionDataStore } from '../../../store/subscription';
 import './clientRequest.scss';
 import { useQueryRequestByJob } from '../../Hook/Query';
 import { RequestProps } from '../../../Type/Request';
@@ -10,6 +11,8 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 // @ts-expect-error turf is not typed
 import * as turf from '@turf/turf';
 import { REQUEST_SUBSCRIPTION } from '../../GraphQL/Subscription';
+import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
+import { SubscriptionProps } from '../../../Type/Subscription';
 
 function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	
@@ -26,9 +29,14 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const lat = userDataStore((state) => state.lat);
 	const settings = userDataStore((state) => state.settings);
 	const setRequest = requestDataStore((state) => state.setRequest);
+	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 
 	// mutation
 	const [hideRequest, {error: hideRequestError}] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
+	const [subscriptionMutation, {error: subscriptionError}] = useMutation(SUBSCRIPTION_MUTATION);
+
+	// get requests by job
+	const {getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 3);
 
 	// Function to filter the requests by the user's location and the request's location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
@@ -76,12 +84,80 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 		}
 	}
 
-	// get requests by job
-	const {getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 3);
+	// add jobs to setSubscriptionJob if there are not already in, or have the same id
+	useEffect(() => {
 
+		// If there are subscriptions, check if the jobs are in the subscription
+		if (subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest')) {
+			subscriptionStore.forEach((subscription) => {
+				if (subscription.subscriber === 'jobRequest' && Array.isArray(subscription.subscriber_id)) {
+					const jobIds = jobs.map((job) => job.job_id);
+					const subscriptionIds = new Set(subscription.subscriber_id);
+
+					// Check if all jobs are in the subscription
+					const allJobsInSubscription = jobIds.every((id) => subscriptionIds.has(id));
+					// Check if all subscriptions are in the jobs
+					const allSubscriptionsInJobs = subscription.subscriber_id.every((id) => jobIds.includes(id));
+
+					// If not, add the new jobs array to the subscription
+					if (!allJobsInSubscription || !allSubscriptionsInJobs) {
+						subscriptionMutation({
+							variables: {
+								input: {
+									user_id: id,
+									subscriber: 'jobRequest',
+									subscriber_id: jobIds
+								}
+							}
+						}).then((response) => {
+							// eslint-disable-next-line @typescript-eslint/no-unused-vars
+							const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+							// replace the old subscription with the new one
+							const newSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) => 
+								subscription.subscriber === 'jobRequest' ? subscriptionWithoutTimestamps : subscription
+							);
+							if (newSubscriptionStore) {
+								setSubscriptionStore(newSubscriptionStore);
+							}
+						});
+
+						if (subscriptionError) {
+							throw new Error('Error while subscribing to jobs');
+						}
+					}
+				}
+			});
+		}
+		// If there are no subscriptions, add the new jobs array to the subscription
+		if (jobs.length > 0 && !subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest')) {
+			const jobIds = jobs.map((job) => job.job_id);
+			subscriptionMutation({
+				variables: {
+					input: {
+						user_id: id,
+						subscriber: 'jobRequest',
+						subscriber_id: jobIds
+					}
+				}
+			}).then((response) => {
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+				if (subscriptionWithoutTimestamps) {
+					setSubscriptionStore([subscriptionWithoutTimestamps]);
+				}
+			});
+
+			if (subscriptionError) {
+				throw new Error('Error while subscribing to jobs');
+			}
+		}
+
+	}, [jobs]);
+	
 	// useEffect to filter the requests by the user's location and the request's location
 	useEffect(() => {
 		if (getRequestsByJob) {
+	console.log('getRequestsByJob', getRequestsByJob.requestsByJob);
 	
 			// Filter the requests
 			RangeFilter(getRequestsByJob.requestsByJob);
@@ -155,6 +231,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 			throw new Error('Error while hiding request');
 		}
 	};
+console.log('clientRequests', clientRequests);
 
 	return (
 		<div className="my_request-container">

@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client';
 import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
 import { GET_JOB_DATA } from '../GraphQL/Job';
-import { GET_MESSAGES_BY_CONVERSATION, GET_USER_DATA, GET_USER_REQUEST_BY_CONVERSATIONS } from '../GraphQL/UserQueries';
+import { GET_MESSAGES_BY_CONVERSATION, GET_USER_DATA, GET_USER_REQUEST_BY_CONVERSATIONS, GET_USER_SUBSCRIPTION } from '../GraphQL/UserQueries';
 
 
 // fetch user data
@@ -139,4 +139,12 @@ export const useQueryMessagesByConversation = (messagesId: number, conversationI
 		throw new Error('Error while fetching messages by conversation');
 	}
 	return {subscribeToMore, messageData, fetchMoreMessage};
+};
+
+export const useQueryUserSubscriptions = () => {
+	const { error: subscriptionError, data: subscriptionData } = useQuery(GET_USER_SUBSCRIPTION);
+	if (subscriptionError) {
+		throw new Error('Error while fetching user subscriptions');
+	}
+	return subscriptionData;
 };

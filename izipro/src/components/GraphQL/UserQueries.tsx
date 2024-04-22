@@ -77,3 +77,16 @@ export const GET_MESSAGES_BY_CONVERSATION = gql`
       }
 }
 `;
+
+export const GET_USER_SUBSCRIPTION = gql`
+  query Subscription {
+    user {
+      subscription {
+        id
+        user_id
+        subscriber
+        subscriber_id
+      }
+    }
+  }
+`;

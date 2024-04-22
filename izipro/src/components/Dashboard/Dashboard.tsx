@@ -6,9 +6,10 @@ import MyRequest from './MyRequest/MyRequest';
 import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import { userDataStore } from '../../store/UserData';
-import { useQueryUserData } from '../Hook/Query';
+import { useQueryUserData, useQueryUserSubscriptions } from '../Hook/Query';
 
 import './Dashboard.scss';
+import { subscriptionDataStore } from '../../store/subscription';
 
 function Dashboard() {
 	const navigate = useNavigate();
@@ -19,13 +20,17 @@ function Dashboard() {
 	//store 
 	const role = userDataStore((state) => state.role);
 	const setAll = userDataStore((state) => state.setAll);
+	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
+	
 	
 	// Query to get the user data
 	const getUserData = useQueryUserData();
+	const getUserSubscription = useQueryUserSubscriptions();
 	
 	// condition if user not logged in
 	const isLogged = localStorage.getItem('ayl') || sessionStorage.getItem('ayl');
 	
+
 
 	// function to check if user is logged in
 	useEffect(() => {
@@ -47,6 +52,7 @@ function Dashboard() {
 
 	});
 
+	// set user data to the store
 	useEffect(() => {
 		if (getUserData) {
 			console.log('userdata', getUserData?.user);
@@ -54,6 +60,14 @@ function Dashboard() {
 			setAll(getUserData?.user);
 		}
 	},[getUserData]);
+
+	// set user subscription to the store
+	useEffect(() => {
+		if (getUserSubscription) {
+			console.log('subscription', getUserSubscription?.user.subscription);
+			setSubscription(getUserSubscription?.user.subscription);
+		}
+	},[getUserSubscription]);
 
 	const handleMyConvesationNavigate = () => {
 		setSelectedTab('My conversations');
