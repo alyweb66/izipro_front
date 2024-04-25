@@ -92,6 +92,7 @@ function MyConversation() {
 		}
 	}, [data]);
 
+	// useEffect to sort the requests by date
 	useEffect(() => {
 		if (requestsConversationStore) {
 			const sortedRequests = [...requestsConversationStore].sort((a, b) => {
@@ -341,6 +342,7 @@ function MyConversation() {
 			variables: {
 				offset: offsetRef.current, // Next offset
 			},
+			// @ts-expect-error no promess here
 		}).then((fetchMoreResult: { data: { user: { requestsConversations: RequestProps[] } } }) => {
 			
 			const request = fetchMoreResult.data.user.requestsConversations;
@@ -352,6 +354,7 @@ function MyConversation() {
 				setRequestsConversationStore(addRequest);
 			}
 			offsetRef.current = offsetRef.current + request.length;
+			
 		});
 	}
 

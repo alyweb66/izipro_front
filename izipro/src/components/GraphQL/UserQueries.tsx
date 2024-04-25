@@ -91,3 +91,13 @@ export const GET_USER_SUBSCRIPTION = gql`
     }
   }
 `;
+
+export const GET_USERS_CONVERSATION = gql`
+  query uery($ids: [Int!], $offset: Int, $limit: Int) {
+    users(ids: $ids, offset: $offset, limit: $limit) {
+      id
+      city
+      denomination
+    }
+  }
+`;

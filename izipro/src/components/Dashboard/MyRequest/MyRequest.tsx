@@ -1,18 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
-import { userDataStore } from '../../../store/UserData';
+import { userConversation, userDataStore } from '../../../store/UserData';
 import { useMutation } from '@apollo/client';
 import { RequestProps } from '../../../Type/Request';
 import './MyRequest.scss';
 import { DELETE_REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
-import { useQueryUserRequests } from '../../Hook/Query';
+import { useQueryUserRequests, useQueryUsersConversation } from '../../Hook/Query';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { myRequestStore } from '../../../store/Request';
+import { UserDataProps } from '../../../Type/User';
 
 function MyRequest() {
 
 	//state
-	const [requests, setRequests] = useState<RequestProps[]>([]);
+	//const [requests, setRequests] = useState<RequestProps[]>([]);
 	const [loading, setLoading] = useState(false);
-	console.log('requests', requests);
+	//const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
+	const [userIds, setUserIds] = useState<number[]>([]);
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
@@ -20,24 +23,45 @@ function MyRequest() {
 	
 	// store
 	const id = userDataStore((state) => state.id);
+	const [myRequestsStore, setMyRequestsStore] = myRequestStore((state) => [state.requests, state.setMyRequestStore]);
+	const [userConv, setUserConv] = userConversation((state) => [state.users, state.setUsers]);
+
+	//useRef
+	const userOffsetRef = useRef(0);
 
 	//mutation
 	const [ deleteRequest, {error: deleteRequestError} ] = useMutation(DELETE_REQUEST_MUTATION);
 
 	// Query to get the user requests
 	const {getUserRequestsData, fetchMore} = useQueryUserRequests(id, 0, limit);
+	const {usersConversationData } = useQueryUsersConversation( userIds ,0 , limit);
 
+	console.log('myRequest', myRequestsStore);
 	
 	// useEffect to update the requests state
 	useEffect(() => {
 		if (getUserRequestsData) {
 			// If offset is 0, it's the first query, so just replace the queries
 			if (offsetRef.current === 0) {
-				setRequests(getUserRequestsData.user.requests);
+				setMyRequestsStore(getUserRequestsData.user.requests);
 			} 
 		}
 	}, [getUserRequestsData]);
 	// Restore scroll position after the component has been rendered
+
+	// useEffect to update the user conversation state
+	useEffect(() => {
+		if (usersConversationData) {
+			console.log('usersConversationData', usersConversationData);
+			
+			// If offset is 0, it's the first query, so just replace the queries
+			if (userOffsetRef.current === 0) {
+				setUserConv(usersConversationData.users);
+			} 
+		}
+
+
+	}, [usersConversationData]);
 
 	// Function to delete a request
 	const handleDeleteRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number, imageNames: string[]) => {
@@ -54,7 +78,7 @@ function MyRequest() {
 		}).then((response) => {
 			if (response.data.deleteRequest) {
 				// Remove the request from the state
-				setRequests(requests.filter(request => request.id !== requestId));
+				setMyRequestStore(myRequest.filter(request => request.id !== requestId));
 			}
 		});
 
@@ -64,53 +88,86 @@ function MyRequest() {
 		
 	};
 
+	const handleConversation = (event: React.MouseEvent<HTMLDivElement>, request: RequestProps) => {
+		event.preventDefault();
+		console.log('request', request);
+		
+		const ids = request?.conversation.map(conversation => {
+			return conversation.user_1 !== id ? conversation.user_1 : conversation.user_2;
+		});
+
+		setUserIds(ids || []); // Provide a default value of an empty array
+		console.log(ids);
+	};
+console.log('userIds', userIds);
+console.log('userConv', userConv);
+
+
 	return (
 		<div className="my_request-container">
-			{!requests[0] && <p>Vous n&apos;avez pas de demande</p>}
-			{getUserRequestsData && (
-				<div > 
-					<InfiniteScroll
-						dataLength={requests.length}
-						next={ () => {
-							if (!loading) {
-								fetchMore({
-									variables: {
-										offset: requests.length // Next offset
-									},
-								}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
-									setRequests(prevRequests => [...(prevRequests || []), ...fetchMoreResult.data.user.requests]);
-									offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
-									setLoading(false);
-								});
+			<div className="request-list">
+				{!myRequestsStore[0] && <p>Vous n&apos;avez pas de demande</p>}
+				{getUserRequestsData && (
+					<div > 
+						<InfiniteScroll
+							dataLength={myRequestsStore.length}
+							next={ () => {
+								if (!loading) {
+									fetchMore({
+										variables: {
+											offset: myRequestsStore.length // Next offset
+										},
+									}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
+										myRequestStore.setState(prevRequests => {
+											return { ...prevRequests, requests: [...prevRequests.requests, ...fetchMoreResult.data.user.requests] };
+										});
+
+										offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
+										setLoading(false);
+									});
+								}
+							}}
+							hasMore={true}
+							loader={<h4>Loading...</h4>}
+						>
+							{myRequestsStore.map((request) => (
+								<div key={request.id} onClick={(event) => handleConversation(event, request)}>
+									<h1>{request.title}</h1>
+									<p>{request.created_at}</p>
+									<p>{request.first_name}</p>
+									<p>{request.last_name}</p>
+									<p>{request.city}</p>
+									<h2>{request.job}</h2>
+									<p>{request.message}</p>
+									<div>
 								
-							}
-						}}
-						hasMore={true}
-						loader={<h4>Loading...</h4>}
-					>
-						{requests.map((request) => (
-							<div key={request.id}>
-								<h1>{request.title}</h1>
-								<p>{request.created_at}</p>
-								<p>{request.first_name}</p>
-								<p>{request.last_name}</p>
-								<p>{request.city}</p>
-								<h2>{request.job}</h2>
-								<p>{request.message}</p>
-								<div>
+										{request.media.map((media) => (
+											media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
+										))}
 								
-									{request.media.map((media) => (
-										media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
-									))}
-								
+									</div>
+									<button type='button' onClick={(event) => {handleDeleteRequest(event, request.id, request.media.map(image => image.name));}}>Supprimer la demande</button>
 								</div>
-								<button type='button' onClick={(event) => {handleDeleteRequest(event, request.id, request.media.map(image => image.name));}}>Supprimer la demande</button>
-							</div>
-						))}
-					</InfiniteScroll>
+							))}
+						</InfiniteScroll>
 				
-				</div>
-			)}
+					</div>
+				)}
+			</div>
+			<div className="answer-list">
+				{userConv?.length === 0 && <p>Vous n&apos;avez pas de conversation</p>}
+				{userConv && userConv?.map((user: UserDataProps ) => (
+					<div key={user.id}>
+						<h1>user</h1>
+						<p>{user.denomination}</p>
+						<p>{user.city}</p>
+					</div>
+				))}
+
+			</div>
+			<div className="message-list">
+
+			</div>
 		</div>
 	);
 }
