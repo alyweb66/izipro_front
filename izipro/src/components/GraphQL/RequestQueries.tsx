@@ -73,8 +73,10 @@ export const GET_REQUEST_BY_JOB = gql`
             }
             created_at
             conversation {
+                id
                 user_1
                 user_2
+                updated_at
             }
         }
     }

@@ -1,5 +1,6 @@
-import { create } from 'zustand';
+import {create } from 'zustand';
 import { RequestSoreProps, RequestProps } from '../Type/Request';
+
 
 type RequestStore = RequestSoreProps & {
     setRequest: (data: RequestSoreProps['request']) => void;
@@ -14,7 +15,7 @@ type RequestConversationStore = {
 	resetRequestConversation: () => void;
 }
 
-export const requestDataStore = create<RequestStore>((set) => ({
+export const requestDataStore = create<RequestStore>((set: (state: Partial<RequestStore>) => void) => ({
 	request:{
 		id:0,
 		urgent: false,
@@ -39,13 +40,14 @@ export const requestDataStore = create<RequestStore>((set) => ({
 			id: 0,
 			user_1: 0,
 			user_2: 0,
+			updated_at: '',
 		}],
 	},
 
-	setRequest: (data) => set({ request: data }),
+	setRequest: (data: RequestSoreProps['request']) => set({ request: data }),
 	resetRequest: () => set({ 
 		request: {
-			id:0, 
+			id: 0, 
 			urgent: false, 
 			title: '', 
 			message: '', 
@@ -60,7 +62,7 @@ export const requestDataStore = create<RequestStore>((set) => ({
 			job: '', 
 			media: [{id: 0, url: '', name: ''}], 
 			created_at: '', 
-			conversation: [{id: 0, user_1: 0, user_2: 0}]
+			conversation: [{id: 0, user_1: 0, user_2: 0, updated_at: ''}]
 		} 
 	})
     
@@ -70,7 +72,5 @@ export const requestDataStore = create<RequestStore>((set) => ({
 export const requestConversationStore = create<RequestConversationStore>((set) => ({
 	requests:[],
 	setRequestConversation: (data) => set({ requests: data }),
-	resetRequestConversation: () => set({ requests: []})
-	
-	
+	resetRequestConversation: () => set({ requests: [] })
 }));

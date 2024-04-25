@@ -16,6 +16,7 @@ import { subscriptionDataStore } from '../../../store/subscription';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 
+
 type useQueryUserConversationsProps = {
 	loading: boolean;
 	data: { user: { requestsConversations: RequestProps[] } };
@@ -32,6 +33,7 @@ function MyConversation() {
 	//const [requestConversation, setRequestConversation] = useState<RequestProps[] | null>(null);
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	//const [conversationIdState, setConversationIdState] = useState<number>(0);
+	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
 
 	//useRef
 	const offsetRef = useRef(0);
@@ -57,7 +59,7 @@ function MyConversation() {
 	const { subscribeToMore, messageData } = useQueryMessagesByConversation(id, conversationId, 0, 10);
 
 	// file upload
-	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
+	const { file, setFile, handleFileChange } = useFileHandler();
 
 	// useEffect to update the message store
 	useEffect(() => {
@@ -78,6 +80,34 @@ function MyConversation() {
 		}
 	}, [messageData]);
 
+	// useEffect to update the data to the requests state
+	useEffect(() => {
+		if (data && data.user) {
+			console.log('data', data);
+	
+			const requestsConversations: RequestProps[] = data.user.requestsConversations;
+			setRequestsConversationStore(requestsConversations); // Fix: Pass an array as the argument
+			offsetRef.current = requestsConversations.length;
+	
+		}
+	}, [data]);
+
+	useEffect(() => {
+		if (requestsConversationStore) {
+			const sortedRequests = [...requestsConversationStore].sort((a, b) => {
+				const dateA = Math.max(...a.conversation.map(c => new Date(c.updated_at).getTime()));
+				const dateB = Math.max(...b.conversation.map(c => new Date(c.updated_at).getTime()));// Convert date to number using getTime()
+		
+				// For ascending order, swap dateA and dateB for descending order
+				return dateB - dateA;
+			});
+
+			setRequestByDate(sortedRequests);
+		
+		}
+	}, [requestsConversationStore]);
+
+
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
 
@@ -92,10 +122,16 @@ function MyConversation() {
 					},
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					updateQuery: (prev: MessageProps, { subscriptionData }: { subscriptionData: any }) => {
-			
+
 						if (!subscriptionData.data) return prev;
+						// check if the message is already in the store
+						const messageAdded: MessageProps[] = subscriptionData.data.messageAdded;
+						const date = new Date(Number(messageAdded[0].created_at));
+						const newDate = date.toISOString();
+						console.log('messageAdded', date);
+						// add the new message to the message store
 						messageDataStore.setState(prevState => {
-							const newMessages = subscriptionData.data.messageAdded.filter(
+							const newMessages = messageAdded.filter(
 								(newMessage: MessageProps) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
 							);
 
@@ -103,36 +139,37 @@ function MyConversation() {
 								...prevState,
 								messages: [...prevState.messages, ...newMessages]
 							};
-						});
 
+						});
+			
+						// add updated_at to the request.conversation
+						requestConversationStore.setState(prevState => {
+							const updatedRequest = prevState.requests.map((request: RequestProps) => {
+								if (request.conversation[0].id === messageAdded[0].conversation_id) {
+									const updatedConversation = { ...request.conversation[0], updated_at: newDate };
+									return { ...request, conversation: [updatedConversation, ...request.conversation.slice(1)] };
+								}
+								return request;
+							});
+							return { requests: updatedRequest };
+						});
 					},
 				});
 			}
 
 		}
 	}, [subscribeToMore, subscriptionStore]);
+	console.log('requestsConversationStore', requestsConversationStore);
 
-
-	// useEffect to update the data to the requests state
-	useEffect(() => {
-		if (data && data.user) {
-			console.log('data', data);
-
-			const requestsConversations: RequestProps[] = data.user.requestsConversations;
-			setRequestsConversationStore(requestsConversations); // Fix: Pass an array as the argument
-			offsetRef.current = requestsConversations.length;
-
-		}
-	}, [data]);
 
 	// cleane the request store if the component is unmounted
 	useEffect(() => {
 		return () => {
 			// remove request.id in requestsConversationStore
-			requestConversationStore.setState(prevState => ({
-				...prevState,
-				requestsConversationStore: prevState.requests.filter(request => request.id !== request.id)
-			})),
+
+			const removedRequest = requestConversationStore.getState().requests.filter((requestConv: RequestProps) => request.id !== requestConv.id);
+			requestConversationStore.setState({ requests: removedRequest });
+			setRequestsConversationStore(removedRequest);
 			resetRequest();
 		};
 	}, []);
@@ -307,8 +344,9 @@ function MyConversation() {
 		}).then((fetchMoreResult: { data: { user: { requestsConversations: RequestProps[] } } }) => {
 			
 			const request = fetchMoreResult.data.user.requestsConversations;
-
+			
 			if (!fetchMoreResult.data) return;
+			// add the new request to the requestsConversationStore
 			if (request) {
 				const addRequest = [...(requestsConversationStore || []), ...request];
 				setRequestsConversationStore(addRequest);
@@ -317,9 +355,6 @@ function MyConversation() {
 		});
 	}
 
-
-	
-	
 	return (
 		<div className="my-conversation-container">
 			<div className="my-client-request">Demandes clients
@@ -346,7 +381,7 @@ function MyConversation() {
 								))}
 							</div>
 						</div>}
-					{requestsConversationStore?.map((requestConversation) => (
+					{requestByDate?.map((requestConversation) => (
 						<div className="request-details" key={requestConversation.id} onClick={() => setSelectedRequest(requestConversation)} >
 							<h1>{requestConversation.title}</h1>
 							<p>{requestConversation.created_at}</p>

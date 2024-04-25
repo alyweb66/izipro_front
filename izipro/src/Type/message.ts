@@ -5,11 +5,11 @@ type MessageProps = {
         conversation_id: number
         created_at: string
         request_id: number
-        media: [{
+        media: {
             id: number
             url: string
             name: string
-        }]
+        }[]
     
 };
 
@@ -19,11 +19,11 @@ type MessageStoreProps = {
         user_id: number
         conversation_id: number
         created_at: string
-        media: [{
+        media: {
             id: number
             url: string
             name: string
-        }]
+        }[]
 };
 
 

@@ -52,6 +52,7 @@ export const GET_USER_REQUEST_BY_CONVERSATIONS = gql`
           id
           user_1
           user_2
+          updated_at
         }
       }
     }

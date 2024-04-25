@@ -12,18 +12,20 @@ type RequestProps = {
     user_id: number
     job_id: number
     job: string
-    media: [{
+    media: {
         id: number
 		url: string
 		name: string
+        
 	
-	}]
+	}[]
     created_at: string
-    conversation: [{
+    conversation: {
         id: number
         user_1: number
         user_2: number
-    }]
+        updated_at: string
+    }[]
 };
 
 type RequestSoreProps = {
@@ -41,18 +43,19 @@ type RequestSoreProps = {
         user_id: number
         job_id: number
         job: string
-        media: [{
+        media: {
             id: number
             url: string
             name: string
         
-        }]
+        }[]
         created_at: string
-        conversation: [{
+        conversation: {
             id: number
             user_1: number
             user_2: number
-        }]
+            updated_at: string
+        }[]
     }
 };
 
