@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
+import { requestDataStore } from '../../../store/Request';
+import { subscriptionDataStore } from '../../../store/subscription';
 import './clientRequest.scss';
 import { useQueryRequestByJob } from '../../Hook/Query';
 import { RequestProps } from '../../../Type/Request';
@@ -9,15 +11,16 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 // @ts-expect-error turf is not typed
 import * as turf from '@turf/turf';
 import { REQUEST_SUBSCRIPTION } from '../../GraphQL/Subscription';
+import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
+import { SubscriptionProps } from '../../../Type/Subscription';
 
-function ClientRequest () {
+function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	
 	// State
 	const [clientRequests, setClientRequests] = useState<RequestProps[] | null>(null);
 
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
-	const limit = 3;
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -25,9 +28,15 @@ function ClientRequest () {
 	const lng = userDataStore((state) => state.lng);
 	const lat = userDataStore((state) => state.lat);
 	const settings = userDataStore((state) => state.settings);
+	const setRequest = requestDataStore((state) => state.setRequest);
+	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 
 	// mutation
 	const [hideRequest, {error: hideRequestError}] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
+	const [subscriptionMutation, {error: subscriptionError}] = useMutation(SUBSCRIPTION_MUTATION);
+
+	// get requests by job
+	const {getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 3);
 
 	// Function to filter the requests by the user's location and the request's location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
@@ -41,18 +50,22 @@ function ClientRequest () {
 				const distance = turf.distance(requestPoint, userPoint);
 
 				return (
+					// Check if the request is in the user's range
 					(distance < request.range / 1000 || request.range === 0) &&
-					(distance < settings[0].range / 1000 || settings[0].range === 0)
+					// Check if the request is in the user's settings range
+					(distance < settings[0].range / 1000 || settings[0].range === 0) &&
+					// Check if the user is already in conversation with the request
+					(!request.conversation[0] || (request.conversation[0].user_1 !== id && request.conversation[0].user_2 !== id))
 				);
 			});
 
-			setClientRequests((prev) => [...filteredRequests, ...(prev || [])]);
+			setClientRequests((prevState) => [...filteredRequests, ...(prevState || [])]);
 			offsetRef.current = offsetRef.current + filteredRequests.length;
 
 		} else {
 			// If the function is called from the query, we need to add the new requests to the bottom of the list
-			setClientRequests((prev) => [
-				...prev || [],
+			setClientRequests((prevState) => [
+				...prevState || [],
 				...requests.filter((request: RequestProps) => {
 					// Define the two points
 					const requestPoint = turf.point([request.lng, request.lat]);
@@ -62,19 +75,89 @@ function ClientRequest () {
 	
 					return (
 						(distance < request.range / 1000 || request.range === 0) &&
-				(distance < settings[0].range / 1000 || settings[0].range === 0)
+				(distance < settings[0].range / 1000 || settings[0].range === 0) &&
+				// Check if the user is already in conversation with the request
+				(!request.conversation[0] || (request.conversation[0].user_1 !== id && request.conversation[0].user_2 !== id))
 					);
 				})
 			]);
 		}
 	}
 
-	// get requests by job
-	const {getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, limit);
+	// add jobs to setSubscriptionJob if there are not already in, or have the same id
+	useEffect(() => {
 
+		// If there are subscriptions, check if the jobs are in the subscription
+		if (subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest')) {
+			subscriptionStore.forEach((subscription) => {
+				if (subscription.subscriber === 'jobRequest' && Array.isArray(subscription.subscriber_id)) {
+					const jobIds = jobs.map((job) => job.job_id);
+					const subscriptionIds = new Set(subscription.subscriber_id);
+
+					// Check if all jobs are in the subscription
+					const allJobsInSubscription = jobIds.every((id) => subscriptionIds.has(id));
+					// Check if all subscriptions are in the jobs
+					const allSubscriptionsInJobs = subscription.subscriber_id.every((id) => jobIds.includes(id));
+
+					// If not, add the new jobs array to the subscription
+					if (!allJobsInSubscription || !allSubscriptionsInJobs) {
+						subscriptionMutation({
+							variables: {
+								input: {
+									user_id: id,
+									subscriber: 'jobRequest',
+									subscriber_id: jobIds
+								}
+							}
+						}).then((response) => {
+							// eslint-disable-next-line @typescript-eslint/no-unused-vars
+							const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+							// replace the old subscription with the new one
+							const newSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) => 
+								subscription.subscriber === 'jobRequest' ? subscriptionWithoutTimestamps : subscription
+							);
+							if (newSubscriptionStore) {
+								setSubscriptionStore(newSubscriptionStore);
+							}
+						});
+
+						if (subscriptionError) {
+							throw new Error('Error while subscribing to jobs');
+						}
+					}
+				}
+			});
+		}
+		// If there are no subscriptions, add the new jobs array to the subscription
+		if (jobs.length > 0 && !subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest')) {
+			const jobIds = jobs.map((job) => job.job_id);
+			subscriptionMutation({
+				variables: {
+					input: {
+						user_id: id,
+						subscriber: 'jobRequest',
+						subscriber_id: jobIds
+					}
+				}
+			}).then((response) => {
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+				if (subscriptionWithoutTimestamps) {
+					setSubscriptionStore([subscriptionWithoutTimestamps]);
+				}
+			});
+
+			if (subscriptionError) {
+				throw new Error('Error while subscribing to jobs');
+			}
+		}
+
+	}, [jobs]);
+	
 	// useEffect to filter the requests by the user's location and the request's location
 	useEffect(() => {
 		if (getRequestsByJob) {
+	console.log('getRequestsByJob', getRequestsByJob.requestsByJob);
 	
 			// Filter the requests
 			RangeFilter(getRequestsByJob.requestsByJob);
@@ -109,20 +192,18 @@ function ClientRequest () {
 	// Function to load more requests with infinite scroll
 	function addRequest() {
 		fetchMore({
-			
 			variables: {
-				offset: offsetRef.current // Next offset
+				offset: offsetRef.current, // Next offset
 			},
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			updateQuery: (prev: RequestProps, { fetchMoreResult }: any) => {
-			
-				if (!fetchMoreResult) return prev;
-				RangeFilter(fetchMoreResult.requestsByJob);
-				offsetRef.current = offsetRef.current + fetchMoreResult.requestsByJob.length;
-				
-		
+		}).then(fetchMoreResult => {
+			const data = fetchMoreResult.data; // Access the 'data' property
+			if (data) {
+				RangeFilter(data.requestsByJob); // Access the 'requestsByJob' property
+				offsetRef.current = offsetRef.current + data.requestsByJob.length;
 			}
 		});
+		
 	}
 	
 	// Function to hide a request
@@ -150,6 +231,7 @@ function ClientRequest () {
 			throw new Error('Error while hiding request');
 		}
 	};
+console.log('clientRequests', clientRequests);
 
 	return (
 		<div className="my_request-container">
@@ -165,7 +247,7 @@ function ClientRequest () {
 						loader={<h4>Loading...</h4>}
 					>
 						{clientRequests.map((request) => (
-							<div key={request.id}>
+							<div className="request-details" key={request.id} onClick={() => {onDetailsClick(); setRequest(request);}}>
 								<h1>{request.title}</h1>
 								<p>{request.created_at}</p>
 								<p>{request.first_name}</p>
