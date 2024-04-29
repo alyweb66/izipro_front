@@ -124,7 +124,6 @@ export const useQueryUserConversations = (offset: number, limit: number) => {
 };
 
 export const useQueryMessagesByConversation = (messagesId: number, conversationId: number, offset: number, limit: number) => {
-	console.log();
 	
 	const {  subscribeToMore,error: messageError, data: messageData, fetchMore: fetchMoreMessage } = useQuery(GET_MESSAGES_BY_CONVERSATION, {
 		variables: {

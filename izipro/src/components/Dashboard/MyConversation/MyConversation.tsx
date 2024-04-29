@@ -32,7 +32,7 @@ function MyConversation() {
 	//const [messages, setMessages] = useState<string[]>([]);
 	//const [requestConversation, setRequestConversation] = useState<RequestProps[] | null>(null);
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
-	//const [conversationIdState, setConversationIdState] = useState<number>(0);
+	const [conversationIdState, setConversationIdState] = useState<number>(0);
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
 
 	//useRef
@@ -55,8 +55,7 @@ function MyConversation() {
 
 	//query
 	const { data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
-	const conversationId = selectedRequest?.conversation[0].id ?? 0;
-	const { subscribeToMore, messageData } = useQueryMessagesByConversation(id, conversationId, 0, 10);
+	const { subscribeToMore, messageData } = useQueryMessagesByConversation(id, conversationIdState, 0, 10);
 
 	// file upload
 	const { file, setFile, handleFileChange } = useFileHandler();
@@ -79,6 +78,17 @@ function MyConversation() {
 			});
 		}
 	}, [messageData]);
+
+	// useEffect to update the conversation id
+	useEffect(() => {
+		if (selectedRequest) {
+			const conversationId = selectedRequest. conversation?.find(conversation => (
+				conversation.user_1 === id || conversation.user_2 === id
+			));
+			setConversationIdState(conversationId?.id ?? 0);
+			
+		}
+	},[selectedRequest]);
 
 	// useEffect to update the data to the requests state
 	useEffect(() => {
@@ -146,11 +156,14 @@ function MyConversation() {
 						// add updated_at to the request.conversation
 						requestConversationStore.setState(prevState => {
 							const updatedRequest = prevState.requests.map((request: RequestProps) => {
-								if (request.conversation[0].id === messageAdded[0].conversation_id) {
-									const updatedConversation = { ...request.conversation[0], updated_at: newDate };
-									return { ...request, conversation: [updatedConversation, ...request.conversation.slice(1)] };
-								}
-								return request;
+								const updatedConversation = request.conversation.map((conversation) => {
+									if (conversation.id === messageAdded[0].conversation_id) {
+										return { ...conversation, updated_at: newDate };
+									}
+									return conversation;
+								});
+								
+								return { ...request, conversation: updatedConversation };
 							});
 							return { requests: updatedRequest };
 						});
@@ -176,11 +189,11 @@ function MyConversation() {
 	}, []);
 
 
-	function sendMessage(requestId: number, newClientRequest = false) {
+	function sendMessage( newClientRequest = false) {
 		// find conversation id where request is equal to the request id if newclientRequest is false
 		let conversationId;
 		if (!newClientRequest) {
-			conversationId = requestsConversationStore?.find((request) => request.id === requestId)?.conversation[0].id;
+			conversationId = conversationIdState;  // requestsConversationStore?.find((request) => request.id === requestId)?.conversation[0].id;
 		} else if (newClientRequest) {
 			conversationId = conversationIdRef.current;
 		}
@@ -282,7 +295,7 @@ function MyConversation() {
 						}
 
 						const newClientRequest = true;
-						sendMessage(requestId, newClientRequest);
+						sendMessage(newClientRequest);
 					});
 
 					if (subscriptionError) {
@@ -319,7 +332,7 @@ function MyConversation() {
 						}
 
 						const newClientRequest = true;
-						sendMessage(requestId, newClientRequest);
+						sendMessage(newClientRequest);
 					});
 				}
 				
@@ -331,10 +344,8 @@ function MyConversation() {
 			}
 		}
 
-		sendMessage(requestId);
+		sendMessage();
 	};
-
-
 
 	// Function to load more requests with infinite scroll
 	function addRequest() {

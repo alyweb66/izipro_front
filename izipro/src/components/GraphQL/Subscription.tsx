@@ -31,8 +31,8 @@ export const REQUEST_SUBSCRIPTION = gql`
 `;
 
 export const MESSAGE_SUBSCRIPTION = gql`
-    subscription Subscription($conversation_ids: [Int!]) {
-        messageAdded(conversation_ids: $conversation_ids) {
+    subscription Myrequest($conversation_ids: [Int!], $request_ids: [Int!], $is_request: Boolean) {
+        messageAdded(conversation_ids: $conversation_ids, request_ids: $request_ids, is_request: $is_request) {
             id
             content
             user_id
