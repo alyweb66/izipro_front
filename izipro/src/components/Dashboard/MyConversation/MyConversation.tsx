@@ -130,6 +130,8 @@ function MyConversation() {
 					document: MESSAGE_SUBSCRIPTION,
 					variables: {
 						conversation_ids: Subscription?.subscriber_id,
+						request_ids: [],
+						is_request: false
 					},
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					updateQuery: (prev: MessageProps, { subscriptionData }: { subscriptionData: any }) => {
@@ -174,8 +176,8 @@ function MyConversation() {
 		}
 	}, [subscribeToMore, subscriptionStore]);
 	console.log('requestsConversationStore', requestsConversationStore);
-
-
+	console.log('messageStore', messageStore);
+	
 	// cleane the request store if the component is unmounted
 	useEffect(() => {
 		return () => {
@@ -189,6 +191,7 @@ function MyConversation() {
 	}, []);
 
 
+	// Function to send message
 	function sendMessage( newClientRequest = false) {
 		// find conversation id where request is equal to the request id if newclientRequest is false
 		let conversationId;
@@ -413,15 +416,13 @@ function MyConversation() {
 					))}
 				</InfiniteScroll>
 			</div>
-
-
 			<div className="my-message">
 				{selectedRequest && (
 					<>
 						<h2>Messages for {selectedRequest.title}</h2>
 						{Array.isArray(messageStore) &&
 							messageStore
-								.filter((message) => message.conversation_id === selectedRequest.conversation[0].id)
+								.filter((message) => message.conversation_id === conversationIdState)
 								.map((message: MessageStoreProps, index) => (
 									<div className={`${message.user_id}`} key={index}>{message.content}</div>
 								))

@@ -73,22 +73,35 @@ function MyRequest() {
 	useEffect(() => {
 		if (myRequestsStore) {
 			const sortedRequests = [...myRequestsStore].sort((a, b) => {
-				const dateA = Math.max(...a.conversation.map(c => new Date(c.updated_at).getTime()));
-				const dateB = Math.max(...b.conversation.map(c => new Date(c.updated_at).getTime()));// Convert date to number using getTime()
-		
+				// Check if a.conversation or b.conversation is empty
+				if (!a.conversation?.length) return 1;
+				if (!b.conversation?.length) return -1;
+			
+				const dateA = a.conversation.some(c => c.updated_at)
+					? Math.max(...a.conversation.map(c => new Date(c.updated_at).getTime()))
+					: 0;
+			
+				const dateB = b.conversation.some(c => c.updated_at)
+					? Math.max(...b.conversation.map(c => new Date(c.updated_at).getTime()))
+					: 0;
+			
 				// For ascending order, swap dateA and dateB for descending order
 				return dateB - dateA;
 			});
 
 			setRequestByDate(sortedRequests);
 
+			
+			
 			// get conversation id in subscriptionStore
 			const conversationIds = subscriptionStore
 				.filter(subscription => subscription.subscriber === 'conversation')
 				.flatMap(subscription => subscription.subscriber_id);
 				
+			// get request with conversation id
+			const requestwithId = myRequestsStore.filter(request => request.conversation && request.conversation.some(conversation => conversation.id));
 			// get conversation id of all request which are not in the subscription
-			const idsNotInSubscriptionStore = myRequestsStore.flatMap((request: RequestProps) => 
+			const idsNotInSubscriptionStore = requestwithId.flatMap((request: RequestProps) => 
 				request.conversation
 					.filter(conversation => conversation.id !== null && !conversationIds.includes(conversation.id))
 					.map(conversation => conversation.id)
@@ -124,7 +137,7 @@ function MyRequest() {
 					});
 				}
 			}
-
+			
 			// get request id in the request store
 			const conversationRequestIds = subscriptionStore
 				.filter(subscription => subscription.subscriber === 'request')
