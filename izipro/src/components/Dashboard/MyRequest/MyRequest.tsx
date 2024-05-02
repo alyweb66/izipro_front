@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { userConversation, userDataStore } from '../../../store/UserData';
 import { useMutation } from '@apollo/client';
-import { RequestProps } from '../../../Type/Request';
+import { RequestProps} from '../../../Type/Request';
 import './MyRequest.scss';
 import { DELETE_REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
 import { useQueryMyMessagesByConversation, useQueryUserRequests, useQueryUsersConversation } from '../../Hook/Query';
@@ -9,13 +9,14 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { myRequestStore } from '../../../store/Request';
 import { UserDataProps } from '../../../Type/User';
 import { myMessageDataStore } from '../../../store/message';
-import { MessageProps, MessageStoreProps } from '../../../Type/message';
+import { MessageProps } from '../../../Type/message';
 import { useFileHandler } from '../../Hook/useFileHandler';
 import { subscriptionDataStore } from '../../../store/subscription';
 import { MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
+//import { useQueryConversation } from '../../Hook/Query';
 
 function MyRequest() {
 
@@ -30,6 +31,7 @@ function MyRequest() {
 	const [newUserId, setNewUserId] = useState<number[]>([]);
 	const [userConvState, setUserConvState] = useState<UserDataProps[]>([]);
 
+
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
 	const limit = 2;
@@ -43,7 +45,7 @@ function MyRequest() {
 
 	//useRef
 	const userOffsetRef = useRef(0);
-	const conversationIdRef = useRef(0);
+	//const conversationIdRef = useRef(0);
 
 	// file upload
 	const { file, setFile, handleFileChange } = useFileHandler();
@@ -57,7 +59,9 @@ function MyRequest() {
 	const {getUserRequestsData, fetchMore} = useQueryUserRequests(id, 0, limit);
 	const {usersConversationData } = useQueryUsersConversation( newUserId.length !== 0 ? newUserId : userIds ,0 , limit);
 	const { subscribeToMore, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 50);
+	//const { refetchConversation } = useQueryConversation(0);
 
+	
 
 	// useEffect to update the requests state
 	useEffect(() => {
@@ -91,7 +95,6 @@ function MyRequest() {
 
 			setRequestByDate(sortedRequests);
 
-			
 			
 			// get conversation id in subscriptionStore
 			const conversationIds = subscriptionStore
@@ -127,14 +130,29 @@ function MyRequest() {
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
 						// replace the old subscription with the new one
-						const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
-							subscription.subscriber === 'conversation' ? subscriptionWithoutTimestamps : subscription
-						);
 
-						if (addSubscriptionStore) {
-							setSubscriptionStore(addSubscriptionStore);
+						// Check if the subscriber already exists in subscriptionStore
+						const existingSubscription = subscriptionStore.find((subscription: SubscriptionProps) =>
+							subscription.subscriber === 'conversation'
+						);
+						// If the subscriber doesn't exist, add it to subscriptionStore
+						if (!existingSubscription) {
+							setSubscriptionStore([...subscriptionStore, subscriptionWithoutTimestamps]);
+						} else {
+							// Replace the old subscription with the new one
+							const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
+								subscription.subscriber === 'conversation' ? subscriptionWithoutTimestamps : subscription
+							);
+
+							if (addSubscriptionStore) {
+								setSubscriptionStore(addSubscriptionStore);
+							}
 						}
 					});
+
+					if (subscriptionError) {
+						throw new Error('Error while creating subscription');
+					}
 				}
 			}
 			
@@ -147,18 +165,12 @@ function MyRequest() {
 			const idsNotInRequestSubscriptionStore = myRequestsStore
 				.filter(request => !conversationRequestIds.includes(request.id))
 				.map(request => request.id); // map to an array of ids
-			console.log('idsNotInRequestSubscriptionStore', idsNotInRequestSubscriptionStore);
-			console.log('conversationRequestIds', conversationRequestIds);
-			
-	
-		
-				
-			// check if the conversation is already in the subscription
+
+			// check if the request is already in the subscription
 			if (idsNotInRequestSubscriptionStore.length ?? 0 > 0) {
 				const updatedRequestIds = [...conversationRequestIds, ...idsNotInRequestSubscriptionStore];
-				console.log('updatedRequestIds', updatedRequestIds);
-				
-				//add new conversation to subscription
+
+				//add new request to subscription
 				if(updatedRequestIds && updatedRequestIds.length > 0) {
 					subscriptionMutation({
 						variables: {
@@ -172,40 +184,58 @@ function MyRequest() {
 					}).then((response) => {
 					// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-						const addSubscriptionStore = [...subscriptionStore, subscriptionWithoutTimestamps];
-						setSubscriptionStore(addSubscriptionStore);
-						
+						// Check if the subscriber already exists in subscriptionStore
+						const existingSubscription = subscriptionStore.find((subscription: SubscriptionProps) =>
+							subscription.subscriber === 'request'
+						);
+						// If the subscriber doesn't exist, add it to subscriptionStore
+						if (!existingSubscription) {
+							setSubscriptionStore([...subscriptionStore, subscriptionWithoutTimestamps]);
+						} else {
+							// Replace the old subscription with the new one
+							const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
+								subscription.subscriber === 'request' ? subscriptionWithoutTimestamps : subscription
+							);
+
+							if (addSubscriptionStore) {
+								setSubscriptionStore(addSubscriptionStore);
+							}
+						}
 					});
+
+					if (subscriptionError) {
+						throw new Error('Error while creating subscription');
+					}
 				}
 			}
-			
-		
 		}
-
 	}, [myRequestsStore]);
-
+	
 	// useEffect to update user conversation by date
 	useEffect(() => {
 
-		if (userConvStore && selectedRequest ) {
+		if (userConvStore && selectedRequest && selectedRequest.conversation) {
 			// sort the messages by date to show the most recent user conversation
-			console.log('messageStore', messageStore);
+			
+			console.log('selectedRequest in by date', selectedRequest);
+			console.log('userConvStore in by sate', userConvStore);
+			
+			
 			const conversation = selectedRequest.conversation;
-			console.log('usersWithLastMessage', conversation);
+	
 			const conversationByDate = conversation.slice().sort((a, b) => {
+
 				const dateA = new Date(a.updated_at).getTime();
 				const dateB = new Date(b.updated_at).getTime();
 				return dateB - dateA;
 			});
-			console.log('bydate', conversationByDate);
 		
 			// take the user id from the conversation
 			const sortedUsers = conversationByDate.map(conversation => {
 				const user = userConvStore.find(user => user.id === (conversation.user_1 !== id ? conversation.user_1 : conversation.user_2));
 				return user;
 			});
-			console.log('sortedUsers', sortedUsers);
-			
+		
 			const filteredSortedUsers = sortedUsers.filter((user): user is UserDataProps => user !== undefined);
 			setUserConvState(filteredSortedUsers);
 		}
@@ -218,14 +248,24 @@ function MyRequest() {
 			const messages: MessageProps[] = messageData.messages;
 			// Add the new messages to the store
 			myMessageDataStore.setState(prevState => {
-				const newMessages = messages.filter(
-					(newMessage) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
-				);
-	
-				return {
-					...prevState,
-					messages: [...prevState.messages, ...newMessages]
-				};
+				if (prevState.messages.length > 0) {
+					
+					
+					const newMessages = messages.filter(
+						(newMessage) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
+					);
+		
+					return {
+						...prevState,
+						messages: [...prevState.messages, ...newMessages]
+					};
+				} else {
+					
+					return {
+						...prevState,
+						messages: [...messages]
+					};
+				}
 			});
 			
 		}
@@ -235,13 +275,24 @@ function MyRequest() {
 	useEffect(() => {
 		if (usersConversationData) {
 			// If offset is 0, it's the first query, so just replace the queries
-			if (userOffsetRef.current === 0) {
+			if (userConvStore.length === 0) {
+
 				setUserConvStore(usersConversationData.users);
+			} else if (usersConversationData.users.every((user1: UserDataProps) => 
+				userConvStore.some(user2 => user2.id === user1.id))) {
+				// if same users ids in the store don't add them
+				return;
+
 			} else {
-				setUserConvStore([...usersConversationData.users, ...userConvStore]);
+				// Filter out users that are already in userConvStore
+				const newUsers = usersConversationData.users.filter(
+					(user1: UserDataProps) => !userConvStore.some(user2 => user2.id === user1.id)
+				);
+				setUserConvStore([...newUsers, ...userConvStore]);
 			}
 		}
 		setNewUserId([]);
+		console.log('userConvStore in useEffect', userConvStore);
 
 	}, [usersConversationData]);
 
@@ -251,6 +302,8 @@ function MyRequest() {
 		if (subscribeToMore) {
 			const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
 			const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'conversation');
+			
+			
 		
 			if (request?.subscriber_id || conversation?.subscriber_id) {
 				subscribeToMore({
@@ -266,18 +319,10 @@ function MyRequest() {
 						if (!subscriptionData.data) return prev;
 						// check if the message is already in the store
 						const messageAdded: MessageProps[] = subscriptionData.data.messageAdded;
-						console.log('messageAdded', messageAdded);
+						
 						
 						const date = new Date(Number(messageAdded[0].created_at));
 						const newDate = date.toISOString();
-
-						// send id to the mutation to find user
-						setNewUserId([]);
-						if (messageAdded[0].user_id !== id && !myRequestsStore.some(request => request.id === selectedRequest?.id && request.conversation.some(
-							conversation => conversation.user_1 === messageAdded[0].user_id || conversation.user_2 === messageAdded[0].user_id))) {
-
-							setNewUserId([messageAdded[0].user_id]);
-						}
 
 						// add the new message to the message store
 						myMessageDataStore.setState(prevState => {
@@ -293,22 +338,60 @@ function MyRequest() {
 						});
 			
 						// add updated_at to the request.conversation
+						
+						// Créez un tableau pour stocker les promesses
+						
+						
 						myRequestStore.setState(prevState => {
 							const updatedRequest = prevState.requests.map((request: RequestProps) => {
-								const updatedConversation = request.conversation.map((conversation) => {
-									if (conversation.id === messageAdded[0].conversation_id) {
-										return { ...conversation, updated_at: newDate };
-									}
-									return conversation;
-								});
-								
-								return { ...request, conversation: updatedConversation };
+								// if the request has no conversation
+								if (request.id === messageAdded[0].request_id  && !request.conversation) {
+									const conversation = [
+										{
+											id: messageAdded[0].conversation_id,
+											user_1: messageAdded[0].user_id,
+											user_2: id,
+											updated_at: newDate
+										}
+									];
+									
+									
+									return { ...request, conversation };
+
+								// if the conversation id is not in the request
+								} else if (request.id === messageAdded[0].request_id  && !request.conversation.some(
+									conversation => conversation.id === messageAdded[0].conversation_id)) {
+									const conversation = [
+										...request.conversation,
+										{
+											id: messageAdded[0].conversation_id,
+											user_1: messageAdded[0].user_id,
+											user_2: id,
+											updated_at: newDate
+										}
+									];
+									
+									return { ...request, conversation };
+									
+								// if the conversation id is in the request
+								} else {
+									const updatedConversation = request.conversation ? request.conversation.map((conversation) => {
+									
+										if (conversation.id === messageAdded[0].conversation_id) {
+											return { ...conversation, updated_at: newDate };
+										}
+										return conversation;
+									}) : [];
+									return { ...request, conversation: updatedConversation };
+
+								}
 							});
 							return { requests: updatedRequest };
 						});
 
-						setSelectedRequest(prevState => {
-							if (prevState && prevState.conversation) {
+						setSelectedRequest((prevState: RequestProps | null) => {
+							// if a conversation is already in selectedRequest
+							if (prevState && prevState.conversation && prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
 								const updatedRequest = prevState?.conversation.map(conversation => {
 			
 									if (conversation.id === messageAdded[0].conversation_id) {
@@ -316,15 +399,60 @@ function MyRequest() {
 									}
 									return conversation;
 								});
-								return { ...prevState, conversation: updatedRequest };								
+								return { ...prevState, conversation: updatedRequest };		
+
+							// if no conversation in the selectedRequest
+							} else if (prevState && !prevState.conversation) {
+
+								const conversation = [
+									{
+										id: messageAdded[0].conversation_id,
+										user_1: messageAdded[0].user_id,
+										user_2: id,
+										updated_at: newDate
+									}
+								];
+								return { ...prevState, conversation };
+							// if the conversation id is not in the selectedRequest
+							} else if (prevState && !prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
+								
+								const conversation = [
+									...prevState.conversation,
+									{
+										id: messageAdded[0].conversation_id,
+										user_1: messageAdded[0].user_id,
+										user_2: id,
+										updated_at: newDate
+									}
+								];
+								return { ...prevState, conversation };
+
+							} else {
+								return null;
 							}
+							
 						});
+
+						// send id to the mutation to find user
+						setNewUserId([]);
+						if (messageAdded[0].user_id !== id && !userConvStore.some(user => user.id === messageAdded[0].user_id)) {
+
+							setNewUserId([messageAdded[0].user_id]);
+						}
+						console.log('newUserId', newUserId);
+						
 					},
 				});
 			}
 
 		}
 	}, [subscribeToMore, subscriptionStore]);
+
+	console.log('userConvStore', userConvStore);
+	console.log('requestByDate', requestByDate);
+	
+	
+
 
 	// Function to delete a request
 	const handleDeleteRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number, imageNames: string[]) => {
@@ -354,15 +482,28 @@ function MyRequest() {
 	// Function to handle the users ids for the conversation
 	const handleConversation = (event: React.MouseEvent<HTMLDivElement>, request: RequestProps) => {
 		event.preventDefault();
-	
-		
-		const ids = request?.conversation.map(conversation => {
-			return conversation.user_1 !== id ? conversation.user_1 : conversation.user_2;
-		});
 
-		setUserIds(ids || []); // Provide a default value of an empty array
-		
-		
+		if (!request.conversation) {
+
+			setUserConvState([]);
+
+		} else { 
+
+			// Get the user ids from the conversation
+			const ids = request?.conversation?.map(conversation => {
+				return conversation.user_1 !== id ? conversation.user_1 : conversation.user_2;
+			});
+
+			const idStore = userConvStore.map(user => user.id);
+
+			// Filter out the user ids that are already in the userConvStore
+			const newIds = ids.filter(id => !idStore.includes(id));
+			console.log('newIds', newIds);
+
+			if (newIds.length > 0) {
+				setUserIds(newIds || []); // Provide a default value of an empty array
+			} 
+		}
 	};
 
 	// Function find conversation id for message
@@ -370,7 +511,7 @@ function MyRequest() {
 		event.preventDefault();
 
 		// find the conversation id for the message
-		const conversationId = selectedRequest?.conversation.find(conversation => 
+		const conversationId = selectedRequest?.conversation?.find(conversation => 
 			(conversation.user_1 === id || conversation.user_2 === id) && 
 			(conversation.user_1 === userId || conversation.user_2 === userId)
 		);
@@ -451,7 +592,7 @@ function MyRequest() {
 									<p>{request.message}</p>
 									<div>
 								
-										{request.media.map((media) => (
+										{request.media?.map((media) => (
 											media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
 										))}
 								
@@ -507,3 +648,10 @@ function MyRequest() {
 }
 
 export default MyRequest;
+
+
+
+
+
+
+

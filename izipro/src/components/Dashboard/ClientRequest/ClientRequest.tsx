@@ -21,6 +21,8 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
+	console.log('offsetRef', offsetRef.current);
+	
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -53,13 +55,23 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 					// Check if the request is in the user's range
 					(distance < request.range / 1000 || request.range === 0) &&
 					// Check if the request is in the user's settings range
-					(distance < settings[0].range / 1000 || settings[0].range === 0) &&
+					(distance < settings[0].range / 1000 || settings[0].range === 0)  &&
 					// Check if the user is already in conversation with the request
-					(!request.conversation[0] || (request.conversation[0].user_1 !== id && request.conversation[0].user_2 !== id))
+					(request.conversation === null || request.conversation === undefined || 
+						!request.conversation.some(conversation => 
+							(conversation.user_1 !== null && conversation.user_2 !== null) && 
+							(conversation.user_1 === id || conversation.user_2 === id)
+						)
+					)
 				);
 			});
 
-			setClientRequests((prevState) => [...filteredRequests, ...(prevState || [])]);
+			setClientRequests((prevState) => {
+				const newRequests = filteredRequests.filter(request => 
+					!prevState?.some(prevRequest => prevRequest.id === request.id)
+				);
+				return [...newRequests, ...(prevState || [])];
+			});
 			offsetRef.current = offsetRef.current + filteredRequests.length;
 
 		} else {
@@ -72,16 +84,40 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 					const userPoint = turf.point([lng, lat]);
 					// Calculate the distance in kilometers (default)
 					const distance = turf.distance(requestPoint, userPoint);
+
 	
 					return (
 						(distance < request.range / 1000 || request.range === 0) &&
-				(distance < settings[0].range / 1000 || settings[0].range === 0) &&
-				// Check if the user is already in conversation with the request
-				(!request.conversation[0] || (request.conversation[0].user_1 !== id && request.conversation[0].user_2 !== id))
+						(distance < settings[0].range / 1000 || settings[0].range === 0) &&
+						// Check if the user is already in conversation with the request
+						(request.conversation === null || request.conversation === undefined || 
+							!request.conversation.some(conversation => 
+								(conversation.user_1 !== null && conversation.user_2 !== null) && 
+						(conversation.user_1 === id || conversation.user_2 === id)
+							)
+						)
 					);
 				})
 			]);
 		}
+	}
+
+	// Function to load more requests with infinite scroll
+	function addRequest() {
+		fetchMore({
+			variables: {
+				offset: offsetRef.current, // Next offset
+			},
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		}).then(fetchMoreResult => {
+			const data = fetchMoreResult.data; // Access the 'data' property
+			if (data) {
+				RangeFilter(data.requestsByJob); // Access the 'requestsByJob' property
+				offsetRef.current = offsetRef.current + data.requestsByJob.length;
+
+			}
+		});
+		
 	}
 
 	// add jobs to setSubscriptionJob if there are not already in, or have the same id
@@ -154,15 +190,16 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 
 	}, [jobs]);
 	
+
 	// useEffect to filter the requests by the user's location and the request's location
 	useEffect(() => {
 		if (getRequestsByJob) {
-	console.log('getRequestsByJob', getRequestsByJob.requestsByJob);
+			console.log('getRequestsByJob', getRequestsByJob.requestsByJob);
 	
 			// Filter the requests
 			RangeFilter(getRequestsByJob.requestsByJob);
 			offsetRef.current += getRequestsByJob.requestsByJob.length;
-	
+
 		}
 	}, [getRequestsByJob, settings]);
 
@@ -189,22 +226,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 		}
 	}, [ subscribeToMore]);
 
-	// Function to load more requests with infinite scroll
-	function addRequest() {
-		fetchMore({
-			variables: {
-				offset: offsetRef.current, // Next offset
-			},
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		}).then(fetchMoreResult => {
-			const data = fetchMoreResult.data; // Access the 'data' property
-			if (data) {
-				RangeFilter(data.requestsByJob); // Access the 'requestsByJob' property
-				offsetRef.current = offsetRef.current + data.requestsByJob.length;
-			}
-		});
-		
-	}
+	
 	
 	// Function to hide a request
 	const handleHideRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
@@ -231,7 +253,8 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 			throw new Error('Error while hiding request');
 		}
 	};
-console.log('clientRequests', clientRequests);
+	console.log('clientRequests', clientRequests);
+
 
 	return (
 		<div className="my_request-container">
@@ -256,7 +279,7 @@ console.log('clientRequests', clientRequests);
 								<h2>{request.job}</h2>
 								<p>{request.message}</p>
 								<div>
-									{request.media.map((media) => (
+									{request.media?.map((media) => (
 										media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
 									))}
 								</div>
@@ -264,6 +287,9 @@ console.log('clientRequests', clientRequests);
 							</div>
 						))}
 					</InfiniteScroll>
+					<button onClick={addRequest}>
+						fetchmore
+					</button>
 				</div>
 			)}
 		</div>

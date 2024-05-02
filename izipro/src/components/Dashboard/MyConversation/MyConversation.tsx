@@ -105,9 +105,19 @@ function MyConversation() {
 	// useEffect to sort the requests by date
 	useEffect(() => {
 		if (requestsConversationStore) {
+
 			const sortedRequests = [...requestsConversationStore].sort((a, b) => {
-				const dateA = Math.max(...a.conversation.map(c => new Date(c.updated_at).getTime()));
-				const dateB = Math.max(...b.conversation.map(c => new Date(c.updated_at).getTime()));// Convert date to number using getTime()
+
+				if (!a.conversation?.length) return 1;
+				if (!b.conversation?.length) return -1;
+
+				const dateA = a.conversation.some(c => c.updated_at)
+					? Math.max(...a.conversation.map(c => new Date(c.updated_at).getTime()))
+					: 0;
+			
+				const dateB = b.conversation.some(c => c.updated_at)
+					? Math.max(...b.conversation.map(c => new Date(c.updated_at).getTime()))
+					: 0;
 		
 				// For ascending order, swap dateA and dateB for descending order
 				return dateB - dateA;
@@ -124,6 +134,7 @@ function MyConversation() {
 
 		if (subscribeToMore) {
 			const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest');
+			console.log('Subscription', Subscription);
 		
 			if (Subscription?.subscriber_id) {
 				subscribeToMore({

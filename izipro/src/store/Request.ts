@@ -16,7 +16,7 @@ type RequestConversationStore = {
 	
 }
 
-type MyRequestStore = {
+export type MyRequestStore = {
 	requests: RequestProps[];
 	setMyRequestStore: (data: RequestProps[]) => void;
 	resetMyRequest: () => void;
