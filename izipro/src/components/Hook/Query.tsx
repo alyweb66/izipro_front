@@ -158,7 +158,7 @@ export const useQueryUsersConversation = (userIds: number[], offset: number, lim
 			offset: offset,
 			limit: limit
 		},
-		skip: !userIds
+		skip: !userIds || userIds.length === 0
 	});
 	if (usersConversationError) {
 		throw new Error('Error while fetching user conversation');

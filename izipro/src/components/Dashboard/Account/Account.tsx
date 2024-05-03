@@ -121,8 +121,6 @@ function Account() {
 
 	}, [getUserData]);
 
-
-
 	// Handle the account submit
 	const handleAccountSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();

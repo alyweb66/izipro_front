@@ -38,12 +38,17 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const [subscriptionMutation, {error: subscriptionError}] = useMutation(SUBSCRIPTION_MUTATION);
 
 	// get requests by job
-	const {getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 3);
+	const {getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 10);
 
 	// Function to filter the requests by the user's location and the request's location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
 		// If the function is called from the subscription, we need to add the new request to the top of list
+		console.log('couocu0000');
+		console.log('fromSubscribeToMore', fromSubscribeToMore);
+		
 		if (fromSubscribeToMore) {
+			console.log('couocu1');
+			
 			const filteredRequests = requests.filter((request: RequestProps) => {
 				// Define the two points
 				const requestPoint = turf.point([request.lng, request.lat]);
@@ -76,6 +81,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 
 		} else {
 			// If the function is called from the query, we need to add the new requests to the bottom of the list
+		
 			setClientRequests((prevState) => [
 				...prevState || [],
 				...requests.filter((request: RequestProps) => {
@@ -122,9 +128,10 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 
 	// add jobs to setSubscriptionJob if there are not already in, or have the same id
 	useEffect(() => {
-
+		
 		// If there are subscriptions, check if the jobs are in the subscription
 		if (subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest')) {
+			console.log('subscriptionStore', subscriptionStore);
 			subscriptionStore.forEach((subscription) => {
 				if (subscription.subscriber === 'jobRequest' && Array.isArray(subscription.subscriber_id)) {
 					const jobIds = jobs.map((job) => job.job_id);
@@ -198,7 +205,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	
 			// Filter the requests
 			RangeFilter(getRequestsByJob.requestsByJob);
-			offsetRef.current += getRequestsByJob.requestsByJob.length;
+			offsetRef.current += getRequestsByJob.requestsByJob?.length;
 
 		}
 	}, [getRequestsByJob, settings]);
