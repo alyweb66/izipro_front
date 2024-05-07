@@ -1,7 +1,8 @@
 import { useQuery } from '@apollo/client';
 import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
 import { GET_JOB_DATA } from '../GraphQL/Job';
-import { GET_MESSAGES_BY_CONVERSATION, GET_USER_DATA, GET_USER_REQUEST_BY_CONVERSATIONS, GET_USER_SUBSCRIPTION } from '../GraphQL/UserQueries';
+import { GET_MESSAGES_BY_CONVERSATION, GET_MY_MESSAGES_BY_CONVERSATION, GET_USERS_CONVERSATION, GET_USER_DATA, GET_USER_REQUEST_BY_CONVERSATIONS, GET_USER_SUBSCRIPTION } from '../GraphQL/UserQueries';
+import { GET_CONVERSATION } from '../GraphQL/ConversationQueries';
 
 
 // fetch user data
@@ -147,4 +148,52 @@ export const useQueryUserSubscriptions = () => {
 		throw new Error('Error while fetching user subscriptions');
 	}
 	return subscriptionData;
+};
+
+export const useQueryUsersConversation = (userIds: number[], offset: number, limit: number) => {
+
+	const { error: usersConversationError, data: usersConversationData } = useQuery(GET_USERS_CONVERSATION, {
+		variables: {
+			ids: userIds,
+			offset: offset,
+			limit: limit
+		},
+		skip: !userIds || userIds.length === 0
+	});
+	if (usersConversationError) {
+		throw new Error('Error while fetching user conversation');
+	}
+	return {usersConversationData};
+};
+
+export const useQueryMyMessagesByConversation = (conversationId: number, offset: number, limit: number) => {
+		
+	const {  subscribeToMore,error: messageError, data: messageData, fetchMore: fetchMoreMessage } = useQuery(GET_MY_MESSAGES_BY_CONVERSATION, {
+		variables: {
+			conversationId: conversationId,
+			offset: offset,
+			limit: limit
+		},
+		skip: !conversationId
+	});
+
+	if (messageError) {
+		throw new Error('Error while fetching messages by conversation');
+	}
+	
+	return {subscribeToMore, messageData, fetchMoreMessage};
+};
+
+export const useQueryConversation = (id: number) => {
+
+	const { error: conversationError, data: conversationData, refetch: refetchConversation } = useQuery(GET_CONVERSATION, {
+		variables: {
+			id: id
+		},
+		skip: !id
+	});
+	if (conversationError) {
+		throw new Error('Error while fetching conversation');
+	}
+	return {conversationData, refetchConversation};
 };

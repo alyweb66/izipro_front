@@ -13,6 +13,14 @@ type RequestConversationStore = {
 	requests: RequestProps[];
 	setRequestConversation: (data: RequestProps[]) => void;
 	resetRequestConversation: () => void;
+	
+}
+
+export type MyRequestStore = {
+	requests: RequestProps[];
+	setMyRequestStore: (data: RequestProps[]) => void;
+	resetMyRequest: () => void;
+	
 }
 
 export const requestDataStore = create<RequestStore>((set: (state: Partial<RequestStore>) => void) => ({
@@ -73,4 +81,10 @@ export const requestConversationStore = create<RequestConversationStore>((set) =
 	requests:[],
 	setRequestConversation: (data) => set({ requests: data }),
 	resetRequestConversation: () => set({ requests: [] })
+}));
+
+export const myRequestStore = create<MyRequestStore>((set) => ({
+	requests:[],
+	setMyRequestStore: (data) => set({ requests: data }),
+	resetMyRequest: () => set({ requests: [] })
 }));

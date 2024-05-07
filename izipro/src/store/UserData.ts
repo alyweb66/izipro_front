@@ -31,6 +31,12 @@ type ChangeForgotPasswordProps = {
 	setIsChangePassword: (isChangePassword: boolean) => void;
 }
 
+type UserConversationProps = {
+	users:UserDataProps[];
+	setUsers: (users: UserDataProps[]) => void;
+	resetUsers: () => void;
+}
+
 export const changeForgotPasswordStore = create<ChangeForgotPasswordProps>((set) => ({
 	isChangePassword: false,
 	setIsChangePassword: (isChangePassword) => set({ isChangePassword })
@@ -145,6 +151,12 @@ export const userDataStore = create<UserDataStore>((set) => ({
 
 }));
 
+export const userConversation = create<UserConversationProps>((set) => ({
+	users:[],
+	setUsers: (users) => set({ users }),
+	resetUsers: () => set({ users: [] })
+
+}));
   
 
 

@@ -91,3 +91,31 @@ export const GET_USER_SUBSCRIPTION = gql`
     }
   }
 `;
+
+export const GET_USERS_CONVERSATION = gql`
+  query uery($ids: [Int!], $offset: Int, $limit: Int) {
+    users(ids: $ids, offset: $offset, limit: $limit) {
+      id
+      city
+      denomination
+    }
+  }
+`;
+
+export const GET_MY_MESSAGES_BY_CONVERSATION = gql`
+  query Query($conversationId: Int!, $offset: Int, $limit: Int) {
+    messages(conversationId: $conversationId, offset: $offset, limit: $limit) {
+          id
+          content
+          user_id
+          conversation_id
+          request_id
+          created_at
+          media {
+            id
+            url
+            name
+          }
+    }
+  }
+`;

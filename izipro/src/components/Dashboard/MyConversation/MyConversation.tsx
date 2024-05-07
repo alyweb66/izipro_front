@@ -32,7 +32,7 @@ function MyConversation() {
 	//const [messages, setMessages] = useState<string[]>([]);
 	//const [requestConversation, setRequestConversation] = useState<RequestProps[] | null>(null);
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
-	//const [conversationIdState, setConversationIdState] = useState<number>(0);
+	const [conversationIdState, setConversationIdState] = useState<number>(0);
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
 
 	//useRef
@@ -55,8 +55,8 @@ function MyConversation() {
 
 	//query
 	const { data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
-	const conversationId = selectedRequest?.conversation[0].id ?? 0;
-	const { subscribeToMore, messageData } = useQueryMessagesByConversation(id, conversationId, 0, 10);
+	const { subscribeToMore, messageData } = useQueryMessagesByConversation(id, conversationIdState, 0, 10);
+	console.log('subbscriptionStore', subscriptionStore);
 
 	// file upload
 	const { file, setFile, handleFileChange } = useFileHandler();
@@ -80,6 +80,17 @@ function MyConversation() {
 		}
 	}, [messageData]);
 
+	// useEffect to update the conversation id
+	useEffect(() => {
+		if (selectedRequest) {
+			const conversationId = selectedRequest. conversation?.find(conversation => (
+				conversation.user_1 === id || conversation.user_2 === id
+			));
+			setConversationIdState(conversationId?.id ?? 0);
+			
+		}
+	},[selectedRequest]);
+
 	// useEffect to update the data to the requests state
 	useEffect(() => {
 		if (data && data.user) {
@@ -87,16 +98,27 @@ function MyConversation() {
 	
 			const requestsConversations: RequestProps[] = data.user.requestsConversations;
 			setRequestsConversationStore(requestsConversations); // Fix: Pass an array as the argument
-			offsetRef.current = requestsConversations.length;
+			offsetRef.current = requestsConversations?.length;
 	
 		}
 	}, [data]);
 
+	// useEffect to sort the requests by date
 	useEffect(() => {
 		if (requestsConversationStore) {
+
 			const sortedRequests = [...requestsConversationStore].sort((a, b) => {
-				const dateA = Math.max(...a.conversation.map(c => new Date(c.updated_at).getTime()));
-				const dateB = Math.max(...b.conversation.map(c => new Date(c.updated_at).getTime()));// Convert date to number using getTime()
+
+				if (!a.conversation?.length) return 1;
+				if (!b.conversation?.length) return -1;
+
+				const dateA = a.conversation.some(c => c.updated_at)
+					? Math.max(...a.conversation.map(c => new Date(c.updated_at).getTime()))
+					: 0;
+			
+				const dateB = b.conversation.some(c => c.updated_at)
+					? Math.max(...b.conversation.map(c => new Date(c.updated_at).getTime()))
+					: 0;
 		
 				// For ascending order, swap dateA and dateB for descending order
 				return dateB - dateA;
@@ -107,18 +129,20 @@ function MyConversation() {
 		}
 	}, [requestsConversationStore]);
 
-
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
-
-		if (subscribeToMore) {
-			const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest');
 		
+		console.log('subscriptionStore', subscriptionStore);
+		if (subscribeToMore) {
+			const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
+			
 			if (Subscription?.subscriber_id) {
 				subscribeToMore({
 					document: MESSAGE_SUBSCRIPTION,
 					variables: {
 						conversation_ids: Subscription?.subscriber_id,
+						request_ids: [],
+						is_request: false
 					},
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					updateQuery: (prev: MessageProps, { subscriptionData }: { subscriptionData: any }) => {
@@ -145,11 +169,14 @@ function MyConversation() {
 						// add updated_at to the request.conversation
 						requestConversationStore.setState(prevState => {
 							const updatedRequest = prevState.requests.map((request: RequestProps) => {
-								if (request.conversation[0].id === messageAdded[0].conversation_id) {
-									const updatedConversation = { ...request.conversation[0], updated_at: newDate };
-									return { ...request, conversation: [updatedConversation, ...request.conversation.slice(1)] };
-								}
-								return request;
+								const updatedConversation = request.conversation?.map((conversation) => {
+									if (conversation.id === messageAdded[0].conversation_id) {
+										return { ...conversation, updated_at: newDate };
+									}
+									return conversation;
+								});
+								
+								return { ...request, conversation: updatedConversation };
 							});
 							return { requests: updatedRequest };
 						});
@@ -160,14 +187,13 @@ function MyConversation() {
 		}
 	}, [subscribeToMore, subscriptionStore]);
 	console.log('requestsConversationStore', requestsConversationStore);
-
-
+	
 	// cleane the request store if the component is unmounted
 	useEffect(() => {
 		return () => {
 			// remove request.id in requestsConversationStore
 
-			const removedRequest = requestConversationStore.getState().requests.filter((requestConv: RequestProps) => request.id !== requestConv.id);
+			const removedRequest = requestConversationStore.getState().requests?.filter((requestConv: RequestProps) => request.id !== requestConv.id);
 			requestConversationStore.setState({ requests: removedRequest });
 			setRequestsConversationStore(removedRequest);
 			resetRequest();
@@ -175,11 +201,12 @@ function MyConversation() {
 	}, []);
 
 
-	function sendMessage(requestId: number, newClientRequest = false) {
+	// Function to send message
+	function sendMessage( newClientRequest = false) {
 		// find conversation id where request is equal to the request id if newclientRequest is false
 		let conversationId;
 		if (!newClientRequest) {
-			conversationId = requestsConversationStore?.find((request) => request.id === requestId)?.conversation[0].id;
+			conversationId = conversationIdState;  // requestsConversationStore?.find((request) => request.id === requestId)?.conversation[0].id;
 		} else if (newClientRequest) {
 			conversationId = conversationIdRef.current;
 		}
@@ -254,13 +281,13 @@ function MyConversation() {
 
 				// update the subscription store
 				// replace the old subscription with the new one
-				if (!subscriptionStore.some(subscription => subscription.subscriber === 'messageRequest')) {
+				if (!subscriptionStore.some(subscription => subscription.subscriber === 'clientConversation')) {
 
 					subscriptionMutation({
 						variables: {
 							input: {
 								user_id: id,
-								subscriber: 'messageRequest',
+								subscriber: 'clientConversation',
 								subscriber_id: [conversationIdRef.current]
 							}
 						}
@@ -269,29 +296,36 @@ function MyConversation() {
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
 						// replace the old subscription with the new one
-						const messageRequestSubscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest');
+						const messageRequestSubscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
 						// If there are no subscriptions, add the new conversation id in the array of subscription.subscriber_id
 						if (!messageRequestSubscription) {
-							subscriptionStore.concat(subscriptionWithoutTimestamps);
+							console.log('subscription before', subscriptionStore);
+
+							const currentSubscriptions = subscriptionDataStore.getState().subscription;
+							const newSubscriptions = [...currentSubscriptions, subscriptionWithoutTimestamps];
+							subscriptionDataStore.getState().setSubscription(newSubscriptions);
+
+							console.log('subscription after', subscriptionStore);
+
 						} else {
 							// replace the old subscription with the new one
 							subscriptionStore.map((subscription: SubscriptionProps) =>
-								subscription.subscriber === 'messageRequest' ? subscriptionWithoutTimestamps : subscription
+								subscription.subscriber === 'clientConversation' ? subscriptionWithoutTimestamps : subscription
 							);
 						}
 
 						const newClientRequest = true;
-						sendMessage(requestId, newClientRequest);
+						sendMessage(newClientRequest);
 					});
 
 					if (subscriptionError) {
 						throw new Error('Error while subscribing to conversation');
 					}
-				} else if (subscriptionStore.some(subscription => subscription.subscriber === 'messageRequest')) {
+				} else if (subscriptionStore.some(subscription => subscription.subscriber === 'clientConversation')) {
 	
 					// recover the old subscription and add the new conversation id in the array of subscription.subscriber_id
 					let newSubscriptionIds;
-					const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'messageRequest');
+					const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
 					if (conversation && Array.isArray(conversation.subscriber_id)) {
 						newSubscriptionIds = [...conversation.subscriber_id, conversationIdRef.current];
 					}
@@ -300,7 +334,7 @@ function MyConversation() {
 						variables: {
 							input: {
 								user_id: id,
-								subscriber: 'messageRequest',
+								subscriber: 'clientConversation',
 								subscriber_id: newSubscriptionIds
 							}
 						}
@@ -310,7 +344,7 @@ function MyConversation() {
 						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
 						// replace the old subscription with the new one
 						const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
-							subscription.subscriber === 'messageRequest' ? subscriptionWithoutTimestamps : subscription
+							subscription.subscriber === 'clientConversation' ? subscriptionWithoutTimestamps : subscription
 						);
 
 						if (addSubscriptionStore) {
@@ -318,7 +352,7 @@ function MyConversation() {
 						}
 
 						const newClientRequest = true;
-						sendMessage(requestId, newClientRequest);
+						sendMessage(newClientRequest);
 					});
 				}
 				
@@ -330,10 +364,8 @@ function MyConversation() {
 			}
 		}
 
-		sendMessage(requestId);
+		sendMessage();
 	};
-
-
 
 	// Function to load more requests with infinite scroll
 	function addRequest() {
@@ -341,6 +373,7 @@ function MyConversation() {
 			variables: {
 				offset: offsetRef.current, // Next offset
 			},
+			// @ts-expect-error no promess here
 		}).then((fetchMoreResult: { data: { user: { requestsConversations: RequestProps[] } } }) => {
 			
 			const request = fetchMoreResult.data.user.requestsConversations;
@@ -352,6 +385,7 @@ function MyConversation() {
 				setRequestsConversationStore(addRequest);
 			}
 			offsetRef.current = offsetRef.current + request.length;
+			
 		});
 	}
 
@@ -399,17 +433,17 @@ function MyConversation() {
 					))}
 				</InfiniteScroll>
 			</div>
-
-
 			<div className="my-message">
 				{selectedRequest && (
 					<>
 						<h2>Messages for {selectedRequest.title}</h2>
 						{Array.isArray(messageStore) &&
 							messageStore
-								.filter((message) => message.conversation_id === selectedRequest.conversation[0].id)
+								.filter((message) => message.conversation_id === conversationIdState)
 								.map((message: MessageStoreProps, index) => (
-									<div className={`${message.user_id}`} key={index}>{message.content}</div>
+									<div className={`${message.user_id}`} key={index}>{message.content}
+										<img src={`${message.media[0].url}`} alt="" />
+									</div>
 								))
 						}
 						<form onSubmit={(event) => handleMessageSubmit(event, selectedRequest.id)}>

@@ -12,3 +12,9 @@ export const messageDataStore = create<MessageStore>((set) => ({
 	setMessageStore: (data) => set({ messages: data }),
 	resetMessage: () => set({ messages: [] }),
 }));
+
+export const myMessageDataStore = create<MessageStore>((set) => ({
+	messages: [],
+	setMessageStore: (data) => set({ messages: data }),
+	resetMessage: () => set({ messages: [] }),
+}));
