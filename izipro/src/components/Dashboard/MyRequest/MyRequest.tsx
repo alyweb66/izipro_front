@@ -34,7 +34,7 @@ function MyRequest() {
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
-	const limit = 2;
+	const limit = 10;
 	
 	// store
 	const id = userDataStore((state) => state.id);
@@ -655,6 +655,7 @@ function MyRequest() {
 								.filter((message) => message.conversation_id === conversationIdState)
 								.map((message) => (
 									<div className={`${message.user_id}`} key={message.id}>{message.content}
+									<img src={`${message.media[0].url}`} alt="" />
 									</div>
 								))
 								

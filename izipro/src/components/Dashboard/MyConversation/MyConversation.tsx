@@ -152,7 +152,7 @@ function MyConversation() {
 						const messageAdded: MessageProps[] = subscriptionData.data.messageAdded;
 						const date = new Date(Number(messageAdded[0].created_at));
 						const newDate = date.toISOString();
-						//console.log('messageAdded', date);
+						console.log('messageAdded', date);
 						// add the new message to the message store
 						messageDataStore.setState(prevState => {
 							const newMessages = messageAdded.filter(
@@ -441,7 +441,9 @@ function MyConversation() {
 							messageStore
 								.filter((message) => message.conversation_id === conversationIdState)
 								.map((message: MessageStoreProps, index) => (
-									<div className={`${message.user_id}`} key={index}>{message.content}</div>
+									<div className={`${message.user_id}`} key={index}>{message.content}
+										<img src={`${message.media[0].url}`} alt="" />
+									</div>
 								))
 						}
 						<form onSubmit={(event) => handleMessageSubmit(event, selectedRequest.id)}>

@@ -38,7 +38,9 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const [subscriptionMutation, {error: subscriptionError}] = useMutation(SUBSCRIPTION_MUTATION);
 
 	// get requests by job
-	const {getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 10);
+	const {getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, offsetRef.current, 10);
+console.log('getRequestsByJob', getRequestsByJob);
+
 
 	// Function to filter the requests by the user's location and the request's location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
@@ -205,7 +207,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	
 			// Filter the requests
 			RangeFilter(getRequestsByJob.requestsByJob);
-			offsetRef.current += getRequestsByJob.requestsByJob?.length;
+			offsetRef.current = offsetRef.current + getRequestsByJob.requestsByJob?.length;
 
 		}
 	}, [getRequestsByJob, settings]);
