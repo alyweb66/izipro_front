@@ -11,6 +11,8 @@ type UserDataProps = {
 	lat: number | null;
 	siret: string;
 	denomination: string | null;
+	description: string | null;
+	image: string | null;
 	role: string;
 	jobs: Array<{ job_id: number}>;
 	settings: Array<{ range: number}>;

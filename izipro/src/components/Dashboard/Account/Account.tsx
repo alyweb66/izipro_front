@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
 import { GET_USER_DATA } from '../../GraphQL/UserQueries';
 import { useMutation, useQuery } from '@apollo/client';
@@ -10,10 +10,14 @@ import { UserDataProps } from '../../../Type/User';
 import { Localization } from '../../Hook/Localization';
 
 import './Account.scss';
+import profileLogo from '../../../../public/logo/logo profile.jpeg';
 
 
 function Account() {
 
+	// useRef for profile picture
+	const fileInput = useRef<HTMLInputElement>(null);
+		
 	// Get the user data
 	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
 
@@ -28,10 +32,11 @@ function Account() {
 	const [lat, setLat] = useState(getUserData?.user.lat || null);
 	const [siret, setSiret] = useState(getUserData?.user.siret || '');
 	const [denomination, setDenomination] = useState(getUserData?.user.denomination || '');
+	const [description, setDescription] = useState(getUserData?.user.description || '');
+	const [image, setImage] = useState(getUserData?.user.image || '');
 	const [oldPassword, setOldPassword] = useState('');
 	const [newPassword, setNewPassword] = useState('');
 	const [confirmNewPassword, setConfirmNewPassword] = useState('');
-	const [role, setRole] = useState(getUserData?.user.role || '');
 
 	// Message modification account
 	const [message, setMessage] = useState('');
@@ -45,6 +50,7 @@ function Account() {
 	const [initialData, setInitialData] = userDataStore((state) => [state.initialData, state.setInitialData]);
 	const setAll = userDataStore((state) => state.setAll);
 	const setAccount = userDataStore((state) => state.setAccount);
+	const role = userDataStore((state) => state.role);
 	
 	// Mutation to update the user data
 	const [updateUser, { error: updateUserError }] = useMutation(UPDATE_USER_MUTATION, {
@@ -75,7 +81,8 @@ function Account() {
 			setSiret(getUserData.user.siret);
 			setDenomination(getUserData.user.denomination);
 			setUserData(getUserData.user);
-			setRole(getUserData.user.role);
+			setDescription(getUserData.user.description);
+			setImage(getUserData.user.image);
 		}
 	}, [getUserData]);
 	
@@ -93,11 +100,12 @@ function Account() {
 			lat,
 			siret: DOMPurify.sanitize(siret),
 			denomination: DOMPurify.sanitize(denomination),
-			role: DOMPurify.sanitize(role),
+			description: DOMPurify.sanitize(description),
+			image: DOMPurify.sanitize(image),
 		};
 	
 		setUserData(newUserData);
-	}, [first_name, last_name, email, address, postal_code, city, lng, lat, siret, denomination]);
+	}, [first_name, last_name, email, address, postal_code, city, lng, lat, siret, denomination, description]);
 	
 	// Set the user data to the store
 	useEffect(() => {
@@ -239,11 +247,68 @@ function Account() {
 		}
 
 	};
+
+	// Handle the profile picture change
+	const handleProfilePicture = (event: React.ChangeEvent<HTMLInputElement>) => {
+		event.preventDefault();
+		console.log('change');
+		
+
+		const file = event.target.files;
+		console.log('file',file);
+		
+
+		if ((file?.length ?? 0) > 0) {
+			console.log('sending');
+			
+			updateUser({
+				variables: {
+					updateUserId: id,
+					input: {
+						image:file,
+					}
+				},
+			}).then((response): void => {
+				console.log('response',response.data);
+		
+				const { updateUser } = response.data;
+				// Set the new user data to the store
+				setAccount(updateUser);
+
+				if (updateUser) {
+					setMessage('Modifications éfféctué');
+					setTimeout(() => {
+						setMessage('');
+				
+					},5000);
+				}
+			});
+		}
+
+	};
+
+
+
 	return (
 		<>
 			<div className="account-container">
 				{error && <p className="user-modification-error">{error}</p>}
 				{message && <p className="user-modification-message">{message}</p>}
+				<div>
+					<img 
+						src={image || profileLogo} 
+						alt="Profile" 
+						onClick={() => fileInput.current?.click()} 
+						style={{ cursor: 'pointer' }} 
+					/>
+					<input 
+						type="file" 
+						ref={fileInput} 
+						onChange={handleProfilePicture} 
+						style={{ display: 'none' }} 
+						accept=".jpg,.jpeg,.png"
+					/>
+				</div>
 				<form className="account-form" onSubmit={handleAccountSubmit} >
 					<label className="label">
 					Prénom:
@@ -352,6 +417,21 @@ function Account() {
 									aria-label="Dénomination"
 									maxLength={50}
 								/>
+							</label>
+							<label className="label">
+								Description
+								<textarea
+									className="text-descritpion"
+									name="description"
+									id="description"
+									placeholder="Exprimez-vous 200 caractères maximum"
+									value={description}
+									onChange={(event) => setDescription(event.target.value)}
+									aria-label="Exprimez-vous 200 caractères maximum"
+									maxLength={200}
+								>
+								</textarea>
+								<p>{description?.length}/200</p>
 							</label>
 						</div>
 					)}

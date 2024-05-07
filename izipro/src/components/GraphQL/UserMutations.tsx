@@ -44,6 +44,8 @@ export const UPDATE_USER_MUTATION = gql`
             lat
             siret
             denomination
+            image
+            description
     }
 }
 `;

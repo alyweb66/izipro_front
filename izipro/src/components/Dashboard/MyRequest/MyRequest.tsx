@@ -642,6 +642,7 @@ function MyRequest() {
 				{userConvState && userConvState?.map((user: UserDataProps ) => (
 					<div key={user.id} onClick={(event) => {handleMessageConversation(event, user.id);}}>
 						<h1>user</h1>
+						<img src={user.image} alt="" />
 						<p>{user.denomination}</p>
 						<p>{user.city}</p>
 					</div>
@@ -655,7 +656,7 @@ function MyRequest() {
 								.filter((message) => message.conversation_id === conversationIdState)
 								.map((message) => (
 									<div className={`${message.user_id}`} key={message.id}>{message.content}
-									<img src={`${message.media[0].url}`} alt="" />
+										<img src={`${message.media[0].url}`} alt="" />
 									</div>
 								))
 								
