@@ -69,6 +69,11 @@ function Register() {
 				}
 			}
 		}).then((response) => {
+
+			if (response.data.createProUser.error) {
+				setError('Erreur siret');
+				return;
+			}
 			
 			if (response.data.createProUser.id) {
 				setUserCreated(true);
