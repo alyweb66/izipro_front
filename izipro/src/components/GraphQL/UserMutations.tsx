@@ -44,6 +44,8 @@ export const UPDATE_USER_MUTATION = gql`
             lat
             siret
             denomination
+            image
+            description
     }
 }
 `;
@@ -106,5 +108,11 @@ export const USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION = gql`
             user_id
             request_id
         }
+    }
+`;
+
+export  const DELETE_PROFILE_PICTURE_MUTATION = gql`
+    mutation Mutation($id: Int!) {
+        deleteProfilePicture(id: $id)
     }
 `;

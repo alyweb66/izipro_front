@@ -62,7 +62,11 @@ function Login() {
 	
 				// if user wants to keep the session active, store the hash in local storage
 				if (activeSession) {
-					localStorage.setItem('ayl', 'true');
+					const data = {
+						value: 'true',
+						expiry: new Date().getTime() + 1*24*60*60*1000, // 24 hours from now
+					};
+					localStorage.setItem('ayl', JSON.stringify(data));
 				} else {
 					localStorage.setItem('ayl', 'session');
 				}

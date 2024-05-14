@@ -15,6 +15,8 @@ type UserDataStore = UserDataProps & {
 	setLat: (lat: number) => void;
 	setSiret: (siret: string) => void;
 	setDenomination: (denomination: string | '') => void;
+	setImage: (image: string | '') => void;
+	setDescription: (description: string | '') => void;
 	setRole: (role: string | '') => void;
 	initialData: UserDataProps;
 	setInitialData: (data: UserDataProps) => void;
@@ -56,6 +58,8 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	lat:0,
 	siret: '',
 	denomination: '',
+	image: '',
+	description: '',
 	role: '',
 	jobs: [],
 	settings: [{range: 0}],
@@ -72,6 +76,8 @@ export const userDataStore = create<UserDataStore>((set) => ({
 		lat:0,
 		siret: '',
 		denomination: '',
+		image: '',
+		description: '',
 		role: '',
 		jobs: [],
 		settings: [{range: 0}]
@@ -110,6 +116,8 @@ export const userDataStore = create<UserDataStore>((set) => ({
 				lat: data.lat,
 				siret: data.siret,
 				denomination: data.denomination,
+				image: data.image,
+				description: data.description,
 				role: data.role,
 				jobs: data.jobs,
 				settings: data.settings
@@ -129,6 +137,8 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	setLat: (lat) => set({ lat }),
 	setSiret: (siret) => set({ siret }),
 	setDenomination: (denomination) => set({ denomination }),
+	setImage: (image) => set({ image }),
+	setDescription: (description) => set({ description }),
 	setRole: (role) => set({ role }),
 	setJobs: (jobs) => set({ jobs }),
 	setSettings: (settings) => set({ settings }),

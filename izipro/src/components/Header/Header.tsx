@@ -9,12 +9,23 @@ function Header() {
 	const [isLogged, setIsLogged] = useState(false);
 
 	const location = useLocation();
+
 	// condition if user not logged in
-	const isLoggedValue = localStorage.getItem('ayl') || sessionStorage.getItem('ayl');
+	let isLoggedValue;
+	if (localStorage.getItem('ayl') === 'session') {
+
+		isLoggedValue = {value: 'true'};
+	} else {
+
+		isLoggedValue = JSON.parse(localStorage.getItem('ayl') || '{}');
+	}
+
 	useEffect(() => {
 		if (location.pathname === '/dashboard' && isLoggedValue) {
 		
-			const newIsLogged = isLoggedValue === 'true' ? true : false;
+			const newIsLogged = isLoggedValue.value === 'true' ? true : false;
+			console.log('newIsLogged', newIsLogged);
+			
 			setIsLogged(newIsLogged );
 	
 		} else {

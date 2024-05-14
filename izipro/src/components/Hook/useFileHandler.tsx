@@ -20,6 +20,7 @@ export function useFileHandler() {
 			return true;
 		});
 		setFileError('');
+		
 		if (validFiles) {
 			const urls = validFiles.map(file => URL.createObjectURL(file));
 			const fileObjects = urls.map(url => new File([url], url));

@@ -1,19 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
 import { GET_USER_DATA } from '../../GraphQL/UserQueries';
 import { useMutation, useQuery } from '@apollo/client';
 import SettingAccount from './SettingAccount/SettingAccount';
-import { CHANGE_PASSWORD_MUTATION, UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
+import { CHANGE_PASSWORD_MUTATION, DELETE_PROFILE_PICTURE_MUTATION, UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
 import DOMPurify from 'dompurify';
 import validator from 'validator';
 import { UserDataProps } from '../../../Type/User';
 import { Localization } from '../../Hook/Localization';
 
 import './Account.scss';
+import profileLogo from '/logo/logo profile.jpeg';
 
 
 function Account() {
 
+	// useRef for profile picture
+	const fileInput = useRef<HTMLInputElement>(null);
+		
 	// Get the user data
 	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
 
@@ -28,10 +32,11 @@ function Account() {
 	const [lat, setLat] = useState(getUserData?.user.lat || null);
 	const [siret, setSiret] = useState(getUserData?.user.siret || '');
 	const [denomination, setDenomination] = useState(getUserData?.user.denomination || '');
+	const [description, setDescription] = useState(getUserData?.user.description || '');
+	const [picture, setPicture] = useState(getUserData?.user.image || '');
 	const [oldPassword, setOldPassword] = useState('');
 	const [newPassword, setNewPassword] = useState('');
 	const [confirmNewPassword, setConfirmNewPassword] = useState('');
-	const [role, setRole] = useState(getUserData?.user.role || '');
 
 	// Message modification account
 	const [message, setMessage] = useState('');
@@ -45,6 +50,8 @@ function Account() {
 	const [initialData, setInitialData] = userDataStore((state) => [state.initialData, state.setInitialData]);
 	const setAll = userDataStore((state) => state.setAll);
 	const setAccount = userDataStore((state) => state.setAccount);
+	const role = userDataStore((state) => state.role);
+	const [image, setImage] = userDataStore((state) => [state.image, state.setImage]);
 	
 	// Mutation to update the user data
 	const [updateUser, { error: updateUserError }] = useMutation(UPDATE_USER_MUTATION, {
@@ -59,6 +66,7 @@ function Account() {
 		}
 	});
 	const [changePassword, { error: changePasswordError }] = useMutation(CHANGE_PASSWORD_MUTATION);
+	const [deleteProfilePicture, { error: deleteProfilePictureError }] = useMutation(DELETE_PROFILE_PICTURE_MUTATION);
 
 	// Set the user data to state
 	useEffect(() => {
@@ -75,7 +83,8 @@ function Account() {
 			setSiret(getUserData.user.siret);
 			setDenomination(getUserData.user.denomination);
 			setUserData(getUserData.user);
-			setRole(getUserData.user.role);
+			setDescription(getUserData.user.description);
+			setPicture(getUserData.user.image);
 		}
 	}, [getUserData]);
 	
@@ -93,11 +102,12 @@ function Account() {
 			lat,
 			siret: DOMPurify.sanitize(siret),
 			denomination: DOMPurify.sanitize(denomination),
-			role: DOMPurify.sanitize(role),
+			description: DOMPurify.sanitize(description),
+			image: DOMPurify.sanitize(picture),
 		};
 	
 		setUserData(newUserData);
-	}, [first_name, last_name, email, address, postal_code, city, lng, lat, siret, denomination]);
+	}, [first_name, last_name, email, address, postal_code, city, lng, lat, siret, denomination, description]);
 	
 	// Set the user data to the store
 	useEffect(() => {
@@ -239,11 +249,89 @@ function Account() {
 		}
 
 	};
+
+	// Handle the profile picture change
+	const handleProfilePicture = (event: React.ChangeEvent<HTMLInputElement>) => {
+		event.preventDefault();
+		
+		const file = event.target.files;
+		
+		if ((file?.length ?? 0) > 0) {
+		
+			updateUser({
+				variables: {
+					updateUserId: id,
+					input: {
+						image:file,
+					}
+				},
+			}).then((response): void => {
+
+				const { updateUser } = response.data;
+				// Set the new user data to the store
+				setAccount(updateUser);
+
+				if (updateUser) {
+					setMessage('Modifications éfféctué');
+					setTimeout(() => {
+						setMessage('');
+				
+					},5000);
+				}
+			});
+		}
+
+	};
+
+	// Handle the profile picture delete
+	const handleDeletePicture = (event: React.MouseEvent<HTMLButtonElement>) => {
+		event.preventDefault();
+
+		deleteProfilePicture({
+			variables: {
+				id: id,
+			},
+		}).then((response): void => {
+			console.log('response',response);
+			
+			if (response.data?.deleteProfilePicture) {
+				setMessage('Modifications éfféctué');
+				setPicture('');
+				setImage('');
+				setTimeout(() => {
+					setMessage('');
+				
+				},5000);
+			}
+		});
+
+		if (deleteProfilePictureError) {
+			throw new Error('Error while deleting profile picture');
+		}
+	};
+
+
 	return (
 		<>
 			<div className="account-container">
 				{error && <p className="user-modification-error">{error}</p>}
 				{message && <p className="user-modification-message">{message}</p>}
+				<div>
+					<img 
+						src={image || profileLogo} 
+						alt="Profile" 
+						onClick={() => fileInput.current?.click()} 
+						style={{ cursor: 'pointer' }} 
+					/>
+					<input 
+						type="file" 
+						ref={fileInput} 
+						onChange={handleProfilePicture} 
+						style={{ display: 'none' }} 
+						accept=".jpg,.jpeg,.png"
+					/>
+					<button type='button' onClick={handleDeletePicture}>X</button>
+				</div>
 				<form className="account-form" onSubmit={handleAccountSubmit} >
 					<label className="label">
 					Prénom:
@@ -352,6 +440,21 @@ function Account() {
 									aria-label="Dénomination"
 									maxLength={50}
 								/>
+							</label>
+							<label className="label">
+								Description
+								<textarea
+									className="text-descritpion"
+									name="description"
+									id="description"
+									placeholder="Exprimez-vous 200 caractères maximum"
+									value={description}
+									onChange={(event) => setDescription(event.target.value)}
+									aria-label="Exprimez-vous 200 caractères maximum"
+									maxLength={200}
+								>
+								</textarea>
+								<p>{description?.length}/200</p>
 							</label>
 						</div>
 					)}

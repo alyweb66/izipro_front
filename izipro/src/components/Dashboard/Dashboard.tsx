@@ -7,6 +7,8 @@ import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import { userDataStore } from '../../store/UserData';
 import { useQueryUserData, useQueryUserSubscriptions } from '../Hook/Query';
+import { useSubscription } from '@apollo/client';
+import { LOGOUT } from '../GraphQL/Subscription';
 
 import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
@@ -21,18 +23,48 @@ function Dashboard() {
 	const role = userDataStore((state) => state.role);
 	const setAll = userDataStore((state) => state.setAll);
 	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
-	
-	
+
 	// Query to get the user data
 	const getUserData = useQueryUserData();
 	const getUserSubscription = useQueryUserSubscriptions();
 	
 	// condition if user not logged in
-	const isLogged = localStorage.getItem('ayl') || sessionStorage.getItem('ayl');
+	let isLogged;
+	if (localStorage.getItem('ayl') === 'session') {
+		isLogged = {value: true};
+	} else {
+		isLogged = JSON.parse(localStorage.getItem('ayl') || '{}');
+	}
 	console.log('getUserSubscription', getUserSubscription);
+	console.log('isLogged', isLogged);
+	console.log(localStorage.getItem('ayl'));
+	
 	
 
+	// subscription to serveur logout
+	const { data, loading, error } = useSubscription(LOGOUT);
 
+	// set user subscription to the store
+	useEffect(() => {
+		if (getUserSubscription) {
+			console.log('subscription', getUserSubscription?.user.subscription);
+			setSubscription(getUserSubscription?.user.subscription);
+		}
+	},[getUserSubscription]);
+
+	useEffect(() => {
+		if (!loading && data.logout) {
+			sessionStorage.clear();
+			localStorage.clear();
+			navigate('/');
+		
+		}
+
+		if (error) {
+			throw new Error('Error while fetching logout');
+		}
+	}, [data, loading]);
+	
 	// function to check if user is logged in
 	useEffect(() => {
 		// clear local storage and session storage when user leaves the page if local storage is set to session
@@ -46,12 +78,19 @@ function Dashboard() {
 		window.addEventListener('beforeunload', handleBeforeUnload);
 
 		// check if user is logged in
-		if (!isLogged) {
+		if (isLogged !== null && Object.keys(isLogged).length !== 0) {
+			if (new Date().getTime() > isLogged.expiry) {
+				// The data has expired
+				localStorage.removeItem('ayl');
+				navigate('/');
+			} 
+		} else {
 			navigate('/');
 			// if user logged in, set the user data to the store
 		} 
 
 	});
+
 
 	// set user data to the store
 	useEffect(() => {
@@ -62,13 +101,7 @@ function Dashboard() {
 		}
 	},[getUserData]);
 
-	// set user subscription to the store
-	useEffect(() => {
-		if (getUserSubscription) {
-			console.log('subscription', getUserSubscription?.user.subscription);
-			setSubscription(getUserSubscription?.user.subscription);
-		}
-	},[getUserSubscription]);
+
 
 	const handleMyConvesationNavigate = () => {
 		setSelectedTab('My conversations');

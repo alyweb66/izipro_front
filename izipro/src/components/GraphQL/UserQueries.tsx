@@ -14,6 +14,8 @@ export const GET_USER_DATA = gql`
       lat
       siret
       denomination
+      image
+      description
       role
       jobs{
         job_id
@@ -97,6 +99,8 @@ export const GET_USERS_CONVERSATION = gql`
     users(ids: $ids, offset: $offset, limit: $limit) {
       id
       city
+      image
+      description
       denomination
     }
   }
