@@ -585,6 +585,27 @@ function MyRequest() {
 		}
 	};
 
+	// Function to fetchmore requests
+	function addRequest() {
+		fetchMore({
+			variables: {
+				offset: myRequestsStore.length // Next offset
+			},
+		}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
+
+			// remove request who is already in the store
+			const requestsIds = myRequestsStore.map(request => request.id);
+			const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIds.includes(request.id));
+
+			myRequestStore.setState(prevRequests => {
+				return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
+			});
+
+			offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
+			setLoading(false);
+		});
+	}
+
 
 	return (
 		<div className="my_request-container">
@@ -596,18 +617,7 @@ function MyRequest() {
 							dataLength={myRequestsStore?.length}
 							next={ () => {
 								if (!loading) {
-									fetchMore({
-										variables: {
-											offset: myRequestsStore.length // Next offset
-										},
-									}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
-										myRequestStore.setState(prevRequests => {
-											return { ...prevRequests, requests: [...prevRequests.requests, ...fetchMoreResult.data.user.requests] };
-										});
-
-										offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
-										setLoading(false);
-									});
+									addRequest();
 								}
 							}}
 							hasMore={true}
