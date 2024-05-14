@@ -13,8 +13,10 @@ function Header() {
 	// condition if user not logged in
 	let isLoggedValue;
 	if (localStorage.getItem('ayl') === 'session') {
-		isLoggedValue = {value: true};
+
+		isLoggedValue = {value: 'true'};
 	} else {
+
 		isLoggedValue = JSON.parse(localStorage.getItem('ayl') || '{}');
 	}
 
@@ -22,6 +24,8 @@ function Header() {
 		if (location.pathname === '/dashboard' && isLoggedValue) {
 		
 			const newIsLogged = isLoggedValue.value === 'true' ? true : false;
+			console.log('newIsLogged', newIsLogged);
+			
 			setIsLogged(newIsLogged );
 	
 		} else {
