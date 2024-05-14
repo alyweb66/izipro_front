@@ -3,14 +3,14 @@ import { userDataStore } from '../../../store/UserData';
 import { GET_USER_DATA } from '../../GraphQL/UserQueries';
 import { useMutation, useQuery } from '@apollo/client';
 import SettingAccount from './SettingAccount/SettingAccount';
-import { CHANGE_PASSWORD_MUTATION, UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
+import { CHANGE_PASSWORD_MUTATION, DELETE_PROFILE_PICTURE_MUTATION, UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
 import DOMPurify from 'dompurify';
 import validator from 'validator';
 import { UserDataProps } from '../../../Type/User';
 import { Localization } from '../../Hook/Localization';
 
 import './Account.scss';
-import profileLogo from '../../../../public/logo/logo profile.jpeg';
+import profileLogo from '/logo/logo profile.jpeg';
 
 
 function Account() {
@@ -33,7 +33,7 @@ function Account() {
 	const [siret, setSiret] = useState(getUserData?.user.siret || '');
 	const [denomination, setDenomination] = useState(getUserData?.user.denomination || '');
 	const [description, setDescription] = useState(getUserData?.user.description || '');
-	const [image, setImage] = useState(getUserData?.user.image || '');
+	const [picture, setPicture] = useState(getUserData?.user.image || '');
 	const [oldPassword, setOldPassword] = useState('');
 	const [newPassword, setNewPassword] = useState('');
 	const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -51,6 +51,7 @@ function Account() {
 	const setAll = userDataStore((state) => state.setAll);
 	const setAccount = userDataStore((state) => state.setAccount);
 	const role = userDataStore((state) => state.role);
+	const [image, setImage] = userDataStore((state) => [state.image, state.setImage]);
 	
 	// Mutation to update the user data
 	const [updateUser, { error: updateUserError }] = useMutation(UPDATE_USER_MUTATION, {
@@ -65,6 +66,7 @@ function Account() {
 		}
 	});
 	const [changePassword, { error: changePasswordError }] = useMutation(CHANGE_PASSWORD_MUTATION);
+	const [deleteProfilePicture, { error: deleteProfilePictureError }] = useMutation(DELETE_PROFILE_PICTURE_MUTATION);
 
 	// Set the user data to state
 	useEffect(() => {
@@ -82,7 +84,7 @@ function Account() {
 			setDenomination(getUserData.user.denomination);
 			setUserData(getUserData.user);
 			setDescription(getUserData.user.description);
-			setImage(getUserData.user.image);
+			setPicture(getUserData.user.image);
 		}
 	}, [getUserData]);
 	
@@ -101,7 +103,7 @@ function Account() {
 			siret: DOMPurify.sanitize(siret),
 			denomination: DOMPurify.sanitize(denomination),
 			description: DOMPurify.sanitize(description),
-			image: DOMPurify.sanitize(image),
+			image: DOMPurify.sanitize(picture),
 		};
 	
 		setUserData(newUserData);
@@ -251,16 +253,11 @@ function Account() {
 	// Handle the profile picture change
 	const handleProfilePicture = (event: React.ChangeEvent<HTMLInputElement>) => {
 		event.preventDefault();
-		console.log('change');
 		
-
 		const file = event.target.files;
-		console.log('file',file);
 		
-
 		if ((file?.length ?? 0) > 0) {
-			console.log('sending');
-			
+		
 			updateUser({
 				variables: {
 					updateUserId: id,
@@ -269,8 +266,7 @@ function Account() {
 					}
 				},
 			}).then((response): void => {
-				console.log('response',response.data);
-		
+
 				const { updateUser } = response.data;
 				// Set the new user data to the store
 				setAccount(updateUser);
@@ -287,6 +283,32 @@ function Account() {
 
 	};
 
+	// Handle the profile picture delete
+	const handleDeletePicture = (event: React.MouseEvent<HTMLButtonElement>) => {
+		event.preventDefault();
+
+		deleteProfilePicture({
+			variables: {
+				id: id,
+			},
+		}).then((response): void => {
+			console.log('response',response);
+			
+			if (response.data?.deleteProfilePicture) {
+				setMessage('Modifications éfféctué');
+				setPicture('');
+				setImage('');
+				setTimeout(() => {
+					setMessage('');
+				
+				},5000);
+			}
+		});
+
+		if (deleteProfilePictureError) {
+			throw new Error('Error while deleting profile picture');
+		}
+	};
 
 
 	return (
@@ -308,6 +330,7 @@ function Account() {
 						style={{ display: 'none' }} 
 						accept=".jpg,.jpeg,.png"
 					/>
+					<button type='button' onClick={handleDeletePicture}>X</button>
 				</div>
 				<form className="account-form" onSubmit={handleAccountSubmit} >
 					<label className="label">
