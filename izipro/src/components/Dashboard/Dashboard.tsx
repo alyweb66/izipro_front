@@ -7,8 +7,6 @@ import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import { userDataStore } from '../../store/UserData';
 import { useQueryUserData, useQueryUserSubscriptions } from '../Hook/Query';
-import { useSubscription } from '@apollo/client';
-import { LOGOUT } from '../GraphQL/Subscription';
 
 import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
@@ -19,7 +17,7 @@ function Dashboard() {
 	// State
 	const [selectedTab, setSelectedTab] = useState('My Profile');
 	
-	//store 
+	//store
 	const role = userDataStore((state) => state.role);
 	const setAll = userDataStore((state) => state.setAll);
 	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
@@ -39,11 +37,6 @@ function Dashboard() {
 	console.log('isLogged', isLogged);
 	console.log(localStorage.getItem('ayl'));
 	
-	
-
-	// subscription to serveur logout
-	const { data, loading, error } = useSubscription(LOGOUT);
-
 	// set user subscription to the store
 	useEffect(() => {
 		if (getUserSubscription) {
@@ -52,18 +45,6 @@ function Dashboard() {
 		}
 	},[getUserSubscription]);
 
-	useEffect(() => {
-		if (!loading && data.logout) {
-			sessionStorage.clear();
-			localStorage.clear();
-			navigate('/');
-		
-		}
-
-		if (error) {
-			throw new Error('Error while fetching logout');
-		}
-	}, [data, loading]);
 	
 	// function to check if user is logged in
 	useEffect(() => {
@@ -82,9 +63,13 @@ function Dashboard() {
 			if (new Date().getTime() > isLogged.expiry) {
 				// The data has expired
 				localStorage.removeItem('ayl');
+				console.log('expired');
+				
 				navigate('/');
 			} 
 		} else {
+			console.log('else');
+			
 			navigate('/');
 			// if user logged in, set the user data to the store
 		} 

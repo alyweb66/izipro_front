@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
 export const GET_USER_DATA = gql`
-  query Query {
+  query UserData {
     user {
       id
       first_name
@@ -95,7 +95,7 @@ export const GET_USER_SUBSCRIPTION = gql`
 `;
 
 export const GET_USERS_CONVERSATION = gql`
-  query uery($ids: [Int!], $offset: Int, $limit: Int) {
+  query UserConversation($ids: [Int!], $offset: Int, $limit: Int) {
     users(ids: $ids, offset: $offset, limit: $limit) {
       id
       city
@@ -107,7 +107,7 @@ export const GET_USERS_CONVERSATION = gql`
 `;
 
 export const GET_MY_MESSAGES_BY_CONVERSATION = gql`
-  query Query($conversationId: Int!, $offset: Int, $limit: Int) {
+  query MessageByConversation($conversationId: Int!, $offset: Int, $limit: Int) {
     messages(conversationId: $conversationId, offset: $offset, limit: $limit) {
           id
           content

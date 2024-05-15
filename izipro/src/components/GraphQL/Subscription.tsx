@@ -48,11 +48,6 @@ export const MESSAGE_SUBSCRIPTION = gql`
     }
 `;
 
-export const LOGOUT = gql`
-    subscription Logout {
-    logout
-    }
 
-`;
 
 

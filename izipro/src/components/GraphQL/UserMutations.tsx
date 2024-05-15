@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
 export const REGISTER_USER_MUTATION = gql`
-    mutation Mutation($input: CreateUserInput!) {
+    mutation Register($input: CreateUserInput!) {
         createUser(input: $input) {
             id
             email
@@ -10,7 +10,7 @@ export const REGISTER_USER_MUTATION = gql`
 `;
 
 export const REGISTER_PRO_USER_MUTATION = gql`
-    mutation Mutation($input: CreateProUserInput!) {
+    mutation ProRegister($input: CreateProUserInput!) {
         createProUser(input: $input) {
             ... on User {
                 id
@@ -31,13 +31,13 @@ export const LOGIN_USER_MUTATION = gql`
 `;
 
 export const LOGOUT_USER_MUTATION = gql`
-    mutation Mutation($logoutId: Int!) {
+    mutation Logout($logoutId: Int!) {
   logout(id: $logoutId)
     }
 `;
 
 export const UPDATE_USER_MUTATION = gql`
-    mutation Mutation($updateUserId: Int!, $input: UpdateUserInput!) {
+    mutation UpdateUser($updateUserId: Int!, $input: UpdateUserInput!) {
   updateUser(id: $updateUserId, input: $input) {
             id
             first_name
@@ -81,7 +81,7 @@ export const CHANGE_PASSWORD_MUTATION = gql`
 `;
 
 export const USER_HAS_JOB_MUTATION = gql`
-    mutation Mutation($input: UserJobInput!) {
+    mutation UserHasJob($input: UserJobInput!) {
         createUserJob(input: $input) {
             id
             user_id
@@ -91,7 +91,7 @@ export const USER_HAS_JOB_MUTATION = gql`
 `;
 
 export const DELETE_USER_HAS_JOB_MUTATION = gql`
-    mutation Mutation($input: UserJobInput!) {
+    mutation DeleteUserHasJob($input: UserJobInput!) {
         deleteUserJob(input: $input) {
             id
             user_id
@@ -101,7 +101,7 @@ export const DELETE_USER_HAS_JOB_MUTATION = gql`
 `;
 
 export const USER_SETTING_MUTATION = gql`
-    mutation Mutation($userSettingId: Int!, $input: UserSettingsInput!) {
+    mutation UserSetting($userSettingId: Int!, $input: UserSettingsInput!) {
         userSetting(id: $userSettingId, input: $input) {
             range
         }
@@ -118,7 +118,7 @@ export const USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION = gql`
 `;
 
 export  const DELETE_PROFILE_PICTURE_MUTATION = gql`
-    mutation Mutation($id: Int!) {
+    mutation DeleteProfilPicture($id: Int!) {
         deleteProfilePicture(id: $id)
     }
 `;
