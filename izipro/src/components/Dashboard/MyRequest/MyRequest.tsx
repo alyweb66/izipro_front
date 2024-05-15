@@ -499,12 +499,14 @@ function MyRequest() {
 				}
 
 		}).then((response) => {
-			
+			// Get the conversation ids for the request
+			const conversationIds = myRequestStore.getState().requests.find(request => request.id === requestId)?.conversation?.map(conversation => conversation.id);
+		
 			if (response.data.deleteRequest) {
 				// Remove the request from the store
 				setMyRequestsStore(myRequestsStore.filter(request => request.id !== requestId));
 			}
-
+		
 			// remove subscription for this request
 			const subscription = subscriptionStore.find(subscription => subscription.subscriber === 'request');
 			const updatedSubscription = Array.isArray(subscription?.subscriber_id) ? subscription?.subscriber_id.filter(id => id !== requestId) : [];
@@ -533,8 +535,39 @@ function MyRequest() {
 
 			});
 
-			if (subscriptionError) {
-				throw new Error('Error while updating subscription');
+
+
+			if (conversationIds) {
+				// remove subscription for this conversation
+				const conversationSubscription = subscriptionStore.find(subscription => subscription.subscriber === 'conversation');
+				const updatedConversationSubscription = Array.isArray(conversationSubscription?.subscriber_id) ? conversationSubscription?.subscriber_id.filter(id => !conversationIds.includes(id)) : [];
+
+				subscriptionMutation({
+					variables: {
+						input: {
+							user_id: id,
+							subscriber: 'conversation',
+							subscriber_id: updatedConversationSubscription
+						}
+					}
+				}).then((response) => {
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+					const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+		
+					// Replace the old subscription with the new one
+					const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
+						subscription.subscriber === 'conversation' ? subscriptionWithoutTimestamps : subscription
+					);
+
+					if (addSubscriptionStore) {
+						setSubscriptionStore(addSubscriptionStore);
+					}
+
+				});
+
+				if (subscriptionError) {
+					throw new Error('Error while updating conversation subscription');
+				}
 			}
 		});
 
@@ -543,6 +576,7 @@ function MyRequest() {
 		}
 		
 	};
+console.log('subscriptionStore', subscriptionStore);
 
 
 	// Function to handle the users ids for the conversation

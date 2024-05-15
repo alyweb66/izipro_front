@@ -391,9 +391,10 @@ function MyConversation() {
 		});
 	}
 
-	// Function to hide a request
+	// Function to hide a client request
 	const handleHideRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
 		event.preventDefault();
+
 		hideRequest({
 			variables: {
 				input: {
@@ -406,11 +407,46 @@ function MyConversation() {
 			if (response.data.createHiddenClientRequest) {
 				setRequestsConversationStore(requestsConversationStore.filter(request => request.id !== requestId));
 			}
+
+			// find conversation id from request to remove it from the subscription
+			const requestConversation = requestsConversationStore.find(request => request.id === requestId);
+			const conversationId = requestConversation?.conversation.find(conversation => conversation.user_1 === id || conversation.user_2 === id)?.id;
+
+			// remove subscription for this conversation
+			const subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
+			const newSubscriptionIds = Array.isArray(subscription?.subscriber_id) ? subscription.subscriber_id.filter((id: number) => id !== conversationId) : [];
+
+			subscriptionMutation({
+				variables: {
+					input: {
+						user_id: id,
+						subscriber: 'clientConversation',
+						subscriber_id: newSubscriptionIds
+					}
+				}
+			}).then((response) => {
+				if (response.data.createSubscription) {
+					// update the subscription store
+					const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+					const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
+						subscription.subscriber === 'clientConversation' ? subscriptionWithoutTimestamps : subscription
+					);
+					if (addSubscriptionStore) {
+						setSubscriptionStore(addSubscriptionStore);
+					}
+				}
+			});
+
+			if (subscriptionError) {
+				throw new Error('Error while updating conversation subscription');
+			}
+
 		});
 		if (hideRequestError) {
 			throw new Error('Error while hiding request');
 		}
 	};
+
 
 	return (
 		<div className="my-conversation-container">
