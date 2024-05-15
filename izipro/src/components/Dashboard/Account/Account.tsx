@@ -28,8 +28,8 @@ function Account() {
 	const [address, setAddress] = useState(getUserData?.user.address || '');
 	const [postal_code, setPostalCode] = useState(getUserData?.user.postal_code || '');
 	const [city, setCity] = useState(getUserData?.user.city || '');
-	const [lng, setLng] = useState(getUserData?.user.lng || null);
-	const [lat, setLat] = useState(getUserData?.user.lat || null);
+	const [lng, setLng] = useState(getUserData?.user.lng || '');
+	const [lat, setLat] = useState(getUserData?.user.lat || '');
 	const [siret, setSiret] = useState(getUserData?.user.siret || '');
 	const [denomination, setDenomination] = useState(getUserData?.user.denomination || '');
 	const [description, setDescription] = useState(getUserData?.user.description || '');
@@ -83,7 +83,7 @@ function Account() {
 			setSiret(getUserData.user.siret);
 			setDenomination(getUserData.user.denomination);
 			setUserData(getUserData.user);
-			setDescription(getUserData.user.description);
+			setDescription(getUserData.user.description || '');
 			setPicture(getUserData.user.image);
 		}
 	}, [getUserData]);

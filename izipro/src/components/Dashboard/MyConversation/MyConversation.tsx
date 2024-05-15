@@ -15,6 +15,7 @@ import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { subscriptionDataStore } from '../../../store/subscription';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
+import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
 
 
 type useQueryUserConversationsProps = {
@@ -52,6 +53,7 @@ function MyConversation() {
 	const [conversation, { error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
 	const [message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
+	const [hideRequest, {error: hideRequestError}] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 
 	//query
 	const { data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
@@ -389,6 +391,27 @@ function MyConversation() {
 		});
 	}
 
+	// Function to hide a request
+	const handleHideRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
+		event.preventDefault();
+		hideRequest({
+			variables: {
+				input: {
+					user_id: id,
+					request_id: requestId
+				}
+			}
+		}).then((response) => {
+
+			if (response.data.createHiddenClientRequest) {
+				setRequestsConversationStore(requestsConversationStore.filter(request => request.id !== requestId));
+			}
+		});
+		if (hideRequestError) {
+			throw new Error('Error while hiding request');
+		}
+	};
+
 	return (
 		<div className="my-conversation-container">
 			<div className="my-client-request">Demandes clients
@@ -424,11 +447,13 @@ function MyConversation() {
 							<p>{requestConversation.city}</p>
 							<h2>{requestConversation.job}</h2>
 							<p>{requestConversation.message}</p>
+							<p>{requestConversation.deleted_at} deleted</p>
 							<div>
 								{requestConversation.media?.map((media) => (
 									media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
 								))}
 							</div>
+							<button type='button' onClick={(event) => {handleHideRequest(event, requestConversation.id);}}>Delete</button>
 						</div>
 					))}
 				</InfiniteScroll>

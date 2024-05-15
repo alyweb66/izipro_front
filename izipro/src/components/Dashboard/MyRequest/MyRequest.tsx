@@ -65,14 +65,14 @@ function MyRequest() {
 	console.log('myRequestsStore', myRequestsStore);
 	console.log('userConversationData', usersConversationData);
 
-	// useEffect to update the requests state
+	// useEffect to update the requests store
 	useEffect(() => {
-		if (getUserRequestsData) {
+		if (getUserRequestsData && getUserRequestsData.user.requests) {
 			// If offset is 0, it's the first query, so just replace the queries
 			if (offsetRef.current === 0) {
 				// check if requests are already in the store
 				const requestsIds = myRequestsStore.map(request => request.id);
-				const newRequests = getUserRequestsData.user.requests.filter((request: RequestProps) => !requestsIds.includes(request.id));
+				const newRequests = getUserRequestsData.user.requests?.filter((request: RequestProps) => !requestsIds.includes(request.id));
 				if (newRequests.length > 0) {
 					myRequestStore.setState(prevRequests => {
 						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
@@ -486,21 +486,55 @@ function MyRequest() {
 
 
 	// Function to delete a request
-	const handleDeleteRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number, imageNames: string[]) => {
+	const handleDeleteRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
 		event.preventDefault();
+
 		deleteRequest({
 			variables: 
 				{ input: 
 					{
 						id: requestId,
 						user_id: id,
-						image_names: imageNames
 					}
 				}
+
 		}).then((response) => {
+			
 			if (response.data.deleteRequest) {
-				// Remove the request from the state
+				// Remove the request from the store
 				setMyRequestsStore(myRequestsStore.filter(request => request.id !== requestId));
+			}
+
+			// remove subscription for this request
+			const subscription = subscriptionStore.find(subscription => subscription.subscriber === 'request');
+			const updatedSubscription = Array.isArray(subscription?.subscriber_id) ? subscription?.subscriber_id.filter(id => id !== requestId) : [];
+
+			subscriptionMutation({
+				variables: {
+					input: {
+						user_id: id,
+						subscriber: 'request',
+						subscriber_id: updatedSubscription
+					}
+				}
+			}).then((response) => {
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+	
+
+				// Replace the old subscription with the new one
+				const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
+					subscription.subscriber === 'request' ? subscriptionWithoutTimestamps : subscription
+				);
+
+				if (addSubscriptionStore) {
+					setSubscriptionStore(addSubscriptionStore);
+				}
+
+			});
+
+			if (subscriptionError) {
+				throw new Error('Error while updating subscription');
 			}
 		});
 
@@ -509,6 +543,7 @@ function MyRequest() {
 		}
 		
 	};
+
 
 	// Function to handle the users ids for the conversation
 	const handleConversation = (event: React.MouseEvent<HTMLDivElement>, request: RequestProps) => {
@@ -639,7 +674,7 @@ function MyRequest() {
 										))}
 								
 									</div>
-									<button type='button' onClick={(event) => {handleDeleteRequest(event, request.id, request.media.map(image => image.name));}}>Supprimer la demande</button>
+									<button type='button' onClick={(event) => {handleDeleteRequest(event, request.id);}}>Supprimer la demande</button>
 								</div>
 							))}
 						</InfiniteScroll>

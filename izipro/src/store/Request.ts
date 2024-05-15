@@ -50,6 +50,7 @@ export const requestDataStore = create<RequestStore>((set: (state: Partial<Reque
 			user_2: 0,
 			updated_at: '',
 		}],
+		deleted_at: '',
 	},
 
 	setRequest: (data: RequestSoreProps['request']) => set({ request: data }),
@@ -70,7 +71,8 @@ export const requestDataStore = create<RequestStore>((set: (state: Partial<Reque
 			job: '', 
 			media: [{id: 0, url: '', name: ''}], 
 			created_at: '', 
-			conversation: [{id: 0, user_1: 0, user_2: 0, updated_at: ''}]
+			conversation: [{id: 0, user_1: 0, user_2: 0, updated_at: ''}],
+			deleted_at: ''
 		} 
 	})
     

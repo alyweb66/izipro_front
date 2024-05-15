@@ -50,7 +50,8 @@ export const GET_USER_REQUESTS = gql`
                 user_1
                 user_2
                 updated_at
-            }
+                }
+                deleted_at
             }
         }
 }
@@ -84,6 +85,7 @@ export const GET_REQUEST_BY_JOB = gql`
                 user_2
                 updated_at
             }
+            deleted_at
         }
     }
 

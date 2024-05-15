@@ -56,6 +56,7 @@ export const GET_USER_REQUEST_BY_CONVERSATIONS = gql`
           user_2
           updated_at
         }
+        deleted_at
       }
     }
   }
