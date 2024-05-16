@@ -219,7 +219,7 @@ function MyConversation() {
 
 
 	// Function to send message
-	function sendMessage( newClientRequest = false) {
+	function sendMessage( updatedRequest?: RequestProps, newClientRequest = false) {
 		// find conversation id where request is equal to the request id if newclientRequest is false
 		let conversationId;
 		if (!newClientRequest) {
@@ -252,15 +252,11 @@ function MyConversation() {
 					conversationIdRef.current = 0;
 					// if the request is a new client request, add the request to the requestsConversationStore
 					if (newClientRequest) {
-console.log('request', request);
-console.log('selectedRequest', selectedRequest);
-
-
-						const addNewRequestConversation = [request, ...requestsConversationStore];
+						if (!updatedRequest) return;
+						const addNewRequestConversation = [updatedRequest, ...requestsConversationStore];
 						requestConversationStore.setState({ requests: addNewRequestConversation });
 						//setRequestsConversationStore(addNewRequestConversation);
 					}
-					
 					resetRequest();
 					setFile([]);
 				});
@@ -273,7 +269,7 @@ console.log('selectedRequest', selectedRequest);
 
 	// Function to send message and create conversation
 	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>, requestId: number) => {
-		debugger;
+	
 		event.preventDefault();
 		// create conversation 
 
@@ -290,18 +286,15 @@ console.log('selectedRequest', selectedRequest);
 				}
 
 			}).then((response) => {
-			
+				let updateRequest: RequestProps;
 				if (response.data.createConversation) {
-					console.log('response', response.data.createConversation);
-					
+
 					const conversation: RequestProps['conversation'] = [response.data.createConversation];
 					conversationIdRef.current = conversation[0].id;
-					console.log('conversationIdRef', conversation);
-					
+		
 					// put the conversation data in the request
-					const updateRequest: RequestProps = { ...request, conversation: conversation };
-					console.log('updateRequest', updateRequest);
-					
+					updateRequest = { ...request, conversation: conversation };
+			
 					requestDataStore.setState((prevState) => ({
 						...prevState,
 						request: updateRequest
@@ -309,9 +302,7 @@ console.log('selectedRequest', selectedRequest);
 					//setRequest(updateRequest);
 					setSelectedRequest(updateRequest);
 				}
-				console.log('selectedRequest', selectedRequest);
-				console.log('request', request);
-				
+						
 				
 				// update the subscription store
 				// replace the old subscription with the new one
@@ -349,7 +340,7 @@ console.log('selectedRequest', selectedRequest);
 						}
 
 						const newClientRequest = true;
-						sendMessage(newClientRequest);
+						sendMessage(updateRequest, newClientRequest);
 					});
 
 					if (subscriptionError) {
@@ -386,7 +377,7 @@ console.log('selectedRequest', selectedRequest);
 						}
 
 						const newClientRequest = true;
-						sendMessage(newClientRequest);
+						sendMessage(updateRequest, newClientRequest);
 					});
 				}
 				
@@ -512,6 +503,7 @@ console.log('selectedRequest', selectedRequest);
 									media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
 								))}
 							</div>
+							<button type='button' onClick={(event) => {event.stopPropagation(); handleHideRequest(event, request.id);}}>Delete</button>
 						</div>}
 					{requestByDate?.map((requestConversation) => (
 						<div className="request-details" key={requestConversation.id} onClick={() => setSelectedRequest(requestConversation)} >
@@ -528,7 +520,7 @@ console.log('selectedRequest', selectedRequest);
 									media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
 								))}
 							</div>
-							<button type='button' onClick={(event) => {handleHideRequest(event, requestConversation.id);}}>Delete</button>
+							<button type='button' onClick={(event) => {event.stopPropagation(); handleHideRequest(event, requestConversation.id);}}>Delete</button>
 						</div>
 					))}
 				</InfiniteScroll>

@@ -65,16 +65,20 @@ function Dashboard() {
 				localStorage.removeItem('ayl');
 				console.log('expired');
 				
-				navigate('/');
+				if (window.location.pathname !== '/') {
+					navigate('/');
+				}
 			} 
 		} else {
 			console.log('else');
 			
-			navigate('/');
+			if (window.location.pathname !== '/') {
+				navigate('/');
+			}
 			// if user logged in, set the user data to the store
 		} 
 
-	});
+	},[]);
 
 
 	// set user data to the store

@@ -292,7 +292,7 @@ console.log('getRequestsByJob', getRequestsByJob);
 										media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
 									))}
 								</div>
-								<button type='button' onClick={(event) => {handleHideRequest(event, request.id);}}>Delete</button>
+								<button type='button' onClick={(event) => {event.stopPropagation(); handleHideRequest(event, request.id);}}>Delete</button>
 							</div>
 						))}
 					</InfiniteScroll>

@@ -740,7 +740,7 @@ function MyRequest() {
 										))}
 								
 									</div>
-									<button type='button' onClick={(event) => {handleDeleteRequest(event, request.id);}}>Supprimer la demande</button>
+									<button type='button' onClick={(event) => {event.stopPropagation(); handleDeleteRequest(event, request.id);}}>Supprimer la demande</button>
 								</div>
 							))}
 						</InfiniteScroll>
