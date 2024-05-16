@@ -11,7 +11,7 @@ import { UserDataProps } from '../../../Type/User';
 import { myMessageDataStore } from '../../../store/message';
 import { MessageProps } from '../../../Type/message';
 import { useFileHandler } from '../../Hook/useFileHandler';
-import { subscriptionDataStore } from '../../../store/subscription';
+import { subscriptionDataStore, SubscriptionStore } from '../../../store/subscription';
 import { MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
@@ -30,7 +30,7 @@ function MyRequest() {
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
 	const [newUserId, setNewUserId] = useState<number[]>([]);
 	const [userConvState, setUserConvState] = useState<UserDataProps[]>([]);
-
+	
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
@@ -44,6 +44,7 @@ function MyRequest() {
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 
 	//useRef
+	const updateSubscriptionRef = useRef<SubscriptionProps[]>([]);
 	//const userOffsetRef = useRef(0);
 	//const conversationIdRef = useRef(0);
 
@@ -474,14 +475,9 @@ function MyRequest() {
 					},
 					
 				});
-				console.log('selectedRequestInSub', selectedRequest);
 			}
-			console.log('myRequestStoreInSub', myRequestsStore);
-			
 		}
 	}, [subscribeToMore, subscriptionStore]);
-	console.log('userConvStore', userConvStore);
-	console.log('userConvState', userConvState);
 
 
 
@@ -501,7 +497,7 @@ function MyRequest() {
 		}).then((response) => {
 			// Get the conversation ids for the request
 			const conversationIds = myRequestStore.getState().requests.find(request => request.id === requestId)?.conversation?.map(conversation => conversation.id);
-		
+			
 			if (response.data.deleteRequest) {
 				// Remove the request from the store
 				setMyRequestsStore(myRequestsStore.filter(request => request.id !== requestId));
@@ -522,53 +518,50 @@ function MyRequest() {
 			}).then((response) => {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-	
+				console.log('subscriptionWithoutTimestamps', subscriptionWithoutTimestamps);
 
-				// Replace the old subscription with the new one
-				const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
-					subscription.subscriber === 'request' ? subscriptionWithoutTimestamps : subscription
-				);
+				subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
+					...prevState,
+					subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
+						subscription.subscriber === 'request' ? subscriptionWithoutTimestamps : subscription
+					)
+				}));
 
-				if (addSubscriptionStore) {
-					setSubscriptionStore(addSubscriptionStore);
-				}
+				if (conversationIds) {
+					console.log('subscriptionStoreiiiii', subscriptionStore);
+				
+					// remove subscription for this conversation
+					const conversationSubscription = subscriptionStore.find(subscription => subscription.subscriber === 'conversation');
+					const updatedConversationSubscription = Array.isArray(conversationSubscription?.subscriber_id) ? conversationSubscription?.subscriber_id.filter(id => !conversationIds.includes(id)) : [];
 
-			});
-
-
-
-			if (conversationIds) {
-				// remove subscription for this conversation
-				const conversationSubscription = subscriptionStore.find(subscription => subscription.subscriber === 'conversation');
-				const updatedConversationSubscription = Array.isArray(conversationSubscription?.subscriber_id) ? conversationSubscription?.subscriber_id.filter(id => !conversationIds.includes(id)) : [];
-
-				subscriptionMutation({
-					variables: {
-						input: {
-							user_id: id,
-							subscriber: 'conversation',
-							subscriber_id: updatedConversationSubscription
+					subscriptionMutation({
+						variables: {
+							input: {
+								user_id: id,
+								subscriber: 'conversation',
+								subscriber_id: updatedConversationSubscription
+							}
 						}
+					}).then((response) => {
+
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
+						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+						console.log('subscriptionWithoutTimestamps conversation', subscriptionWithoutTimestamps);
+
+						subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
+							...prevState,
+							subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
+								subscription.subscriber === 'conversation' ? subscriptionWithoutTimestamps : subscription
+							)
+						}));
+
+					});
+
+					if (subscriptionError) {
+						throw new Error('Error while updating conversation subscription');
 					}
-				}).then((response) => {
-					// eslint-disable-next-line @typescript-eslint/no-unused-vars
-					const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-		
-					// Replace the old subscription with the new one
-					const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
-						subscription.subscriber === 'conversation' ? subscriptionWithoutTimestamps : subscription
-					);
-
-					if (addSubscriptionStore) {
-						setSubscriptionStore(addSubscriptionStore);
-					}
-
-				});
-
-				if (subscriptionError) {
-					throw new Error('Error while updating conversation subscription');
 				}
-			}
+			});
 		});
 
 		if (deleteRequestError) {
@@ -576,7 +569,7 @@ function MyRequest() {
 		}
 		
 	};
-console.log('subscriptionStore', subscriptionStore);
+	console.log('subscriptionStore', subscriptionStore);
 
 
 	// Function to handle the users ids for the conversation
