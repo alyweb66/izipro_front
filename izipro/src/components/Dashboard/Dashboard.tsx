@@ -10,6 +10,8 @@ import { useQueryUserData, useQueryUserSubscriptions } from '../Hook/Query';
 
 import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
+import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
+import { useMutation } from '@apollo/client';
 
 function Dashboard() {
 	const navigate = useNavigate();
@@ -18,6 +20,7 @@ function Dashboard() {
 	const [selectedTab, setSelectedTab] = useState('My Profile');
 	
 	//store
+	const id = userDataStore((state) => state.id);
 	const role = userDataStore((state) => state.role);
 	const setAll = userDataStore((state) => state.setAll);
 	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
@@ -25,6 +28,9 @@ function Dashboard() {
 	// Query to get the user data
 	const getUserData = useQueryUserData();
 	const getUserSubscription = useQueryUserSubscriptions();
+
+	//mutation
+	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
 	
 	// condition if user not logged in
 	let isLogged;
@@ -51,9 +57,20 @@ function Dashboard() {
 		// clear local storage and session storage when user leaves the page if local storage is set to session
 		const handleBeforeUnload = () => {
 			if (localStorage.getItem('ayl') === 'session') {
-				// clear local storage and session storage
-				sessionStorage.clear();
-				localStorage.clear();
+				// clear local storage,session storage and cookie
+				logout({
+					variables: {
+						logoutId: id
+					}
+				}).then(() => {
+
+					sessionStorage.clear();
+					localStorage.clear();
+				});
+
+				if (logoutError) {
+					throw new Error('Error while logging out');
+				}
 			}
 		};
 		window.addEventListener('beforeunload', handleBeforeUnload);

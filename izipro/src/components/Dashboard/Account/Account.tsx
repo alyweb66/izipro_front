@@ -7,7 +7,6 @@ import SettingAccount from './SettingAccount/SettingAccount';
 import { CHANGE_PASSWORD_MUTATION, 
 	DELETE_ACCOUNT_MUTATION, 
 	DELETE_PROFILE_PICTURE_MUTATION, 
-	LOGOUT_USER_MUTATION, 
 	UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
 import DOMPurify from 'dompurify';
 import validator from 'validator';
@@ -87,8 +86,6 @@ function Account() {
 	const [changePassword, { error: changePasswordError }] = useMutation(CHANGE_PASSWORD_MUTATION);
 	const [deleteProfilePicture, { error: deleteProfilePictureError }] = useMutation(DELETE_PROFILE_PICTURE_MUTATION);
 	const [deleteAccount, { error: deleteAccountError }] = useMutation(DELETE_ACCOUNT_MUTATION);
-	// mutation to logout user
-	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
 
 	// Set the user data to state
 	useEffect(() => {
@@ -361,10 +358,6 @@ function Account() {
 				navigate('/');
 				//});
 
-				if (logoutError) {
-					throw new Error('Error while logging out');
-				} 
-        
 			}
 		});
 
