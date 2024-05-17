@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { SubscriptionProps } from '../Type/Subscription';
 
-type SubscriptionStore = {
+export type SubscriptionStore = {
 	subscription: SubscriptionProps[];
 	setSubscription: (data: SubscriptionProps[]) => void;
 }

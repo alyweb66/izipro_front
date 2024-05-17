@@ -10,28 +10,28 @@ function Header() {
 
 	const location = useLocation();
 
-	// condition if user not logged in
-	let isLoggedValue;
-	if (localStorage.getItem('ayl') === 'session') {
 
-		isLoggedValue = {value: 'true'};
-	} else {
-
-		isLoggedValue = JSON.parse(localStorage.getItem('ayl') || '{}');
-	}
-
+	// Check if user is logged in
 	useEffect(() => {
+		// condition if user not logged in
+		let isLoggedValue;
+		if (localStorage.getItem('ayl') === 'session') {
+
+			isLoggedValue = {value: 'true'};
+		} else {
+
+			isLoggedValue = JSON.parse(localStorage.getItem('ayl') || '{}');
+		}
+
 		if (location.pathname === '/dashboard' && isLoggedValue) {
-		
 			const newIsLogged = isLoggedValue.value === 'true' ? true : false;
-			console.log('newIsLogged', newIsLogged);
+			
 			
 			setIsLogged(newIsLogged );
-	
 		} else {
 			setIsLogged(false);
 		}
-	}, [location.pathname, isLoggedValue]);
+	}, [location.pathname]);
 
 
 	return (

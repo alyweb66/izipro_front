@@ -26,6 +26,7 @@ type RequestProps = {
         user_2: number
         updated_at: string
     }[]
+    deleted_at: string
 };
 
 type RequestSoreProps = {
@@ -56,6 +57,7 @@ type RequestSoreProps = {
             user_2: number
             updated_at: string
         }[]
+        deleted_at: string
     }
 };
 

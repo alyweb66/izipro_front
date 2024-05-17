@@ -4,7 +4,7 @@ import './MyConversation.scss';
 import { requestDataStore, requestConversationStore } from '../../../store/Request';
 import { RequestProps } from '../../../Type/Request';
 import { CONVERSATION_MUTATION, MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
-import { useMutation } from '@apollo/client';
+import { useMutation, useSubscription } from '@apollo/client';
 import { userDataStore } from '../../../store/UserData';
 import { useQueryMessagesByConversation, useQueryUserConversations } from '../../Hook/Query';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -12,9 +12,10 @@ import { useFileHandler } from '../../Hook/useFileHandler';
 import { messageDataStore } from '../../../store/message';
 import { MessageProps, MessageStoreProps } from '../../../Type/message';
 import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
-import { subscriptionDataStore } from '../../../store/subscription';
+import { SubscriptionStore, subscriptionDataStore } from '../../../store/subscription';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
+import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
 
 
 type useQueryUserConversationsProps = {
@@ -41,7 +42,7 @@ function MyConversation() {
 
 	//store
 	const id = userDataStore((state) => state.id);
-	const [request, setRequest] = requestDataStore((state) => [state.request, state.setRequest]);
+	const [request] = requestDataStore((state) => [state.request, state.setRequest]);
 	const resetRequest = requestDataStore((state) => state.resetRequest);
 	const [requestsConversationStore, setRequestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 	const [messageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
@@ -52,14 +53,28 @@ function MyConversation() {
 	const [conversation, { error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
 	const [message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
+	const [hideRequest, {error: hideRequestError}] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 
 	//query
 	const { data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
-	const { subscribeToMore, messageData } = useQueryMessagesByConversation(id, conversationIdState, 0, 10);
-	console.log('subbscriptionStore', subscriptionStore);
+	const { messageData } = useQueryMessagesByConversation(id, conversationIdState, 0, 10);
+	
 
 	// file upload
 	const { file, setFile, handleFileChange } = useFileHandler();
+
+	// Message subscription
+	const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
+	const { data: messageSubscription, error: errorSubscription } = useSubscription(MESSAGE_SUBSCRIPTION, {
+		variables: {
+			conversation_ids: Subscription?.subscriber_id,
+			request_ids: [],
+			is_request: false
+		},
+	});
+	if (errorSubscription) {
+		throw new Error('Error while subscribing to message');
+	}
 
 	// useEffect to update the message store
 	useEffect(() => {
@@ -94,7 +109,7 @@ function MyConversation() {
 	// useEffect to update the data to the requests state
 	useEffect(() => {
 		if (data && data.user) {
-			console.log('data', data);
+			
 	
 			const requestsConversations: RequestProps[] = data.user.requestsConversations;
 			setRequestsConversationStore(requestsConversations); // Fix: Pass an array as the argument
@@ -132,9 +147,9 @@ function MyConversation() {
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
 		
-		console.log('subscriptionStore', subscriptionStore);
-		if (subscribeToMore) {
-			const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
+		
+		//if (subscribeToMore) {
+		/* const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
 			
 			if (Subscription?.subscriber_id) {
 				subscribeToMore({
@@ -147,46 +162,48 @@ function MyConversation() {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					updateQuery: (prev: MessageProps, { subscriptionData }: { subscriptionData: any }) => {
 
-						if (!subscriptionData.data) return prev;
-						// check if the message is already in the store
-						const messageAdded: MessageProps[] = subscriptionData.data.messageAdded;
-						const date = new Date(Number(messageAdded[0].created_at));
-						const newDate = date.toISOString();
-						console.log('messageAdded', date);
-						// add the new message to the message store
-						messageDataStore.setState(prevState => {
-							const newMessages = messageAdded.filter(
-								(newMessage: MessageProps) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
-							);
-
-							return {
-								...prevState,
-								messages: [...prevState.messages, ...newMessages]
-							};
-
-						});
+						if (!subscriptionData.data) return prev; */
+		// check if the message is already in the store
+		if (messageSubscription?.messageAdded) {
+			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
+			const date = new Date(Number(messageAdded[0].created_at));
+			const newDate = date.toISOString();
 			
-						// add updated_at to the request.conversation
-						requestConversationStore.setState(prevState => {
-							const updatedRequest = prevState.requests.map((request: RequestProps) => {
-								const updatedConversation = request.conversation?.map((conversation) => {
-									if (conversation.id === messageAdded[0].conversation_id) {
-										return { ...conversation, updated_at: newDate };
-									}
-									return conversation;
-								});
-								
-								return { ...request, conversation: updatedConversation };
-							});
-							return { requests: updatedRequest };
-						});
-					},
-				});
-			}
+			// add the new message to the message store
+			messageDataStore.setState(prevState => {
+				const newMessages = messageAdded.filter(
+					(newMessage: MessageProps) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
+				);
 
+				return {
+					...prevState,
+					messages: [...prevState.messages, ...newMessages]
+				};
+
+			});
+			
+			// add updated_at to the request.conversation
+			requestConversationStore.setState(prevState => {
+				const updatedRequest = prevState.requests.map((request: RequestProps) => {
+					const updatedConversation = request.conversation?.map((conversation) => {
+						if (conversation.id === messageAdded[0].conversation_id) {
+							return { ...conversation, updated_at: newDate };
+						}
+						return conversation;
+					});
+								
+					return { ...request, conversation: updatedConversation };
+				});
+				return { requests: updatedRequest };
+			});
 		}
-	}, [subscribeToMore, subscriptionStore]);
-	console.log('requestsConversationStore', requestsConversationStore);
+		//},
+		//});
+		//}
+
+		//}
+	}, [messageSubscription]);
+	
 	
 	// cleane the request store if the component is unmounted
 	useEffect(() => {
@@ -202,7 +219,7 @@ function MyConversation() {
 
 
 	// Function to send message
-	function sendMessage( newClientRequest = false) {
+	function sendMessage( updatedRequest?: RequestProps, newClientRequest = false) {
 		// find conversation id where request is equal to the request id if newclientRequest is false
 		let conversationId;
 		if (!newClientRequest) {
@@ -235,12 +252,12 @@ function MyConversation() {
 					conversationIdRef.current = 0;
 					// if the request is a new client request, add the request to the requestsConversationStore
 					if (newClientRequest) {
-
-						const addNewRequestConversation = [request, ...requestsConversationStore];
-						setRequestsConversationStore(addNewRequestConversation);
-						resetRequest();
+						if (!updatedRequest) return;
+						const addNewRequestConversation = [updatedRequest, ...requestsConversationStore];
+						requestConversationStore.setState({ requests: addNewRequestConversation });
+						//setRequestsConversationStore(addNewRequestConversation);
 					}
-
+					resetRequest();
 					setFile([]);
 				});
 			}
@@ -252,6 +269,7 @@ function MyConversation() {
 
 	// Function to send message and create conversation
 	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>, requestId: number) => {
+	
 		event.preventDefault();
 		// create conversation 
 
@@ -268,17 +286,24 @@ function MyConversation() {
 				}
 
 			}).then((response) => {
-			
+				let updateRequest: RequestProps;
 				if (response.data.createConversation) {
+
 					const conversation: RequestProps['conversation'] = [response.data.createConversation];
 					conversationIdRef.current = conversation[0].id;
-					
+		
 					// put the conversation data in the request
-					const updateRequest: RequestProps = { ...request, conversation: conversation };
-					setRequest(updateRequest);
+					updateRequest = { ...request, conversation: conversation };
+			
+					requestDataStore.setState((prevState) => ({
+						...prevState,
+						request: updateRequest
+					})),
+					//setRequest(updateRequest);
 					setSelectedRequest(updateRequest);
 				}
-
+						
+				
 				// update the subscription store
 				// replace the old subscription with the new one
 				if (!subscriptionStore.some(subscription => subscription.subscriber === 'clientConversation')) {
@@ -299,13 +324,13 @@ function MyConversation() {
 						const messageRequestSubscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
 						// If there are no subscriptions, add the new conversation id in the array of subscription.subscriber_id
 						if (!messageRequestSubscription) {
-							console.log('subscription before', subscriptionStore);
+							
 
 							const currentSubscriptions = subscriptionDataStore.getState().subscription;
 							const newSubscriptions = [...currentSubscriptions, subscriptionWithoutTimestamps];
 							subscriptionDataStore.getState().setSubscription(newSubscriptions);
 
-							console.log('subscription after', subscriptionStore);
+							
 
 						} else {
 							// replace the old subscription with the new one
@@ -315,7 +340,7 @@ function MyConversation() {
 						}
 
 						const newClientRequest = true;
-						sendMessage(newClientRequest);
+						sendMessage(updateRequest, newClientRequest);
 					});
 
 					if (subscriptionError) {
@@ -352,7 +377,7 @@ function MyConversation() {
 						}
 
 						const newClientRequest = true;
-						sendMessage(newClientRequest);
+						sendMessage(updateRequest, newClientRequest);
 					});
 				}
 				
@@ -389,6 +414,70 @@ function MyConversation() {
 		});
 	}
 
+	// Function to hide a client request
+	const handleHideRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
+		event.preventDefault();
+
+		hideRequest({
+			variables: {
+				input: {
+					user_id: id,
+					request_id: requestId
+				}
+			}
+		}).then((response) => {
+
+			// find conversation id from request to remove it from the subscription
+			const requestConversation = requestsConversationStore.find(request => request.id === requestId);
+			const conversationId = requestConversation?.conversation.find(conversation => conversation.user_1 === id || conversation.user_2 === id)?.id;
+
+			if (response.data.createHiddenClientRequest) {
+				setRequestsConversationStore(requestsConversationStore.filter(request => request.id !== requestId));
+			}
+
+			// remove subscription for this conversation
+			const subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
+			const newSubscriptionIds = Array.isArray(subscription?.subscriber_id) ? subscription.subscriber_id.filter((id: number) => id !== conversationId) : [];
+
+			subscriptionMutation({
+				variables: {
+					input: {
+						user_id: id,
+						subscriber: 'clientConversation',
+						subscriber_id: newSubscriptionIds
+					}
+				}
+			}).then((response) => {
+				if (response.data.createSubscription) {
+					// update the subscription store
+					const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+
+					subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
+						...prevState,
+						subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
+							subscription.subscriber === 'clientConversation' ? subscriptionWithoutTimestamps : subscription
+						)
+					}));
+
+					messageDataStore.setState((prevState) => ({
+						...prevState,
+						messages: prevState.messages.filter((message: MessageStoreProps) => message.conversation_id !== conversationId)
+					}));
+				
+				}
+			});
+
+			if (subscriptionError) {
+				throw new Error('Error while updating conversation subscription');
+			}
+
+		});
+		if (hideRequestError) {
+			throw new Error('Error while hiding request');
+		}
+	};
+
+
 	return (
 		<div className="my-conversation-container">
 			<div className="my-client-request">Demandes clients
@@ -414,6 +503,7 @@ function MyConversation() {
 									media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
 								))}
 							</div>
+							<button type='button' onClick={(event) => {event.stopPropagation(); handleHideRequest(event, request.id);}}>Delete</button>
 						</div>}
 					{requestByDate?.map((requestConversation) => (
 						<div className="request-details" key={requestConversation.id} onClick={() => setSelectedRequest(requestConversation)} >
@@ -424,11 +514,13 @@ function MyConversation() {
 							<p>{requestConversation.city}</p>
 							<h2>{requestConversation.job}</h2>
 							<p>{requestConversation.message}</p>
+							<p>{requestConversation.deleted_at} deleted</p>
 							<div>
 								{requestConversation.media?.map((media) => (
 									media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
 								))}
 							</div>
+							<button type='button' onClick={(event) => {event.stopPropagation(); handleHideRequest(event, requestConversation.id);}}>Delete</button>
 						</div>
 					))}
 				</InfiniteScroll>

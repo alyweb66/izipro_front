@@ -23,6 +23,7 @@ export const GET_USER_DATA = gql`
       settings {
         range
       }
+      deleted_at
     }
   }
 `;
@@ -56,6 +57,7 @@ export const GET_USER_REQUEST_BY_CONVERSATIONS = gql`
           user_2
           updated_at
         }
+        deleted_at
       }
     }
   }
