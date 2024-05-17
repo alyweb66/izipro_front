@@ -2,11 +2,11 @@ import { userDataStore } from '../../../store/UserData';
 import { useMutation } from '@apollo/client';
 import { LOGOUT_USER_MUTATION } from '../../GraphQL/UserMutations';
 import { useNavigate } from 'react-router-dom';
+
 import './Logout.scss';
 
-
-
 function Logout() {
+
 	const navigate = useNavigate();
 
 	//store

@@ -9,6 +9,12 @@ export const REGISTER_USER_MUTATION = gql`
     }
 `;
 
+export const DELETE_ACCOUNT_MUTATION = gql`
+    mutation DeleteAccount($id: Int!) {
+        deleteUser(id: $id)
+    }
+`;
+
 export const REGISTER_PRO_USER_MUTATION = gql`
     mutation ProRegister($input: CreateProUserInput!) {
         createProUser(input: $input) {

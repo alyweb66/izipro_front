@@ -23,6 +23,7 @@ export const GET_USER_DATA = gql`
       settings {
         range
       }
+      deleted_at
     }
   }
 `;

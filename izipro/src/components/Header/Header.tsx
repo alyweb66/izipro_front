@@ -25,7 +25,7 @@ function Header() {
 
 		if (location.pathname === '/dashboard' && isLoggedValue) {
 			const newIsLogged = isLoggedValue.value === 'true' ? true : false;
-			console.log('newIsLogged', newIsLogged);
+			
 			
 			setIsLogged(newIsLogged );
 		} else {

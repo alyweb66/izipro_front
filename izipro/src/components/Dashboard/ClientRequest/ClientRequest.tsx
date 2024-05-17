@@ -21,8 +21,6 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
-	console.log('offsetRef', offsetRef.current);
-	
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -39,17 +37,17 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 
 	// get requests by job
 	const {getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, offsetRef.current, 10);
-console.log('getRequestsByJob', getRequestsByJob);
+
 
 
 	// Function to filter the requests by the user's location and the request's location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
 		// If the function is called from the subscription, we need to add the new request to the top of list
-		console.log('couocu0000');
-		console.log('fromSubscribeToMore', fromSubscribeToMore);
+		
+		
 		
 		if (fromSubscribeToMore) {
-			console.log('couocu1');
+			
 			
 			const filteredRequests = requests.filter((request: RequestProps) => {
 				// Define the two points
@@ -133,7 +131,7 @@ console.log('getRequestsByJob', getRequestsByJob);
 		
 		// If there are subscriptions, check if the jobs are in the subscription
 		if (subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest')) {
-			console.log('subscriptionStore', subscriptionStore);
+			
 			subscriptionStore.forEach((subscription) => {
 				if (subscription.subscriber === 'jobRequest' && Array.isArray(subscription.subscriber_id)) {
 					const jobIds = jobs.map((job) => job.job_id);
@@ -203,7 +201,7 @@ console.log('getRequestsByJob', getRequestsByJob);
 	// useEffect to filter the requests by the user's location and the request's location
 	useEffect(() => {
 		if (getRequestsByJob) {
-			console.log('getRequestsByJob', getRequestsByJob.requestsByJob);
+			
 	
 			// Filter the requests
 			RangeFilter(getRequestsByJob.requestsByJob);
@@ -235,8 +233,6 @@ console.log('getRequestsByJob', getRequestsByJob);
 		}
 	}, [ subscribeToMore]);
 
-	
-	
 	// Function to hide a request
 	const handleHideRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
 		event.preventDefault();
@@ -262,9 +258,7 @@ console.log('getRequestsByJob', getRequestsByJob);
 			throw new Error('Error while hiding request');
 		}
 	};
-	console.log('clientRequests', clientRequests);
-
-
+	
 	return (
 		<div className="my_request-container">
 			{!clientRequests?.length && <p>Vous n&apos;avez pas de demande</p>}

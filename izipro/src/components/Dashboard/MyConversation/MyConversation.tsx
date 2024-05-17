@@ -42,7 +42,7 @@ function MyConversation() {
 
 	//store
 	const id = userDataStore((state) => state.id);
-	const [request, setRequest] = requestDataStore((state) => [state.request, state.setRequest]);
+	const [request] = requestDataStore((state) => [state.request, state.setRequest]);
 	const resetRequest = requestDataStore((state) => state.resetRequest);
 	const [requestsConversationStore, setRequestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 	const [messageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
@@ -57,8 +57,8 @@ function MyConversation() {
 
 	//query
 	const { data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
-	const { subscribeToMore, messageData } = useQueryMessagesByConversation(id, conversationIdState, 0, 10);
-	console.log('subbscriptionStore', subscriptionStore);
+	const { messageData } = useQueryMessagesByConversation(id, conversationIdState, 0, 10);
+	
 
 	// file upload
 	const { file, setFile, handleFileChange } = useFileHandler();
@@ -109,7 +109,7 @@ function MyConversation() {
 	// useEffect to update the data to the requests state
 	useEffect(() => {
 		if (data && data.user) {
-			console.log('data', data);
+			
 	
 			const requestsConversations: RequestProps[] = data.user.requestsConversations;
 			setRequestsConversationStore(requestsConversations); // Fix: Pass an array as the argument
@@ -147,7 +147,7 @@ function MyConversation() {
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
 		
-		console.log('data', messageSubscription);
+		
 		//if (subscribeToMore) {
 		/* const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
 			
@@ -168,7 +168,7 @@ function MyConversation() {
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
-			console.log('messageAdded', date);
+			
 			// add the new message to the message store
 			messageDataStore.setState(prevState => {
 				const newMessages = messageAdded.filter(
@@ -203,7 +203,7 @@ function MyConversation() {
 
 		//}
 	}, [messageSubscription]);
-	console.log('requestsConversationStore', requestsConversationStore);
+	
 	
 	// cleane the request store if the component is unmounted
 	useEffect(() => {
@@ -324,13 +324,13 @@ function MyConversation() {
 						const messageRequestSubscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
 						// If there are no subscriptions, add the new conversation id in the array of subscription.subscriber_id
 						if (!messageRequestSubscription) {
-							console.log('subscription before', subscriptionStore);
+							
 
 							const currentSubscriptions = subscriptionDataStore.getState().subscription;
 							const newSubscriptions = [...currentSubscriptions, subscriptionWithoutTimestamps];
 							subscriptionDataStore.getState().setSubscription(newSubscriptions);
 
-							console.log('subscription after', subscriptionStore);
+							
 
 						} else {
 							// replace the old subscription with the new one

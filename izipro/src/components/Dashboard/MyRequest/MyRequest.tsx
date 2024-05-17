@@ -60,13 +60,13 @@ function MyRequest() {
 	const { getUserRequestsData, fetchMore } = useQueryUserRequests(id, 0, limit);
 	const { usersConversationData } = useQueryUsersConversation( newUserId.length !== 0 ? newUserId : userIds ,0 , limit);
 	const { messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 20);
-	console.log('getUserRequestsData', getUserRequestsData);
-	console.log('newUserId', newUserId);
+	
+	
 
 	const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
 	const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'conversation');
-	console.log('request subscribeToMore', request);
-	console.log('conversation subscribeToMore', conversation);
+	
+	
 
 	const { data: messageSubscription, error: errorSubscription } = useSubscription(MESSAGE_SUBSCRIPTION, {
 		variables: {
@@ -79,8 +79,8 @@ function MyRequest() {
 		throw new Error('Error while subscribing to message');
 	}
 
-	console.log('myRequestsStore', myRequestsStore);
-	console.log('userConversationData', usersConversationData);
+	
+	
 
 	// useEffect to update the requests store
 	useEffect(() => {
@@ -240,10 +240,10 @@ function MyRequest() {
 	
 	// useEffect to update user conversation by date
 	useEffect(() => {
-		console.log('after message');
+		
 		
 		if (userConvStore && selectedRequest && selectedRequest.conversation) {
-			console.log('after message in condition');
+			
 			
 			// sort the messages by date to show the most recent user conversation
 			const conversation = selectedRequest.conversation;
@@ -303,7 +303,7 @@ function MyRequest() {
 		if (usersConversationData) {
 			// If offset is 0, it's the first query, so just replace the queries
 			if (userConvStore.length === 0) {
-				console.log('setting userConvStore');
+				
 				
 				setUserConvStore(usersConversationData.users);
 
@@ -321,7 +321,7 @@ function MyRequest() {
 			}
 		}
 		setNewUserId([]);
-		console.log('userConvStore in useEffect', userConvStore);
+		
 
 	}, [usersConversationData]);
 
@@ -331,8 +331,8 @@ function MyRequest() {
 		/* if (subscribeToMore) {
 			const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
 			const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'conversation');
-			console.log('request subscribeToMore', request);
-			console.log('conversation subscribeToMore', conversation);
+			
+			
 			
 
 			if (request?.subscriber_id || conversation?.subscriber_id) {
@@ -353,7 +353,7 @@ function MyRequest() {
 
 		//if (!subscriptionData.data) return prev;
 		// check if the message is already in the store
-		console.log('data', messageSubscription);
+		
 		if (messageSubscription?.messageAdded) {
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
 						
@@ -373,14 +373,14 @@ function MyRequest() {
 				};
 
 			});
-			console.log('myRequestStoreInSub', myRequestsStore);
+			
 						
 			// add the conversation to the request
 			myRequestStore.setState(prevState => {
 				const updatedRequest = prevState.requests.map((request: RequestProps) => {
 				// if the conversation id is in the request
 					if (request.conversation && request.conversation.some((conversation) => conversation.id === messageAdded[0].conversation_id)) {
-						console.log('request1', request);
+						
 						const updatedConversation = request.conversation.map((conversation) => {
 							if (conversation.id === messageAdded[0].conversation_id) {
 								return { ...conversation, updated_at: newDate };
@@ -392,7 +392,7 @@ function MyRequest() {
 					// if there is a conversation in the request but the conversation id is not in the request
 					} else if (request.id === messageAdded[0].request_id  && request.conversation?.some(
 						conversation => conversation.id !== messageAdded[0].conversation_id)) {
-						console.log('request2', request);
+						
 										
 						const conversation = [
 							...request.conversation,
@@ -408,7 +408,7 @@ function MyRequest() {
 					} else {
 					// if the request hasn't a conversation
 						if (request.id === messageAdded[0].request_id  && !request.conversation) {
-							console.log('request3', request);
+							
 										
 							const conversation = [
 								{
@@ -455,7 +455,7 @@ function MyRequest() {
 
 					// check if user is in userConvStore
 					if (!userConvStore.some(user => user.id === messageAdded[0].user_id)) {
-						console.log('set new user');
+						
 						setNewUserId([messageAdded[0].user_id]);
 					}
 
@@ -476,7 +476,7 @@ function MyRequest() {
 
 					// check if user is in userConvStore
 					if (!userConvStore.some(user => user.id === messageAdded[0].user_id)) {
-						console.log('set new user');
+						
 									
 						setNewUserId([messageAdded[0].user_id]);
 					}
@@ -488,7 +488,7 @@ function MyRequest() {
 				}
 							
 			});
-			console.log('newUserId', newUserId);
+			
 						
 			// send id to the mutation to find user
 			setNewUserId([]);
@@ -544,7 +544,7 @@ function MyRequest() {
 			}).then((response) => {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-				console.log('subscriptionWithoutTimestamps', subscriptionWithoutTimestamps);
+				
 
 				subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
 					...prevState,
@@ -554,7 +554,7 @@ function MyRequest() {
 				}));
 
 				if (conversationIds) {
-					console.log('subscriptionStoreiiiii', subscriptionStore);
+					
 				
 					// remove subscription for this conversation
 					const conversationSubscription = subscriptionStore.find(subscription => subscription.subscriber === 'conversation');
@@ -572,7 +572,7 @@ function MyRequest() {
 
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-						console.log('subscriptionWithoutTimestamps conversation', subscriptionWithoutTimestamps);
+						
 
 						subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
 							...prevState,
@@ -608,7 +608,7 @@ function MyRequest() {
 		}
 		
 	};
-	console.log('subscriptionStore', subscriptionStore);
+	
 
 
 	// Function to handle the users ids for the conversation
@@ -630,7 +630,7 @@ function MyRequest() {
 
 			// Filter out the user ids that are already in the userConvStore
 			const newIds = ids.filter(id => !idStore.includes(id));
-			console.log('newIds', newIds);
+			
 
 			if (newIds.length > 0) {
 				setUserIds(newIds || []); // Provide a default value of an empty array

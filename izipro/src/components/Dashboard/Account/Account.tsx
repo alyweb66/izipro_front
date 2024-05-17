@@ -1,25 +1,38 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { userDataStore } from '../../../store/UserData';
 import { GET_USER_DATA } from '../../GraphQL/UserQueries';
 import { useMutation, useQuery } from '@apollo/client';
 import SettingAccount from './SettingAccount/SettingAccount';
-import { CHANGE_PASSWORD_MUTATION, DELETE_PROFILE_PICTURE_MUTATION, UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
+import { CHANGE_PASSWORD_MUTATION, 
+	DELETE_ACCOUNT_MUTATION, 
+	DELETE_PROFILE_PICTURE_MUTATION, 
+	LOGOUT_USER_MUTATION, 
+	UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
 import DOMPurify from 'dompurify';
 import validator from 'validator';
 import { UserDataProps } from '../../../Type/User';
 import { Localization } from '../../Hook/Localization';
+//@ts-expect-error react-modal is not compatible with typescript
+import ReactModal from 'react-modal';
 
 import './Account.scss';
 import profileLogo from '/logo/logo profile.jpeg';
 
+ReactModal.setAppElement('#root');
+
 
 function Account() {
+	// Navigate
+	const navigate = useNavigate();
 
 	// useRef for profile picture
 	const fileInput = useRef<HTMLInputElement>(null);
 		
 	// Get the user data
 	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
+	console.log('getUserData', getUserData);
+	
 
 	//state
 	const [first_name, setFirstName] = useState(getUserData?.user.first_name || '');
@@ -37,6 +50,11 @@ function Account() {
 	const [oldPassword, setOldPassword] = useState('');
 	const [newPassword, setNewPassword] = useState('');
 	const [confirmNewPassword, setConfirmNewPassword] = useState('');
+	const [ModalIsOpen, setModalIsOpen] = useState(false);
+
+	// modal delete account function
+	const openDeleteModal = () => setModalIsOpen(true);
+	const closeDeleteModal = () => setModalIsOpen(false);
 
 	// Message modification account
 	const [message, setMessage] = useState('');
@@ -52,6 +70,7 @@ function Account() {
 	const setAccount = userDataStore((state) => state.setAccount);
 	const role = userDataStore((state) => state.role);
 	const [image, setImage] = userDataStore((state) => [state.image, state.setImage]);
+	const resetUserData = userDataStore((state) => state.resetUserData);
 	
 	// Mutation to update the user data
 	const [updateUser, { error: updateUserError }] = useMutation(UPDATE_USER_MUTATION, {
@@ -67,6 +86,9 @@ function Account() {
 	});
 	const [changePassword, { error: changePasswordError }] = useMutation(CHANGE_PASSWORD_MUTATION);
 	const [deleteProfilePicture, { error: deleteProfilePictureError }] = useMutation(DELETE_PROFILE_PICTURE_MUTATION);
+	const [deleteAccount, { error: deleteAccountError }] = useMutation(DELETE_ACCOUNT_MUTATION);
+	// mutation to logout user
+	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
 
 	// Set the user data to state
 	useEffect(() => {
@@ -292,7 +314,7 @@ function Account() {
 				id: id,
 			},
 		}).then((response): void => {
-			console.log('response',response);
+			
 			
 			if (response.data?.deleteProfilePicture) {
 				setMessage('Modifications éfféctué');
@@ -308,6 +330,48 @@ function Account() {
 		if (deleteProfilePictureError) {
 			throw new Error('Error while deleting profile picture');
 		}
+	};
+	
+	
+
+	const handledeleteAccount = (event: React.MouseEvent<HTMLButtonElement>) => {
+		event.preventDefault();
+
+		// Delete the user account
+		deleteAccount({
+			variables: {
+				id: id,
+			},
+		}).then((response): void => {
+			if (response.data?.deleteUser) {
+				
+				// clear user data store
+				resetUserData();
+				// clear local storage and session storage
+				localStorage.clear();
+				sessionStorage.clear();
+	
+				// clear the cookie
+				if (document.cookie) {
+					document.cookie = 'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+					document.cookie = 'refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+				}
+				//redirect to home page
+				closeDeleteModal();
+				navigate('/');
+				//});
+
+				if (logoutError) {
+					throw new Error('Error while logging out');
+				} 
+        
+			}
+		});
+
+		if (deleteAccountError) {
+			throw new Error('Error while deleting account');
+		}
+		
 	};
 
 
@@ -500,8 +564,20 @@ function Account() {
 					</button>
 
 				</form>
+				<button type='button' onClick={openDeleteModal}>supprimer mon compte</button>
 			</div>
 			<SettingAccount />
+			<ReactModal
+				isOpen={ModalIsOpen}
+				contentLabel="Delete Account"
+				shouldCloseOnOverlayClick={false}
+			>
+				<h1>ATTENTION</h1>
+				<p>Vous allez supprimer votre compte definitevement, êtes vous sur?</p>
+				<button onClick={handledeleteAccount}>Supprimer</button>
+				<button onClick={closeDeleteModal}>Annuler</button>
+				
+			</ReactModal>
 		</>
 	);
 }

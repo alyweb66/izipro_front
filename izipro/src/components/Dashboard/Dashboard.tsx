@@ -33,14 +33,14 @@ function Dashboard() {
 	} else {
 		isLogged = JSON.parse(localStorage.getItem('ayl') || '{}');
 	}
-	console.log('getUserSubscription', getUserSubscription);
-	console.log('isLogged', isLogged);
-	console.log(localStorage.getItem('ayl'));
+	
+	
+	
 	
 	// set user subscription to the store
 	useEffect(() => {
 		if (getUserSubscription) {
-			console.log('subscription', getUserSubscription?.user.subscription);
+			
 			setSubscription(getUserSubscription?.user.subscription);
 		}
 	},[getUserSubscription]);
@@ -63,14 +63,14 @@ function Dashboard() {
 			if (new Date().getTime() > isLogged.expiry) {
 				// The data has expired
 				localStorage.removeItem('ayl');
-				console.log('expired');
+				
 				
 				if (window.location.pathname !== '/') {
 					navigate('/');
 				}
 			} 
 		} else {
-			console.log('else');
+			
 			
 			if (window.location.pathname !== '/') {
 				navigate('/');
@@ -84,7 +84,7 @@ function Dashboard() {
 	// set user data to the store
 	useEffect(() => {
 		if (getUserData) {
-			console.log('userdata', getUserData?.user);
+			
 			
 			setAll(getUserData?.user);
 		}
