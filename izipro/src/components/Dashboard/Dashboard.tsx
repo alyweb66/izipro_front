@@ -114,20 +114,20 @@ function Dashboard() {
 	};
 
 	return(
-		<div className='dashboard-container'>
-			<nav className="menu-container">
-				<ul className="menu">
-					<li className="tab" onClick={() => setSelectedTab('Request')}>Demande</li>
-					<li className="tab" onClick={() => setSelectedTab('My requests')}>Mes demandes</li>
-					{role === 'pro' && <li className="tab" onClick={() => setSelectedTab('Client request')}>Client</li>}
-					<li className="tab" onClick={() => setSelectedTab('My conversations')}>Mes échanges</li>
-					<li className="tab" onClick={() => setSelectedTab('My profile')}>Mon compte</li>
+		<div className='dashboard'>
+			<nav className="dashboard__nav">
+				<ul className="dashboard__nav__menu">
+					<li className="dashboard__nav__menu__tab" onClick={() => setSelectedTab('Request')}>Demande</li>
+					<li className="dashboard__nav__menu__tab" onClick={() => setSelectedTab('My requests')}>Mes demandes</li>
+					{role === 'pro' && <li className="dashboard__nav__menu__tab" onClick={() => setSelectedTab('Client request')}>Client</li>}
+					<li className="dashboard__nav__menu__tab" onClick={() => setSelectedTab('My conversations')}>Mes échanges</li>
+					<li className="dashboard__nav__menu__tab" onClick={() => setSelectedTab('My profile')}>Mon compte</li>
 
 
 				</ul>
 			</nav>
 
-			<div className="content-container">
+			<div className="dashboard__content">
 				{selectedTab === 'Request' && <Request/>}
 				{selectedTab === 'My requests' && <MyRequest/>}
 				{selectedTab === 'My conversations' && <MyConversation/>}

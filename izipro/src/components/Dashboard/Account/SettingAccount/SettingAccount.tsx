@@ -6,6 +6,7 @@ import './SettingAccount.scss';
 import { useEffect, useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { userDataStore } from '../../../../store/UserData';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
 
 function SettingAccount() {
@@ -21,6 +22,7 @@ function SettingAccount() {
 	const [wishListJob, setWishListJob] = useState<JobProps[]>([]);
 	const [selectedJob, setSelectedJob] = useState<JobProps[]>([]);
 	const [radius, setRadius] = useState(settings[0]?.range || 0);
+	const [message, setMessage] = useState('');
 
 	// fetch jobs
 	const categoriesData = useQueryCategory();
@@ -137,6 +139,10 @@ function SettingAccount() {
 			}
 		}).then(() => {
 			setSettings([{range: radius}]);
+			setMessage('distance validée');
+			setTimeout(() => {
+				setMessage('');
+			}, 5000);
 		});
 
 		if (errorUserSetting) {
@@ -149,24 +155,25 @@ function SettingAccount() {
 		<div className="setting-account">
 			{role === 'pro' && (
 				<>
-					<form action="" onSubmit={handleSubmitJob}>
+					<form className="setting-account__form" onSubmit={handleSubmitJob}>
+						<h1 className="setting-account__form__title">Indiquez vos métiers:</h1>
 						<select
-							className="job-select"
+							className="setting-account__form__select"
 							name="job"
 							id="job"
 							value={selectedCategory}
 							onChange={(event) => setSelectedCategory(event.target.value)}
 						>
-							<option value="">Catégorie</option>
+							<option className="setting-account__form__select__option" value="">Catégorie</option>
 							{categoriesData && categoriesData.categories.map((category: CategoryPros, index: number) => (
-								<option key={index} value={category.id}>
+								<option className="setting-account__form__select__option" key={index} value={category.id}>
 									{category.name}
 								</option>
 
 							))}
 						</select>
 						<select
-							className="category_select"
+							className="setting-account__form__select"
 							name="job"
 							id="job"
 							value={JSON.stringify(selectedJob)}
@@ -185,21 +192,22 @@ function SettingAccount() {
 							))}
 
 						</select>
-						<ul>
+						<ul className="setting-account__form__list" >
+							<h2 className="setting-account__subtitle">Métiers séléctionné:</h2>
 							{wishListJob && wishListJob.map((job: JobProps, index: number) => (
-								<li key={index}>
+								<li className="setting-account__form__list__tag" key={index}>
 									{job.name}
-									<button onClick={(event) => handleRemoveListJob(job.id, event)}>X</button>
+									<button className="setting-account__form__list__delete__button" onClick={(event) => handleRemoveListJob(job.id, event)}>X</button>
 								</li>
 							))}
 						</ul>
-						<button type='submit'>valider les métiers</button>
-						<ul>
-						Vos métiers séléctionné
+						<button className="setting-account__form__button" type='submit'>valider</button>
+						<ul className="setting-account__form__list job">
+							<h2 className="setting-account__subtitle">Vos métiers:</h2>
 							{selectedJob && selectedJob.map((job: JobProps, index: number) => (
-								<li key={index}>
+								<li className="setting-account__form__list__tag" key={index}>
 									{job.name}
-									<button onClick={(event) => handleDeleteJob(job.id, event)}>X</button>
+									<button className="setting-account__form__list__delete__button" onClick={(event) => handleDeleteJob(job.id, event)}>X</button>
 								</li>
 							))}
 						</ul>
@@ -207,11 +215,12 @@ function SettingAccount() {
 
 					</form>
 				
-					<label htmlFor="radius">
-						<p>Selectionnez une distance:</p>
+					<label className="setting-account__radius">
+						<h2 className="setting-account__subtitle">Selectionnez une distance d&apos;action:</h2>
 						{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
 					</label>
 					<input
+						className="setting-account__radius__input"
 						id="radius"
 						type="range"
 						min="0"
@@ -220,7 +229,10 @@ function SettingAccount() {
 						value={radius}
 						onChange={e => setRadius(Number(e.target.value))}
 					/>
-					<button onClick={handleValidateRange}>Valider</button>
+					<div className="setting-account__radius__input__message">
+						{message && <p>{message}</p>}
+					</div>
+					<button className="setting-account__radius__button" onClick={handleValidateRange}>Valider</button>
 				</>
 			)}
 		</div>
