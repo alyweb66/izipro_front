@@ -152,90 +152,92 @@ function SettingAccount() {
 	};
 
 	return (
-		<div className="setting-account">
+		<>
 			{role === 'pro' && (
-				<>
-					<form className="setting-account__form" onSubmit={handleSubmitJob}>
-						<h1 className="setting-account__form__title">Indiquez vos métiers:</h1>
-						<select
-							className="setting-account__form__select"
-							name="job"
-							id="job"
-							value={selectedCategory}
-							onChange={(event) => setSelectedCategory(event.target.value)}
-						>
-							<option className="setting-account__form__select__option" value="">Catégorie</option>
-							{categoriesData && categoriesData.categories.map((category: CategoryPros, index: number) => (
-								<option className="setting-account__form__select__option" key={index} value={category.id}>
-									{category.name}
-								</option>
+				<div className="setting-account">
+					<>
+						<form className="setting-account__form" onSubmit={handleSubmitJob}>
+							<h1 className="setting-account__form__title">Indiquez vos métiers:</h1>
+							<select
+								className="setting-account__form__select"
+								name="job"
+								id="job"
+								value={selectedCategory}
+								onChange={(event) => setSelectedCategory(event.target.value)}
+							>
+								<option className="setting-account__form__select__option" value="">Catégorie</option>
+								{categoriesData && categoriesData.categories.map((category: CategoryPros, index: number) => (
+									<option className="setting-account__form__select__option" key={index} value={category.id}>
+										{category.name}
+									</option>
 
-							))}
-						</select>
-						<select
-							className="setting-account__form__select"
-							name="job"
-							id="job"
-							value={JSON.stringify(selectedJob)}
-							onChange={(event) => setWishListJob([JSON.parse(event.target.value), ...wishListJob])}
-						>
-							<option value="">Métiers</option>
-							{jobData && jobData.category.jobs.map((job: JobProps, index: number) => (
+								))}
+							</select>
+							<select
+								className="setting-account__form__select"
+								name="job"
+								id="job"
+								value={JSON.stringify(selectedJob)}
+								onChange={(event) => setWishListJob([JSON.parse(event.target.value), ...wishListJob])}
+							>
+								<option value="">Métiers</option>
+								{jobData && jobData.category.jobs.map((job: JobProps, index: number) => (
 
-								<option
-									key={index}
-									value={JSON.stringify({ id: job.id, name: job.name })}
-									title={job.description}
-								>
-									{job.name}
-								</option>
-							))}
+									<option
+										key={index}
+										value={JSON.stringify({ id: job.id, name: job.name })}
+										title={job.description}
+									>
+										{job.name}
+									</option>
+								))}
 
-						</select>
-						<ul className="setting-account__form__list" >
-							<h2 className="setting-account__subtitle">Métiers séléctionné:</h2>
-							{wishListJob && wishListJob.map((job: JobProps, index: number) => (
-								<li className="setting-account__form__list__tag" key={index}>
-									{job.name}
-									<button className="setting-account__form__list__delete__button" onClick={(event) => handleRemoveListJob(job.id, event)}>X</button>
-								</li>
-							))}
-						</ul>
-						<button className="setting-account__form__button" type='submit'>valider</button>
-						<ul className="setting-account__form__list job">
-							<h2 className="setting-account__subtitle">Vos métiers:</h2>
-							{selectedJob && selectedJob.map((job: JobProps, index: number) => (
-								<li className="setting-account__form__list__tag" key={index}>
-									{job.name}
-									<button className="setting-account__form__list__delete__button" onClick={(event) => handleDeleteJob(job.id, event)}>X</button>
-								</li>
-							))}
-						</ul>
+							</select>
+							<ul className="setting-account__form__list" >
+								<h2 className="setting-account__subtitle">Métiers séléctionné:</h2>
+								{wishListJob && wishListJob.map((job: JobProps, index: number) => (
+									<li className="setting-account__form__list__tag" key={index}>
+										{job.name}
+										<button className="setting-account__form__list__delete__button" onClick={(event) => handleRemoveListJob(job.id, event)}>X</button>
+									</li>
+								))}
+							</ul>
+							<button className="setting-account__form__button" type='submit'>valider</button>
+							<ul className="setting-account__form__list job">
+								<h2 className="setting-account__subtitle">Vos métiers:</h2>
+								{selectedJob && selectedJob.map((job: JobProps, index: number) => (
+									<li className="setting-account__form__list__tag" key={index}>
+										{job.name}
+										<button className="setting-account__form__list__delete__button" onClick={(event) => handleDeleteJob(job.id, event)}>X</button>
+									</li>
+								))}
+							</ul>
 
 
-					</form>
+						</form>
 				
-					<label className="setting-account__radius">
-						<h2 className="setting-account__subtitle">Selectionnez une distance d&apos;action:</h2>
-						{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
-					</label>
-					<input
-						className="setting-account__radius__input"
-						id="radius"
-						type="range"
-						min="0"
-						max="100000"
-						step="5000"
-						value={radius}
-						onChange={e => setRadius(Number(e.target.value))}
-					/>
-					<div className="setting-account__radius__input__message">
-						{message && <p>{message}</p>}
-					</div>
-					<button className="setting-account__radius__button" onClick={handleValidateRange}>Valider</button>
-				</>
+						<label className="setting-account__radius">
+							<h2 className="setting-account__subtitle">Selectionnez une distance d&apos;action:</h2>
+							{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
+						</label>
+						<input
+							className="setting-account__radius__input"
+							id="radius"
+							type="range"
+							min="0"
+							max="100000"
+							step="5000"
+							value={radius}
+							onChange={e => setRadius(Number(e.target.value))}
+						/>
+						<div className="setting-account__radius__input__message">
+							{message && <p>{message}</p>}
+						</div>
+						<button className="setting-account__radius__button" onClick={handleValidateRange}>Valider</button>
+					</>
+				</div>
 			)}
-		</div>
+		</>
 	);
 }
 

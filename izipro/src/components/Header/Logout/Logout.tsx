@@ -50,7 +50,7 @@ function Logout() {
 			<button
 				className="logout__button"
 				onClick={handleLogout}
-			>Se déconnecter
+			>Déconnexion
 			</button>
 		</div>
 	);

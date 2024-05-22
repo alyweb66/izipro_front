@@ -7,7 +7,7 @@ import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import { userDataStore } from '../../store/UserData';
 import { useQueryUserData, useQueryUserSubscriptions } from '../Hook/Query';
-
+import { GiHamburgerMenu } from 'react-icons/gi';
 import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
 import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
@@ -17,7 +17,9 @@ function Dashboard() {
 	const navigate = useNavigate();
 
 	// State
-	const [selectedTab, setSelectedTab] = useState('My Profile');
+	const [selectedTab, setSelectedTab] = useState('My requests');
+	const [isOpen, setIsOpen] = useState(false);
+	console.log('selectedTab', selectedTab);
 	
 	//store
 	const id = userDataStore((state) => state.id);
@@ -39,10 +41,7 @@ function Dashboard() {
 	} else {
 		isLogged = JSON.parse(localStorage.getItem('ayl') || '{}');
 	}
-	
-	
-	
-	
+
 	// set user subscription to the store
 	useEffect(() => {
 		if (getUserSubscription) {
@@ -107,23 +106,32 @@ function Dashboard() {
 		}
 	},[getUserData]);
 
-
-
+	// function to handle navigation to my conversation
 	const handleMyConvesationNavigate = () => {
 		setSelectedTab('My conversations');
+	};
+
+	// burger menu
+	const toggleMenu = () => {
+		setIsOpen(!isOpen);
 	};
 
 	return(
 		<div className='dashboard'>
 			<nav className="dashboard__nav">
-				<ul className="dashboard__nav__menu">
-					<li className="dashboard__nav__menu__tab" onClick={() => setSelectedTab('Request')}>Demande</li>
-					<li className="dashboard__nav__menu__tab" onClick={() => setSelectedTab('My requests')}>Mes demandes</li>
-					{role === 'pro' && <li className="dashboard__nav__menu__tab" onClick={() => setSelectedTab('Client request')}>Client</li>}
-					<li className="dashboard__nav__menu__tab" onClick={() => setSelectedTab('My conversations')}>Mes échanges</li>
-					<li className="dashboard__nav__menu__tab" onClick={() => setSelectedTab('My profile')}>Mon compte</li>
-
-
+				<button className="dashboard__nav__burger-menu" onClick={toggleMenu}>
+					<div className='burger-icon'>
+						<div className="burger-icon__line"></div>
+						<div className="burger-icon__middle"></div>
+						<div className="burger-icon__line"></div>
+					</div>
+				</button>
+				<ul className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}>
+					<li className={`dashboard__nav__menu__tab ${selectedTab === 'Request' ? 'active' : ''}`} onClick={() => {setSelectedTab('Request'), setIsOpen(!isOpen);}}>Demande</li>
+					<li className={`dashboard__nav__menu__tab ${selectedTab === 'My requests' ? 'active' : ''}`} onClick={() => {setSelectedTab('My requests'), setIsOpen(!isOpen);}}>Mes demandes</li>
+					{role === 'pro' && <li className={`dashboard__nav__menu__tab ${selectedTab === 'Client request' ? 'active' : ''}`} onClick={() => {setSelectedTab('Client request'), setIsOpen(!isOpen);}}>Client</li>}
+					{role === 'pro' &&<li className={`dashboard__nav__menu__tab ${selectedTab === 'My conversations' ? 'active' : ''}`} onClick={() => {setSelectedTab('My conversations'), setIsOpen(!isOpen);}}>Mes échanges</li>}
+					<li className={`dashboard__nav__menu__tab ${selectedTab === 'My profile' ? 'active' : ''}`} onClick={() => {setSelectedTab('My profile'), setIsOpen(!isOpen);}}>Mon compte</li>
 				</ul>
 			</nav>
 

@@ -47,11 +47,7 @@
             padding-right: 1.5rem;
             background-color: white;
 
-
-
             &:hover {
-
-                //  color: v.$color-primary-blue;
                 border: 1px solid black;
                 font-weight: 500;
             }
@@ -78,11 +74,7 @@
                 flex-direction: row-reverse;
                 align-items: center;
                 justify-content: flex-end;
-                opacity: 1; // Start invisible
-                transform: scale(1); // Start scaled down
-                transition: opacity 0.4s, transform 0.4s;
-
-
+  
             }
 
             .setting-account__form__list__delete__button {
