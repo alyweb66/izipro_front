@@ -23,7 +23,7 @@ export function useFileHandler() {
 		
 		if (validFiles) {
 			const urls = validFiles.map(file => URL.createObjectURL(file));
-			const fileObjects = urls.map(url => new File([url], url));
+			const fileObjects = urls.map((url, index) => new File([url], url, { type: validFiles[index].type }));
 			setFile([...file, ...validFiles]);
 			setUrlFile([...urlFile, ...fileObjects]);
 		}

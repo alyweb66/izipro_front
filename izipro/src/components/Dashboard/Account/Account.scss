@@ -253,3 +253,22 @@
     }
 
 }
+
+@media (max-width: 480px) {
+    .account {
+        .account__profile {
+            .account__profile__form {
+                width: 100%;
+                margin: 1rem;
+                padding: 1rem;
+
+                &.password {
+                    margin-top: 2rem;
+                }
+            }
+        }
+
+        
+    }
+
+}
