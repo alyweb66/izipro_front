@@ -5,8 +5,14 @@ export function useFileHandler() {
 	const [file, setFile] = useState<File[]>([]);
 	const [urlFile, setUrlFile] = useState<File[]>([]);
 
-	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const files = event.target.files;
+	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLDivElement>, onDrag = false) => {
+
+		let files;
+		if (onDrag) {
+			files = (event as React.DragEvent<HTMLDivElement>).dataTransfer.files;
+		} else {
+			files = (event as React.ChangeEvent<HTMLInputElement>).target.files;
+		}
 		const maxFileSize = 1048576; // 1MB in bytes
 		// filter pdf files that are too large
 		const validFiles = Array.from(files!).filter(file => {

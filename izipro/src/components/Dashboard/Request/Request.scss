@@ -71,6 +71,10 @@
             font-weight: 500;
             color: v.$color-primary-orange;
 
+            &.urgent {
+                margin-top: 2rem;
+            }
+
             &.radius {
                 margin-bottom: 0.5rem;
                 margin-top: 1.2rem;
@@ -128,8 +132,6 @@
                     -5px 0 10px #ffffff17,
                     5px 0 10px #6666661c;
             }
-
-
 
         }
 
@@ -272,11 +274,28 @@
         .request__form {
             width: 90%;
 
+            .request__form__select {
+                width: 90%;
+            }
+
             .request__form__label {
                 margin: 0 10%;
             }
 
            
+        }
+    }
+}
+
+@media (max-width: 700px) {
+    .request {
+
+        .request__form {
+
+            .request__form__select {
+                width: 70%;
+            }
+
         }
     }
 }

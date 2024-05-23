@@ -177,6 +177,21 @@ function Request() {
 		setMap(event.target);
 	};
 
+	// Handle file upload
+	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if (urlFile.length < 3) {
+			handleFileChange(event);
+		}	
+	};
+
+	// Handle file drop
+	const handleFileDrop = (event: React.DragEvent<HTMLDivElement>) => {
+		event.preventDefault(); // Get dropped files
+		if (urlFile.length < 3) {
+			const onDrag = true;
+			handleFileChange(event, onDrag); // Use your existing file handler
+		}
+	};
 	// Update zoom level when radius changes
 	useEffect(() => {
 		const mediaQuery = window.matchMedia('(max-width: 450px)');
@@ -240,7 +255,7 @@ function Request() {
 				(<p>Veuillez renseigner votre nom, prénom et adresse dans votre compte pour faire une demande</p>)}
 			{address && city && postal_code && first_name && last_name && (
 				<form className="request__form" onSubmit={handleSubmitRequest}>
-					<h2 className="request__form__title">Si votre demande est une urgence cliquez sur URGENT:</h2>
+					<h2 className="request__form__title urgent">Si votre demande est une urgence cliquez sur URGENT:</h2>
 					<button
 						className={`urgent-button ${urgent ? 'active' : ''}`}
 						onClick={(event) => {
@@ -368,7 +383,13 @@ function Request() {
 						))}
 					</div>
 					<h2 className="request__form__title media">Ajoutez des photos (3 maximum):</h2>
-					<label htmlFor="file" className="request__form__label-file">
+					<label 
+						htmlFor="file" 
+						className="request__form__label-file"
+						onDragOver={(event) => event.preventDefault()}
+						onDragEnter={(event) => event.preventDefault()}
+						onDrop={handleFileDrop}
+					>
 						<span>
 							<svg
 								xmlSpace="preserve"
@@ -417,7 +438,7 @@ function Request() {
 						name="text"
 						type="file"
 						multiple={true}
-						onChange={handleFileChange}
+						onChange={handleFileUpload}
 						accept=".jpg,.jpeg,.png,.pdf"
 					/>
 					<input
@@ -426,7 +447,7 @@ function Request() {
 						type="file" 
 						accept="image/*" 
 						capture="environment" 
-						onChange={handleFileChange} 
+						onChange={handleFileUpload} 
 					/>
 					<FaCamera 
 						className="request__form__input-media camera-icone " 
