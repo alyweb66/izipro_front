@@ -5,11 +5,11 @@ export function useFileHandler() {
 	const [file, setFile] = useState<File[]>([]);
 	const [urlFile, setUrlFile] = useState<File[]>([]);
 
-	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLDivElement>, onDrag = false) => {
+	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLLabelElement>, onDrag = false) => {
 
 		let files;
 		if (onDrag) {
-			files = (event as React.DragEvent<HTMLDivElement>).dataTransfer.files;
+			files = (event as React.DragEvent<HTMLLabelElement>).dataTransfer.files;
 		} else {
 			files = (event as React.ChangeEvent<HTMLInputElement>).target.files;
 		}

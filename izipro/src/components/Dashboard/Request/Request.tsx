@@ -185,7 +185,7 @@ function Request() {
 	};
 
 	// Handle file drop
-	const handleFileDrop = (event: React.DragEvent<HTMLDivElement>) => {
+	const handleFileDrop = (event: React.DragEvent<HTMLLabelElement>) => {
 		event.preventDefault(); // Get dropped files
 		if (urlFile.length < 3) {
 			const onDrag = true;
