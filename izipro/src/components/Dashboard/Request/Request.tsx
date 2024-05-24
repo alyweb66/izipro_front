@@ -39,6 +39,7 @@ function Request() {
 	const [descriptionRequest, setDescriptionRequest] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 	const [successMessage, setSuccessMessage] = useState('');
+	//const [description, setDescription] = useState('');
 
 	// file upload
 	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
@@ -345,7 +346,7 @@ function Request() {
 						<input
 							className="request__form__label__input title"
 							type="text"
-							placeholder="Titre de la demande"
+							placeholder="Titre de la demande (50 caractères maximum)"
 							value={titleRequest}
 							onChange={(event) => setTitleRequest(event.target.value)}
 							maxLength={50}
@@ -357,11 +358,14 @@ function Request() {
 							className="request__form__label__input textarea"
 							name="description"
 							id="description"
-							placeholder="Description de la demande"
+							placeholder="Description de la demande (500 caractères maximum)"
 							value={descriptionRequest}
+							maxLength={500}
+							aria-label="Description de la demande 500 caractères maximum"
 							onChange={(event) => setDescriptionRequest(event.target.value)}
 						>
 						</textarea>
+						<p>{descriptionRequest?.length}/500</p>
 					</label>
 					<div className="request__form__input-media">
 						{urlFile.map((file, index) => (

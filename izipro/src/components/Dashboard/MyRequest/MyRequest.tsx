@@ -16,10 +16,16 @@ import { MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
+import { FaTrashAlt } from 'react-icons/fa';
+import pdfLogo from '/logo/pdf-icon.svg';
+import { useModal, ImageModal } from '../../Hook/ImageModal';
 //import { useQueryConversation } from '../../Hook/Query';
 
 function MyRequest() {
 
+	// ImageModal Hook
+	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
+	
 	//state
 	//const [requests, setRequests] = useState<RequestProps[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -60,12 +66,10 @@ function MyRequest() {
 	const { getUserRequestsData, fetchMore } = useQueryUserRequests(id, 0, limit);
 	const { usersConversationData } = useQueryUsersConversation( newUserId.length !== 0 ? newUserId : userIds ,0 , limit);
 	const { messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 20);
-	
-	
+
 
 	const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
 	const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'conversation');
-	
 	
 
 	const { data: messageSubscription, error: errorSubscription } = useSubscription(MESSAGE_SUBSCRIPTION, {
@@ -79,8 +83,6 @@ function MyRequest() {
 		throw new Error('Error while subscribing to message');
 	}
 
-	
-	
 
 	// useEffect to update the requests store
 	useEffect(() => {
@@ -505,8 +507,6 @@ function MyRequest() {
 		//}
 	}, [messageSubscription]);
 
-
-
 	// Function to delete a request
 	const handleDeleteRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
 		event.preventDefault();
@@ -608,8 +608,6 @@ function MyRequest() {
 		}
 		
 	};
-	
-
 
 	// Function to handle the users ids for the conversation
 	const handleConversation = (event: React.MouseEvent<HTMLDivElement>, request: RequestProps) => {
@@ -706,14 +704,16 @@ function MyRequest() {
 			setLoading(false);
 		});
 	}
+	console.log('myRequestByDate', requestByDate);
+
 
 
 	return (
-		<div className="my_request-container">
-			<div className="request-list">
+		<div className="my-request">
+			<div className="my-request__list">
 				{!requestByDate && <p>Vous n&apos;avez pas de demande</p>}
 				{requestByDate && (
-					<div > 
+					<div className="my-request__list__detail" > 
 						<InfiniteScroll
 							dataLength={myRequestsStore?.length}
 							next={ () => {
@@ -725,22 +725,75 @@ function MyRequest() {
 							loader={<h4>Loading...</h4>}
 						>
 							{requestByDate.map((request) => (
-								<div key={request.id} onClick={(event) => [handleConversation(event, request), setSelectedRequest(request)]}>
-									<h1>{request.title}</h1>
-									<p>{request.created_at}</p>
-									<p>{request.first_name}</p>
-									<p>{request.last_name}</p>
-									<p>{request.city}</p>
-									<h2>{request.job}</h2>
-									<p>{request.message}</p>
-									<div>
+								<div
+									className={`my-request__list__detail__item ${request.urgent}` }
+									key={request.id} 
+									onClick={(event) => [handleConversation(event, request), setSelectedRequest(request)]}
+								>
+									{request.urgent && <p className="my-request__list__detail__item urgent">URGENT</p>}
+									<div className="my-request__list__detail__item__header">
+										<p className="my-request__list__detail__item__header date" >
+											<span className="my-request__list__detail__item__header date-span">
+												Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
+										</p>
+										<p className="my-request__list__detail__item__header city" >
+											<span className="my-request__list__detail__item__header city-span">
+												Ville:</span>&nbsp;{request.city}
+										</p>
+										<h2 className="my-request__list__detail__item__header job" >
+											<span className="my-request__list__detail__item__header job-span">
+												Métier:</span>&nbsp;{request.job}
+										</h2>
+										<p className="my-request__list__detail__item__header name" >
+											<span className="my-request__list__detail__item__header name-span">
+												Nom:</span>&nbsp;{request.first_name} {request.last_name}
+										</p>
+									</div>
+									<h1 className="my-request__list__detail__item title" >{request.title}</h1>
+									<p className="my-request__list__detail__item message" >{request.message}</p>
+									<div className="my-request__list__detail__item__picture">
 								
-										{request.media?.map((media) => (
-											media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
-										))}
+										{(() => {
+											const imageUrls = request.media?.map(media => media.url) || [];
+											return request.media?.map((media, index) => (
+												media ? (
+													media.name.endsWith('.pdf') ? (
+														<a href={media.url} key={media.id} download={media.name} target="_blank" rel="noopener noreferrer" >
+															<img 
+																className="my-request__list__detail__item__picture img" 
+																//key={media.id} 
+																src={pdfLogo} 
+																alt={media.name} 
+															/>
+														</a>
+													) : (
+														<img 
+															className="my-request__list__detail__item__picture img" 
+															key={media.id} 
+															src={media.url} 
+															onClick={() => openModal(imageUrls, index)}
+															alt={media.name} 
+														/>
+													)
+												) : null
+											));
+										})()}
 								
 									</div>
-									<button type='button' onClick={(event) => {event.stopPropagation(); handleDeleteRequest(event, request.id);}}>Supprimer la demande</button>
+									{/* <div className="my-request__list__detail__item__footer">
+										
+										
+									</div> */}
+									<button
+										id="delete-request"
+										className="my-request__list__detail__item__delete" 
+										type='button' 
+										onClick={(event) => {event.stopPropagation(); handleDeleteRequest(event, request.id);}}>Supprimer la demande
+									</button>
+									<FaTrashAlt 
+										className="my-request__list__detail__item__delete-FaTrashAlt" 
+										onClick={() => document.getElementById('delete-request')?.click()}
+									/>
 								</div>
 							))}
 						</InfiniteScroll>
@@ -748,20 +801,25 @@ function MyRequest() {
 					</div>
 				)}
 			</div>
-			<div className="answer-list">
-				{userConvState?.length === 0 && <p>Vous n&apos;avez pas de conversation</p>}
+			<div className="my-request__answer-list">
+				{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
 				{userConvState && userConvState?.map((user: UserDataProps ) => (
-					<div key={user.id} onClick={(event) => {handleMessageConversation(event, user.id);}}>
-						<h1>user</h1>
-						<img src={user.image} alt="" />
-						<p>{user.denomination}</p>
-						<p>{user.city}</p>
+					<div
+						className="my-request__answer-list__user" 
+						key={user.id} 
+						onClick={(event) => {handleMessageConversation(event, user.id);}}>
+						<div className="my-request__answer-list__user__header">
+							<img className="my-request__answer-list__user__header img" src={user.image} alt="" />
+							<p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p>
+							<p className="my-request__answer-list__user_ header denomination">{user.denomination}</p>
+						</div>
+						{/* <p className="my-request__answer-list__user city">{user.city}</p> */}
 					</div>
 				))}
 
 			</div>
-			<div className="message-list">
-				<h2>Messages for {selectedRequest?.title}</h2>
+			<div className="my-request__message-list">
+				<h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2>
 				{Array.isArray(messageStore) &&
 							messageStore
 								.filter((message) => message.conversation_id === conversationIdState)
@@ -772,23 +830,35 @@ function MyRequest() {
 								))
 								
 				}
-				<form onSubmit={(event) => handleMessageSubmit(event)}>
+				<form className="my-request__message-list__form" onSubmit={(event) => handleMessageSubmit(event)}>
 					<input
+						className="my-request__message-list__form__input"
 						type="text"
 						value={messageValue}
 						onChange={(e) => setMessageValue(e.target.value)}
 						placeholder="Type your message here"
 					/>
 					<input
+						className="my-request__message-list__form__input media"
 						type="file"
 						accept="image/*,.pdf"
 						onChange={handleFileChange}
 					/>
-					<button type="submit">Send</button>
+					<button className="my-request__message-list__form__button" type="submit">Send</button>
 				</form>
 
 			</div>
+
+			<ImageModal 
+				modalIsOpen={modalIsOpen} 
+				closeModal={closeModal} 
+				selectedImage={selectedImage} 
+				nextImage={nextImage}
+				previousImage={previousImage}
+			/>
 		</div>
+
+		
 	);
 }
 
