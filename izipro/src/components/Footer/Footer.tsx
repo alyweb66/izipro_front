@@ -1,15 +1,15 @@
-import './Footer.scss'
+import './Footer.scss';
 
 function Footer() {
-  return (
+	return (
     
-    <div>
-        <footer>
-              <a href="#">CGU</a>
-              <a href="#">Contact</a>
-        </footer>
-    </div>
-  );
+		<div>
+			<footer>
+				<a href="#">CGU</a>
+				<a href="#">Contact</a>
+			</footer>
+		</div>
+	);
 }
 
 export default Footer;

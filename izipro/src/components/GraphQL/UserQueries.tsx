@@ -100,6 +100,8 @@ export const GET_USERS_CONVERSATION = gql`
   query UserConversation($ids: [Int!], $offset: Int, $limit: Int) {
     users(ids: $ids, offset: $offset, limit: $limit) {
       id
+      first_name
+      last_name
       city
       image
       description

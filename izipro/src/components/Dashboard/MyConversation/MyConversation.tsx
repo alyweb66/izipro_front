@@ -549,6 +549,7 @@ function MyConversation() {
 								type="file"
 								accept="image/*,.pdf"
 								onChange={handleFileChange}
+								multiple={true}
 							/>
 							<button type="submit">Send</button>
 						</form>

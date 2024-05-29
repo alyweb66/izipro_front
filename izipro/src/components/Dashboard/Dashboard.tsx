@@ -12,6 +12,7 @@ import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
 import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
 import { useMutation } from '@apollo/client';
+import Footer from '../Footer/Footer';
 
 function Dashboard() {
 	const navigate = useNavigate();
@@ -142,7 +143,8 @@ function Dashboard() {
 				{selectedTab === 'My profile' && <Account />}
 				{selectedTab === 'Client request' && <ClientRequest onDetailsClick={handleMyConvesationNavigate} />}
 
-			</div>	
+			</div>
+			<Footer />	
 		</div>
 		
 	);

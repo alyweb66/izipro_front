@@ -39,17 +39,18 @@ export function ImageModal({ modalIsOpen, closeModal, selectedImage, nextImage, 
 			isOpen={modalIsOpen}
 			onRequestClose={closeModal}
 			contentLabel="Image Modal"
+			shouldCloseOnOverlayClick={true}
 		>
 			<button 
 				id="close"
 				className="react-modal__button" 
 				onClick={closeModal}>Fermer
 			</button>
-			<MdClose 
-				className="react-modal__button-close" 
-				onClick={() => document.getElementById('close')?.click()} 
-			/>
 			<div className="react-modal__picture">
+				<MdClose 
+					className="react-modal__button-close" 
+					onClick={() => document.getElementById('close')?.click()} 
+				/>
 				<button
 					id="previous" 
 					className="react-modal__picture button" 
