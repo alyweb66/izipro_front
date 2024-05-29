@@ -21,6 +21,7 @@
 
 
         .my-request__list__detail__item {
+            cursor: pointer;
             display: flex;
             flex-direction: column;
             // border: 1px solid v.$color-secondary-blue;
@@ -98,7 +99,7 @@
                 &.date {
                     display: flex;
                     flex-direction: row;
-                    margin-top: 0;
+                    margin-top: 0.5rem;
                     margin-left: 0.3rem;
                     font-size: 0.9rem;
                     font-weight: 400;

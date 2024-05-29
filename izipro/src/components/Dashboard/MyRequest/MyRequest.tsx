@@ -764,7 +764,12 @@ function MyRequest() {
 								<div
 									className={`my-request__list__detail__item ${request.urgent} ${selectedRequest === request ? 'selected' : ''} ` }
 									key={request.id} 
-									onClick={(event) => [handleConversation(event, request), setSelectedRequest(request), setIsListOpen(!isListOpen), setIsAnswerOpen(!isAnswerOpen)]}
+									onClick={(event) => [
+										handleConversation(event, request), 
+										setSelectedRequest(request), 
+										setIsListOpen(!isListOpen), 
+										setIsAnswerOpen(!isAnswerOpen)
+									]}
 								>
 									{request.urgent && <p className="my-request__list__detail__item urgent">URGENT</p>}
 									<div className="my-request__list__detail__item__header">
@@ -788,7 +793,10 @@ function MyRequest() {
 									<h1 className="my-request__list__detail__item title" >{request.title}</h1>
 									<p 
 										className={`my-request__list__detail__item message ${isMessageExpanded ? 'expanded' : ''}`}
-										onClick={() => setIsMessageExpanded(!isMessageExpanded)} 
+										onClick={(event) => {
+											setIsMessageExpanded(!isMessageExpanded),
+											event.stopPropagation();
+										}} 
 									>
 										{request.message}
 									</p>
@@ -818,7 +826,10 @@ function MyRequest() {
 															className="my-request__list__detail__item__picture img" 
 															key={media.id} 
 															src={media.url} 
-															onClick={() => openModal(imageUrls, index)}
+															onClick={(event) => {
+																openModal(imageUrls, index),
+																event.stopPropagation();
+															}}
 															alt={media.name} 
 														/>
 													)
@@ -835,11 +846,17 @@ function MyRequest() {
 										id="delete-request"
 										className="my-request__list__detail__item__delete" 
 										type='button' 
-										onClick={(event) => {event.stopPropagation(); handleDeleteRequest(event, request.id);}}>Supprimer la demande
+										onClick={(event) => {
+											handleDeleteRequest(event, request.id), 
+											event.stopPropagation();
+										}}>
 									</button>
 									<FaTrashAlt 
 										className="my-request__list__detail__item__delete-FaTrashAlt" 
-										onClick={() => document.getElementById('delete-request')?.click()}
+										onClick={(event) => {
+											document.getElementById('delete-request')?.click(),
+											event.stopPropagation();
+										}}
 									/>
 								</div>
 							))}
