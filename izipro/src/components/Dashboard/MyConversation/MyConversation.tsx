@@ -19,9 +19,10 @@ import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutat
 import RequestItem from '../../Hook/Request';
 import pdfLogo from '/logo/pdf-icon.svg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
-import { FaCamera, FaTrashAlt } from 'react-icons/fa';
+import { FaCamera } from 'react-icons/fa';
 import { MdAttachFile, MdKeyboardArrowLeft, MdSend } from 'react-icons/md';
 import TextareaAutosize from 'react-textarea-autosize';
+import logoProfile from '/logo/logo profile.jpeg';
 
 
 
@@ -30,6 +31,10 @@ type useQueryUserConversationsProps = {
 	data: { user: { requestsConversations: RequestProps[] } };
 	refetch: () => void;
 	fetchMore: (options: { variables: { offset: number } }) => void;
+};
+
+type ExpandedState = {
+	[key: number]: boolean;
 };
 
 
@@ -45,9 +50,10 @@ function MyConversation() {
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [conversationIdState, setConversationIdState] = useState<number>(0);
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
-	const [isListOpen, setIsListOpen] = useState(false);
-	const [isMessageExpanded, setIsMessageExpanded] = useState(false);
+	const [isListOpen, setIsListOpen] = useState(true);
+	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [isMessageOpen, setIsMessageOpen] = useState(false);
+	const [requestTitle, setRequestTitle] = useState(false);
 
 	//useRef
 	const offsetRef = useRef(0);
@@ -90,6 +96,12 @@ function MyConversation() {
 		throw new Error('Error while subscribing to message');
 	}
 
+	useEffect(() => {
+		if (request) {
+			setSelectedRequest(request);
+		}
+	}, []);
+
 	// useEffect to update the message store
 	useEffect(() => {
 		if (messageData) {
@@ -124,10 +136,9 @@ function MyConversation() {
 	useEffect(() => {
 		if (data && data.user) {
 
-console.log('data',data);
-
 			const requestsConversations: RequestProps[] = data.user.requestsConversations;
-			setRequestsConversationStore(requestsConversations); // Fix: Pass an array as the argument
+			//setRequestsConversationStore(requestsConversations); // Fix: Pass an array as the argument
+			requestConversationStore.setState({ requests: requestsConversations });
 			offsetRef.current = requestsConversations?.length;
 
 		}
@@ -231,6 +242,13 @@ console.log('data',data);
 			resetRequest();
 		};
 	}, []);
+
+	// useEffect to scroll to the end of the messages
+	useEffect(() => {
+		setTimeout(() => {
+			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+		}, 200);
+	}, [messageStore]);
 
 
 	// Function to send message
@@ -503,7 +521,6 @@ console.log('data',data);
 		newUrlFileList.splice(index, 1);
 		setUrlFile(newUrlFileList);
 	};
-console.log('requestConversationStore',requestConversationStore);
 
 	return (
 		<div className="my-conversation">
@@ -524,6 +541,8 @@ console.log('requestConversationStore',requestConversationStore);
 							{request && request.id > 0 &&
 								<RequestItem
 									request={request}
+									isMessageOpen={isMessageOpen}
+									setIsMessageOpen={setIsMessageOpen}
 									resetRequest={resetRequest}
 									isListOpen={isListOpen}
 									selectedRequest={selectedRequest!} // Add '!' to assert that selectedRequest is not null
@@ -535,8 +554,11 @@ console.log('requestConversationStore',requestConversationStore);
 									openModal={openModal}
 								/>
 							}
-							{requestByDate.map((request) => (
-								<RequestItem key={request.id}
+							{requestByDate.map((requestByDate) => (
+								<RequestItem key={requestByDate.id}
+									requestByDate={requestByDate}
+									isMessageOpen={isMessageOpen}
+									setIsMessageOpen={setIsMessageOpen}
 									isListOpen={isListOpen}
 									selectedRequest={selectedRequest!} // Add '!' to assert that selectedRequest is not null
 									setSelectedRequest={setSelectedRequest}
@@ -558,24 +580,22 @@ console.log('requestConversationStore',requestConversationStore);
 					{selectedRequest && (
 						<div
 							className="my-conversation__message-list__user__header"
-							//onClick={() => setUserDescription(!userDescription)}
+							onClick={() => setRequestTitle(!requestTitle)}
 						>
 							<div
-								className="my-request__message-list__user__header__detail"
+								className="my-conversation__message-list__user__header__detail"
 							>
 								<MdKeyboardArrowLeft
 									className="my-conversation__message-list__user__header__detail return"
-									//onClick={() => [setSelectedUser(null), setIsMessageOpen(!isMessageOpen), setIsAnswerOpen(!isAnswerOpen)]}
+									onClick={() => [setIsMessageOpen(!isMessageOpen), setIsListOpen(!isListOpen)]}
 								/>
-								{/* <img className="my-conversation__message-list__user__header__detail img" src={selectedUser.image ? selectedUser.image : logoPorfile} alt="" /> */}
-								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
-								{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
-								
-								<p className="my-conversation__message-list__user__header__detail denomination">{selectedRequest.title}</p>
-								
-							
+								<img className="my-conversation__message-list__user__header__detail img" src={selectedRequest.image ? selectedRequest.image : logoProfile} alt="" />
+								<p className="my-conversation__message-list__user__header__detail name">{selectedRequest.first_name} {selectedRequest.last_name}</p>
+
 							</div>
-			
+							{requestTitle && <div>
+								<p className="my-conversation__message-list__user__header__detail title">{selectedRequest.title}</p>
+							</div>}
 						</div>
 					)}
 
@@ -592,6 +612,7 @@ console.log('requestConversationStore',requestConversationStore);
 						}}
 						hasMore={true}
 						loader={<h4>Loading...</h4>}
+						
 					>
 						{Array.isArray(messageStore) &&
 							messageStore

@@ -20,10 +20,14 @@ import { FaTrashAlt,FaCamera } from 'react-icons/fa';
 import { MdSend, MdAttachFile } from 'react-icons/md';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
 import pdfLogo from '/logo/pdf-icon.svg';
-import logoPorfile from '/logo/logo profile.jpeg';
+import logoProfile from '/logo/logo profile.jpeg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import TextareaAutosize from 'react-textarea-autosize';
 //import { useQueryConversation } from '../../Hook/Query';
+
+type ExpandedState = {
+	[key: number]: boolean;
+};
 
 function MyRequest() {
 
@@ -45,7 +49,7 @@ function MyRequest() {
 	const [isListOpen, setIsListOpen] = useState<boolean>(true);
 	const [isAnswerOpen, setIsAnswerOpen] = useState<boolean>(false);
 	const [isMessageOpen, setIsMessageOpen] = useState<boolean>(false);
-	const [isMessageExpanded, setIsMessageExpanded] = useState<boolean>(false);
+	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 
 	
 
@@ -65,6 +69,7 @@ function MyRequest() {
 	//const userOffsetRef = useRef(0);
 	//const conversationIdRef = useRef(0);
 	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
+	const idRef = useRef<number>(0);
 
 	// file upload
 	const { urlFile, setUrlFile, file, setFile, handleFileChange } = useFileHandler();
@@ -519,6 +524,7 @@ function MyRequest() {
 		//}
 	}, [messageSubscription]);
 
+	// useEffect to scroll to the end of the messages
 	useEffect(() => {
 		setTimeout(() => {
 			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -792,9 +798,19 @@ function MyRequest() {
 									</div>
 									<h1 className="my-request__list__detail__item title" >{request.title}</h1>
 									<p 
-										className={`my-request__list__detail__item message ${isMessageExpanded ? 'expanded' : ''}`}
+										//@ts-expect-error con't resolve this type
+										className={`my-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
 										onClick={(event) => {
-											setIsMessageExpanded(!isMessageExpanded),
+											//to open the message when the user clicks on it just for the selected request 
+											idRef.current = request?.id  ?? 0; // check if request or requestByDate is not undefined
+											console.log('id', idRef.current);
+					
+											if (idRef.current !== undefined && setIsMessageExpanded) {
+												setIsMessageExpanded((prevState: ExpandedState)  => ({
+													...prevState,
+													[idRef.current as number]: !prevState[idRef.current]
+												}));
+											}
 											event.stopPropagation();
 										}} 
 									>
@@ -883,7 +899,7 @@ function MyRequest() {
 							key={user.id} 
 							onClick={(event) => {handleMessageConversation(event, user.id), setSelectedUser(user), setIsMessageOpen(!isMessageOpen), setIsAnswerOpen(!isAnswerOpen);}}>
 							<div className="my-request__answer-list__user__header">
-								<img className="my-request__answer-list__user__header img" src={user.image ? user.image : logoPorfile} alt="" />
+								<img className="my-request__answer-list__user__header img" src={user.image ? user.image : logoProfile} alt="" />
 								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
 								{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
 								{user.denomination ? (
@@ -911,7 +927,7 @@ function MyRequest() {
 									className="my-request__message-list__user__header__detail return" 
 									onClick={() => [setSelectedUser(null), setIsMessageOpen(!isMessageOpen), setIsAnswerOpen(!isAnswerOpen)]}
 								/>								
-								<img className="my-request__message-list__user__header__detail img" src={selectedUser.image ? selectedUser.image : logoPorfile} alt="" />
+								<img className="my-request__message-list__user__header__detail img" src={selectedUser.image ? selectedUser.image : logoProfile} alt="" />
 								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
 								{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
 								{selectedUser.denomination ? (

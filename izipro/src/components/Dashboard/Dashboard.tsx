@@ -7,7 +7,6 @@ import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import { userDataStore } from '../../store/UserData';
 import { useQueryUserData, useQueryUserSubscriptions } from '../Hook/Query';
-import { GiHamburgerMenu } from 'react-icons/gi';
 import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
 import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';

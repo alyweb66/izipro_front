@@ -3,8 +3,10 @@
 .my-conversation {
     width: 100%;
     display: flex;
+    justify-content: center;
     align-items: stretch;
     max-height: 81.31vh;
+
 
 
 
@@ -21,6 +23,7 @@
 
 
         .my-conversation__list__detail__item {
+            position: relative;
             cursor: pointer;
             display: flex;
             flex-direction: column;
@@ -43,6 +46,35 @@
                 background-color: transparent;
                 box-shadow: none;
                 color: red;
+
+            }
+
+            &.new {
+                background-color: v.$color-chat-orange;
+                border: 1px solid v.$color-primary-orange;
+            }
+
+            &.deleted {
+
+                background-color: v.$color-deleted-grey;
+                border: 1px solid v.$color-deleted-grey;
+
+                .my-conversation__list__detail__item__deleted {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: v.$color-error;
+                    font-size: 1.5rem;
+                    font-weight: 500;
+                    z-index: 0;
+                }
+
+                .my-conversation__list__detail__item__header,
+                .my-conversation__list__detail__item {
+                    opacity: 0.4;
+                }
+
 
             }
 
@@ -227,7 +259,7 @@
                         display: none;
                     }
 
-                    &.img {
+                     &.img {
                         margin: 0.5rem 1rem;
                         border-radius: 0.5rem;
                         width: 50px;
@@ -238,23 +270,25 @@
                     }
 
                     &.name {
+                        width: 30%;
                         box-shadow: none;
-                        margin: auto 0.3rem auto 0;
+                        margin: 0.5rem  0.3rem;
                         font-size: 1rem;
                         font-weight: 500;
-                    }
+                    } 
 
-                    &.denomination {
+                    &.title {
                         box-shadow: none;
-                        margin: auto 0.3rem auto 0;
+                        margin: auto 0.3rem auto 0.5rem;
                         background-color: transparent;
-                        font-size: 1rem;
+                        font-size: 1.3rem;
+                        color: v.$color-primary-blue;
                         font-weight: 500;
 
                     }
                 }
 
-                &.description {
+                /*  &.description {
                     width: 98%;
                     padding: 0.5rem;
                     box-shadow: none;
@@ -265,7 +299,7 @@
                     font-weight: 500;
 
 
-                }
+                } */
             }
 
         }
@@ -319,7 +353,6 @@
                     background-color: v.$color-chat-blue;
                     border-radius: 0 1rem 1rem 1rem;
                     margin-top: 1rem;
-                    //width: 70%;
                     max-width: 70%;
 
                     &.me {
@@ -350,14 +383,12 @@
                         .map {
                             display: flex;
                             flex-wrap: wrap;
-                            //justify-content: space-around;
                             background-color: transparent;
                             gap: 0.3rem;
                             margin: 0.5rem 0.5rem;
                             justify-content: flex-start;
 
                             .a-pdf {
-                                // width: 100%;
                                 display: flex;
                                 justify-content: end;
                                 width: auto;
@@ -493,10 +524,9 @@
 
 
                 &:focus {
-
-                    outline: none; // Remove default focus indicator
+                    outline: none; 
                     border-radius: 0.2rem;
-                    box-shadow: 0 0 0 1px v.$color-primary-blue; // Add your own focus indicator
+                    box-shadow: 0 0 0 1px v.$color-primary-blue; 
                 }
             }
 
@@ -521,7 +551,7 @@
     }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 800px) {
     .my-conversation {
         width: 100%;
         max-height: 100%;
@@ -555,11 +585,6 @@
                     cursor: pointer;
 
                 }
-
-                /* .my-request__answer-list__user {
-                    width: 100%;
-                } */
-
 
             }
         }

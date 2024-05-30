@@ -398,7 +398,6 @@
                     background-color: v.$color-chat-blue;
                     border-radius: 0 1rem 1rem 1rem;
                     margin-top: 1rem;
-                    //width: 70%;
                     max-width: 70%;
 
                     &.me {
@@ -429,14 +428,12 @@
                         .map {
                             display: flex;
                             flex-wrap: wrap;
-                            //justify-content: space-around;
                             background-color: transparent;
                             gap: 0.3rem;
                             margin: 0.5rem 0.5rem;
                             justify-content: flex-start;
 
                             .a-pdf {
-                                // width: 100%;
                                 display: flex;
                                 justify-content: end;
                                 width: auto;
@@ -573,9 +570,9 @@
 
                 &:focus {
 
-                    outline: none; // Remove default focus indicator
+                    outline: none; 
                     border-radius: 0.2rem;
-                    box-shadow: 0 0 0 1px v.$color-primary-blue; // Add your own focus indicator
+                    box-shadow: 0 0 0 1px v.$color-primary-blue; 
                 }
             }
 
@@ -634,11 +631,6 @@
                     cursor: pointer;
 
                 }
-
-                /* .my-request__answer-list__user {
-                    width: 100%;
-                } */
-
 
             }
         }

@@ -17,6 +17,10 @@ import pdfLogo from '/logo/pdf-icon.svg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt } from 'react-icons/fa';
 
+type ExpandedState = {
+	[key: number]: boolean;
+};
+
 function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 
 	// ImageModal Hook
@@ -24,10 +28,11 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	
 	// State
 	const [clientRequests, setClientRequests] = useState<RequestProps[] | null>(null);
-	const [isMessageExpanded, setIsMessageExpanded] = useState(false);
+	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
+	const idRef = useRef<number>(0);
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -312,9 +317,20 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 									</div>
 									<h1 className="client-request__list__detail__item title" >{request.title}</h1>
 									<p 
-										className={`client-request__list__detail__item message ${isMessageExpanded ? 'expanded' : ''}`}
+										//@ts-expect-error con't resolve this type
+										className={`client-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
 										onClick={(event: React.MouseEvent) => {
-											setIsMessageExpanded(!isMessageExpanded);
+											//to open the message when the user clicks on it just for the selected request 
+											idRef.current = request?.id  ?? 0; // check if request or requestByDate is not undefined
+											console.log('id', idRef.current);
+					
+											if (idRef.current !== undefined && setIsMessageExpanded) {
+												setIsMessageExpanded((prevState: ExpandedState)  => ({
+													...prevState,
+													[idRef.current as number]: !prevState[idRef.current]
+												}));
+											}
+											
 											event.stopPropagation();
 										}}  
 									>

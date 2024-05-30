@@ -195,6 +195,30 @@
 
 }
 
+@media (max-width: 800px) {
+  .client-request {
+    .client-request__list {
+
+      .client-request__list__detail__item {
+        
+        &.message {
+          cursor: pointer;
+          display: block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        &.expanded {
+          white-space: normal;
+          max-width: none;
+        }
+
+      }
+    }
+  }
+}
+
 @media (max-width: 480px) {
   .client-request {
     .client-request__list {
@@ -221,3 +245,4 @@
     }
   }
 }
+
