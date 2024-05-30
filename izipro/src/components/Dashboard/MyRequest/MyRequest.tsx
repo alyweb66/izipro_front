@@ -838,10 +838,6 @@ function MyRequest() {
 										})()}
 								
 									</div>
-									{/* <div className="my-request__list__detail__item__footer">
-										
-										
-									</div> */}
 									<button
 										id="delete-request"
 										className="my-request__list__detail__item__delete" 

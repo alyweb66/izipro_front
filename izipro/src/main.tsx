@@ -48,12 +48,15 @@ const splitLink = split(
 	wsLink,
 	httpLink,
 );
-// create a client
-const client = new ApolloClient({
-	cache: new InMemoryCache(),
-	link: splitLink,
-	defaultOptions: defaultOptions,
-});
+// create a client and check if it exists
+let client;
+if (!client) {
+	client = new ApolloClient({
+		cache: new InMemoryCache(),
+		link: splitLink,
+		defaultOptions: defaultOptions,
+	});
+}
 
 // create a root
 const root = ReactDOM.createRoot(
