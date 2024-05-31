@@ -17,16 +17,17 @@ function Dashboard() {
 	const navigate = useNavigate();
 
 	// State
-	const [selectedTab, setSelectedTab] = useState('My requests');
 	const [isOpen, setIsOpen] = useState(false);
-	console.log('selectedTab', selectedTab);
-	
+
 	//store
 	const id = userDataStore((state) => state.id);
 	const role = userDataStore((state) => state.role);
 	const setAll = userDataStore((state) => state.setAll);
-	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
 
+	//state for first page
+	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
+	
+	const [selectedTab, setSelectedTab] = useState(role === 'user'? 'My requests' : 'Client request');
 	// Query to get the user data
 	const getUserData = useQueryUserData();
 	const getUserSubscription = useQueryUserSubscriptions();

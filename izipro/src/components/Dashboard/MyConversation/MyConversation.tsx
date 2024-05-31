@@ -91,6 +91,7 @@ function MyConversation() {
 		throw new Error('Error while subscribing to message');
 	}
 
+	// useEffect to set the new selected request
 	useEffect(() => {
 		if (request) {
 			setSelectedRequest(request);
@@ -671,7 +672,12 @@ function MyConversation() {
 					</InfiniteScroll>
 				</div>
 
-				<form className="my-conversation__message-list__form" onSubmit={(event) => selectedRequest && handleMessageSubmit(event, selectedRequest.id)}>
+				<form className="my-conversation__message-list__form" onSubmit={(event) => {
+					event.preventDefault();
+					if (selectedRequest?.id && !selectedRequest.deleted_at) {
+						handleMessageSubmit(event, selectedRequest.id);
+					}
+				}}>
 					{urlFile.length > 0 && <div className="my-conversation__message-list__form__preview">
 						{urlFile.map((file, index) => (
 							<div className="my-conversation__message-list__form__preview__container" key={index}>
@@ -706,6 +712,7 @@ function MyConversation() {
 							onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}
 							placeholder="Tapez votre message ici..."
 							maxLength={500}
+							minRows={1}
 						/>
 						<MdSend
 							className="my-conversation__message-list__form__label__send"

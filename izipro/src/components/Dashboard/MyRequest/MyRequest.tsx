@@ -106,6 +106,17 @@ function MyRequest() {
 		throw new Error('Error while subscribing to message');
 	}
 
+	//useEffect to set request and user in starting
+	useEffect(() => {
+		if (requestByDate && !selectedRequest && (requestByDate?.length ?? 0) > 0) {
+			setSelectedRequest(requestByDate[0]);
+			handleConversation(requestByDate[0]);
+			setTimeout(() => {
+				document.getElementById('first-user')?.click();
+			}, 200);
+		}
+	}, [requestByDate]);
+	console.log('selectedUser', selectedUser);
 
 	// useEffect to update the requests store
 	useEffect(() => {
@@ -147,7 +158,6 @@ function MyRequest() {
 
 			setRequestByDate(sortedRequests);
 
-			
 			// get conversation id in subscriptionStore
 			const conversationIds = subscriptionStore
 				.filter(subscription => subscription.subscriber === 'conversation')
@@ -542,10 +552,6 @@ function MyRequest() {
 	console.log('modalArgs', modalArgs);
 	console.log('requestByDate', requestByDate);
 	
-	
-	
-	
-
 	// Function to delete a request
 	const handleDeleteRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
 		event.preventDefault();
@@ -650,8 +656,8 @@ function MyRequest() {
 	};
 
 	// Function to handle the users ids for the conversation
-	const handleConversation = (event: React.MouseEvent<HTMLDivElement>, request: RequestProps) => {
-		event.preventDefault();
+	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLDivElement>) => {
+		event?.preventDefault();
 
 		if (!request.conversation) {
 
@@ -761,7 +767,7 @@ function MyRequest() {
 			setLoading(false);
 		});
 	}
-	console.log('modalArgs', modalArgs);
+	console.log('myRequestsStore', myRequestsStore);
 
 	return (
 		<div className="my-request">
@@ -784,7 +790,7 @@ function MyRequest() {
 									className={`my-request__list__detail__item ${request.urgent} ${selectedRequest === request ? 'selected' : ''} ` }
 									key={request.id} 
 									onClick={(event) => [
-										handleConversation(event, request), 
+										handleConversation(request, event), 
 										setSelectedRequest(request), 
 										setIsListOpen(!isListOpen), 
 										setIsAnswerOpen(!isAnswerOpen)
@@ -910,8 +916,9 @@ function MyRequest() {
 						onClick={() => [setSelectedRequest(null), setIsListOpen(!isMessageOpen), setIsAnswerOpen(!isAnswerOpen)]}
 					/>
 					{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
-					{userConvState && userConvState?.map((user: UserDataProps ) => (
+					{userConvState && userConvState?.map((user: UserDataProps, index ) => (
 						<div
+							id={index === 0 ? 'first-user' : undefined}
 							className={`my-request__answer-list__user ${selectedUser === user ? 'selected-user' : ''}`} 
 							key={user.id} 
 							onClick={(event) => {handleMessageConversation(event, user.id), setSelectedUser(user), setIsMessageOpen(!isMessageOpen), setIsAnswerOpen(!isAnswerOpen);}}>
@@ -1030,7 +1037,13 @@ function MyRequest() {
 					</InfiniteScroll>
 				</div>
 				
-				<form className="my-request__message-list__form" onSubmit={(event) => handleMessageSubmit(event)}>
+				<form className="my-request__message-list__form" onSubmit={(event) => {
+					event.preventDefault();
+					if (selectedUser) {
+						handleMessageSubmit(event);
+					}
+
+				}}>
 					{urlFile.length > 0 && <div className="my-request__message-list__form__preview">
 						{urlFile.map((file, index) => (
 							<div className="my-request__message-list__form__preview__container" key={index}>
