@@ -166,6 +166,7 @@
                 margin: 0 0.3rem 0 0.3rem;
                 font-size: 1rem;
                 font-weight: 400;
+                background-color: v.$color-light-blue;
             }
 
             &.expanded {
@@ -259,7 +260,7 @@
                         display: none;
                     }
 
-                     &.img {
+                    &.img {
                         margin: 0.5rem 1rem;
                         border-radius: 0.5rem;
                         width: 50px;
@@ -272,10 +273,10 @@
                     &.name {
                         width: 30%;
                         box-shadow: none;
-                        margin: 0.5rem  0.3rem;
+                        margin: 0.5rem 0.3rem;
                         font-size: 1rem;
                         font-weight: 500;
-                    } 
+                    }
 
                     &.title {
                         box-shadow: none;
@@ -524,9 +525,9 @@
 
 
                 &:focus {
-                    outline: none; 
+                    outline: none;
                     border-radius: 0.2rem;
-                    box-shadow: 0 0 0 1px v.$color-primary-blue; 
+                    box-shadow: 0 0 0 1px v.$color-primary-blue;
                 }
             }
 
@@ -625,20 +626,37 @@
 }
 
 @media (max-width: 480px) {
-    .my-conversation {
+    //.my-conversation {
+    //    .my-conversation__list {
+      //      .my-conversation__message-list__form {
+      //          .my-conversation__message-list__form__preview {
+        //            .my-conversation__message-list__form__preview__container {
+                        .my-conversation__message-list__form__preview__container__image {
+                            width: 50px;
+                            height: 50px;
+
+                        }
+
+             //       }
+
+      //          }
+    //        }
+  //      }
 
         .my-conversation__answer-list.open,
         .my-conversation__message-list.open,
         .my-conversation__list.open {
             max-width: 100%;
         }
-    }
+   // }
 }
 
 
 
+@include v.picture-modal;
 
-.react-modal {
+
+/* .react-modal {
     display: flex;
     width: 100%;
     height: 100%;
@@ -698,10 +716,12 @@
 
 
 
-}
+} */
 
 @media (max-width: 1200px) {
-    .react-modal {
+    @include v.picture-modal-querie;
+}
+    /* .react-modal {
 
         .react-modal__button-close {
             margin: 0;
@@ -737,5 +757,4 @@
             }
 
         }
-    }
-}
+    } */

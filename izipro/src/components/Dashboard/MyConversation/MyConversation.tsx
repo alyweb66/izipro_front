@@ -25,16 +25,11 @@ import TextareaAutosize from 'react-textarea-autosize';
 import logoProfile from '/logo/logo profile.jpeg';
 
 
-
 type useQueryUserConversationsProps = {
 	loading: boolean;
 	data: { user: { requestsConversations: RequestProps[] } };
 	refetch: () => void;
 	fetchMore: (options: { variables: { offset: number } }) => void;
-};
-
-type ExpandedState = {
-	[key: number]: boolean;
 };
 
 
@@ -53,7 +48,7 @@ function MyConversation() {
 	const [isListOpen, setIsListOpen] = useState(true);
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [isMessageOpen, setIsMessageOpen] = useState(false);
-	const [requestTitle, setRequestTitle] = useState(false);
+	const [requestTitle, setRequestTitle] = useState(true);
 
 	//useRef
 	const offsetRef = useRef(0);
@@ -580,14 +575,21 @@ function MyConversation() {
 					{selectedRequest && (
 						<div
 							className="my-conversation__message-list__user__header"
-							onClick={() => setRequestTitle(!requestTitle)}
+							onClick={(event) => {
+								setRequestTitle(!requestTitle);
+								event.stopPropagation();
+							}}
 						>
 							<div
 								className="my-conversation__message-list__user__header__detail"
 							>
 								<MdKeyboardArrowLeft
 									className="my-conversation__message-list__user__header__detail return"
-									onClick={() => [setIsMessageOpen(!isMessageOpen), setIsListOpen(!isListOpen)]}
+									onClick={(event) => {
+										setIsMessageOpen(!isMessageOpen), 
+										setIsListOpen(!isListOpen),
+										event.stopPropagation();
+									}}
 								/>
 								<img className="my-conversation__message-list__user__header__detail img" src={selectedRequest.image ? selectedRequest.image : logoProfile} alt="" />
 								<p className="my-conversation__message-list__user__header__detail name">{selectedRequest.first_name} {selectedRequest.last_name}</p>

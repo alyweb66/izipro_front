@@ -133,7 +133,7 @@ const RequestItem = ({
 								
 			</div>
 			<button
-				id="delete-request"
+				id={`delete-request-${request || requestByDate}`}
 				className="my-conversation__list__detail__item__delete" 
 				type='button' 
 				onClick={(event) => {
@@ -148,7 +148,7 @@ const RequestItem = ({
 			<FaTrashAlt 
 				className="my-conversation__list__detail__item__delete-FaTrashAlt" 
 				onClick={(event) => {
-					document.getElementById('delete-request')?.click(),
+					document.getElementById(`delete-request-${request || requestByDate}`)?.click(),
 					event.stopPropagation();
 				}}
 			/>

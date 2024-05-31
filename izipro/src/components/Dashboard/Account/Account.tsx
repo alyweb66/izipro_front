@@ -52,12 +52,6 @@ function Account() {
 	const [ModalIsOpen, setModalIsOpen] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
 	
-
-	// modal delete account function
-	const openDeleteModal = () => setModalIsOpen(true);
-	const closeDeleteModal = () => setModalIsOpen(false);
-
-
 	// Message modification account
 	const [messageAccount, setMessageAccount] = useState('');
 	const [errorAccount, setErrorAccount] = useState('');
@@ -328,6 +322,7 @@ function Account() {
 		}
 	};
 
+	// Handle the account delete
 	const handledeleteAccount = (event: React.MouseEvent<HTMLButtonElement>) => {
 		event.preventDefault();
 
@@ -351,7 +346,7 @@ function Account() {
 					document.cookie = 'refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 				}
 				//redirect to home page
-				closeDeleteModal();
+				setModalIsOpen(false);
 				navigate('/');
 				//});
 
@@ -580,7 +575,7 @@ function Account() {
 				<button 
 					className="account__profile__delete" 
 					type='button' 
-					onClick={openDeleteModal}>supprimer mon compte
+					onClick={() => setModalIsOpen(!ModalIsOpen)}>supprimer mon compte
 				</button>
 			</div>
 			
@@ -596,7 +591,7 @@ function Account() {
 					<p className="modal__description">Vous allez supprimer votre compte definitevement, êtes vous sur?</p>
 					<div className="modal__container__button">
 						<button className="modal__delete" onClick={handledeleteAccount}>Supprimer</button>
-						<button className="modal__cancel" onClick={closeDeleteModal}>Annuler</button>
+						<button className="modal__cancel" onClick={() => setModalIsOpen(!ModalIsOpen)}>Annuler</button>
 					</div>
 				</div>
 			</ReactModal>

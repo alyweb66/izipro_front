@@ -375,7 +375,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 									</div>
 								
 									<button
-										id="delete-request"
+										id={`delete-request-${request.id}`}
 										className="client-request__list__detail__item__delete" 
 										type='button' 
 										onClick={(event) => {
@@ -386,7 +386,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 									<FaTrashAlt 
 										className="client-request__list__detail__item__delete-FaTrashAlt" 
 										onClick={(event) => {
-											document.getElementById('delete-request')?.click(),
+											document.getElementById(`delete-request-${request.id}`)?.click(),
 											event.stopPropagation();
 										}}
 									/>

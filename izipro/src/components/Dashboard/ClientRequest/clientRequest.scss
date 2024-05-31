@@ -200,13 +200,14 @@
     .client-request__list {
 
       .client-request__list__detail__item {
-        
+
         &.message {
           cursor: pointer;
           display: block;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          background-color: v.$color-light-blue;
         }
 
         &.expanded {
@@ -234,6 +235,7 @@
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          background-color: v.$color-light-blue;
         }
 
         &.expanded {

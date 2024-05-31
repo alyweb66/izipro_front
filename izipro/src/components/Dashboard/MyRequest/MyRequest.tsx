@@ -24,6 +24,10 @@ import logoProfile from '/logo/logo profile.jpeg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import TextareaAutosize from 'react-textarea-autosize';
 //import { useQueryConversation } from '../../Hook/Query';
+import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+//@ts-expect-error react-modal is not compatible with typescript
+import ReactModal from 'react-modal';
+ReactModal.setAppElement('#root');
 
 type ExpandedState = {
 	[key: number]: boolean;
@@ -50,6 +54,8 @@ function MyRequest() {
 	const [isAnswerOpen, setIsAnswerOpen] = useState<boolean>(false);
 	const [isMessageOpen, setIsMessageOpen] = useState<boolean>(false);
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
+	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
+	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
 
 	
 
@@ -531,8 +537,17 @@ function MyRequest() {
 		}, 200);
 	}, [messageStore]);
 
+	console.log('selectedRequest', selectedRequest);
+	console.log('myRequestsStore', myRequestsStore);
+	console.log('modalArgs', modalArgs);
+	console.log('requestByDate', requestByDate);
+	
+	
+	
+	
+
 	// Function to delete a request
-	const handleDeleteRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
+	const handleDeleteRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
 		event.preventDefault();
 
 		deleteRequest({
@@ -552,6 +567,9 @@ function MyRequest() {
 				// Remove the request from the store
 				setMyRequestsStore(myRequestsStore.filter(request => request.id !== requestId));
 			}
+			setUserConvState([]);
+			setModalArgs(null);
+			setDeleteItemModalIsOpen(false);
 		
 			// remove subscription for this request
 			const subscription = subscriptionStore.find(subscription => subscription.subscriber === 'request');
@@ -615,8 +633,6 @@ function MyRequest() {
 								messages: [...newMessages]
 							};
 						});
-
-						setUserConvState([]);
 
 					});
 
@@ -745,10 +761,7 @@ function MyRequest() {
 			setLoading(false);
 		});
 	}
-
-	console.log('selectedUser', selectedUser);
-	
-
+	console.log('modalArgs', modalArgs);
 
 	return (
 		<div className="my-request">
@@ -855,18 +868,22 @@ function MyRequest() {
 								
 									</div>
 									<button
-										id="delete-request"
+										id={`delete-request-${request.id}`}
 										className="my-request__list__detail__item__delete" 
 										type='button' 
 										onClick={(event) => {
-											handleDeleteRequest(event, request.id), 
+											setDeleteItemModalIsOpen(true);
+											console.log('requestId', request.id);
+											
+											setModalArgs({ event, requestId: request.id }),
+											//handleDeleteRequest(event, request.id), 
 											event.stopPropagation();
 										}}>
 									</button>
 									<FaTrashAlt 
 										className="my-request__list__detail__item__delete-FaTrashAlt" 
 										onClick={(event) => {
-											document.getElementById('delete-request')?.click(),
+											document.getElementById(`delete-request-${request.id}`)?.click(),
 											event.stopPropagation();
 										}}
 									/>
@@ -1088,6 +1105,41 @@ function MyRequest() {
 				nextImage={nextImage}
 				previousImage={previousImage}
 			/>
+			<DeleteItemModal
+				modalArgs={modalArgs} 
+				setModalArgs={setModalArgs} 
+				setDeleteItemModalIsOpen={setDeleteItemModalIsOpen} 
+				deleteItemModalIsOpen={deleteItemModalIsOpen} 
+				handleDeleteRequest={handleDeleteRequest}
+			/>
+			{/* <ReactModal
+				className="modal"
+				isOpen={deleteItemModalIsOpen}
+				contentLabel="Delete Account"
+				shouldCloseOnOverlayClick={false}
+				aria-label="supprimer mon compte"
+			>
+				<div className="modal__container">
+					<h1 className="modal__title">ATTENTION!!</h1>
+					<p className="modal__description">Vous allez supprimer cette demande, êtes vous sur?</p>
+					<div className="modal__container__button">
+						<button 
+							className="modal__delete" 
+							onClick={() => {
+								if (modalArgs?.event && modalArgs?.requestId) {
+									handleDeleteRequest(modalArgs.event, modalArgs.requestId);
+								}
+							}}
+						>
+							Supprimer
+						</button>
+						<button className="modal__cancel" onClick={() => {
+							setDeleteItemModalIsOpen(!deleteItemModalIsOpen),
+							setModalArgs(null);
+						}}>Annuler</button>
+					</div>
+				</div>
+			</ReactModal> */}
 		</div>
 
 		
