@@ -44,6 +44,7 @@ export const GET_USER_REQUEST_BY_CONVERSATIONS = gql`
         job_id
         first_name
         last_name
+        image
         job
         media {
           id
@@ -100,6 +101,8 @@ export const GET_USERS_CONVERSATION = gql`
   query UserConversation($ids: [Int!], $offset: Int, $limit: Int) {
     users(ids: $ids, offset: $offset, limit: $limit) {
       id
+      first_name
+      last_name
       city
       image
       description

@@ -10,12 +10,16 @@ import Map from 'react-map-gl';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useFileHandler } from '../../Hook/useFileHandler';
+import { TbUrgent } from 'react-icons/tb';
+import { FaCamera } from 'react-icons/fa';
 
 import './Request.scss';
+import pdfLogo from '/logo/pdf-icon.svg';
 
 
 
 function Request() {
+
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -35,6 +39,7 @@ function Request() {
 	const [descriptionRequest, setDescriptionRequest] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 	const [successMessage, setSuccessMessage] = useState('');
+	//const [description, setDescription] = useState('');
 
 	// file upload
 	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
@@ -53,7 +58,7 @@ function Request() {
 	const categoriesData = useQueryCategory();
 
 	// fetch jobs
-	const jobData  = useQueryJobs(selectedCategory);
+	const jobData = useQueryJobs(selectedCategory);
 
 	// remove file
 	const handleRemove = (index: number) => {
@@ -73,7 +78,7 @@ function Request() {
 		// check if all fields are filled
 		let timer: number | undefined;
 		if (!titleRequest || !descriptionRequest || !selectedJob) {
-			setErrorMessage('Veuiilez remplir tous les champs');
+			setErrorMessage('Veuillez remplir tous les champs');
 			timer = setTimeout(() => {
 				setErrorMessage('');
 			}, 5000); // 5000ms = 5s
@@ -84,9 +89,9 @@ function Request() {
 			// map file to send to graphql
 			const sendFile = file.map(file => ({
 				file,
-			})); 
-			
-			
+			}));
+
+
 			createRequest({
 				variables: {
 					input: {
@@ -103,7 +108,7 @@ function Request() {
 					}
 				}
 			}).then((response) => {
-				
+
 				if (response.data.createRequest) {
 					setSuccessMessage('Demande envoyée avec succès');
 					timer = setTimeout(() => {
@@ -173,49 +178,97 @@ function Request() {
 		setMap(event.target);
 	};
 
+	// Handle file upload
+	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if (urlFile.length < 3) {
+			handleFileChange(event);
+		}	
+	};
+
+	// Handle file drop
+	const handleFileDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+		event.preventDefault(); // Get dropped files
+		if (urlFile.length < 3) {
+			const onDrag = true;
+			handleFileChange(event, onDrag); // Use your existing file handler
+		}
+	};
 	// Update zoom level when radius changes
 	useEffect(() => {
-		if (radius <= 5000) {
-			setZoom(11);
-		} else if (radius <= 10000) {
-			setZoom(10);
-		} else if (radius <= 15000) {
-			setZoom(9.5);
-		} else if (radius <= 20000) {
-			setZoom(9);
-		} else if (radius <= 25000) {
-			setZoom(8.5);
-		} else if (radius <= 35000) {
-			setZoom(8);
-		} else if (radius <= 40000) {
-			setZoom(8);
-		} else if (radius <= 45000) {
-			setZoom(7.7);
-		} else if (radius <= 60000) {
-			setZoom(7);
-		} else if (radius <= 100000) {
-			setZoom(6.8);
+		const mediaQuery = window.matchMedia('(max-width: 450px)');
+
+		if (mediaQuery.matches) {
+			if (radius <= 5000) {
+				setZoom(10.5);
+			} else if (radius <= 10000) {
+				setZoom(9.5);
+			} else if (radius <= 15000) {
+				setZoom(9);
+			} else if (radius <= 20000) {
+				setZoom(8.5);
+			} else if (radius <= 25000) {
+				setZoom(8.2);
+			} else if (radius <= 35000) {
+				setZoom(7.9);
+			} else if (radius <= 40000) {
+				setZoom(7.7);
+			} else if (radius <= 45000) {
+				setZoom(7.5);
+			} else if (radius <= 50000) {
+				setZoom(7.4);
+			} else if (radius <= 60000) {
+				setZoom(6.9);
+			} else if (radius <= 100000) {
+				setZoom(6.4);
+			} else {
+				setZoom(6);
+			}
 		} else {
-			setZoom(7);
+			if (radius <= 5000) {
+				setZoom(11);
+			} else if (radius <= 10000) {
+				setZoom(10);
+			} else if (radius <= 15000) {
+				setZoom(9.5);
+			} else if (radius <= 20000) {
+				setZoom(9);
+			} else if (radius <= 25000) {
+				setZoom(8.5);
+			} else if (radius <= 35000) {
+				setZoom(8);
+			} else if (radius <= 40000) {
+				setZoom(8);
+			} else if (radius <= 45000) {
+				setZoom(7.7);
+			} else if (radius <= 60000) {
+				setZoom(7);
+			} else if (radius <= 100000) {
+				setZoom(6.8);
+			} else {
+				setZoom(7);
+			}
 		}
 	}, [radius]);
 
 	return (
-		<div className="request-container">
-			{[!address && !city && !postal_code && !first_name && !last_name] && 
-			( <p>Veuillez renseigner votre nom, prénom et adresse dans votre compte pour faire une demande</p>)}
+		<div className="request">
+			{(!address && !city && !postal_code && !first_name && !last_name) &&
+				(<p>Veuillez renseigner votre nom, prénom et adresse dans votre compte pour faire une demande</p>)}
 			{address && city && postal_code && first_name && last_name && (
-				<form className="request-form" onSubmit={handleSubmitRequest}>
+				<form className="request__form" onSubmit={handleSubmitRequest}>
+					<h2 className="request__form__title urgent">Si votre demande est une urgence cliquez sur URGENT:</h2>
 					<button
-						className={`urgent-button ${urgent ? 'urgent-button-active' : ''}`}
+						className={`urgent-button ${urgent ? 'active' : ''}`}
 						onClick={(event) => {
 							event.preventDefault();
 							setUrgent(!urgent);
 						}
 						}
-					>Urgent</button>
+					>URGENT
+						<TbUrgent className="urgent-icon" /></button>
+					<h2 className="request__form__title">Séléctionnez la catégorie et le métier concerné:</h2>
 					<select
-						className="job-select"
+						className="request__form__select"
 						name="job"
 						id="job"
 						value={selectedCategory}
@@ -230,7 +283,7 @@ function Request() {
 						))}
 					</select>
 					<select
-						className="category_select"
+						className="request__form__select"
 						name="job"
 						id="job"
 						value={selectedJob}
@@ -251,11 +304,12 @@ function Request() {
 					</select>
 					{lng && lat && (
 						<>
-							<label htmlFor="radius">
-								<p>Selectionnez une distance:</p>
+							<h2 className="request__form__title radius">Séléctionnez une distance:</h2>
+							<label className="request__form__label-radius" htmlFor="radius">
 								{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
 							</label>
 							<input
+								className="request__form__input-radius"
 								id="radius"
 								type="range"
 								min="0"
@@ -264,65 +318,82 @@ function Request() {
 								value={radius}
 								onChange={e => setRadius(Number(e.target.value))}
 							/>
-							<Map
-								mapboxAccessToken="pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg"
-								initialViewState={{
-									longitude: lng,
-									latitude: lat,
-									zoom: zoom
-								}}
-								zoom={zoom}
-								style={{ width: 600, height: 400 }}
-								mapStyle="mapbox://styles/mapbox/streets-v9"
-								onLoad={handleMapLoaded}
-								dragRotate={false}
 
-							/>
+							<div className="request__form__map">
+
+								<div className="request__form__map__map">
+									<Map
+										mapboxAccessToken="pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg"
+										initialViewState={{
+											longitude: lng,
+											latitude: lat,
+											zoom: zoom
+										}}
+										zoom={zoom}
+										scrollZoom={false}
+										mapStyle="mapbox://styles/mapbox/streets-v9"
+										onLoad={handleMapLoaded}
+										dragRotate={false}
+									/>
+								</div>
+
+							</div>
 						</>
 					)}
-					<input
-						className="input-request"
-						type="text"
-						placeholder="Titre de la demande"
-						value={titleRequest}
-						onChange={(event) => setTitleRequest(event.target.value)}
-						maxLength={50}
-					/>
-					<textarea
-						className="text-request"
-						name="description"
-						id="description"
-						placeholder="Description de la demande"
-						value={descriptionRequest}
-						onChange={(event) => setDescriptionRequest(event.target.value)}
-					>
-					</textarea>
-					{errorMessage && <p className="error-message">{errorMessage}</p>}
-					{successMessage && <p className="success-message">{successMessage}</p>}
-					{fileError && <p className="error-message">{fileError}</p>}
-					{urlFile.map((file, index) =>(
-						<div key={index} style={{ position: 'relative', display: 'inline-block' }}>
-							<img 
-								style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-								src={file.name} 
-								alt={`Preview ${index}`} 
-							/>
-							<div 
-								style={{ 
-									position: 'absolute', 
-									top: '0', 
-									right: '0', 
-									background: 'red', 
-									color: 'white', 
-									cursor: 'pointer' 
-								}}
-								onClick={() => handleRemove(index)}
-							>
-					X
+					<h2 className="request__form__title">Saisissez le titre:</h2>
+
+					<label className="request__form__label">
+						<input
+							className="request__form__label__input title"
+							type="text"
+							placeholder="Titre de la demande (50 caractères maximum)"
+							value={titleRequest}
+							onChange={(event) => setTitleRequest(event.target.value)}
+							maxLength={50}
+						/>
+					</label>
+					<h2 className="request__form__title">Décrivez votre demande:</h2>
+					<label className="request__form__label">
+						<textarea
+							className="request__form__label__input textarea"
+							name="description"
+							id="description"
+							placeholder="Description de la demande (500 caractères maximum)"
+							value={descriptionRequest}
+							maxLength={500}
+							aria-label="Description de la demande 500 caractères maximum"
+							onChange={(event) => setDescriptionRequest(event.target.value)}
+						>
+						</textarea>
+						<p>{descriptionRequest?.length}/500</p>
+					</label>
+					<div className="request__form__input-media">
+						{urlFile.map((file, index) => (
+							<div className="request__form__input-media container" key={index}>
+								
+								<img
+									className="request__form__input-media preview"
+									style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+									src={file.type === 'application/pdf' ? pdfLogo : file.name}
+									alt={`Preview ${index}`}
+								/>
+								<div
+									className="request__form__input-media remove"
+									onClick={() => handleRemove(index)}
+								>
+									X
+								</div>
 							</div>
-						</div>
-					))}
-					<label htmlFor="file" className="labelFile">
+						))}
+					</div>
+					<h2 className="request__form__title media">Ajoutez des photos (3 maximum):</h2>
+					<label 
+						htmlFor="file" 
+						className="request__form__label-file"
+						onDragOver={(event) => event.preventDefault()}
+						onDragEnter={(event) => event.preventDefault()}
+						onDrop={handleFileDrop}
+					>
 						<span>
 							<svg
 								xmlSpace="preserve"
@@ -365,17 +436,34 @@ function Request() {
 						</span>
 						<p>Glissez et déposez votre fichier ici ou cliquez pour sélectionner un fichier! (Format accepté : .jpg,.jpeg,.png,.pdf, pdf inférieur à 1Mo)</p>
 					</label>
-					<input 
-						id="file" 
-						className="input" 
-						name="text" 
+					<input
+						id="file"
+						className="request__form__input-media file"
+						name="text"
 						type="file"
-						multiple={true} 
-						onChange={handleFileChange}
-						accept=".jpg,.jpeg,.png,.pdf" 
+						multiple={true}
+						onChange={handleFileUpload}
+						accept=".jpg,.jpeg,.png,.pdf"
+					/>
+					<input
+						id="fileInput"
+						className="request__form__input-media camera" 
+						type="file" 
+						accept="image/*" 
+						capture="environment" 
+						onChange={handleFileUpload} 
+					/>
+					<FaCamera 
+						className="request__form__input-media camera-icone " 
+						onClick={() => document.getElementById('fileInput')?.click()}
 					/>
 
-					<button className="request_submit" type="submit">Envoyer</button>
+					<div className="message">
+						{errorMessage && <p className="message__error">{errorMessage}</p>}
+						{successMessage && <p className="message__success">{successMessage}</p>}
+						{fileError && <p className="message__error">{fileError}</p>}
+					</div>
+					<button className="request__form__button" type="submit">Envoyer</button>
 				</form>
 			)}
 		</div>

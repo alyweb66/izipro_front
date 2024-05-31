@@ -5,6 +5,7 @@ type RequestProps = {
     message: string
     first_name: string
     last_name: string
+    image: string
     city: string
     lng: number
 	lat: number
@@ -37,6 +38,7 @@ type RequestSoreProps = {
         message: string
         first_name: string
         last_name: string
+        image: string
         city: string
         lng: number
         lat: number

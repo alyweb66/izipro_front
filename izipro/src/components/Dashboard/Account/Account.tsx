@@ -50,14 +50,15 @@ function Account() {
 	const [newPassword, setNewPassword] = useState('');
 	const [confirmNewPassword, setConfirmNewPassword] = useState('');
 	const [ModalIsOpen, setModalIsOpen] = useState(false);
-
-	// modal delete account function
-	const openDeleteModal = () => setModalIsOpen(true);
-	const closeDeleteModal = () => setModalIsOpen(false);
-
+	const [showPassword, setShowPassword] = useState(false);
+	
 	// Message modification account
-	const [message, setMessage] = useState('');
-	const [error, setError] = useState('');	
+	const [messageAccount, setMessageAccount] = useState('');
+	const [errorAccount, setErrorAccount] = useState('');
+	
+	// Message modification password
+	const[messagePassword, setMessagePassword] = useState('');
+	const[errorPassword, setErrorPassword] = useState('');
 
 	// Set the changing user data
 	const [userData, setUserData] = useState(getUserData?.user || {} as UserDataProps);
@@ -150,6 +151,7 @@ function Account() {
 
 	}, [getUserData]);
 
+
 	// Handle the account submit
 	const handleAccountSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -179,18 +181,18 @@ function Account() {
 		}, {});
 		
 		if (changedFields.siret && changedFields.siret.length !== 14) {
-			setError('Siret invalide');
+			setErrorAccount('Siret invalide');
 			setTimeout(() => {
-				setError('');
+				setErrorAccount('');
 			
 			},5000);
 			return;
 		}
 
 		if (changedFields.email) {
-			setMessage('Un email de confirmation a été envoyé, le nouvel email sera effectif après confirmation');
+			setMessageAccount('Un email de confirmation a été envoyé, le nouvel email sera effectif après confirmation');
 			setTimeout(() => {
-				setMessage('');
+				setMessageAccount('');
 			
 			},5000);
 			return;
@@ -217,15 +219,16 @@ function Account() {
 				setAccount(updateUser);
 
 				if (updateUser) {
-					setMessage('Modifications éfféctué');
+					setMessageAccount('Modifications éfféctué');
 					setTimeout(() => {
-						setMessage('');
+						setMessageAccount('');
 					
 					},5000);
 				}
 			});
 
 			if (updateUserError) {
+				setMessageAccount('Erreur lors de la modification');
 				throw new Error('Error while updating user data');
 			}
 		}
@@ -237,12 +240,12 @@ function Account() {
 
 		// Check if the new password and the confirm new password are the same
 		if (newPassword !== confirmNewPassword) {
-			setError('Les mots de passe ne correspondent pas');
+			setErrorPassword('Les mots de passe ne correspondent pas');
 			return;
 		}
 		// Check if the new password is strong
 		if (!validator.isStrongPassword(newPassword)) {
-			setError('Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial');
+			setErrorPassword('Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial');
 			return;
 		}
 		// Change the password
@@ -256,14 +259,18 @@ function Account() {
 			},
 		}).then((response) => {
 			if (response.data?.changePassword) {
-				setMessage('Mot de passe modifié');
+				setMessagePassword('Mot de passe modifié');
+				setOldPassword('');
+				setNewPassword('');
+				setConfirmNewPassword('');
 				setTimeout(() => {
-					setMessage('');
+					setMessagePassword('');
 				}, 5000);
 			}
 		});
 
 		if (changePasswordError) {
+			setErrorPassword('Erreur lors de la modification du mot de passe');
 			throw new Error('Error while changing password');
 		}
 
@@ -289,14 +296,6 @@ function Account() {
 				const { updateUser } = response.data;
 				// Set the new user data to the store
 				setAccount(updateUser);
-
-				if (updateUser) {
-					setMessage('Modifications éfféctué');
-					setTimeout(() => {
-						setMessage('');
-				
-					},5000);
-				}
 			});
 		}
 
@@ -312,15 +311,9 @@ function Account() {
 			},
 		}).then((response): void => {
 			
-			
 			if (response.data?.deleteProfilePicture) {
-				setMessage('Modifications éfféctué');
 				setPicture('');
 				setImage('');
-				setTimeout(() => {
-					setMessage('');
-				
-				},5000);
 			}
 		});
 
@@ -328,9 +321,8 @@ function Account() {
 			throw new Error('Error while deleting profile picture');
 		}
 	};
-	
-	
 
+	// Handle the account delete
 	const handledeleteAccount = (event: React.MouseEvent<HTMLButtonElement>) => {
 		event.preventDefault();
 
@@ -354,7 +346,7 @@ function Account() {
 					document.cookie = 'refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 				}
 				//redirect to home page
-				closeDeleteModal();
+				setModalIsOpen(false);
 				navigate('/');
 				//});
 
@@ -369,30 +361,35 @@ function Account() {
 
 
 	return (
-		<>
-			<div className="account-container">
-				{error && <p className="user-modification-error">{error}</p>}
-				{message && <p className="user-modification-message">{message}</p>}
-				<div>
+		<div className="account">
+			<div className="account__profile">
+				{/* {error && <p className="account__profile__modification-error">{error}</p>}
+				{message && <p className="account__profile__modification-message">{message}</p>} */}
+				<div className="account__picture">
 					<img 
+						className="account__profile__picture__img"
 						src={image || profileLogo} 
 						alt="Profile" 
 						onClick={() => fileInput.current?.click()} 
 						style={{ cursor: 'pointer' }} 
 					/>
-					<input 
+					<input
+						className="account__profile__picture__input" 
 						type="file" 
 						ref={fileInput} 
 						onChange={handleProfilePicture} 
 						style={{ display: 'none' }} 
 						accept=".jpg,.jpeg,.png"
 					/>
-					<button type='button' onClick={handleDeletePicture}>X</button>
+					<button className="account__profile__picture__delete" type='button' onClick={handleDeletePicture}>Supprimer</button>
 				</div>
-				<form className="account-form" onSubmit={handleAccountSubmit} >
-					<label className="label">
+				<form className="account__profile__form" onSubmit={handleAccountSubmit} >
+					<h1 className="account__profile__form__title">Mes informations:</h1>
+					<div></div>
+					<label className="account__profile__form__label">
 					Prénom:
-						<input className="input-label" 
+						<input 
+							className="account__profile__form__label__input" 
 							type="text" 
 							name="first_name"						
 							value={first_name || ''} 
@@ -402,10 +399,10 @@ function Account() {
 							maxLength={50}
 						/>
 					</label>
-					<label className="label">
+					<label className="account__profile__form__label">
 					Nom:
 						<input 
-							className="input-label" 
+							className="account__profile__form__label__input" 
 							type="text" 
 							name="last_name"
 							value={last_name || ''}
@@ -415,10 +412,10 @@ function Account() {
 							maxLength={50}
 						/>
 					</label>
-					<label className="label">
+					<label className="account__profile__form__label">
 					Email:
 						<input 
-							className="input-label" 
+							className="account__profile__form__label__input" 
 							type="text" 
 							name="email"
 							value={email || ''}
@@ -428,10 +425,10 @@ function Account() {
 							maxLength={50}
 						/>
 					</label>
-					<label className="label">
+					<label className="account__profile__form__label">
 					Adresse:
 						<input 
-							className="input-label" 
+							className="account__profile__form__label__input" 
 							type="text"
 							name="address" 
 							value={address || ''}
@@ -442,10 +439,10 @@ function Account() {
 							required
 						/>
 					</label>
-					<label className="label">
+					<label className="account__profile__form__label">
 					Code postal:
 						<input 
-							className="input-label" 
+							className="account__profile__form__label__input" 
 							type="text" 
 							name="postal_code"
 							value={postal_code || ''}
@@ -456,10 +453,10 @@ function Account() {
 							required
 						/>
 					</label>
-					<label className="label">
+					<label className="account__profile__form__label">
 					Ville:
 						<input 
-							className="input-label" 
+							className="account__profile__form__label__input" 
 							type="text" 
 							name="city"
 							value={city || ''}
@@ -471,11 +468,11 @@ function Account() {
 						/>
 					</label>
 					{role === 'pro' && (
-						<div>
-							<label className="label">
+						<>
+							<label className="account__profile__form__label">
 							Siret:
 								<input 
-									className="input-label" 
+									className="account__profile__form__label__input" 
 									type="text" 
 									name="siret"
 									value={siret || ''}
@@ -485,10 +482,10 @@ function Account() {
 									maxLength={14}
 								/>
 							</label>
-							<label className="label">
+							<label className="account__profile__form__label">
 							Dénomination:
 								<input 
-									className="input-label" 
+									className="account__profile__form__label__input" 
 									type="text"
 									name="denomination" 
 									value={denomination || ''}
@@ -498,10 +495,10 @@ function Account() {
 									maxLength={50}
 								/>
 							</label>
-							<label className="label">
-								Description
+							<label className="account__profile__form__label">
+								Description:
 								<textarea
-									className="text-descritpion"
+									className="account__profile__form__label__input textarea"
 									name="description"
 									id="description"
 									placeholder="Exprimez-vous 200 caractères maximum"
@@ -513,65 +510,93 @@ function Account() {
 								</textarea>
 								<p>{description?.length}/200</p>
 							</label>
-						</div>
+						</>
+						
 					)}
-				
-					<button className="account-button" type="submit">Valider les modifications</button>
+					{errorAccount && <p className="account__profile__modification-error">{errorAccount}</p>}
+					{messageAccount && <p className="account__profile__modification-message">{messageAccount}</p>}
+					<button className="account__profile__button" type="submit">Valider</button>
 				</form>
-				<form className="account-form" onSubmit={handleSubmitNewPassword}>
-					<input
-						type="oldPassword"
-						name="oldPassword"
-						value={oldPassword}
-						className="input"
-						placeholder="Ancien mot de passe"
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setOldPassword(event.target.value)}
-						aria-label="Ancien mot de passe"
-						maxLength={60}
-						required
-					/>
-					<input
-						type="newPassword"
-						name="newPassword"
-						value={newPassword}
-						className="input"
-						placeholder="Nouveau mot de passe"
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewPassword(event.target.value)}
-						aria-label="Nouveau mot de passe"
-						maxLength={60}
-						required
-					/>
-					<input
-						type="newPassword"
-						name="confirmNewPassword"
-						value={confirmNewPassword}
-						className="input"
-						placeholder="Confirmer le nouveau mot de passe"
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(event.target.value)}
-						aria-label="Confirmer le nouveau mot de passe"
-						maxLength={60}
-						required
-					/>
-					<button className="account-button" type="submit">
-					Valider le nouveau mot de passe
+				<SettingAccount />
+				<form className="account__profile__form password " onSubmit={handleSubmitNewPassword}>
+					<h1 className="account__profile__form__title">Changer le mot de passe:</h1>
+					<label className="account__profile__form__label">
+						
+						<input
+							className="account__profile__form__label__input"
+							type={showPassword ? 'text' : 'password'}
+							name="oldPassword"
+							value={oldPassword}
+							placeholder="Ancien mot de passe"
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setOldPassword(event.target.value)}
+							aria-label="Ancien mot de passe"
+							maxLength={60}
+							required
+						/>
+					</label>
+					<label className="account__profile__form__label">
+						<input
+							className="account__profile__form__label__input"
+							type={showPassword ? 'text' : 'password'}
+							name="newPassword"
+							value={newPassword}
+							placeholder="Nouveau mot de passe"
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewPassword(event.target.value)}
+							aria-label="Nouveau mot de passe"
+							maxLength={60}
+							required
+						/>
+					</label>
+					<label className="account__profile__form__label">
+						<input
+							className="account__profile__form__label__input"
+							type={showPassword ? 'text' : 'password'}
+							name="confirmNewPassword"
+							value={confirmNewPassword}
+							placeholder="Confirmer le nouveau mot de passe"
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(event.target.value)}
+							aria-label="Confirmer le nouveau mot de passe"
+							maxLength={60}
+							required
+						/>
+					</label>
+					{errorPassword && <p className="account__profile__modification-error">{errorPassword}</p>}
+					{messagePassword && <p className="account__profile__modification-message">{messagePassword}</p>}
+					<button className="account__profile__button__show-password"  onClick={() => setShowPassword(!showPassword)}>
+						{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
+					</button>
+					<button 
+						className="account__profile__button" 
+						type="submit">
+					Valider
 					</button>
 
 				</form>
-				<button type='button' onClick={openDeleteModal}>supprimer mon compte</button>
+				<button 
+					className="account__profile__delete" 
+					type='button' 
+					onClick={() => setModalIsOpen(!ModalIsOpen)}>supprimer mon compte
+				</button>
 			</div>
-			<SettingAccount />
+			
 			<ReactModal
+				className="modal"
 				isOpen={ModalIsOpen}
 				contentLabel="Delete Account"
 				shouldCloseOnOverlayClick={false}
+				aria-label="supprimer mon compte"
 			>
-				<h1>ATTENTION</h1>
-				<p>Vous allez supprimer votre compte definitevement, êtes vous sur?</p>
-				<button onClick={handledeleteAccount}>Supprimer</button>
-				<button onClick={closeDeleteModal}>Annuler</button>
-				
+				<div className="modal__container">
+					<h1 className="modal__title">ATTENTION!!</h1>
+					<p className="modal__description">Vous allez supprimer votre compte definitevement, êtes vous sur?</p>
+					<div className="modal__container__button">
+						<button className="modal__delete" onClick={handledeleteAccount}>Supprimer</button>
+						<button className="modal__cancel" onClick={() => setModalIsOpen(!ModalIsOpen)}>Annuler</button>
+					</div>
+				</div>
 			</ReactModal>
-		</>
+			
+		</div>
 	);
 }
 export default Account;

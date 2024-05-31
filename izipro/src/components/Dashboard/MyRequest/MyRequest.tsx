@@ -16,10 +16,28 @@ import { MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
+import { FaTrashAlt,FaCamera } from 'react-icons/fa';
+import { MdSend, MdAttachFile } from 'react-icons/md';
+import { MdKeyboardArrowLeft } from 'react-icons/md';
+import pdfLogo from '/logo/pdf-icon.svg';
+import logoProfile from '/logo/logo profile.jpeg';
+import { useModal, ImageModal } from '../../Hook/ImageModal';
+import TextareaAutosize from 'react-textarea-autosize';
 //import { useQueryConversation } from '../../Hook/Query';
+import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+//@ts-expect-error react-modal is not compatible with typescript
+import ReactModal from 'react-modal';
+ReactModal.setAppElement('#root');
+
+type ExpandedState = {
+	[key: number]: boolean;
+};
 
 function MyRequest() {
 
+	// ImageModal Hook
+	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
+	
 	//state
 	//const [requests, setRequests] = useState<RequestProps[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -30,11 +48,20 @@ function MyRequest() {
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
 	const [newUserId, setNewUserId] = useState<number[]>([]);
 	const [userConvState, setUserConvState] = useState<UserDataProps[]>([]);
+	const [selectedUser, setSelectedUser] = useState<UserDataProps | null>(null);
+	const [userDescription, setUserDescription] = useState<boolean>(false);
+	const [isListOpen, setIsListOpen] = useState<boolean>(true);
+	const [isAnswerOpen, setIsAnswerOpen] = useState<boolean>(false);
+	const [isMessageOpen, setIsMessageOpen] = useState<boolean>(false);
+	const [isMessageExpanded, setIsMessageExpanded] = useState({});
+	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
+	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
+
 	
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
-	const limit = 10;
+	const limit = 2;
 	
 	// store
 	const id = userDataStore((state) => state.id);
@@ -47,9 +74,11 @@ function MyRequest() {
 	//const updateSubscriptionRef = useRef<SubscriptionProps[]>([]);
 	//const userOffsetRef = useRef(0);
 	//const conversationIdRef = useRef(0);
+	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
+	const idRef = useRef<number>(0);
 
 	// file upload
-	const { file, setFile, handleFileChange } = useFileHandler();
+	const { urlFile, setUrlFile, file, setFile, handleFileChange } = useFileHandler();
 
 	//mutation
 	const [ deleteRequest, {error: deleteRequestError} ] = useMutation(DELETE_REQUEST_MUTATION);
@@ -60,14 +89,12 @@ function MyRequest() {
 	const { getUserRequestsData, fetchMore } = useQueryUserRequests(id, 0, limit);
 	const { usersConversationData } = useQueryUsersConversation( newUserId.length !== 0 ? newUserId : userIds ,0 , limit);
 	const { messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 20);
-	
-	
 
+	// get the subscription
 	const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
 	const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'conversation');
 	
-	
-
+	// Subscription to get new message
 	const { data: messageSubscription, error: errorSubscription } = useSubscription(MESSAGE_SUBSCRIPTION, {
 		variables: {
 			conversation_ids: conversation?.subscriber_id,
@@ -79,8 +106,17 @@ function MyRequest() {
 		throw new Error('Error while subscribing to message');
 	}
 
-	
-	
+	//useEffect to set request and user in starting
+	useEffect(() => {
+		if (requestByDate && !selectedRequest && (requestByDate?.length ?? 0) > 0) {
+			setSelectedRequest(requestByDate[0]);
+			handleConversation(requestByDate[0]);
+			setTimeout(() => {
+				document.getElementById('first-user')?.click();
+			}, 200);
+		}
+	}, [requestByDate]);
+	console.log('selectedUser', selectedUser);
 
 	// useEffect to update the requests store
 	useEffect(() => {
@@ -122,7 +158,6 @@ function MyRequest() {
 
 			setRequestByDate(sortedRequests);
 
-			
 			// get conversation id in subscriptionStore
 			const conversationIds = subscriptionStore
 				.filter(subscription => subscription.subscriber === 'conversation')
@@ -505,10 +540,20 @@ function MyRequest() {
 		//}
 	}, [messageSubscription]);
 
+	// useEffect to scroll to the end of the messages
+	useEffect(() => {
+		setTimeout(() => {
+			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+		}, 200);
+	}, [messageStore]);
 
-
+	console.log('selectedRequest', selectedRequest);
+	console.log('myRequestsStore', myRequestsStore);
+	console.log('modalArgs', modalArgs);
+	console.log('requestByDate', requestByDate);
+	
 	// Function to delete a request
-	const handleDeleteRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
+	const handleDeleteRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
 		event.preventDefault();
 
 		deleteRequest({
@@ -528,6 +573,9 @@ function MyRequest() {
 				// Remove the request from the store
 				setMyRequestsStore(myRequestsStore.filter(request => request.id !== requestId));
 			}
+			setUserConvState([]);
+			setModalArgs(null);
+			setDeleteItemModalIsOpen(false);
 		
 			// remove subscription for this request
 			const subscription = subscriptionStore.find(subscription => subscription.subscriber === 'request');
@@ -592,8 +640,6 @@ function MyRequest() {
 							};
 						});
 
-						setUserConvState([]);
-
 					});
 
 					if (subscriptionError) {
@@ -608,12 +654,10 @@ function MyRequest() {
 		}
 		
 	};
-	
-
 
 	// Function to handle the users ids for the conversation
-	const handleConversation = (event: React.MouseEvent<HTMLDivElement>, request: RequestProps) => {
-		event.preventDefault();
+	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLDivElement>) => {
+		event?.preventDefault();
 
 		if (!request.conversation) {
 
@@ -648,8 +692,8 @@ function MyRequest() {
 			(conversation.user_1 === userId || conversation.user_2 === userId)
 		);
 
-
 		setConversationIdState(conversationId?.id || 0);
+
 
 	};
 
@@ -678,12 +722,29 @@ function MyRequest() {
 				}).then(() => {
 					setMessageValue('');
 					setFile([]);
+					setUrlFile([]);
+					const textarea = document.querySelector('.my-request__message-list__form__label__input') as HTMLTextAreaElement;
+					if (textarea) {
+						textarea.style.height = 'auto';
+					}
 				});
 			}
 		}
 		if (createMessageError) {
 			throw new Error('Error creating message');
 		}
+	};
+
+	// remove file
+	const handleRemove = (index: number) => {
+		// Remove file from file list
+		const newFiles = [...file];
+		newFiles.splice(index, 1);
+		setFile(newFiles);
+		// Remove file from urlFile list
+		const newUrlFileList = [...urlFile];
+		newUrlFileList.splice(index, 1);
+		setUrlFile(newUrlFileList);
 	};
 
 	// Function to fetchmore requests
@@ -706,14 +767,14 @@ function MyRequest() {
 			setLoading(false);
 		});
 	}
-
+	console.log('myRequestsStore', myRequestsStore);
 
 	return (
-		<div className="my_request-container">
-			<div className="request-list">
+		<div className="my-request">
+			<div className={`my-request__list ${isListOpen ? 'open' : ''}`}>
 				{!requestByDate && <p>Vous n&apos;avez pas de demande</p>}
 				{requestByDate && (
-					<div > 
+					<div className="my-request__list__detail" > 
 						<InfiniteScroll
 							dataLength={myRequestsStore?.length}
 							next={ () => {
@@ -725,22 +786,113 @@ function MyRequest() {
 							loader={<h4>Loading...</h4>}
 						>
 							{requestByDate.map((request) => (
-								<div key={request.id} onClick={(event) => [handleConversation(event, request), setSelectedRequest(request)]}>
-									<h1>{request.title}</h1>
-									<p>{request.created_at}</p>
-									<p>{request.first_name}</p>
-									<p>{request.last_name}</p>
-									<p>{request.city}</p>
-									<h2>{request.job}</h2>
-									<p>{request.message}</p>
-									<div>
+								<div
+									className={`my-request__list__detail__item ${request.urgent} ${selectedRequest === request ? 'selected' : ''} ` }
+									key={request.id} 
+									onClick={(event) => [
+										handleConversation(request, event), 
+										setSelectedRequest(request), 
+										setIsListOpen(!isListOpen), 
+										setIsAnswerOpen(!isAnswerOpen)
+									]}
+								>
+									{request.urgent && <p className="my-request__list__detail__item urgent">URGENT</p>}
+									<div className="my-request__list__detail__item__header">
+										<p className="my-request__list__detail__item__header date" >
+											<span className="my-request__list__detail__item__header date-span">
+												Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
+										</p>
+										<p className="my-request__list__detail__item__header city" >
+											<span className="my-request__list__detail__item__header city-span">
+												Ville:</span>&nbsp;{request.city}
+										</p>
+										<h2 className="my-request__list__detail__item__header job" >
+											<span className="my-request__list__detail__item__header job-span">
+												Métier:</span>&nbsp;{request.job}
+										</h2>
+										<p className="my-request__list__detail__item__header name" >
+											<span className="my-request__list__detail__item__header name-span">
+												Nom:</span>&nbsp;{request.first_name} {request.last_name}
+										</p>
+									</div>
+									<h1 className="my-request__list__detail__item title" >{request.title}</h1>
+									<p 
+										//@ts-expect-error con't resolve this type
+										className={`my-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
+										onClick={(event) => {
+											//to open the message when the user clicks on it just for the selected request 
+											idRef.current = request?.id  ?? 0; // check if request or requestByDate is not undefined
+											console.log('id', idRef.current);
+					
+											if (idRef.current !== undefined && setIsMessageExpanded) {
+												setIsMessageExpanded((prevState: ExpandedState)  => ({
+													...prevState,
+													[idRef.current as number]: !prevState[idRef.current]
+												}));
+											}
+											event.stopPropagation();
+										}} 
+									>
+										{request.message}
+									</p>
+									<div className="my-request__list__detail__item__picture">
 								
-										{request.media?.map((media) => (
-											media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
-										))}
+										{(() => {
+											const imageUrls = request.media?.map(media => media.url) || [];
+											return request.media?.map((media, index) => (
+												media ? (
+													media.name.endsWith('.pdf') ? (
+														<a 
+															href={media.url} 
+															key={media.id} 
+															download={media.name} 
+															target="_blank" 
+															rel="noopener noreferrer" 
+															onClick={(event) => {event.stopPropagation();}} >
+															<img 
+																className="my-request__list__detail__item__picture img" 
+																//key={media.id} 
+																src={pdfLogo} 
+																alt={media.name} 
+															/>
+														</a>
+													) : (
+														<img 
+															className="my-request__list__detail__item__picture img" 
+															key={media.id} 
+															src={media.url} 
+															onClick={(event) => {
+																openModal(imageUrls, index),
+																event.stopPropagation();
+															}}
+															alt={media.name} 
+														/>
+													)
+												) : null
+											));
+										})()}
 								
 									</div>
-									<button type='button' onClick={(event) => {event.stopPropagation(); handleDeleteRequest(event, request.id);}}>Supprimer la demande</button>
+									<button
+										id={`delete-request-${request.id}`}
+										className="my-request__list__detail__item__delete" 
+										type='button' 
+										onClick={(event) => {
+											setDeleteItemModalIsOpen(true);
+											console.log('requestId', request.id);
+											
+											setModalArgs({ event, requestId: request.id }),
+											//handleDeleteRequest(event, request.id), 
+											event.stopPropagation();
+										}}>
+									</button>
+									<FaTrashAlt 
+										className="my-request__list__detail__item__delete-FaTrashAlt" 
+										onClick={(event) => {
+											document.getElementById(`delete-request-${request.id}`)?.click(),
+											event.stopPropagation();
+										}}
+									/>
 								</div>
 							))}
 						</InfiniteScroll>
@@ -748,47 +900,262 @@ function MyRequest() {
 					</div>
 				)}
 			</div>
-			<div className="answer-list">
-				{userConvState?.length === 0 && <p>Vous n&apos;avez pas de conversation</p>}
-				{userConvState && userConvState?.map((user: UserDataProps ) => (
-					<div key={user.id} onClick={(event) => {handleMessageConversation(event, user.id);}}>
-						<h1>user</h1>
-						<img src={user.image} alt="" />
-						<p>{user.denomination}</p>
-						<p>{user.city}</p>
-					</div>
-				))}
-
-			</div>
-			<div className="message-list">
-				<h2>Messages for {selectedRequest?.title}</h2>
-				{Array.isArray(messageStore) &&
-							messageStore
-								.filter((message) => message.conversation_id === conversationIdState)
-								.map((message) => (
-									<div className={`${message.user_id}`} key={message.id}>{message.content}
-										<img src={`${message.media[0].url}`} alt="" />
-									</div>
-								))
-								
-				}
-				<form onSubmit={(event) => handleMessageSubmit(event)}>
-					<input
-						type="text"
-						value={messageValue}
-						onChange={(e) => setMessageValue(e.target.value)}
-						placeholder="Type your message here"
+			<div className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''}`}>
+				<InfiniteScroll
+					dataLength={myRequestsStore?.length}
+					next={ () => {
+						if (!loading) {
+							addRequest();
+						}
+					}}
+					hasMore={true}
+					loader={<h4>Loading...</h4>}
+				>
+					<MdKeyboardArrowLeft 
+						className="my-request__answer-list return" 
+						onClick={() => [setSelectedRequest(null), setIsListOpen(!isMessageOpen), setIsAnswerOpen(!isAnswerOpen)]}
 					/>
+					{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
+					{userConvState && userConvState?.map((user: UserDataProps, index ) => (
+						<div
+							id={index === 0 ? 'first-user' : undefined}
+							className={`my-request__answer-list__user ${selectedUser === user ? 'selected-user' : ''}`} 
+							key={user.id} 
+							onClick={(event) => {handleMessageConversation(event, user.id), setSelectedUser(user), setIsMessageOpen(!isMessageOpen), setIsAnswerOpen(!isAnswerOpen);}}>
+							<div className="my-request__answer-list__user__header">
+								<img className="my-request__answer-list__user__header img" src={user.image ? user.image : logoProfile} alt="" />
+								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
+								{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
+								{user.denomination ? (
+									<p className="my-request__answer-list__user__header denomination">{user.denomination}</p>
+								) : (
+									<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
+								) }
+							</div>
+							{/* <p className="my-request__answer-list__user city">{user.city}</p> */}
+						</div>
+					))}
+				</InfiniteScroll>
+			</div>
+			<div className={`my-request__message-list ${isMessageOpen ? 'open' : ''}`}>
+				<div className="my-request__message-list__user">
+					{selectedUser &&  (
+						<div
+							className="my-request__message-list__user__header"  
+							onClick={() => setUserDescription(!userDescription)}
+						>
+							<div 
+								className="my-request__message-list__user__header__detail"
+							>
+								<MdKeyboardArrowLeft 
+									className="my-request__message-list__user__header__detail return" 
+									onClick={() => [setSelectedUser(null), setIsMessageOpen(!isMessageOpen), setIsAnswerOpen(!isAnswerOpen)]}
+								/>								
+								<img className="my-request__message-list__user__header__detail img" src={selectedUser.image ? selectedUser.image : logoProfile} alt="" />
+								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
+								{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
+								{selectedUser.denomination ? (
+									<p className="my-request__message-list__user__header__detail denomination">{selectedUser.denomination}</p>
+								) : (
+									<p className="my-request__message-list__user__header__detail name">{selectedUser.first_name} {selectedUser.last_name}</p>
+								)}
+							</div>
+							{/* <p className="my-request__answer-list__user city">{user.city}</p> */}
+							{userDescription && <div>
+								<p className="my-request__message-list__user__header description">{selectedUser.description ? selectedUser.description : 'Pas de déscription'}</p> 
+							</div>
+							}
+						</div>
+					)}
+
+				</div>
+				{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
+				<div className="my-request__message-list__message">
+					<InfiniteScroll
+						className="infinite-scroll"
+						dataLength={messageStore?.length}
+						next={ () => {
+							if (!loading) {
+								addRequest();
+							}
+						}}
+						hasMore={true}
+						loader={<h4>Loading...</h4>}
+					>
+						{Array.isArray(messageStore) &&
+								messageStore
+									.filter((message) => message.conversation_id === conversationIdState)
+									.map((message, index, array) => (
+										<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
+											{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
+											<div className={`content ${message.user_id === id ? 'me' : ''}`}>
+												{message.media[0].url &&  (
+													<div className="my-request__message-list__message__detail__image-container">
+														<div className={`map ${message.content ? 'message' : ''}`}>
+															{(() => {
+																const imageUrls = message.media?.map(media => media.url) || [];
+																return message.media?.map((media, index) => (
+																	media ? (
+																		media.name.endsWith('.pdf') ? (
+																			<a 
+																				className="a-pdf"
+																				href={media.url} 
+																				key={media.id} 
+																				download={media.name} 
+																				target="_blank" 
+																				rel="noopener noreferrer" 
+																				onClick={(event) => {event.stopPropagation();}} >
+																				<img 
+																					className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`} 
+																					//key={media.id} 
+																					src={pdfLogo} 
+																					alt={media.name} 
+																				/>
+																			</a>
+																		) : (
+																			<img 
+																				className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`} 
+																				key={media.id} 
+																				src={media.url} 
+																				onClick={() => openModal(imageUrls, index)}
+																				alt={media.name} 
+																			/>
+																		)
+																	) : null
+																));
+															})()}
+														</div>
+													</div>
+												)}
+												{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
+											</div>
+											<div className="my-request__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
+										</div>
+									))
+					
+						}
+					</InfiniteScroll>
+				</div>
+				
+				<form className="my-request__message-list__form" onSubmit={(event) => {
+					event.preventDefault();
+					if (selectedUser) {
+						handleMessageSubmit(event);
+					}
+
+				}}>
+					{urlFile.length > 0 && <div className="my-request__message-list__form__preview">
+						{urlFile.map((file, index) => (
+							<div className="my-request__message-list__form__preview__container" key={index}>
+								
+								<img
+									className="my-request__message-list__form__preview__container__image"
+									src={file.type === 'application/pdf' ? pdfLogo : file.name}
+									alt={`Preview ${index}`}
+								/>
+								<div
+									className="my-request__message-list__form__preview__container__remove"
+									onClick={() => handleRemove(index)}
+								>
+									X
+								</div>
+							</div>
+						))}
+					</div>}
+					<label className="my-request__message-list__form__label">
+						<MdAttachFile 
+							className="my-request__message-list__form__label__attach"
+							onClick={() =>document.getElementById('send-file')?.click()}
+						/>
+						<FaCamera
+							className="my-request__message-list__form__label__camera"
+							onClick={() => document.getElementById('file-camera')?.click()}
+						/>
+						<TextareaAutosize
+							//key={messageValue || 'empty'}
+							className="my-request__message-list__form__label__input"
+							value={messageValue}
+							onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}
+							placeholder="Tapez votre message ici..."
+							maxLength={500}
+						/>
+						<MdSend 
+							className="my-request__message-list__form__label__send"
+							onClick={() => document.getElementById('send-message')?.click()}
+						/>
+					</label>
 					<input
+						id="send-file"
+						className="my-request__message-list__form__input"
 						type="file"
 						accept="image/*,.pdf"
-						onChange={handleFileChange}
+						onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
+						multiple={true}
 					/>
-					<button type="submit">Send</button>
+					<input
+						id="file-camera"
+						className="my-request__message-list__form__input medi" 
+						type="file" 
+						accept="image/*" 
+						capture="environment" 
+						onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)} 
+					/>
+					<button
+						id="send-message" 
+						className="my-request__message-list__form__button" 
+						type="submit"
+					>
+							Send
+					</button>
 				</form>
 
 			</div>
+
+			<ImageModal 
+				modalIsOpen={modalIsOpen} 
+				closeModal={closeModal} 
+				selectedImage={selectedImage} 
+				nextImage={nextImage}
+				previousImage={previousImage}
+			/>
+			<DeleteItemModal
+				modalArgs={modalArgs} 
+				setModalArgs={setModalArgs} 
+				setDeleteItemModalIsOpen={setDeleteItemModalIsOpen} 
+				deleteItemModalIsOpen={deleteItemModalIsOpen} 
+				handleDeleteRequest={handleDeleteRequest}
+			/>
+			{/* <ReactModal
+				className="modal"
+				isOpen={deleteItemModalIsOpen}
+				contentLabel="Delete Account"
+				shouldCloseOnOverlayClick={false}
+				aria-label="supprimer mon compte"
+			>
+				<div className="modal__container">
+					<h1 className="modal__title">ATTENTION!!</h1>
+					<p className="modal__description">Vous allez supprimer cette demande, êtes vous sur?</p>
+					<div className="modal__container__button">
+						<button 
+							className="modal__delete" 
+							onClick={() => {
+								if (modalArgs?.event && modalArgs?.requestId) {
+									handleDeleteRequest(modalArgs.event, modalArgs.requestId);
+								}
+							}}
+						>
+							Supprimer
+						</button>
+						<button className="modal__cancel" onClick={() => {
+							setDeleteItemModalIsOpen(!deleteItemModalIsOpen),
+							setModalArgs(null);
+						}}>Annuler</button>
+					</div>
+				</div>
+			</ReactModal> */}
 		</div>
+
+		
 	);
 }
 

@@ -1,0 +1,158 @@
+/* eslint-disable @typescript-eslint/ban-types */
+import { FaTrashAlt } from 'react-icons/fa';
+import pdfLogo from '/logo/pdf-icon.svg';
+import { RequestProps } from '../../Type/Request';
+import { useRef } from 'react';
+
+type ExpandedState = {
+	[key: number]: boolean;
+};
+
+const RequestItem = ({ 
+	isListOpen,
+	requestByDate,
+	isMessageOpen,
+	setIsMessageOpen,
+	request,
+	resetRequest,
+	selectedRequest, 
+	setSelectedRequest, 
+	isMessageExpanded, 
+	setIsMessageExpanded, 
+	setIsListOpen, 
+	handleHideRequest, 
+	openModal 
+}: {
+    isListOpen?: boolean,
+	requestByDate?: RequestProps,
+	isMessageOpen?: boolean,
+	setIsMessageOpen?: Function,
+    request?: RequestProps,
+	resetRequest?: Function, // replace YourRequestType with the actual type of your request object
+    selectedRequest?: RequestProps,
+    setSelectedRequest?: Function,
+    isMessageExpanded?: Object,
+    setIsMessageExpanded?: Function,
+    setIsListOpen?: Function,
+    handleHideRequest?: Function,
+    openModal?: Function
+  }) => {
+	const idRef = useRef<number>(0);
+	return (
+		<div
+			className={`my-conversation__list__detail__item 
+			${(request || requestByDate)?.urgent} 
+			${request ? 'new' : ''} 
+			${selectedRequest === (request || requestByDate) ? 'selected' : ''}
+			${requestByDate?.deleted_at ? 'deleted' : ''} 
+			` }
+			key={((request || requestByDate)?.id)?.toString()} 
+			onClick={() => {
+				if ((request || requestByDate) && setSelectedRequest) {
+					setSelectedRequest && setSelectedRequest(request || requestByDate);
+				}
+				setIsListOpen && setIsListOpen(!isListOpen);
+				setIsMessageOpen && setIsMessageOpen(!isMessageOpen);
+			}}
+		>
+			{requestByDate?.deleted_at && <p className="my-conversation__list__detail__item__deleted">SUPPRIMÉ PAR L&apos;UTILISATEUR</p>}
+			{(request || requestByDate)?.urgent && <p className="my-conversation__list__detail__item urgent">URGENT</p>}
+			<div className="my-conversation__list__detail__item__header">
+				<p className="my-conversation__list__detail__item__header date" >
+					<span className="my-conversation__list__detail__item__header date-span">
+												Date:</span>&nbsp;{new Date(Number((request || requestByDate)?.created_at)).toLocaleString()}
+				</p>
+				<p className="my-conversation__list__detail__item__header city" >
+					<span className="my-conversation__list__detail__item__header city-span">
+												Ville:</span>&nbsp;{(request || requestByDate)?.city}
+				</p>
+				<h2 className="my-conversation__list__detail__item__header job" >
+					<span className="my-conversation__list__detail__item__header job-span">
+												Métier:</span>&nbsp;{(request || requestByDate)?.job}
+				</h2>
+				<p className="my-conversation__list__detail__item__header name" >
+					<span className="my-conversation__list__detail__item__header name-span">
+												Nom:</span>&nbsp;{(request || requestByDate)?.first_name} {(request || requestByDate)?.last_name}
+				</p>
+			</div>
+			<h1 className="my-conversation__list__detail__item title" >{(request || requestByDate)?.title}</h1>
+			<p 
+			//@ts-expect-error no type here
+				className={`my-conversation__list__detail__item message ${isMessageExpanded && isMessageExpanded[idRef.current] ? 'expanded' : ''}`}
+				onClick={(event) => {
+					//to open the message when the user clicks on it just for the selected request 
+					idRef.current = (request?.id ?? requestByDate?.id) ?? 0; // check if request or requestByDate is not undefined
+					console.log('id', idRef.current);
+					
+					if (idRef.current !== undefined && setIsMessageExpanded) {
+						setIsMessageExpanded((prevState: ExpandedState) => ({
+							...prevState,
+							[idRef.current as number]: !prevState[idRef.current as number]
+						}));
+					}
+					event.stopPropagation();
+				}} 
+			>
+				{(request || requestByDate)?.message}
+			</p>
+			<div className="my-conversation__list__detail__item__picture">
+								
+				{(() => {
+					const imageUrls = (request || requestByDate)?.media?.map(media => media.url) || [];
+					return (request || requestByDate)?.media?.map((media, index) => (
+						media ? (
+							media.name.endsWith('.pdf') ? (
+								<a 
+									href={media.url} 
+									key={media.id} 
+									download={media.name} 
+									target="_blank" 
+									rel="noopener noreferrer" 
+									onClick={(event) => {event.stopPropagation();}} >
+									<img 
+										className="my-conversation__list__detail__item__picture img" 
+										src={pdfLogo} 
+										alt={media.name} 
+									/>
+								</a>
+							) : (
+								<img 
+									className="my-conversation__list__detail__item__picture img" 
+									key={media.id} 
+									src={media.url} 
+									onClick={(event) => {
+										openModal && openModal(imageUrls, index),
+										event.stopPropagation();
+									}}
+									alt={media.name} 
+								/>
+							)
+						) : null
+					));
+				})()}
+								
+			</div>
+			<button
+				id={`delete-request-${request || requestByDate}`}
+				className="my-conversation__list__detail__item__delete" 
+				type='button' 
+				onClick={(event) => {
+					if (request?.id) {
+						resetRequest && resetRequest();
+					} else {
+						handleHideRequest && handleHideRequest(event, requestByDate?.id);
+					}
+					event.stopPropagation();
+				}}>
+			</button>
+			<FaTrashAlt 
+				className="my-conversation__list__detail__item__delete-FaTrashAlt" 
+				onClick={(event) => {
+					document.getElementById(`delete-request-${request || requestByDate}`)?.click(),
+					event.stopPropagation();
+				}}
+			/>
+		</div>
+	);
+};
+export default RequestItem;

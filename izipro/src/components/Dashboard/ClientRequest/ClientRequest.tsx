@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
 import { requestDataStore } from '../../../store/Request';
 import { subscriptionDataStore } from '../../../store/subscription';
@@ -13,14 +13,26 @@ import * as turf from '@turf/turf';
 import { REQUEST_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 import { SubscriptionProps } from '../../../Type/Subscription';
+import pdfLogo from '/logo/pdf-icon.svg';
+import { useModal, ImageModal } from '../../Hook/ImageModal';
+import { FaTrashAlt } from 'react-icons/fa';
+
+type ExpandedState = {
+	[key: number]: boolean;
+};
 
 function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
+
+	// ImageModal Hook
+	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
 	
 	// State
 	const [clientRequests, setClientRequests] = useState<RequestProps[] | null>(null);
+	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
+	const idRef = useRef<number>(0);
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -260,41 +272,141 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	};
 	
 	return (
-		<div className="my_request-container">
-			{!clientRequests?.length && <p>Vous n&apos;avez pas de demande</p>}
-			{clientRequests && (
-				<div> 
-					<InfiniteScroll
-						dataLength={clientRequests.length}
-						next={ () => {
-							addRequest();
-						}}
-						hasMore={true}
-						loader={<h4>Loading...</h4>}
-					>
-						{clientRequests.map((request) => (
-							<div className="request-details" key={request.id} onClick={() => {onDetailsClick(); setRequest(request);}}>
-								<h1>{request.title}</h1>
-								<p>{request.created_at}</p>
-								<p>{request.first_name}</p>
-								<p>{request.last_name}</p>
-								<p>{request.city}</p>
-								<h2>{request.job}</h2>
-								<p>{request.message}</p>
-								<div>
-									{request.media?.map((media) => (
-										media ? (<img key={media.id} src={media.url} alt={media.name} />) : null
-									))}
+		<div className="client-request">
+			<div className="client-request__list">
+				{!clientRequests?.length && <p>Vous n&apos;avez pas de demande</p>}
+				{clientRequests && (
+					<div className="client-request__list__detail"> 
+						<InfiniteScroll
+							dataLength={clientRequests.length}
+							next={ () => {
+								addRequest();
+							}}
+							hasMore={true}
+							loader={<h4>Loading...</h4>}
+						>
+							{clientRequests.map((request) => (
+								<div
+									className={`client-request__list__detail__item ${request.urgent}`}
+									key={request.id} 
+									onClick={(event) => {
+										setRequest(request),
+										onDetailsClick(),
+										event.stopPropagation();
+									}}
+								
+								>
+									{request.urgent && <p className="client-request__list__detail__item urgent">URGENT</p>}
+									<div className="client-request__list__detail__item__header">
+										<p className="client-request__list__detail__item__header date" >
+											<span className="client-request__list__detail__item__header date-span">
+										Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
+										</p>
+										<p className="client-request__list__detail__item__header city" >
+											<span className="client-request__list__detail__item__header city-span">
+										Ville:</span>&nbsp;{request.city}
+										</p>
+										<h2 className="client-request__list__detail__item__header job" >
+											<span className="client-request__list__detail__item__header job-span">
+										Métier:</span>&nbsp;{request.job}
+										</h2>
+										<p className="client-request__list__detail__item__header name" >
+											<span className="client-request__list__detail__item__header name-span">
+										Nom:</span>&nbsp;{request.first_name} {request.last_name}
+										</p>
+									</div>
+									<h1 className="client-request__list__detail__item title" >{request.title}</h1>
+									<p 
+										//@ts-expect-error con't resolve this type
+										className={`client-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
+										onClick={(event: React.MouseEvent) => {
+											//to open the message when the user clicks on it just for the selected request 
+											idRef.current = request?.id  ?? 0; // check if request or requestByDate is not undefined
+											console.log('id', idRef.current);
+					
+											if (idRef.current !== undefined && setIsMessageExpanded) {
+												setIsMessageExpanded((prevState: ExpandedState)  => ({
+													...prevState,
+													[idRef.current as number]: !prevState[idRef.current]
+												}));
+											}
+											
+											event.stopPropagation();
+										}}  
+									>
+										{request.message}
+									</p>
+									<div className="client-request__list__detail__item__picture">
+						
+										{(() => {
+											const imageUrls = request.media?.map(media => media.url) || [];
+											return request.media?.map((media, index) => (
+												media ? (
+													media.name.endsWith('.pdf') ? (
+														<a 
+															href={media.url} 
+															key={media.id} 
+															download={media.name} 
+															target="_blank" 
+															rel="noopener noreferrer" 
+															onClick={(event) => {event.stopPropagation();}} >
+															<img 
+																className="client-request__list__detail__item__picture img" 
+																//key={media.id} 
+																src={pdfLogo} 
+																alt={media.name} 
+															/>
+														</a>
+													) : (
+														<img 
+															className="client-request__list__detail__item__picture img" 
+															key={media.id} 
+															src={media.url} 
+															onClick={(event: React.MouseEvent) => {
+																openModal(imageUrls, index),
+																event.stopPropagation();}}
+															alt={media.name} 
+														/>
+													)
+												) : null
+											));
+										})()}
+						
+									</div>
+								
+									<button
+										id={`delete-request-${request.id}`}
+										className="client-request__list__detail__item__delete" 
+										type='button' 
+										onClick={(event) => {
+											handleHideRequest(event, request.id),
+											event.stopPropagation();
+										}}>
+									</button>
+									<FaTrashAlt 
+										className="client-request__list__detail__item__delete-FaTrashAlt" 
+										onClick={(event) => {
+											document.getElementById(`delete-request-${request.id}`)?.click(),
+											event.stopPropagation();
+										}}
+									/>
 								</div>
-								<button type='button' onClick={(event) => {event.stopPropagation(); handleHideRequest(event, request.id);}}>Delete</button>
-							</div>
-						))}
-					</InfiniteScroll>
-					<button onClick={addRequest}>
+							))}
+						</InfiniteScroll>
+						<button onClick={addRequest}>
 						fetchmore
-					</button>
-				</div>
-			)}
+						</button>
+					</div>
+				)}
+			</div>
+
+			<ImageModal 
+				modalIsOpen={modalIsOpen} 
+				closeModal={closeModal} 
+				selectedImage={selectedImage} 
+				nextImage={nextImage}
+				previousImage={previousImage}
+			/>
 		</div>
 	);
 }

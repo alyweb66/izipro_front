@@ -7,24 +7,27 @@ import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import { userDataStore } from '../../store/UserData';
 import { useQueryUserData, useQueryUserSubscriptions } from '../Hook/Query';
-
 import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
 import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
 import { useMutation } from '@apollo/client';
+import Footer from '../Footer/Footer';
 
 function Dashboard() {
 	const navigate = useNavigate();
 
 	// State
-	const [selectedTab, setSelectedTab] = useState('My Profile');
-	
+	const [isOpen, setIsOpen] = useState(false);
+
 	//store
 	const id = userDataStore((state) => state.id);
 	const role = userDataStore((state) => state.role);
 	const setAll = userDataStore((state) => state.setAll);
-	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
 
+	//state for first page
+	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
+	
+	const [selectedTab, setSelectedTab] = useState(role === 'user'? 'My requests' : 'Client request');
 	// Query to get the user data
 	const getUserData = useQueryUserData();
 	const getUserSubscription = useQueryUserSubscriptions();
@@ -39,10 +42,7 @@ function Dashboard() {
 	} else {
 		isLogged = JSON.parse(localStorage.getItem('ayl') || '{}');
 	}
-	
-	
-	
-	
+
 	// set user subscription to the store
 	useEffect(() => {
 		if (getUserSubscription) {
@@ -107,34 +107,44 @@ function Dashboard() {
 		}
 	},[getUserData]);
 
-
-
+	// function to handle navigation to my conversation
 	const handleMyConvesationNavigate = () => {
 		setSelectedTab('My conversations');
 	};
 
+	// burger menu
+	const toggleMenu = () => {
+		setIsOpen(!isOpen);
+	};
+
 	return(
-		<div className='dashboard-container'>
-			<nav className="menu-container">
-				<ul className="menu">
-					<li className="tab" onClick={() => setSelectedTab('Request')}>Demande</li>
-					<li className="tab" onClick={() => setSelectedTab('My requests')}>Mes demandes</li>
-					{role === 'pro' && <li className="tab" onClick={() => setSelectedTab('Client request')}>Client</li>}
-					<li className="tab" onClick={() => setSelectedTab('My conversations')}>Mes échanges</li>
-					<li className="tab" onClick={() => setSelectedTab('My profile')}>Mon compte</li>
-
-
+		<div className='dashboard'>
+			<nav className="dashboard__nav">
+				<button className="dashboard__nav__burger-menu" onClick={toggleMenu}>
+					<div className='burger-icon'>
+						<div className="burger-icon__line"></div>
+						<div className="burger-icon__middle"></div>
+						<div className="burger-icon__line"></div>
+					</div>
+				</button>
+				<ul className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}>
+					<li className={`dashboard__nav__menu__tab ${selectedTab === 'Request' ? 'active' : ''}`} onClick={() => {setSelectedTab('Request'), setIsOpen(!isOpen);}}>Demande</li>
+					<li className={`dashboard__nav__menu__tab ${selectedTab === 'My requests' ? 'active' : ''}`} onClick={() => {setSelectedTab('My requests'), setIsOpen(!isOpen);}}>Mes demandes</li>
+					{role === 'pro' && <li className={`dashboard__nav__menu__tab ${selectedTab === 'Client request' ? 'active' : ''}`} onClick={() => {setSelectedTab('Client request'), setIsOpen(!isOpen);}}>Client</li>}
+					{role === 'pro' &&<li className={`dashboard__nav__menu__tab ${selectedTab === 'My conversations' ? 'active' : ''}`} onClick={() => {setSelectedTab('My conversations'), setIsOpen(!isOpen);}}>Mes échanges</li>}
+					<li className={`dashboard__nav__menu__tab ${selectedTab === 'My profile' ? 'active' : ''}`} onClick={() => {setSelectedTab('My profile'), setIsOpen(!isOpen);}}>Mon compte</li>
 				</ul>
 			</nav>
 
-			<div className="content-container">
+			<div className="dashboard__content">
 				{selectedTab === 'Request' && <Request/>}
 				{selectedTab === 'My requests' && <MyRequest/>}
 				{selectedTab === 'My conversations' && <MyConversation/>}
 				{selectedTab === 'My profile' && <Account />}
 				{selectedTab === 'Client request' && <ClientRequest onDetailsClick={handleMyConvesationNavigate} />}
 
-			</div>	
+			</div>
+			<Footer />	
 		</div>
 		
 	);
