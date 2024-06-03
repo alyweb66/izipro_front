@@ -107,7 +107,7 @@ export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, l
 export const useQueryUserConversations = (offset: number, limit: number) => {
 
 
-	const {loading, error: conversationError, data, fetchMore} = useQuery(GET_USER_REQUEST_BY_CONVERSATIONS, {
+	const {error: conversationError, data, fetchMore} = useQuery(GET_USER_REQUEST_BY_CONVERSATIONS, {
 		fetchPolicy: 'network-only',
 		variables: {
 			offset: offset,
@@ -121,7 +121,7 @@ export const useQueryUserConversations = (offset: number, limit: number) => {
 	if (!data) {
 		return [];
 	}
-	return {loading, data, fetchMore};
+	return {data, fetchMore};
 };
 
 export const useQueryMessagesByConversation = (conversationId: number, offset: number, limit: number) => {

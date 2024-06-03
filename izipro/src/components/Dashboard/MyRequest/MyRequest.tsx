@@ -715,27 +715,29 @@ function MyRequest() {
 
 	// Function to fetchmore requests
 	function addRequest() {
-		fetchMore({
-			variables: {
-				offset: myRequestsStore.length // Next offset
-			},
-		}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
-			console.log('fetchMoreResult', fetchMoreResult.data.user.requests);
+		if (fetchMore) {
+			fetchMore({
+				variables: {
+					offset: myRequestsStore.length // Next offset
+				},
+			}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
+				console.log('fetchMoreResult', fetchMoreResult.data.user.requests);
 
-			// remove request who is already in the store
-			const requestsIds = myRequestsStore.map(request => request.id);
-			const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIds.includes(request.id));
-			console.log('newRequests', newRequests);
-			if (newRequests.length > 0) {
-				myRequestStore.setState(prevRequests => {
-					return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
-				});
-
-				offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
-			}
-
-			setLoading(false);
-		});
+				// remove request who is already in the store
+				const requestsIds = myRequestsStore.map(request => request.id);
+				const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIds.includes(request.id));
+				console.log('newRequests', newRequests);
+				if (newRequests.length > 0) {
+					myRequestStore.setState(prevRequests => {
+						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
+					});
+				
+					offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
+				}
+			
+				setLoading(false);
+			});
+		}
 	}
 
 	return (

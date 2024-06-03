@@ -416,24 +416,26 @@ function MyConversation() {
 
 	// Function to load more requests with infinite scroll
 	function addRequest() {
-		fetchMore({
-			variables: {
-				offset: offsetRef.current, // Next offset
-			},
+		if (fetchMore) {
+			fetchMore({
+				variables: {
+					offset: offsetRef.current, // Next offset
+				},
 			// @ts-expect-error no promess here
-		}).then((fetchMoreResult: { data: { user: { requestsConversations: RequestProps[] } } }) => {
+			}).then((fetchMoreResult: { data: { user: { requestsConversations: RequestProps[] } } }) => {
 
-			const request = fetchMoreResult.data.user.requestsConversations;
-
-			if (!fetchMoreResult.data) return;
-			// add the new request to the requestsConversationStore
-			if (request) {
-				const addRequest = [...(requestsConversationStore || []), ...request];
-				setRequestsConversationStore(addRequest);
-			}
-			offsetRef.current = offsetRef.current + request.length;
-
-		});
+				const request = fetchMoreResult.data.user.requestsConversations;
+			
+				if (!fetchMoreResult.data) return;
+				// add the new request to the requestsConversationStore
+				if (request) {
+					const addRequest = [...(requestsConversationStore || []), ...request];
+					setRequestsConversationStore(addRequest);
+				}
+				offsetRef.current = offsetRef.current + request.length;
+			
+			});
+		}
 	}
 
 	// Function to hide a client request
