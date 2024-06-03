@@ -362,32 +362,7 @@ function MyRequest() {
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
 
-		/* if (subscribeToMore) {
-			const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
-			const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'conversation');
-			
-			
-			
-
-			if (request?.subscriber_id || conversation?.subscriber_id) {
-				console.log('Subscribing with:', {
-					conversation_ids: conversation?.subscriber_id,
-					request_ids: request?.subscriber_id
-				});
-				
-				subscribeToMore({
-					document: MESSAGE_SUBSCRIPTION,
-					variables: {
-						conversation_ids: conversation?.subscriber_id,
-						request_ids: request?.subscriber_id,
-						is_request: true
-					}, */
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		//updateQuery: (prev: MessageProps, { subscriptionData }: { subscriptionData: any }) => {
-
-		//if (!subscriptionData.data) return prev;
 		// check if the message is already in the store
-		
 		if (messageSubscription?.messageAdded) {
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
 						
@@ -408,7 +383,6 @@ function MyRequest() {
 
 			});
 			
-						
 			// add the conversation to the request
 			myRequestStore.setState(prevState => {
 				const updatedRequest = prevState.requests.map((request: RequestProps) => {
@@ -532,11 +506,7 @@ function MyRequest() {
 			}
 						
 		}			
-		//},
-					
-		//});
-		//}
-		//}
+	
 	}, [messageSubscription]);
 
 	// useEffect to scroll to the end of the messages

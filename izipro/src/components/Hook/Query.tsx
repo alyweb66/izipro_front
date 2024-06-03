@@ -124,16 +124,15 @@ export const useQueryUserConversations = (offset: number, limit: number) => {
 	return {loading, data, fetchMore};
 };
 
-export const useQueryMessagesByConversation = (messagesId: number, conversationId: number, offset: number, limit: number) => {
+export const useQueryMessagesByConversation = (conversationId: number, offset: number, limit: number) => {
 	
 	const {  subscribeToMore,error: messageError, data: messageData, fetchMore: fetchMoreMessage } = useQuery(GET_MESSAGES_BY_CONVERSATION, {
 		variables: {
-			messagesId: messagesId,
 			conversationId: conversationId,
 			offset: offset,
 			limit: limit
 		},
-		skip: !messagesId || !conversationId
+		skip: !conversationId
 	});
 
 	if (messageError) {
