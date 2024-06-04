@@ -16,6 +16,7 @@ import { Localization } from '../../Hook/Localization';
 import ReactModal from 'react-modal';
 
 import './Account.scss';
+import '../../../styles/spinner.scss';
 import profileLogo from '/logo/logo profile.jpeg';
 
 ReactModal.setAppElement('#root');
