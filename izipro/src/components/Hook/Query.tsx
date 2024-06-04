@@ -91,7 +91,7 @@ export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, l
 	
 	const jobIdArray = jobId.map((job) => job.job_id);
 
-	const { subscribeToMore, error: requestError, data: getRequestsByJob, fetchMore } = useQuery(GET_REQUEST_BY_JOB, {
+	const { loading, subscribeToMore, error: requestError, data: getRequestsByJob, fetchMore } = useQuery(GET_REQUEST_BY_JOB, {
 		
 		fetchPolicy: 'network-only',
 		variables: {
@@ -105,14 +105,14 @@ export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, l
 	if (requestError) {
 		throw new Error('Error while fetching requests by jobs');
 	}
-	return {getRequestsByJob, subscribeToMore, fetchMore};
+	return {loading, getRequestsByJob, subscribeToMore, fetchMore};
 };
 
 // fetch user conversations
 export const useQueryUserConversations = (offset: number, limit: number) => {
 
 
-	const {error: conversationError, data, fetchMore} = useQuery(GET_USER_REQUEST_BY_CONVERSATIONS, {
+	const {loading, error: conversationError, data, fetchMore} = useQuery(GET_USER_REQUEST_BY_CONVERSATIONS, {
 		fetchPolicy: 'network-only',
 		variables: {
 			offset: offset,
@@ -126,13 +126,13 @@ export const useQueryUserConversations = (offset: number, limit: number) => {
 	if (!data) {
 		return [];
 	}
-	return {data, fetchMore};
+	return {loading, data, fetchMore};
 };
 
 // fetch messages by conversation
 export const useQueryMessagesByConversation = (conversationId: number, offset: number, limit: number) => {
 	
-	const {  subscribeToMore,error: messageError, data: messageData, fetchMore: fetchMoreMessage } = useQuery(GET_MESSAGES_BY_CONVERSATION, {
+	const {  loading, subscribeToMore,error: messageError, data: messageData, fetchMore: fetchMoreMessage } = useQuery(GET_MESSAGES_BY_CONVERSATION, {
 		variables: {
 			conversationId: conversationId,
 			offset: offset,
@@ -144,7 +144,7 @@ export const useQueryMessagesByConversation = (conversationId: number, offset: n
 	if (messageError) {
 		throw new Error('Error while fetching messages by conversation');
 	}
-	return {subscribeToMore, messageData, fetchMoreMessage};
+	return {loading, subscribeToMore, messageData, fetchMoreMessage};
 };
 
 // fetch user subscriptions

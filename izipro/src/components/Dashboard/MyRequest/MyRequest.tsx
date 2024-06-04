@@ -529,7 +529,6 @@ function MyRequest() {
 		}, 200);
 	}, [messageStore]);
 
-	console.log('myRequestsStore', myRequestsStore);
 
 	// Function to delete a request
 	const handleDeleteRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
@@ -753,8 +752,8 @@ function MyRequest() {
 	return (
 		<div className="my-request">
 			<div className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}>
-				{!requestByDate && <p>Vous n&apos;avez pas de demande</p>}
 				{requestLoading && <div className="spinner"><span className="loader"></span></div>}
+				{!requestByDate && <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p>}
 				{requestByDate && (
 					<div className="my-request__list__detail" > 
 						<InfiniteScroll
@@ -764,7 +763,7 @@ function MyRequest() {
 								addRequest();	
 							}}
 							hasMore={true}
-							loader={<h4>Loading...</h4>}
+							loader={<p ></p>}
 						>
 							{requestByDate.map((request) => (
 								<div
@@ -877,7 +876,6 @@ function MyRequest() {
 								</div>
 							))}
 						</InfiniteScroll>
-				
 					</div>
 				)}
 			</div>
@@ -975,7 +973,7 @@ function MyRequest() {
 							
 						}}
 						hasMore={true}
-						loader={<h4>Loading...</h4>}
+						loader={<p className="my-request__list no-req">Vous n&apos;avez pas de message</p>}
 					>
 						{Array.isArray(messageStore) &&
 								messageStore

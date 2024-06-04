@@ -71,8 +71,8 @@ function MyConversation() {
 	const [hideRequest, { error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 
 	//query
-	const { data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
-	const { messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
+	const { loading: convLoading, data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
+	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
 
 	// file upload
 	const { file,urlFile, setUrlFile, setFile, handleFileChange } = useFileHandler();
@@ -515,6 +515,7 @@ function MyConversation() {
 
 	return (
 		<div className="my-conversation">
+			{convLoading && <div className="spinner"><span className="loader"></span></div>}
 			<div className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
 				{!requestByDate && <p>Vous n&apos;avez pas de demande</p>}
 				{requestByDate && (
@@ -567,7 +568,8 @@ function MyConversation() {
 				)}
 			</div>
 
-			<div className={`my-conversation__message-list ${isMessageOpen ? 'open' : ''}`}>
+			<div className={`my-conversation__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`}>
+				{messageLoading && <div className="spinner"><span className="loader"></span></div>}
 				<div className="my-conversation__message-list__user">
 					{selectedRequest && (
 						<div
@@ -610,7 +612,7 @@ function MyConversation() {
 							
 						}}
 						hasMore={true}
-						loader={<h4>Loading...</h4>}
+						loader={<h4></h4>}
 						
 					>
 						{Array.isArray(messageStore) &&
