@@ -9,6 +9,7 @@ type ExpandedState = {
 };
 
 const RequestItem = ({ 
+	index,
 	isListOpen,
 	requestByDate,
 	isMessageOpen,
@@ -23,6 +24,7 @@ const RequestItem = ({
 	handleHideRequest, 
 	openModal 
 }: {
+	index?: number,
     isListOpen?: boolean,
 	requestByDate?: RequestProps,
 	isMessageOpen?: boolean,
@@ -40,6 +42,7 @@ const RequestItem = ({
 	const idRef = useRef<number>(0);
 	return (
 		<div
+			id={index === 0 ? 'first-user' : undefined}
 			className={`my-conversation__list__detail__item 
 			${(request || requestByDate)?.urgent} 
 			${request ? 'new' : ''} 

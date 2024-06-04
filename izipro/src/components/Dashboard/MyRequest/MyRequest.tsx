@@ -116,7 +116,6 @@ function MyRequest() {
 			}, 200);
 		}
 	}, [requestByDate]);
-	console.log('selectedUser', selectedUser);
 
 	// useEffect to update the requests store
 	useEffect(() => {
@@ -363,32 +362,7 @@ function MyRequest() {
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
 
-		/* if (subscribeToMore) {
-			const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
-			const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'conversation');
-			
-			
-			
-
-			if (request?.subscriber_id || conversation?.subscriber_id) {
-				console.log('Subscribing with:', {
-					conversation_ids: conversation?.subscriber_id,
-					request_ids: request?.subscriber_id
-				});
-				
-				subscribeToMore({
-					document: MESSAGE_SUBSCRIPTION,
-					variables: {
-						conversation_ids: conversation?.subscriber_id,
-						request_ids: request?.subscriber_id,
-						is_request: true
-					}, */
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		//updateQuery: (prev: MessageProps, { subscriptionData }: { subscriptionData: any }) => {
-
-		//if (!subscriptionData.data) return prev;
 		// check if the message is already in the store
-		
 		if (messageSubscription?.messageAdded) {
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
 						
@@ -409,7 +383,6 @@ function MyRequest() {
 
 			});
 			
-						
 			// add the conversation to the request
 			myRequestStore.setState(prevState => {
 				const updatedRequest = prevState.requests.map((request: RequestProps) => {
@@ -533,11 +506,7 @@ function MyRequest() {
 			}
 						
 		}			
-		//},
-					
-		//});
-		//}
-		//}
+	
 	}, [messageSubscription]);
 
 	// useEffect to scroll to the end of the messages
@@ -547,11 +516,8 @@ function MyRequest() {
 		}, 200);
 	}, [messageStore]);
 
-	console.log('selectedRequest', selectedRequest);
 	console.log('myRequestsStore', myRequestsStore);
-	console.log('modalArgs', modalArgs);
-	console.log('requestByDate', requestByDate);
-	
+
 	// Function to delete a request
 	const handleDeleteRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
 		event.preventDefault();
@@ -749,25 +715,30 @@ function MyRequest() {
 
 	// Function to fetchmore requests
 	function addRequest() {
-		fetchMore({
-			variables: {
-				offset: myRequestsStore.length // Next offset
-			},
-		}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
+		if (fetchMore) {
+			fetchMore({
+				variables: {
+					offset: myRequestsStore.length // Next offset
+				},
+			}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
+				console.log('fetchMoreResult', fetchMoreResult.data.user.requests);
 
-			// remove request who is already in the store
-			const requestsIds = myRequestsStore.map(request => request.id);
-			const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIds.includes(request.id));
-
-			myRequestStore.setState(prevRequests => {
-				return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
+				// remove request who is already in the store
+				const requestsIds = myRequestsStore.map(request => request.id);
+				const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIds.includes(request.id));
+				console.log('newRequests', newRequests);
+				if (newRequests.length > 0) {
+					myRequestStore.setState(prevRequests => {
+						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
+					});
+				
+					offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
+				}
+			
+				setLoading(false);
 			});
-
-			offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
-			setLoading(false);
-		});
+		}
 	}
-	console.log('myRequestsStore', myRequestsStore);
 
 	return (
 		<div className="my-request">
@@ -778,9 +749,10 @@ function MyRequest() {
 						<InfiniteScroll
 							dataLength={myRequestsStore?.length}
 							next={ () => {
-								if (!loading) {
-									addRequest();
-								}
+								console.log('couocu');
+							
+								addRequest();
+								
 							}}
 							hasMore={true}
 							loader={<h4>Loading...</h4>}
@@ -822,7 +794,6 @@ function MyRequest() {
 										onClick={(event) => {
 											//to open the message when the user clicks on it just for the selected request 
 											idRef.current = request?.id  ?? 0; // check if request or requestByDate is not undefined
-											console.log('id', idRef.current);
 					
 											if (idRef.current !== undefined && setIsMessageExpanded) {
 												setIsMessageExpanded((prevState: ExpandedState)  => ({
@@ -904,9 +875,7 @@ function MyRequest() {
 				<InfiniteScroll
 					dataLength={myRequestsStore?.length}
 					next={ () => {
-						if (!loading) {
-							addRequest();
-						}
+						
 					}}
 					hasMore={true}
 					loader={<h4>Loading...</h4>}
@@ -975,9 +944,7 @@ function MyRequest() {
 						className="infinite-scroll"
 						dataLength={messageStore?.length}
 						next={ () => {
-							if (!loading) {
-								addRequest();
-							}
+							
 						}}
 						hasMore={true}
 						loader={<h4>Loading...</h4>}

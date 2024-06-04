@@ -72,8 +72,7 @@ function MyConversation() {
 
 	//query
 	const { data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
-	const { messageData } = useQueryMessagesByConversation(id, conversationIdState, 0, 10);
-
+	const { messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
 
 	// file upload
 	const { file,urlFile, setUrlFile, setFile, handleFileChange } = useFileHandler();
@@ -90,6 +89,16 @@ function MyConversation() {
 	if (errorSubscription) {
 		throw new Error('Error while subscribing to message');
 	}
+
+	//useEffect to set request in starting
+	useEffect(() => {
+		if (requestByDate && selectedRequest?.id === 0 && (requestByDate?.length ?? 0) > 0) {
+			setSelectedRequest(requestByDate[0]);
+			setTimeout(() => {
+				document.getElementById('first-user')?.click();
+			}, 200);
+		}
+	}, [requestByDate]);
 
 	// useEffect to set the new selected request
 	useEffect(() => {
@@ -170,21 +179,7 @@ function MyConversation() {
 	useEffect(() => {
 
 
-		//if (subscribeToMore) {
-		/* const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
-			
-			if (Subscription?.subscriber_id) {
-				subscribeToMore({
-					document: MESSAGE_SUBSCRIPTION,
-					variables: {
-						conversation_ids: Subscription?.subscriber_id,
-						request_ids: [],
-						is_request: false
-					},
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					updateQuery: (prev: MessageProps, { subscriptionData }: { subscriptionData: any }) => {
-
-						if (!subscriptionData.data) return prev; */
+		
 		// check if the message is already in the store
 		if (messageSubscription?.messageAdded) {
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
@@ -219,11 +214,7 @@ function MyConversation() {
 				return { requests: updatedRequest };
 			});
 		}
-		//},
-		//});
-		//}
 
-		//}
 	}, [messageSubscription]);
 
 
@@ -288,6 +279,7 @@ function MyConversation() {
 					}
 					resetRequest();
 					setFile([]);
+					setUrlFile([]);
 				});
 			}
 		}
@@ -330,6 +322,7 @@ function MyConversation() {
 					})),
 					//setRequest(updateRequest);
 					setSelectedRequest(updateRequest);
+					
 				}
 
 
@@ -423,24 +416,26 @@ function MyConversation() {
 
 	// Function to load more requests with infinite scroll
 	function addRequest() {
-		fetchMore({
-			variables: {
-				offset: offsetRef.current, // Next offset
-			},
+		if (fetchMore) {
+			fetchMore({
+				variables: {
+					offset: offsetRef.current, // Next offset
+				},
 			// @ts-expect-error no promess here
-		}).then((fetchMoreResult: { data: { user: { requestsConversations: RequestProps[] } } }) => {
+			}).then((fetchMoreResult: { data: { user: { requestsConversations: RequestProps[] } } }) => {
 
-			const request = fetchMoreResult.data.user.requestsConversations;
-
-			if (!fetchMoreResult.data) return;
-			// add the new request to the requestsConversationStore
-			if (request) {
-				const addRequest = [...(requestsConversationStore || []), ...request];
-				setRequestsConversationStore(addRequest);
-			}
-			offsetRef.current = offsetRef.current + request.length;
-
-		});
+				const request = fetchMoreResult.data.user.requestsConversations;
+			
+				if (!fetchMoreResult.data) return;
+				// add the new request to the requestsConversationStore
+				if (request) {
+					const addRequest = [...(requestsConversationStore || []), ...request];
+					setRequestsConversationStore(addRequest);
+				}
+				offsetRef.current = offsetRef.current + request.length;
+			
+			});
+		}
 	}
 
 	// Function to hide a client request
@@ -550,8 +545,9 @@ function MyConversation() {
 									openModal={openModal}
 								/>
 							}
-							{requestByDate.map((requestByDate) => (
+							{requestByDate.map((requestByDate, index) => (
 								<RequestItem key={requestByDate.id}
+									index={index}
 									requestByDate={requestByDate}
 									isMessageOpen={isMessageOpen}
 									setIsMessageOpen={setIsMessageOpen}
@@ -610,7 +606,7 @@ function MyConversation() {
 						dataLength={messageStore?.length}
 						next={() => {
 							
-							addRequest();
+		
 							
 						}}
 						hasMore={true}
