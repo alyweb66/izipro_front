@@ -52,13 +52,13 @@ function Request() {
 
 
 	// mutation
-	const [createRequest, { error: requestError }] = useMutation(REQUEST_MUTATION);
+	const [createRequest, { loading: createLoading, error: requestError }] = useMutation(REQUEST_MUTATION);
 
 	// fetch categories 
-	const categoriesData = useQueryCategory();
+	const {loading: categoryLoading, categoriesData} = useQueryCategory();
 
 	// fetch jobs
-	const jobData = useQueryJobs(selectedCategory);
+	const {loading: JobDataLoading, jobData} = useQueryJobs(selectedCategory);
 
 	// remove file
 	const handleRemove = (index: number) => {
@@ -252,6 +252,8 @@ function Request() {
 
 	return (
 		<div className="request">
+			{categoryLoading || JobDataLoading || createLoading && <div className="spinner"><span className="loader"></span></div>}
+
 			{(!address && !city && !postal_code && !first_name && !last_name) &&
 				(<p>Veuillez renseigner votre nom, prénom et adresse dans votre compte pour faire une demande</p>)}
 			{address && city && postal_code && first_name && last_name && (

@@ -27,9 +27,10 @@ function Dashboard() {
 	//state for first page
 	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
 	
-	const [selectedTab, setSelectedTab] = useState(role === 'user'? 'My requests' : 'Client request');
+	const [selectedTab, setSelectedTab] = useState('');
+
 	// Query to get the user data
-	const getUserData = useQueryUserData();
+	const {loading: userDataLoading, getUserData} = useQueryUserData();
 	const getUserSubscription = useQueryUserSubscriptions();
 
 	//mutation
@@ -50,6 +51,18 @@ function Dashboard() {
 			setSubscription(getUserSubscription?.user.subscription);
 		}
 	},[getUserSubscription]);
+
+	// set the default tab based on the user role
+	useEffect(() => {
+		if (role) {
+			if (role === 'pro') {
+				setSelectedTab('Client request');
+			} else {
+				setSelectedTab('My requests');
+			}
+
+		}
+	},[role]);
 
 	
 	// function to check if user is logged in
@@ -119,6 +132,7 @@ function Dashboard() {
 
 	return(
 		<div className='dashboard'>
+			
 			<nav className="dashboard__nav">
 				<button className="dashboard__nav__burger-menu" onClick={toggleMenu}>
 					<div className='burger-icon'>
@@ -137,6 +151,7 @@ function Dashboard() {
 			</nav>
 
 			<div className="dashboard__content">
+				{userDataLoading && <div className="spinner"><span className="loader"></span></div>}
 				{selectedTab === 'Request' && <Request/>}
 				{selectedTab === 'My requests' && <MyRequest/>}
 				{selectedTab === 'My conversations' && <MyConversation/>}

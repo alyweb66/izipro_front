@@ -4,10 +4,12 @@ import { userDataStore } from '../../../store/UserData';
 import { GET_USER_DATA } from '../../GraphQL/UserQueries';
 import { useMutation, useQuery } from '@apollo/client';
 import SettingAccount from './SettingAccount/SettingAccount';
-import { CHANGE_PASSWORD_MUTATION, 
-	DELETE_ACCOUNT_MUTATION, 
-	DELETE_PROFILE_PICTURE_MUTATION, 
-	UPDATE_USER_MUTATION } from '../../GraphQL/UserMutations';
+import {
+	CHANGE_PASSWORD_MUTATION,
+	DELETE_ACCOUNT_MUTATION,
+	DELETE_PROFILE_PICTURE_MUTATION,
+	UPDATE_USER_MUTATION
+} from '../../GraphQL/UserMutations';
 import DOMPurify from 'dompurify';
 import validator from 'validator';
 import { UserDataProps } from '../../../Type/User';
@@ -28,11 +30,12 @@ function Account() {
 
 	// useRef for profile picture
 	const fileInput = useRef<HTMLInputElement>(null);
-		
+
 	// Get the user data
-	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
+	const { loading, error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
+
 	console.log('getUserData', getUserData);
-	
+
 
 	//state
 	const [first_name, setFirstName] = useState(getUserData?.user.first_name || '');
@@ -52,14 +55,14 @@ function Account() {
 	const [confirmNewPassword, setConfirmNewPassword] = useState('');
 	const [ModalIsOpen, setModalIsOpen] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
-	
+
 	// Message modification account
 	const [messageAccount, setMessageAccount] = useState('');
 	const [errorAccount, setErrorAccount] = useState('');
-	
+
 	// Message modification password
-	const[messagePassword, setMessagePassword] = useState('');
-	const[errorPassword, setErrorPassword] = useState('');
+	const [messagePassword, setMessagePassword] = useState('');
+	const [errorPassword, setErrorPassword] = useState('');
 
 	// Set the changing user data
 	const [userData, setUserData] = useState(getUserData?.user || {} as UserDataProps);
@@ -72,26 +75,26 @@ function Account() {
 	const role = userDataStore((state) => state.role);
 	const [image, setImage] = userDataStore((state) => [state.image, state.setImage]);
 	const resetUserData = userDataStore((state) => state.resetUserData);
-	
+
 	// Mutation to update the user data
-	const [updateUser, { error: updateUserError }] = useMutation(UPDATE_USER_MUTATION, {
-		update(cache, {data: { updateUser}}) {
+	const [updateUser, {loading: updateUserLoading, error: updateUserError }] = useMutation(UPDATE_USER_MUTATION, {
+		update(cache, { data: { updateUser } }) {
 			cache.modify({
 				fields: {
 					user(existingUser = {}) {
 						return { ...existingUser, ...updateUser.user };
 					},
 				},
-			}); 
+			});
 		}
 	});
-	const [changePassword, { error: changePasswordError }] = useMutation(CHANGE_PASSWORD_MUTATION);
+	const [changePassword, { loading: changepasswordLoading, error: changePasswordError }] = useMutation(CHANGE_PASSWORD_MUTATION);
 	const [deleteProfilePicture, { error: deleteProfilePictureError }] = useMutation(DELETE_PROFILE_PICTURE_MUTATION);
 	const [deleteAccount, { error: deleteAccountError }] = useMutation(DELETE_ACCOUNT_MUTATION);
 
 	// Set the user data to state
 	useEffect(() => {
-		
+
 		if (getUserData?.user) {
 			setFirstName(getUserData.user.first_name);
 			setLastName(getUserData.user.last_name);
@@ -108,11 +111,11 @@ function Account() {
 			setPicture(getUserData.user.image);
 		}
 	}, [getUserData]);
-	
+
 	// Set the new user data to state
 	useEffect(() => {
 		//sanitize the input
-		const newUserData  = {
+		const newUserData = {
 			first_name: DOMPurify.sanitize(first_name),
 			last_name: DOMPurify.sanitize(last_name),
 			email: DOMPurify.sanitize(email),
@@ -126,10 +129,10 @@ function Account() {
 			description: DOMPurify.sanitize(description),
 			image: DOMPurify.sanitize(picture),
 		};
-	
+
 		setUserData(newUserData);
 	}, [first_name, last_name, email, address, postal_code, city, lng, lat, siret, denomination, description]);
-	
+
 	// Set the user data to the store
 	useEffect(() => {
 
@@ -140,11 +143,11 @@ function Account() {
 				acc[key as keyof UserDataProps] = value === null ? '' : value;
 				return acc;
 			}, {} as UserDataProps);
-		
+
 			setInitialData(userData);
 			setAll(userData);
 		}
-		
+
 
 		if (getUserError) {
 			throw new Error('Error while fetching user data');
@@ -169,24 +172,24 @@ function Account() {
 			setLng(location?.lng);
 			setLat(location?.lat);
 		}
-	
+
 		// Compare the initial data with the new data and get the changed fields
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const changedFields = (Object.keys(initialData) as Array<keyof UserDataProps>).reduce((result: any, key: keyof UserDataProps) => {
-			
+
 			if (initialData[key] !== newUserData[key]) {
 				result[key] = newUserData[key];
 			}
-			
-			return result ;
+
+			return result;
 		}, {});
-		
+
 		if (changedFields.siret && changedFields.siret.length !== 14) {
 			setErrorAccount('Siret invalide');
 			setTimeout(() => {
 				setErrorAccount('');
-			
-			},5000);
+
+			}, 5000);
 			return;
 		}
 
@@ -194,27 +197,27 @@ function Account() {
 			setMessageAccount('Un email de confirmation a été envoyé, le nouvel email sera effectif après confirmation');
 			setTimeout(() => {
 				setMessageAccount('');
-			
-			},5000);
+
+			}, 5000);
 			return;
 		}
-		
+
 		// Delete the role and id fields
 		delete changedFields.role && delete changedFields.id;
 
 		// Check if there are changed values, if yes use mutation
-		const keys =Object.keys(changedFields).filter(key => changedFields[key] !== undefined && changedFields[key] !== null);
+		const keys = Object.keys(changedFields).filter(key => changedFields[key] !== undefined && changedFields[key] !== null);
 
 		// if there are changed values, use mutation
 		if (keys.length > 0) {
-	
+
 			updateUser({
 				variables: {
 					updateUserId: id,
 					input: changedFields,
 				},
 			}).then((response): void => {
-			
+
 				const { updateUser } = response.data;
 				// Set the new user data to the store
 				setAccount(updateUser);
@@ -223,8 +226,8 @@ function Account() {
 					setMessageAccount('Modifications éfféctué');
 					setTimeout(() => {
 						setMessageAccount('');
-					
-					},5000);
+
+					}, 5000);
 				}
 			});
 
@@ -280,16 +283,16 @@ function Account() {
 	// Handle the profile picture change
 	const handleProfilePicture = (event: React.ChangeEvent<HTMLInputElement>) => {
 		event.preventDefault();
-		
+
 		const file = event.target.files;
-		
+
 		if ((file?.length ?? 0) > 0) {
-		
+
 			updateUser({
 				variables: {
 					updateUserId: id,
 					input: {
-						image:file,
+						image: file,
 					}
 				},
 			}).then((response): void => {
@@ -311,7 +314,7 @@ function Account() {
 				id: id,
 			},
 		}).then((response): void => {
-			
+
 			if (response.data?.deleteProfilePicture) {
 				setPicture('');
 				setImage('');
@@ -334,13 +337,13 @@ function Account() {
 			},
 		}).then((response): void => {
 			if (response.data?.deleteUser) {
-				
+
 				// clear user data store
 				resetUserData();
 				// clear local storage and session storage
 				localStorage.clear();
 				sessionStorage.clear();
-	
+
 				// clear the cookie
 				if (document.cookie) {
 					document.cookie = 'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
@@ -357,54 +360,62 @@ function Account() {
 		if (deleteAccountError) {
 			throw new Error('Error while deleting account');
 		}
-		
+
 	};
 
 
 	return (
 		<div className="account">
-			<div className="account__profile">
+
+			< div className={`account__profile ${loading ? 'loading' : ''}`} >
+				{loading && <div className="spinner"><span className="loader"></span></div>}
 				{/* {error && <p className="account__profile__modification-error">{error}</p>}
 				{message && <p className="account__profile__modification-message">{message}</p>} */}
-				<div className="account__picture">
-					<img 
+				<div className="account__picture" >
+					<img
 						className="account__profile__picture__img"
-						src={image || profileLogo} 
-						alt="Profile" 
-						onClick={() => fileInput.current?.click()} 
-						style={{ cursor: 'pointer' }} 
+						src={image || profileLogo}
+						alt="Profile"
+						onClick={() => fileInput.current?.click()}
+						style={{ cursor: 'pointer' }}
 					/>
 					<input
-						className="account__profile__picture__input" 
-						type="file" 
-						ref={fileInput} 
-						onChange={handleProfilePicture} 
-						style={{ display: 'none' }} 
+						className="account__profile__picture__input"
+						type="file"
+						ref={fileInput}
+						onChange={handleProfilePicture}
+						style={{ display: 'none' }}
 						accept=".jpg,.jpeg,.png"
 					/>
 					<button className="account__profile__picture__delete" type='button' onClick={handleDeletePicture}>Supprimer</button>
-				</div>
-				<form className="account__profile__form" onSubmit={handleAccountSubmit} >
+				</div >
+				<form className={`account__profile__form ${updateUserLoading ? 'loading' : ''}`} onSubmit={handleAccountSubmit} >
+					{updateUserLoading &&
+						<div className="spinner">
+							<span className="loader">
+							</span>
+						</div>
+					}
 					<h1 className="account__profile__form__title">Mes informations:</h1>
 					<div></div>
 					<label className="account__profile__form__label">
-					Prénom:
-						<input 
-							className="account__profile__form__label__input" 
-							type="text" 
-							name="first_name"						
-							value={first_name || ''} 
+						Prénom:
+						<input
+							className="account__profile__form__label__input"
+							type="text"
+							name="first_name"
+							value={first_name || ''}
 							placeholder={first_name || ''}
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)} 
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)}
 							aria-label="Prénom"
 							maxLength={50}
 						/>
 					</label>
 					<label className="account__profile__form__label">
-					Nom:
-						<input 
-							className="account__profile__form__label__input" 
-							type="text" 
+						Nom:
+						<input
+							className="account__profile__form__label__input"
+							type="text"
 							name="last_name"
 							value={last_name || ''}
 							placeholder={last_name || ''}
@@ -414,54 +425,54 @@ function Account() {
 						/>
 					</label>
 					<label className="account__profile__form__label">
-					Email:
-						<input 
-							className="account__profile__form__label__input" 
-							type="text" 
+						Email:
+						<input
+							className="account__profile__form__label__input"
+							type="text"
 							name="email"
 							value={email || ''}
-							placeholder={email || ''} 
+							placeholder={email || ''}
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
 							aria-label="Email"
 							maxLength={50}
 						/>
 					</label>
 					<label className="account__profile__form__label">
-					Adresse:
-						<input 
-							className="account__profile__form__label__input" 
+						Adresse:
+						<input
+							className="account__profile__form__label__input"
 							type="text"
-							name="address" 
+							name="address"
 							value={address || ''}
-							placeholder={address || ''} 
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddress(event.target.value)} 
+							placeholder={address || ''}
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddress(event.target.value)}
 							aria-label="Adresse"
 							maxLength={100}
 							required
 						/>
 					</label>
 					<label className="account__profile__form__label">
-					Code postal:
-						<input 
-							className="account__profile__form__label__input" 
-							type="text" 
+						Code postal:
+						<input
+							className="account__profile__form__label__input"
+							type="text"
 							name="postal_code"
 							value={postal_code || ''}
-							placeholder={postal_code || ''} 
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCode(event.target.value)} 
+							placeholder={postal_code || ''}
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCode(event.target.value)}
 							aria-label="Code postal"
 							maxLength={10}
 							required
 						/>
 					</label>
 					<label className="account__profile__form__label">
-					Ville:
-						<input 
-							className="account__profile__form__label__input" 
-							type="text" 
+						Ville:
+						<input
+							className="account__profile__form__label__input"
+							type="text"
 							name="city"
 							value={city || ''}
-							placeholder={city || ''} 
+							placeholder={city || ''}
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCity(event.target.value)}
 							aria-label="Ville"
 							maxLength={20}
@@ -471,27 +482,27 @@ function Account() {
 					{role === 'pro' && (
 						<>
 							<label className="account__profile__form__label">
-							Siret:
-								<input 
-									className="account__profile__form__label__input" 
-									type="text" 
+								Siret:
+								<input
+									className="account__profile__form__label__input"
+									type="text"
 									name="siret"
 									value={siret || ''}
-									placeholder={siret || ''} 
+									placeholder={siret || ''}
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
 									aria-label="Siret"
 									maxLength={14}
 								/>
 							</label>
 							<label className="account__profile__form__label">
-							Dénomination:
-								<input 
-									className="account__profile__form__label__input" 
+								Dénomination:
+								<input
+									className="account__profile__form__label__input"
 									type="text"
-									name="denomination" 
+									name="denomination"
 									value={denomination || ''}
 									placeholder={denomination || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenomination(event.target.value)} 
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenomination(event.target.value)}
 									aria-label="Dénomination"
 									maxLength={50}
 								/>
@@ -512,17 +523,24 @@ function Account() {
 								<p>{description?.length}/200</p>
 							</label>
 						</>
-						
+
 					)}
 					{errorAccount && <p className="account__profile__modification-error">{errorAccount}</p>}
 					{messageAccount && <p className="account__profile__modification-message">{messageAccount}</p>}
 					<button className="account__profile__button" type="submit">Valider</button>
 				</form>
 				<SettingAccount />
-				<form className="account__profile__form password " onSubmit={handleSubmitNewPassword}>
+				<form className={`account__profile__form password ${changepasswordLoading ? 'loading' : ''}` } onSubmit={handleSubmitNewPassword}>
+					{changepasswordLoading &&
+						<div className="spinner">
+							<span className="loader">
+							</span>
+						</div>
+					}
+
 					<h1 className="account__profile__form__title">Changer le mot de passe:</h1>
 					<label className="account__profile__form__label">
-						
+
 						<input
 							className="account__profile__form__label__input"
 							type={showPassword ? 'text' : 'password'}
@@ -563,23 +581,26 @@ function Account() {
 					</label>
 					{errorPassword && <p className="account__profile__modification-error">{errorPassword}</p>}
 					{messagePassword && <p className="account__profile__modification-message">{messagePassword}</p>}
-					<button className="account__profile__button__show-password"  onClick={() => setShowPassword(!showPassword)}>
+					<button className="account__profile__button__show-password" onClick={() => setShowPassword(!showPassword)}>
 						{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
 					</button>
-					<button 
-						className="account__profile__button" 
+					<button
+						className="account__profile__button"
 						type="submit">
-					Valider
+						Valider
 					</button>
 
+
 				</form>
-				<button 
-					className="account__profile__delete" 
-					type='button' 
+				<button
+					className="account__profile__delete"
+					type='button'
 					onClick={() => setModalIsOpen(!ModalIsOpen)}>supprimer mon compte
 				</button>
-			</div>
-			
+			</div >
+
+
+
 			<ReactModal
 				className="modal"
 				isOpen={ModalIsOpen}
@@ -596,8 +617,8 @@ function Account() {
 					</div>
 				</div>
 			</ReactModal>
-			
-		</div>
+
+		</div >
 	);
 }
 export default Account;

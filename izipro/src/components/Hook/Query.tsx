@@ -4,32 +4,34 @@ import { GET_JOB_DATA } from '../GraphQL/Job';
 import { GET_MESSAGES_BY_CONVERSATION, GET_MY_MESSAGES_BY_CONVERSATION, GET_USERS_CONVERSATION, GET_USER_DATA, GET_USER_REQUEST_BY_CONVERSATIONS, GET_USER_SUBSCRIPTION } from '../GraphQL/UserQueries';
 import { GET_CONVERSATION } from '../GraphQL/ConversationQueries';
 
+import '../../styles/spinner.scss';
+
 
 // fetch user data
 export const useQueryUserData = () => {
-	const { error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
+	const { loading, error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
 	
 	if (getUserError) {
 		throw new Error('Error while fetching user data');
 	}
 
-	return getUserData;
+	return { loading, getUserData};
 };		
 
 // fetch categories 
 export const useQueryCategory = () => {
-	const { error: categoryError, data: categoriesData } = useQuery(GET_JOB_CATEGORY);
+	const { loading, error: categoryError, data: categoriesData } = useQuery(GET_JOB_CATEGORY);
 	if (categoryError) {
 		throw new Error('Error while fetching categories data');
 	}
 
-	return categoriesData;
+	return {loading, categoriesData};
 };
 
 // fetch jobs
 export const useQueryJobs = (selectedCategory: string) => {
 	
-	const { error: jobError, data: jobData } = useQuery(GET_JOBS_BY_CATEGORY,
+	const { loading, error: jobError, data: jobData } = useQuery(GET_JOBS_BY_CATEGORY,
 		{
 			variables: {
 				categoryId: Number(selectedCategory)
@@ -40,7 +42,7 @@ export const useQueryJobs = (selectedCategory: string) => {
 	if (jobError) {
 		throw new Error('Error while fetching jobs');
 	}
-	return jobData;
+	return {loading, jobData};
 };
 
 // fetch job data
@@ -64,9 +66,10 @@ export const useQueryJobData = (jobId:{job_id: number}[] ) => {
 	return jobs;
 };
 
+// fetch user requests
 export const  useQueryUserRequests = (id: number, offset: number, limit: number) => {
 	
-	const { error: getUserRequestsError, data: getUserRequestsData, fetchMore } = useQuery(GET_USER_REQUESTS, {
+	const { loading, error: getUserRequestsError, data: getUserRequestsData, fetchMore } = useQuery(GET_USER_REQUESTS, {
 		fetchPolicy: 'network-only',
 		variables: {
 			requestsId: id,
@@ -80,9 +83,10 @@ export const  useQueryUserRequests = (id: number, offset: number, limit: number)
 		throw new Error('Error while fetching user requests');
 	}
 
-	return {getUserRequestsData, fetchMore};
+	return {loading, getUserRequestsData, fetchMore};
 };
 
+// fetch requests by job
 export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, limit: number) => {
 	
 	const jobIdArray = jobId.map((job) => job.job_id);
@@ -104,6 +108,7 @@ export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, l
 	return {getRequestsByJob, subscribeToMore, fetchMore};
 };
 
+// fetch user conversations
 export const useQueryUserConversations = (offset: number, limit: number) => {
 
 
@@ -124,6 +129,7 @@ export const useQueryUserConversations = (offset: number, limit: number) => {
 	return {data, fetchMore};
 };
 
+// fetch messages by conversation
 export const useQueryMessagesByConversation = (conversationId: number, offset: number, limit: number) => {
 	
 	const {  subscribeToMore,error: messageError, data: messageData, fetchMore: fetchMoreMessage } = useQuery(GET_MESSAGES_BY_CONVERSATION, {
@@ -141,6 +147,7 @@ export const useQueryMessagesByConversation = (conversationId: number, offset: n
 	return {subscribeToMore, messageData, fetchMoreMessage};
 };
 
+// fetch user subscriptions
 export const useQueryUserSubscriptions = () => {
 	const { error: subscriptionError, data: subscriptionData } = useQuery(GET_USER_SUBSCRIPTION);
 	if (subscriptionError) {
@@ -149,9 +156,10 @@ export const useQueryUserSubscriptions = () => {
 	return subscriptionData;
 };
 
+// fetch users conversation
 export const useQueryUsersConversation = (userIds: number[], offset: number, limit: number) => {
 
-	const { error: usersConversationError, data: usersConversationData } = useQuery(GET_USERS_CONVERSATION, {
+	const { loading, error: usersConversationError, data: usersConversationData } = useQuery(GET_USERS_CONVERSATION, {
 		variables: {
 			ids: userIds,
 			offset: offset,
@@ -162,12 +170,13 @@ export const useQueryUsersConversation = (userIds: number[], offset: number, lim
 	if (usersConversationError) {
 		throw new Error('Error while fetching user conversation');
 	}
-	return {usersConversationData};
+	return {loading, usersConversationData};
 };
 
+// fetch messages by conversation
 export const useQueryMyMessagesByConversation = (conversationId: number, offset: number, limit: number) => {
 		
-	const {  subscribeToMore,error: messageError, data: messageData, fetchMore: fetchMoreMessage } = useQuery(GET_MY_MESSAGES_BY_CONVERSATION, {
+	const {  loading, subscribeToMore,error: messageError, data: messageData } = useQuery(GET_MY_MESSAGES_BY_CONVERSATION, {
 		variables: {
 			conversationId: conversationId,
 			offset: offset,
@@ -180,9 +189,10 @@ export const useQueryMyMessagesByConversation = (conversationId: number, offset:
 		throw new Error('Error while fetching messages by conversation');
 	}
 	
-	return {subscribeToMore, messageData, fetchMoreMessage};
+	return {loading, subscribeToMore, messageData};
 };
 
+// fetch conversation
 export const useQueryConversation = (id: number) => {
 
 	const { error: conversationError, data: conversationData, refetch: refetchConversation } = useQuery(GET_CONVERSATION, {

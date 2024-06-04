@@ -6,7 +6,6 @@ import './SettingAccount.scss';
 import { useEffect, useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { userDataStore } from '../../../../store/UserData';
-import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
 
 function SettingAccount() {
@@ -25,8 +24,8 @@ function SettingAccount() {
 	const [message, setMessage] = useState('');
 
 	// fetch jobs
-	const categoriesData = useQueryCategory();
-	const jobData  = useQueryJobs(selectedCategory);
+	const {loading: categoryLoading, categoriesData } = useQueryCategory();
+	const { loading: jobLoading, jobData  }  = useQueryJobs(selectedCategory);
 	const jobDataName = useQueryJobData(jobs);
 
 	// set job with the value from the database
@@ -37,9 +36,9 @@ function SettingAccount() {
 	}, [jobDataName]);
 
 	// mutation
-	const [createUserJob, { error: errorCreateUserJob }] = useMutation(USER_HAS_JOB_MUTATION);
-	const [deleteUserJob, { error: errorDeleteUserJob }] = useMutation(DELETE_USER_HAS_JOB_MUTATION);
-	const [userSetting, { error: errorUserSetting}] = useMutation(USER_SETTING_MUTATION);
+	const [createUserJob, { loading: userJobLoading, error: errorCreateUserJob }] = useMutation(USER_HAS_JOB_MUTATION);
+	const [deleteUserJob, { loading: deleteJobLoading, error: errorDeleteUserJob }] = useMutation(DELETE_USER_HAS_JOB_MUTATION);
+	const [userSetting, { loading: settingLoading, error: errorUserSetting}] = useMutation(USER_SETTING_MUTATION);
 	
 	// function to remove list job before submit
 	const handleRemoveListJob = (id: number, event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -156,7 +155,8 @@ function SettingAccount() {
 			{role === 'pro' && (
 				<div className="setting-account">
 					<>
-						<form className="setting-account__form" onSubmit={handleSubmitJob}>
+						<form className={`setting-account__form ${jobLoading ? 'loading' : ''}`} onSubmit={handleSubmitJob}>
+							{jobLoading && <div className="spinner"><span className="loader"></span></div>}
 							<h1 className="setting-account__form__title">Indiquez vos métiers:</h1>
 							<select
 								className="setting-account__form__select"
@@ -203,7 +203,9 @@ function SettingAccount() {
 								))}
 							</ul>
 							<button className="setting-account__form__button" type='submit'>valider</button>
-							<ul className="setting-account__form__list job">
+							<ul className={`setting-account__form__list job ${(userJobLoading || deleteJobLoading || categoryLoading) ? 'loading' : ''}`}>
+								{(userJobLoading || deleteJobLoading || categoryLoading) && <div className="spinner"><span className="loader"></span></div>}
+								
 								<h2 className="setting-account__subtitle">Vos métiers:</h2>
 								{selectedJob && selectedJob.map((job: JobProps, index: number) => (
 									<li className="setting-account__form__list__tag" key={index}>
@@ -216,24 +218,27 @@ function SettingAccount() {
 
 						</form>
 				
-						<label className="setting-account__radius">
-							<h2 className="setting-account__subtitle">Selectionnez une distance d&apos;action:</h2>
-							{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
-						</label>
-						<input
-							className="setting-account__radius__input"
-							id="radius"
-							type="range"
-							min="0"
-							max="100000"
-							step="5000"
-							value={radius}
-							onChange={e => setRadius(Number(e.target.value))}
-						/>
-						<div className="setting-account__radius__input__message">
-							{message && <p>{message}</p>}
+						<div className={`setting-account__radius ${settingLoading ? 'loading' : ''}`}>
+							{settingLoading && <div className="spinner"><span className="loader"></span></div>}
+							<label className="setting-account__radius__label">
+								<h2 className="setting-account__subtitle">Selectionnez une distance d&apos;action:</h2>
+								{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
+							</label>
+							<input
+								className="setting-account__radius__input"
+								id="radius"
+								type="range"
+								min="0"
+								max="100000"
+								step="5000"
+								value={radius}
+								onChange={e => setRadius(Number(e.target.value))}
+							/>
+							<div className="setting-account__radius__input__message">
+								{message && <p>{message}</p>}
+							</div>
+							<button className="setting-account__radius__button" onClick={handleValidateRange}>Valider</button>
 						</div>
-						<button className="setting-account__radius__button" onClick={handleValidateRange}>Valider</button>
 					</>
 				</div>
 			)}

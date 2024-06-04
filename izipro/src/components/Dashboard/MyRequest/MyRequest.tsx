@@ -40,7 +40,7 @@ function MyRequest() {
 	
 	//state
 	//const [requests, setRequests] = useState<RequestProps[]>([]);
-	const [loading, setLoading] = useState(false);
+	//const [loading, setLoading] = useState(false);
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [userIds, setUserIds] = useState<number[]>([]);
 	const [conversationIdState, setConversationIdState] = useState<number>(0);
@@ -57,6 +57,11 @@ function MyRequest() {
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
 
+	console.log('isAnswerOpen', isAnswerOpen);
+	console.log('isMessageOpen', isMessageOpen);
+	console.log('isListOpen', isListOpen);
+	
+	
 	
 
 	// Create a state for the scroll position
@@ -86,9 +91,9 @@ function MyRequest() {
 	const [ subscriptionMutation, { error: subscriptionError } ] = useMutation(SUBSCRIPTION_MUTATION);
 	
 	// Query to get the user requests
-	const { getUserRequestsData, fetchMore } = useQueryUserRequests(id, 0, limit);
-	const { usersConversationData } = useQueryUsersConversation( newUserId.length !== 0 ? newUserId : userIds ,0 , limit);
-	const { messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 20);
+	const { loading: requestLoading, getUserRequestsData, fetchMore } = useQueryUserRequests(id, 0, limit);
+	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation( newUserId.length !== 0 ? newUserId : userIds ,0 , limit);
+	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 20);
 
 	// get the subscription
 	const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
@@ -111,11 +116,19 @@ function MyRequest() {
 		if (requestByDate && !selectedRequest && (requestByDate?.length ?? 0) > 0) {
 			setSelectedRequest(requestByDate[0]);
 			handleConversation(requestByDate[0]);
-			setTimeout(() => {
-				document.getElementById('first-user')?.click();
-			}, 200);
 		}
 	}, [requestByDate]);
+	
+	// useEffect to select the message at stasting
+	useEffect(() => {
+
+		if (window.innerWidth > 1200) {
+			setTimeout(() => {
+				document.getElementById('first-user')?.click();
+			}, 300);
+		}
+
+	},[]);
 
 	// useEffect to update the requests store
 	useEffect(() => {
@@ -624,13 +637,12 @@ function MyRequest() {
 	// Function to handle the users ids for the conversation
 	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLDivElement>) => {
 		event?.preventDefault();
-
+		
 		if (!request.conversation) {
 
 			setUserConvState([]);
 
 		} else { 
-
 			// Get the user ids from the conversation
 			const ids = request?.conversation?.map(conversation => {
 				return conversation.user_1 !== id ? conversation.user_1 : conversation.user_2;
@@ -640,8 +652,7 @@ function MyRequest() {
 
 			// Filter out the user ids that are already in the userConvStore
 			const newIds = ids.filter(id => !idStore.includes(id));
-			
-
+		
 			if (newIds.length > 0) {
 				setUserIds(newIds || []); // Provide a default value of an empty array
 			} 
@@ -735,24 +746,22 @@ function MyRequest() {
 					offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
 				}
 			
-				setLoading(false);
 			});
 		}
 	}
 
 	return (
 		<div className="my-request">
-			<div className={`my-request__list ${isListOpen ? 'open' : ''}`}>
+			<div className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}>
 				{!requestByDate && <p>Vous n&apos;avez pas de demande</p>}
+				{requestLoading && <div className="spinner"><span className="loader"></span></div>}
 				{requestByDate && (
 					<div className="my-request__list__detail" > 
 						<InfiniteScroll
 							dataLength={myRequestsStore?.length}
 							next={ () => {
-								console.log('couocu');
-							
-								addRequest();
-								
+
+								addRequest();	
 							}}
 							hasMore={true}
 							loader={<h4>Loading...</h4>}
@@ -761,12 +770,13 @@ function MyRequest() {
 								<div
 									className={`my-request__list__detail__item ${request.urgent} ${selectedRequest === request ? 'selected' : ''} ` }
 									key={request.id} 
-									onClick={(event) => [
+									onClick={(event) => {
 										handleConversation(request, event), 
 										setSelectedRequest(request), 
-										setIsListOpen(!isListOpen), 
-										setIsAnswerOpen(!isAnswerOpen)
-									]}
+										setIsListOpen(false), 
+										setIsAnswerOpen(true),
+										setIsMessageOpen(false);
+									}}
 								>
 									{request.urgent && <p className="my-request__list__detail__item urgent">URGENT</p>}
 									<div className="my-request__list__detail__item__header">
@@ -871,7 +881,8 @@ function MyRequest() {
 					</div>
 				)}
 			</div>
-			<div className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''}`}>
+			<div className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''} ${conversationLoading ? 'loading' : ''}`}>
+				{conversationLoading && <div className="spinner"><span className="loader"></span></div>}
 				<InfiniteScroll
 					dataLength={myRequestsStore?.length}
 					next={ () => {
@@ -882,7 +893,12 @@ function MyRequest() {
 				>
 					<MdKeyboardArrowLeft 
 						className="my-request__answer-list return" 
-						onClick={() => [setSelectedRequest(null), setIsListOpen(!isMessageOpen), setIsAnswerOpen(!isAnswerOpen)]}
+						onClick={() => {
+							setSelectedRequest(null), 
+							setIsListOpen(true), 
+							setIsAnswerOpen(false),
+							setIsMessageOpen(false);
+						}}
 					/>
 					{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
 					{userConvState && userConvState?.map((user: UserDataProps, index ) => (
@@ -890,7 +906,14 @@ function MyRequest() {
 							id={index === 0 ? 'first-user' : undefined}
 							className={`my-request__answer-list__user ${selectedUser === user ? 'selected-user' : ''}`} 
 							key={user.id} 
-							onClick={(event) => {handleMessageConversation(event, user.id), setSelectedUser(user), setIsMessageOpen(!isMessageOpen), setIsAnswerOpen(!isAnswerOpen);}}>
+							onClick={(event) => {
+								handleMessageConversation(event, user.id), 
+								setSelectedUser(user), 
+								setIsMessageOpen(true), 
+								setIsAnswerOpen(false),
+								setIsListOpen(false);
+							}}>
+
 							<div className="my-request__answer-list__user__header">
 								<img className="my-request__answer-list__user__header img" src={user.image ? user.image : logoProfile} alt="" />
 								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
@@ -901,12 +924,12 @@ function MyRequest() {
 									<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
 								) }
 							</div>
-							{/* <p className="my-request__answer-list__user city">{user.city}</p> */}
 						</div>
 					))}
 				</InfiniteScroll>
 			</div>
-			<div className={`my-request__message-list ${isMessageOpen ? 'open' : ''}`}>
+			<div className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`}>
+				{messageLoading && <div className="spinner"><span className="loader"></span></div>}
 				<div className="my-request__message-list__user">
 					{selectedUser &&  (
 						<div
@@ -918,7 +941,12 @@ function MyRequest() {
 							>
 								<MdKeyboardArrowLeft 
 									className="my-request__message-list__user__header__detail return" 
-									onClick={() => [setSelectedUser(null), setIsMessageOpen(!isMessageOpen), setIsAnswerOpen(!isAnswerOpen)]}
+									onClick={() => {
+										setSelectedUser(null), 
+										setIsMessageOpen(false), 
+										setIsAnswerOpen(true),
+										setIsListOpen(false);
+									}}
 								/>								
 								<img className="my-request__message-list__user__header__detail img" src={selectedUser.image ? selectedUser.image : logoProfile} alt="" />
 								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
