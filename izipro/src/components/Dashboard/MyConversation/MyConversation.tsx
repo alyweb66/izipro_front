@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useRef, useState } from 'react';
 import './MyConversation.scss';
-import { requestDataStore, requestConversationStore } from '../../../store/Request';
+import { requestDataStore, requestConversationStore, clientRequestStore } from '../../../store/Request';
 import { RequestProps } from '../../../Type/Request';
 import { CONVERSATION_MUTATION, MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
 import { useMutation, useSubscription } from '@apollo/client';
@@ -64,6 +64,7 @@ function MyConversation() {
 	const [messageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const role = userDataStore((state) => state.role);
+	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 
 	//mutation
 	const [conversation, { loading: convMutLoading, error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
@@ -72,7 +73,7 @@ function MyConversation() {
 	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 
 	//query
-	const { loading: convLoading, data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
+	const { loading: convLoading, data: requestConv, fetchMore } = useQueryUserConversations(0, 4) as unknown as useQueryUserConversationsProps;
 	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
 
 	// file upload
@@ -138,21 +139,32 @@ function MyConversation() {
 		}
 	}, [selectedRequest]);
 
-	// useEffect to update the data to the requests state
+	// useEffect to update the request to the requests store
 	useEffect(() => {
-		if (data && data.user) {
+		if (requestConv && requestConv.user) {
 
-			const requestsConversations: RequestProps[] = data.user.requestsConversations;
+			const requestsConversations: RequestProps[] = requestConv.user.requestsConversations;
+
+			//get all request who are not in the store
+			const newRequests = requestsConversations.filter((request: RequestProps) => requestsConversationStore?.every(prevRequest => prevRequest.id !== request.id));
+
 			//setRequestsConversationStore(requestsConversations); // Fix: Pass an array as the argument
-			requestConversationStore.setState({ requests: requestsConversations });
+			if (newRequests.length > 0) {
+				requestConversationStore.setState({ requests: newRequests });
+			}
+
 			offsetRef.current = requestsConversations?.length;
 
 		}
-	}, [data]);
+	}, [requestConv]);
+console.log('request', request);
 
+console.log('requestByDate', requestByDate);
+console.log('requestConv', requestConv);
 	// useEffect to sort the requests by date
 	useEffect(() => {
 		if (requestsConversationStore) {
+console.log('requestsConversationStore', requestsConversationStore);
 
 			const sortedRequests = [...requestsConversationStore].sort((a, b) => {
 
@@ -218,7 +230,6 @@ function MyConversation() {
 
 	}, [messageSubscription]);
 
-
 	// cleane the request store if the component is unmounted
 	useEffect(() => {
 		return () => {
@@ -278,6 +289,10 @@ function MyConversation() {
 						requestConversationStore.setState({ requests: addNewRequestConversation });
 						//setRequestsConversationStore(addNewRequestConversation);
 					}
+
+					// remove request from clientRequestStore
+					setClientRequestsStore(clientRequestsStore.filter(clientRequest => clientRequest.id !== request.id));
+					// remove file from the file list and request
 					resetRequest();
 					setFile([]);
 					setUrlFile([]);
@@ -426,11 +441,14 @@ function MyConversation() {
 			}).then((fetchMoreResult: { data: { user: { requestsConversations: RequestProps[] } } }) => {
 
 				const request = fetchMoreResult.data.user.requestsConversations;
+
+				//get all request who are not in the store
+				const newRequests = request.filter((request: RequestProps) => requestsConversationStore?.every(prevRequest => prevRequest.id !== request.id));
 			
 				if (!fetchMoreResult.data) return;
 				// add the new request to the requestsConversationStore
-				if (request) {
-					const addRequest = [...(requestsConversationStore || []), ...request];
+				if (newRequests) {
+					const addRequest = [...(requestsConversationStore || []), ...newRequests];
 					setRequestsConversationStore(addRequest);
 				}
 				offsetRef.current = offsetRef.current + request.length;
@@ -514,9 +532,6 @@ function MyConversation() {
 		setUrlFile(newUrlFileList);
 	};
 
-
-
-	
 	return (
 		<div className="my-conversation">
 			{(convLoading || hideRequestLoading) && <Spinner/>}
@@ -527,6 +542,7 @@ function MyConversation() {
 						<InfiniteScroll
 							dataLength={requestsConversationStore?.length}
 							next={() => {
+console.log('couocu');
 
 								addRequest();
 

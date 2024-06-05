@@ -51,7 +51,6 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 
 	// get requests by job
 	const {loading: requestJobLoading, getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 10);
-	console.log('clientRequestsStore', clientRequestsStore);
 
 	// Function to filter the requests by the user's location and the request's location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
