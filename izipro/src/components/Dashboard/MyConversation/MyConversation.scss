@@ -1,6 +1,7 @@
 @use '../../../styles/variables' as v;
 
 .my-conversation {
+    // position for spinner
     position: relative;
     width: 100%;
     display: flex;
@@ -22,7 +23,6 @@
         .my-conversation__list__detail {
 
             .my-conversation__list__detail__item {
-  
                 cursor: pointer;
                 display: flex;
                 flex-direction: column;

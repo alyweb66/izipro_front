@@ -61,7 +61,7 @@ function MyRequest() {
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
-	const limit = 2;
+	const limit = 4;
 
 	// store
 	const id = userDataStore((state) => state.id);
@@ -747,19 +747,18 @@ function MyRequest() {
 
 	return (
 		<div className="my-request">
-			<div className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}>
+			<div id="scrollableRequest" className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}>
 				{requestLoading && <Spinner />}
 				{!requestByDate && <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p>}
 				{requestByDate && (
 					<div className="my-request__list__detail" >
 						<InfiniteScroll
 							dataLength={myRequestsStore?.length}
-							next={() => {
-
-								addRequest();
-							}}
+							next={addRequest}
 							hasMore={true}
 							loader={<p ></p>}
+							scrollableTarget="scrollableRequest"
+							
 						>
 							{requestByDate.map((request) => (
 								<div
@@ -875,15 +874,17 @@ function MyRequest() {
 					</div>
 				)}
 			</div>
-			<div className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''} ${conversationLoading ? 'loading' : ''}`}>
+			<div id="scrollableAnswer" className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''} ${conversationLoading ? 'loading' : ''}`}>
 				{conversationLoading && <Spinner />}
 				<InfiniteScroll
 					dataLength={myRequestsStore?.length}
 					next={() => {
-
+						console.log('fetchMore user');
+						
 					}}
 					hasMore={true}
 					loader={<h4>Loading...</h4>}
+					scrollableTarget="scrollableAnswer"
 				>
 					<MdKeyboardArrowLeft
 						className="my-request__answer-list return"
@@ -961,15 +962,17 @@ function MyRequest() {
 
 				</div>
 				{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
-				<div className="my-request__message-list__message">
+				<div id="scrollableMessage" className="my-request__message-list__message">
 					<InfiniteScroll
 						className="infinite-scroll"
 						dataLength={messageStore?.length}
 						next={() => {
+							console.log('fetchMore message');
 
 						}}
 						hasMore={true}
 						loader={<p className="my-request__list no-req">Vous n&apos;avez pas de message</p>}
+						scrollableTarget="scrollableMessage"
 					>
 						{Array.isArray(messageStore) &&
 							messageStore

@@ -75,7 +75,7 @@ function MyConversation() {
 	//query
 	const { loading: convLoading, data: requestConv, fetchMore } = useQueryUserConversations(0, 4) as unknown as useQueryUserConversationsProps;
 	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
-console.log('requestConv', requestConv);
+
 
 	// file upload
 	const { file,urlFile, setUrlFile, setFile, handleFileChange } = useFileHandler();
@@ -429,6 +429,8 @@ console.log('requestConv', requestConv);
 	// Function to load more requests with infinite scroll
 	function addRequest() {
 		if (fetchMore) {
+			console.log('coucou fetchmore');
+			
 			fetchMore({
 				variables: {
 					offset: offsetRef.current, // Next offset
@@ -527,21 +529,22 @@ console.log('requestConv', requestConv);
 		newUrlFileList.splice(index, 1);
 		setUrlFile(newUrlFileList);
 	};
+console.log('offset', offsetRef.current);
 
 	return (
 		<div className="my-conversation">
 			{(convLoading || hideRequestLoading) && <Spinner/>}
-			<div className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
+			<div id="scrollabList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
 				{!requestByDate && <p>Vous n&apos;avez pas de demande</p>}
 				{requestByDate && (
 					<div className="my-conversation__list__detail" >
 						<InfiniteScroll
 							dataLength={requestsConversationStore?.length}
-							next={() => {
-								addRequest();
-							}}
+							next={addRequest}
 							hasMore={true}
 							loader={<h4></h4>}
+							scrollableTarget="scrollabList"
+	
 						>
 							{request && request.id > 0 &&
 								<RequestItem
@@ -618,13 +621,14 @@ console.log('requestConv', requestConv);
 
 				</div>
 				{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
-				<div className="my-conversation__message-list__message">
+				<div id="scrollableMessageList" className="my-conversation__message-list__message">
 					<InfiniteScroll
 						className="infinite-scroll"
 						dataLength={messageStore?.length}
 						next={() => {}}
 						hasMore={true}
 						loader={<h4></h4>}
+						scrollableTarget="scrollableMessageList"
 						
 					>
 						{Array.isArray(messageStore) &&

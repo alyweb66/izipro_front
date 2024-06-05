@@ -29,14 +29,13 @@
     
             }
 
-        .my-request__list__detail {
-
             &.loading {
 
                 position: relative;
             }
 
 
+        .my-request__list__detail {
             .my-request__list__detail__item {
                 cursor: pointer;
                 display: flex;
