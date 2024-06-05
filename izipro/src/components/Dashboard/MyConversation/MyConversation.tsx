@@ -157,14 +157,11 @@ function MyConversation() {
 
 		}
 	}, [requestConv]);
-console.log('request', request);
-
 console.log('requestByDate', requestByDate);
 console.log('requestConv', requestConv);
 	// useEffect to sort the requests by date
 	useEffect(() => {
 		if (requestsConversationStore) {
-console.log('requestsConversationStore', requestsConversationStore);
 
 			const sortedRequests = [...requestsConversationStore].sort((a, b) => {
 
@@ -285,6 +282,7 @@ console.log('requestsConversationStore', requestsConversationStore);
 					// if the request is a new client request, add the request to the requestsConversationStore
 					if (newClientRequest) {
 						if (!updatedRequest) return;
+						
 						const addNewRequestConversation = [updatedRequest, ...requestsConversationStore];
 						requestConversationStore.setState({ requests: addNewRequestConversation });
 						//setRequestsConversationStore(addNewRequestConversation);
@@ -542,13 +540,10 @@ console.log('requestsConversationStore', requestsConversationStore);
 						<InfiniteScroll
 							dataLength={requestsConversationStore?.length}
 							next={() => {
-console.log('couocu');
-
 								addRequest();
-
 							}}
 							hasMore={true}
-							loader={<h4>Loading...</h4>}
+							loader={<h4></h4>}
 						>
 							{request && request.id > 0 &&
 								<RequestItem
