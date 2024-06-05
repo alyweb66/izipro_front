@@ -1,15 +1,13 @@
 @use '../../../styles/variables' as v;
 
 .my-conversation {
+    position: relative;
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: stretch;
     max-height: 81.31vh;
-
-
-
-
+    position: relative;
 
     .my-conversation__list {
         overflow-y: auto;
@@ -21,212 +19,215 @@
             -5px 0 10px #ffffff17,
             5px 0 10px #6666661c;
 
+        .my-conversation__list__detail {
 
-        .my-conversation__list__detail__item {
-            position: relative;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            // border: 1px solid v.$color-secondary-blue;
-            margin: 1rem;
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: -5px 0 10px #6666661c,
-                -5px 0 10px #ffffff17,
-                5px 0 10px #6666661c;
-
-            &.true {
-                background-color: rgba(255, 0, 0, 0.068);
-                border: 1px solid red;
-            }
-
-            &.urgent {
-                border: none;
-                margin: auto;
-                background-color: transparent;
-                box-shadow: none;
-                color: red;
-
-            }
-
-            &.new {
-                background-color: v.$color-chat-orange;
-                border: 1px solid v.$color-primary-orange;
-            }
-
-            &.deleted {
-
-                background-color: v.$color-deleted-grey;
-                border: 1px solid v.$color-deleted-grey;
-
-                .my-conversation__list__detail__item__deleted {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    color: v.$color-error;
-                    font-size: 1.5rem;
-                    font-weight: 500;
-                    z-index: 0;
-                }
-
-                .my-conversation__list__detail__item__header,
-                .my-conversation__list__detail__item {
-                    opacity: 0.4;
-                }
-
-
-            }
-
-
-
-            .my-conversation__list__detail__item__header {
+            .my-conversation__list__detail__item {
+  
+                cursor: pointer;
                 display: flex;
                 flex-direction: column;
-                align-items: baseline;
+                // border: 1px solid v.$color-secondary-blue;
+                margin: 1rem;
+                background-color: white;
+                border-radius: 0.5rem;
+                box-shadow: -5px 0 10px #6666661c,
+                    -5px 0 10px #ffffff17,
+                    5px 0 10px #6666661c;
 
-
-                &.city {
-                    display: flex;
-                    flex-direction: row;
-                    margin-left: 0.3rem;
-                    font-size: 1rem;
-                    font-weight: 400;
+                &.true {
+                    background-color: rgba(255, 0, 0, 0.068);
+                    border: 1px solid red;
                 }
 
-                &.city-span {
-                    color: v.$color-primary-orange;
+                &.urgent {
+                    border: none;
+                    margin: auto;
+                    background-color: transparent;
+                    box-shadow: none;
+                    color: red;
+
+                }
+
+                &.new {
+                    background-color: v.$color-chat-orange;
+                    border: 1px solid v.$color-primary-orange;
+                }
+
+                &.deleted {
+
+                    background-color: v.$color-deleted-grey;
+                    border: 1px solid v.$color-deleted-grey;
+
+                    .my-conversation__list__detail__item__deleted {
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        color: v.$color-error;
+                        font-size: 1.5rem;
+                        font-weight: 500;
+                        z-index: 0;
+                    }
+
+                    .my-conversation__list__detail__item__header,
+                    .my-conversation__list__detail__item {
+                        opacity: 0.4;
+                    }
+
+
+                }
+
+
+
+                .my-conversation__list__detail__item__header {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: baseline;
+
+
+                    &.city {
+                        display: flex;
+                        flex-direction: row;
+                        margin-left: 0.3rem;
+                        font-size: 1rem;
+                        font-weight: 400;
+                    }
+
+                    &.city-span {
+                        color: v.$color-primary-orange;
+                        font-weight: 500;
+                    }
+
+                    &.job {
+                        display: flex;
+                        flex-direction: row;
+                        margin-left: 0.3rem;
+                        font-size: 1rem;
+                        font-weight: 400;
+                        color: black
+                    }
+
+                    &.job-span {
+                        color: v.$color-primary-orange;
+                        font-weight: 500;
+                    }
+
+                    &.name {
+                        display: flex;
+                        flex-direction: row;
+
+                        margin: 0 0.3rem 0 0.3rem;
+                        font-size: 1rem;
+                        font-weight: 400;
+
+                    }
+
+                    &.name-span {
+                        color: v.$color-primary-orange;
+                        font-weight: 500;
+                    }
+
+                    &.date {
+                        display: flex;
+                        flex-direction: row;
+                        margin-top: 0.5rem;
+                        margin-left: 0.3rem;
+                        font-size: 0.9rem;
+                        font-weight: 400;
+                    }
+
+                    &.date-span {
+                        color: v.$color-primary-orange;
+                        font-weight: 500;
+                    }
+                }
+
+                &.title {
+                    border: none;
+                    background-color: transparent;
+                    box-shadow: none;
+                    margin: 0.5rem auto 0.2rem 0.2rem;
+                    font-size: 1.2rem;
                     font-weight: 500;
+                    color: v.$color-primary-blue;
                 }
 
-                &.job {
-                    display: flex;
-                    flex-direction: row;
-                    margin-left: 0.3rem;
-                    font-size: 1rem;
-                    font-weight: 400;
-                    color: black
-                }
-
-                &.job-span {
-                    color: v.$color-primary-orange;
-                    font-weight: 500;
-                }
-
-                &.name {
-                    display: flex;
-                    flex-direction: row;
-
+                &.message {
+                    display: block;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    cursor: pointer;
+                    width: inherit;
+                    border: none;
+                    background-color: transparent;
+                    box-shadow: none;
                     margin: 0 0.3rem 0 0.3rem;
                     font-size: 1rem;
                     font-weight: 400;
-
+                    background-color: v.$color-light-blue;
                 }
 
-                &.name-span {
-                    color: v.$color-primary-orange;
-                    font-weight: 500;
+                &.expanded {
+                    white-space: normal;
+                    max-width: none;
                 }
 
-                &.date {
+                &.false.selected {
+                    border-radius: 1px solid v.$color-primary-blue;
+                }
+
+                .my-conversation__list__detail__item__footer {
                     display: flex;
-                    flex-direction: row;
+                    flex-direction: column;
+                    align-items: baseline;
                     margin-top: 0.5rem;
-                    margin-left: 0.3rem;
-                    font-size: 0.9rem;
-                    font-weight: 400;
+
+
+
                 }
 
-                &.date-span {
-                    color: v.$color-primary-orange;
-                    font-weight: 500;
+                .my-conversation__list__detail__item__picture {
+                    display: flex;
+
+                    flex-wrap: wrap;
+
+                    &.img {
+                        margin: 1rem 0.5rem 0 0.5rem;
+                        border-radius: 0.5rem;
+                        width: 70px;
+                        height: 70px;
+                        cursor: pointer;
+
+                    }
                 }
-            }
 
-            &.title {
-                border: none;
-                background-color: transparent;
-                box-shadow: none;
-                margin: 0.5rem auto 0.2rem 0.2rem;
-                font-size: 1.2rem;
-                font-weight: 500;
-                color: v.$color-primary-blue;
-            }
+                .my-conversation__list__detail__item__delete {
+                    display: none;
 
-            &.message {
-                display: block;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                cursor: pointer;
-                width: inherit;
-                border: none;
-                background-color: transparent;
-                box-shadow: none;
-                margin: 0 0.3rem 0 0.3rem;
-                font-size: 1rem;
-                font-weight: 400;
-                background-color: v.$color-light-blue;
-            }
+                }
 
-            &.expanded {
-                white-space: normal;
-                max-width: none;
-            }
-
-            &.false.selected {
-                border-radius: 1px solid v.$color-primary-blue;
-            }
-
-            .my-conversation__list__detail__item__footer {
-                display: flex;
-                flex-direction: column;
-                align-items: baseline;
-                margin-top: 0.5rem;
-
-
-
-            }
-
-            .my-conversation__list__detail__item__picture {
-                display: flex;
-
-                flex-wrap: wrap;
-
-                &.img {
-                    margin: 1rem 0.5rem 0 0.5rem;
-                    border-radius: 0.5rem;
-                    width: 70px;
-                    height: 70px;
+                .my-conversation__list__detail__item__delete-FaTrashAlt {
+                    font-size: 1.5rem;
+                    margin: 1rem 1rem 1rem auto;
+                    color: v.$color-error;
                     cursor: pointer;
-
                 }
             }
 
-            .my-conversation__list__detail__item__delete {
-                display: none;
-
+            .my-conversation__list__detail__item.false.selected {
+                background-color: #028cef1f;
+                border: 2px solid v.$color-primary-blue;
+                border-radius: 0.5rem;
             }
 
-            .my-conversation__list__detail__item__delete-FaTrashAlt {
-                font-size: 1.5rem;
-                margin: 1rem 1rem 1rem auto;
-                color: v.$color-error;
-                cursor: pointer;
+            .my-conversation__list__detail__item.true.selected {
+                background-color: #028cef1f;
+                border: 2px solid v.$color-primary-blue;
+                border-radius: 0.5rem;
             }
         }
 
-        .my-conversation__list__detail__item.false.selected {
-            background-color: #028cef1f;
-            border: 2px solid v.$color-primary-blue;
-            border-radius: 0.5rem;
-        }
-
-        .my-conversation__list__detail__item.true.selected {
-            background-color: #028cef1f;
-            border: 2px solid v.$color-primary-blue;
-            border-radius: 0.5rem;
-        }
 
     }
 
@@ -240,6 +241,10 @@
             -5px 0 10px #ffffff17,
             5px 0 10px #6666661c;
         max-width: 45%;
+
+        &.loading {
+            position: relative;
+        }
 
         .my-conversation__message-list__user {
 
@@ -410,6 +415,10 @@
 
                                 &.multiple {
                                     width: 6rem;
+                                }
+
+                                &.loading {
+                                    position: relative;
                                 }
                             }
 
@@ -626,29 +635,31 @@
 }
 
 @media (max-width: 480px) {
+
     //.my-conversation {
     //    .my-conversation__list {
-      //      .my-conversation__message-list__form {
-      //          .my-conversation__message-list__form__preview {
-        //            .my-conversation__message-list__form__preview__container {
-                        .my-conversation__message-list__form__preview__container__image {
-                            width: 50px;
-                            height: 50px;
+    //      .my-conversation__message-list__form {
+    //          .my-conversation__message-list__form__preview {
+    //            .my-conversation__message-list__form__preview__container {
+    .my-conversation__message-list__form__preview__container__image {
+        width: 50px;
+        height: 50px;
 
-                        }
+    }
 
-             //       }
+    //       }
 
-      //          }
+    //          }
     //        }
-  //      }
+    //      }
 
-        .my-conversation__answer-list.open,
-        .my-conversation__message-list.open,
-        .my-conversation__list.open {
-            max-width: 100%;
-        }
-   // }
+    .my-conversation__answer-list.open,
+    .my-conversation__message-list.open,
+    .my-conversation__list.open {
+        max-width: 100%;
+    }
+
+    // }
 }
 
 
@@ -721,7 +732,8 @@
 @media (max-width: 1200px) {
     @include v.picture-modal-querie;
 }
-    /* .react-modal {
+
+/* .react-modal {
 
         .react-modal__button-close {
             margin: 0;

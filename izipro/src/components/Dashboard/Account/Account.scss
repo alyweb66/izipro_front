@@ -1,11 +1,11 @@
 @use '../../../styles/variables' as v;
 
 .account {
-    // max-width: 80rem;
+    //position for spinner
+    position: relative;
     width: 80rem;
     max-width: 100%;
     margin: 0 auto;
-    //max-width: 100%;
     background-color: white;
     display: flex;
     align-items: center;
@@ -18,15 +18,16 @@
         align-items: center;
         flex-wrap: wrap;
         justify-content: center;
-        //flex-direction: column;
 
-
+        &.loading {
+            height: 100vh;
+        }
 
         .account__picture {
+            //position: relative;
             width: 100%;
             margin-top: 1rem;
             text-align: center;
-
 
             .account__profile__picture__img {
                 margin: auto;
@@ -67,6 +68,14 @@
                     5px 0 10px #6666661c;
 
             &.password {
+                //position for spinner
+                //position: relative;
+                margin-bottom: 5rem;
+            }
+
+            &.loading {
+                 //position for spinner
+                position: relative;
                 margin-bottom: 5rem;
             }
 

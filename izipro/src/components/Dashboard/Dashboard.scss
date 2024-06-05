@@ -1,6 +1,7 @@
 @use '../../styles/variables' as v;
 
 .dashboard {
+    position: relative;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -55,6 +56,7 @@
     }
 
     .dashboard__content {
+       // position: relative;
         background-color: white;
           
     }

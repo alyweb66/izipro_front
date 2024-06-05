@@ -16,6 +16,8 @@ import { SubscriptionProps } from '../../../Type/Subscription';
 import pdfLogo from '/logo/pdf-icon.svg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt } from 'react-icons/fa';
+import Spinner from '../../Hook/Spinner';
+
 
 type ExpandedState = {
 	[key: number]: boolean;
@@ -44,12 +46,13 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 
 	// mutation
-	const [hideRequest, {error: hideRequestError}] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
-	const [subscriptionMutation, {error: subscriptionError}] = useMutation(SUBSCRIPTION_MUTATION);
+	const [hideRequest, {loading: hiddenLoading, error: hideRequestError}] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
+	const [subscriptionMutation, {loading: subscribeLoading, error: subscriptionError}] = useMutation(SUBSCRIPTION_MUTATION);
 
 	// get requests by job
-	const {getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, offsetRef.current, 10);
+	const {loading: requestJobLoading, getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 10);
 
+console.log('getRequestsByJob', getRequestsByJob);
 
 
 	// Function to filter the requests by the user's location and the request's location
@@ -214,7 +217,6 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	useEffect(() => {
 		if (getRequestsByJob) {
 			
-	
 			// Filter the requests
 			RangeFilter(getRequestsByJob.requestsByJob);
 			offsetRef.current = offsetRef.current + getRequestsByJob.requestsByJob?.length;
@@ -274,7 +276,8 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	return (
 		<div className="client-request">
 			<div className="client-request__list">
-				{!clientRequests?.length && <p>Vous n&apos;avez pas de demande</p>}
+				{(requestJobLoading || hiddenLoading || subscribeLoading) &&  <Spinner/>}
+				{!clientRequests?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>}
 				{clientRequests && (
 					<div className="client-request__list__detail"> 
 						<InfiniteScroll
