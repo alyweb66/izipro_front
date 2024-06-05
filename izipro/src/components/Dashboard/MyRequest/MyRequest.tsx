@@ -59,13 +59,6 @@ function MyRequest() {
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
 
-	console.log('isAnswerOpen', isAnswerOpen);
-	console.log('isMessageOpen', isMessageOpen);
-	console.log('isListOpen', isListOpen);
-
-
-
-
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
 	const limit = 2;
@@ -774,10 +767,10 @@ function MyRequest() {
 									key={request.id}
 									onClick={(event) => {
 										handleConversation(request, event),
-											setSelectedRequest(request),
-											setIsListOpen(false),
-											setIsAnswerOpen(true),
-											setIsMessageOpen(false);
+										setSelectedRequest(request),
+										setIsListOpen(false),
+										setIsAnswerOpen(true),
+										setIsMessageOpen(false);
 									}}
 								>
 									{request.urgent && <p className="my-request__list__detail__item urgent">URGENT</p>}
@@ -846,7 +839,7 @@ function MyRequest() {
 															src={media.url}
 															onClick={(event) => {
 																openModal(imageUrls, index),
-																	event.stopPropagation();
+																event.stopPropagation();
 															}}
 															alt={media.name}
 														/>
@@ -865,15 +858,15 @@ function MyRequest() {
 											console.log('requestId', request.id);
 
 											setModalArgs({ event, requestId: request.id }),
-												//handleDeleteRequest(event, request.id), 
-												event.stopPropagation();
+											//handleDeleteRequest(event, request.id), 
+											event.stopPropagation();
 										}}>
 									</button>
 									<FaTrashAlt
 										className="my-request__list__detail__item__delete-FaTrashAlt"
 										onClick={(event) => {
 											document.getElementById(`delete-request-${request.id}`)?.click(),
-												event.stopPropagation();
+											event.stopPropagation();
 										}}
 									/>
 								</div>
@@ -896,9 +889,9 @@ function MyRequest() {
 						className="my-request__answer-list return"
 						onClick={() => {
 							setSelectedRequest(null),
-								setIsListOpen(true),
-								setIsAnswerOpen(false),
-								setIsMessageOpen(false);
+							setIsListOpen(true),
+							setIsAnswerOpen(false),
+							setIsMessageOpen(false);
 						}}
 					/>
 					{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
@@ -909,10 +902,10 @@ function MyRequest() {
 							key={user.id}
 							onClick={(event) => {
 								handleMessageConversation(event, user.id),
-									setSelectedUser(user),
-									setIsMessageOpen(true),
-									setIsAnswerOpen(false),
-									setIsListOpen(false);
+								setSelectedUser(user),
+								setIsMessageOpen(true),
+								setIsAnswerOpen(false),
+								setIsListOpen(false);
 							}}>
 
 							<div className="my-request__answer-list__user__header">
@@ -944,9 +937,9 @@ function MyRequest() {
 									className="my-request__message-list__user__header__detail return"
 									onClick={() => {
 										setSelectedUser(null),
-											setIsMessageOpen(false),
-											setIsAnswerOpen(true),
-											setIsListOpen(false);
+										setIsMessageOpen(false),
+										setIsAnswerOpen(true),
+										setIsListOpen(false);
 									}}
 								/>
 								<img className="my-request__message-list__user__header__detail img" src={selectedUser.image ? selectedUser.image : logoProfile} alt="" />

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
-import { requestDataStore } from '../../../store/Request';
+import { requestDataStore, clientRequestStore } from '../../../store/Request';
 import { subscriptionDataStore } from '../../../store/subscription';
 import './clientRequest.scss';
 import { useQueryRequestByJob } from '../../Hook/Query';
@@ -29,7 +29,6 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
 	
 	// State
-	const [clientRequests, setClientRequests] = useState<RequestProps[] | null>(null);
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 
 	// Create a ref for the scroll position
@@ -44,6 +43,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const settings = userDataStore((state) => state.settings);
 	const setRequest = requestDataStore((state) => state.setRequest);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
+	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 
 	// mutation
 	const [hideRequest, {loading: hiddenLoading, error: hideRequestError}] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
@@ -51,19 +51,13 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 
 	// get requests by job
 	const {loading: requestJobLoading, getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 10);
-
-console.log('getRequestsByJob', getRequestsByJob);
-
+	console.log('clientRequestsStore', clientRequestsStore);
 
 	// Function to filter the requests by the user's location and the request's location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
 		// If the function is called from the subscription, we need to add the new request to the top of list
-		
-		
-		
 		if (fromSubscribeToMore) {
-			
-			
+
 			const filteredRequests = requests.filter((request: RequestProps) => {
 				// Define the two points
 				const requestPoint = turf.point([request.lng, request.lat]);
@@ -86,29 +80,26 @@ console.log('getRequestsByJob', getRequestsByJob);
 				);
 			});
 
-			setClientRequests((prevState) => {
-				const newRequests = filteredRequests.filter(request => 
-					!prevState?.some(prevRequest => prevRequest.id === request.id)
-				);
-				return [...newRequests, ...(prevState || [])];
-			});
+			// Check if the request is already in the list
+			const newRequests = filteredRequests.filter(request => 
+				!clientRequestsStore?.some(prevRequest => prevRequest.id === request.id)
+			);
+			if (newRequests) {
+				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
+			}
 			offsetRef.current = offsetRef.current + filteredRequests.length;
 
 		} else {
 			// If the function is called from the query, we need to add the new requests to the bottom of the list
-		
-			setClientRequests((prevState) => [
-				...prevState || [],
-				...requests.filter((request: RequestProps) => {
-					// Define the two points
-					const requestPoint = turf.point([request.lng, request.lat]);
-					const userPoint = turf.point([lng, lat]);
-					// Calculate the distance in kilometers (default)
-					const distance = turf.distance(requestPoint, userPoint);
+			requests.filter((request: RequestProps) => {
+				// Define the two points
+				const requestPoint = turf.point([request.lng, request.lat]);
+				const userPoint = turf.point([lng, lat]);
+				// Calculate the distance in kilometers (default)
+				const distance = turf.distance(requestPoint, userPoint);
 
-	
-					return (
-						(distance < request.range / 1000 || request.range === 0) &&
+				return (
+					(distance < request.range / 1000 || request.range === 0) &&
 						(distance < settings[0].range / 1000 || settings[0].range === 0) &&
 						// Check if the user is already in conversation with the request
 						(request.conversation === null || request.conversation === undefined || 
@@ -117,9 +108,13 @@ console.log('getRequestsByJob', getRequestsByJob);
 						(conversation.user_1 === id || conversation.user_2 === id)
 							)
 						)
-					);
-				})
-			]);
+				);
+			});
+
+			if (requests) {
+				setClientRequestsStore([ ...requests, ...(clientRequestsStore || []),]);
+			}
+			
 		}
 	}
 
@@ -131,10 +126,15 @@ console.log('getRequestsByJob', getRequestsByJob);
 			},
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		}).then(fetchMoreResult => {
-			const data = fetchMoreResult.data; // Access the 'data' property
-			if (data) {
-				RangeFilter(data.requestsByJob); // Access the 'requestsByJob' property
-				offsetRef.current = offsetRef.current + data.requestsByJob.length;
+			const data = fetchMoreResult.data.requestsByJob; // Access the 'data' property
+
+			//get all request who are not in the store
+			const newRequests = data.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
+			console.log('newRequests', newRequests);
+			
+			if (newRequests.length > 0) {
+				RangeFilter(newRequests); // Access the 'requestsByJob' property
+				offsetRef.current = offsetRef.current + data.length;
 
 			}
 		});
@@ -212,15 +212,19 @@ console.log('getRequestsByJob', getRequestsByJob);
 
 	}, [jobs]);
 	
-
 	// useEffect to filter the requests by the user's location and the request's location
 	useEffect(() => {
 		if (getRequestsByJob) {
+			const requestByJob = getRequestsByJob.requestsByJob;
+			
+			//get all request who are not in the store
+			const newRequests = requestByJob.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
 			
 			// Filter the requests
-			RangeFilter(getRequestsByJob.requestsByJob);
-			offsetRef.current = offsetRef.current + getRequestsByJob.requestsByJob?.length;
-
+			if (newRequests.length > 0) {
+				RangeFilter(requestByJob);
+				offsetRef.current = offsetRef.current + requestByJob?.length;
+			}
 		}
 	}, [getRequestsByJob, settings]);
 
@@ -260,12 +264,15 @@ console.log('getRequestsByJob', getRequestsByJob);
 		}).then((response) => {
 
 			if (response.data.createHiddenClientRequest) {
-				setClientRequests((prevClientRequests) => {
+
+				setClientRequestsStore(clientRequestsStore.filter(request => request.id !== requestId));
+				
+			/* 	clientRequestStore((prevClientRequests: RequestProps[]) => {
 					if (prevClientRequests) {
 						return prevClientRequests.filter((request) => request.id !== requestId);
 					}
 					return null;
-				});
+				}); */
 			}
 		});
 		if (hideRequestError) {
@@ -277,18 +284,18 @@ console.log('getRequestsByJob', getRequestsByJob);
 		<div className="client-request">
 			<div className="client-request__list">
 				{(requestJobLoading || hiddenLoading || subscribeLoading) &&  <Spinner/>}
-				{!clientRequests?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>}
-				{clientRequests && (
+				{!clientRequestsStore?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>}
+				{clientRequestsStore && (
 					<div className="client-request__list__detail"> 
 						<InfiniteScroll
-							dataLength={clientRequests.length}
+							dataLength={clientRequestsStore.length}
 							next={ () => {
 								addRequest();
 							}}
 							hasMore={true}
 							loader={<h4>Loading...</h4>}
 						>
-							{clientRequests.map((request) => (
+							{clientRequestsStore.map((request) => (
 								<div
 									className={`client-request__list__detail__item ${request.urgent}`}
 									key={request.id} 
