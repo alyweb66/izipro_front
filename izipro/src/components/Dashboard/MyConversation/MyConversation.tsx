@@ -75,6 +75,7 @@ function MyConversation() {
 	//query
 	const { loading: convLoading, data: requestConv, fetchMore } = useQueryUserConversations(0, 4) as unknown as useQueryUserConversationsProps;
 	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
+console.log('requestConv', requestConv);
 
 	// file upload
 	const { file,urlFile, setUrlFile, setFile, handleFileChange } = useFileHandler();
@@ -148,17 +149,16 @@ function MyConversation() {
 			//get all request who are not in the store
 			const newRequests = requestsConversations.filter((request: RequestProps) => requestsConversationStore?.every(prevRequest => prevRequest.id !== request.id));
 
-			//setRequestsConversationStore(requestsConversations); // Fix: Pass an array as the argument
+			// add the new request to the requestsConversationStore
 			if (newRequests.length > 0) {
-				requestConversationStore.setState({ requests: newRequests });
+				requestConversationStore.setState(prevState => ({ ...prevState, requests: [...requestsConversationStore, ...newRequests] }));
 			}
 
 			offsetRef.current = requestsConversations?.length;
 
 		}
 	}, [requestConv]);
-console.log('requestByDate', requestByDate);
-console.log('requestConv', requestConv);
+
 	// useEffect to sort the requests by date
 	useEffect(() => {
 		if (requestsConversationStore) {
@@ -188,8 +188,6 @@ console.log('requestConv', requestConv);
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
 
-
-		
 		// check if the message is already in the store
 		if (messageSubscription?.messageAdded) {
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
