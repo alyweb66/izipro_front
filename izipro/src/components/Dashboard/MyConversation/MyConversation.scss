@@ -1,6 +1,7 @@
 @use '../../../styles/variables' as v;
 
 .my-conversation {
+    position: relative;
     width: 100%;
     display: flex;
     justify-content: center;
@@ -414,6 +415,10 @@
 
                                 &.multiple {
                                     width: 6rem;
+                                }
+
+                                &.loading {
+                                    position: relative;
                                 }
                             }
 

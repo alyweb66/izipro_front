@@ -13,6 +13,8 @@ import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
 import { useMutation } from '@apollo/client';
 import Footer from '../Footer/Footer';
 
+import Spinner from '../Hook/Spinner';
+
 function Dashboard() {
 	const navigate = useNavigate();
 
@@ -132,7 +134,7 @@ function Dashboard() {
 
 	return(
 		<div className='dashboard'>
-			
+			{userDataLoading && <Spinner/>}
 			<nav className="dashboard__nav">
 				<button className="dashboard__nav__burger-menu" onClick={toggleMenu}>
 					<div className='burger-icon'>
@@ -151,7 +153,7 @@ function Dashboard() {
 			</nav>
 
 			<div className="dashboard__content">
-				{userDataLoading && <div className="spinner"><span className="loader"></span></div>}
+				
 				{selectedTab === 'Request' && <Request/>}
 				{selectedTab === 'My requests' && <MyRequest/>}
 				{selectedTab === 'My conversations' && <MyConversation/>}

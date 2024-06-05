@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { userConversation, userDataStore } from '../../../store/UserData';
 import { useMutation, useSubscription } from '@apollo/client';
-import { RequestProps} from '../../../Type/Request';
+import { RequestProps } from '../../../Type/Request';
 import './MyRequest.scss';
 import { DELETE_REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
 import { useQueryMyMessagesByConversation, useQueryUserRequests, useQueryUsersConversation } from '../../Hook/Query';
@@ -16,7 +16,7 @@ import { MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
-import { FaTrashAlt,FaCamera } from 'react-icons/fa';
+import { FaTrashAlt, FaCamera } from 'react-icons/fa';
 import { MdSend, MdAttachFile } from 'react-icons/md';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
 import pdfLogo from '/logo/pdf-icon.svg';
@@ -25,9 +25,11 @@ import { useModal, ImageModal } from '../../Hook/ImageModal';
 import TextareaAutosize from 'react-textarea-autosize';
 //import { useQueryConversation } from '../../Hook/Query';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+import Spinner from '../../Hook/Spinner';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
 ReactModal.setAppElement('#root');
+
 
 type ExpandedState = {
 	[key: number]: boolean;
@@ -37,7 +39,7 @@ function MyRequest() {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
-	
+
 	//state
 	//const [requests, setRequests] = useState<RequestProps[]>([]);
 	//const [loading, setLoading] = useState(false);
@@ -60,14 +62,14 @@ function MyRequest() {
 	console.log('isAnswerOpen', isAnswerOpen);
 	console.log('isMessageOpen', isMessageOpen);
 	console.log('isListOpen', isListOpen);
-	
-	
-	
+
+
+
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
 	const limit = 2;
-	
+
 	// store
 	const id = userDataStore((state) => state.id);
 	const [myRequestsStore, setMyRequestsStore] = myRequestStore((state) => [state.requests, state.setMyRequestStore]);
@@ -86,19 +88,19 @@ function MyRequest() {
 	const { urlFile, setUrlFile, file, setFile, handleFileChange } = useFileHandler();
 
 	//mutation
-	const [ deleteRequest, {error: deleteRequestError} ] = useMutation(DELETE_REQUEST_MUTATION);
-	const [ message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
-	const [ subscriptionMutation, { error: subscriptionError } ] = useMutation(SUBSCRIPTION_MUTATION);
-	
+	const [deleteRequest, { error: deleteRequestError }] = useMutation(DELETE_REQUEST_MUTATION);
+	const [message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
+	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
+
 	// Query to get the user requests
 	const { loading: requestLoading, getUserRequestsData, fetchMore } = useQueryUserRequests(id, 0, limit);
-	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation( newUserId.length !== 0 ? newUserId : userIds ,0 , limit);
+	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, limit);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 20);
 
 	// get the subscription
 	const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
 	const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'conversation');
-	
+
 	// Subscription to get new message
 	const { data: messageSubscription, error: errorSubscription } = useSubscription(MESSAGE_SUBSCRIPTION, {
 		variables: {
@@ -118,7 +120,7 @@ function MyRequest() {
 			handleConversation(requestByDate[0]);
 		}
 	}, [requestByDate]);
-	
+
 	// useEffect to select the message at stasting
 	useEffect(() => {
 
@@ -128,7 +130,7 @@ function MyRequest() {
 			}, 300);
 		}
 
-	},[]);
+	}, []);
 
 	// useEffect to update the requests store
 	useEffect(() => {
@@ -144,10 +146,10 @@ function MyRequest() {
 					});
 				}
 				//setMyRequestsStore(getUserRequestsData.user.requests);
-			} 
+			}
 		}
 	}, [getUserRequestsData]);
-	
+
 	// useEffect to sort the requests by date
 	useEffect(() => {
 		if (myRequestsStore) {
@@ -155,15 +157,15 @@ function MyRequest() {
 				// Check if a.conversation or b.conversation is empty
 				if (!a.conversation?.length) return 1;
 				if (!b.conversation?.length) return -1;
-			
+
 				const dateA = a.conversation.some(c => c.updated_at)
 					? Math.max(...a.conversation.map(c => new Date(c.updated_at).getTime()))
 					: 0;
-			
+
 				const dateB = b.conversation.some(c => c.updated_at)
 					? Math.max(...b.conversation.map(c => new Date(c.updated_at).getTime()))
 					: 0;
-			
+
 				// For ascending order, swap dateA and dateB for descending order
 				return dateB - dateA;
 			});
@@ -174,11 +176,11 @@ function MyRequest() {
 			const conversationIds = subscriptionStore
 				.filter(subscription => subscription.subscriber === 'conversation')
 				.flatMap(subscription => subscription.subscriber_id);
-				
+
 			// get request with conversation id
 			const requestwithId = myRequestsStore.filter(request => request.conversation && request.conversation.some(conversation => conversation.id));
 			// get conversation id of all request which are not in the subscription
-			const idsNotInSubscriptionStore = requestwithId.flatMap((request: RequestProps) => 
+			const idsNotInSubscriptionStore = requestwithId.flatMap((request: RequestProps) =>
 				request.conversation
 					.filter(conversation => conversation.id !== null && !conversationIds.includes(conversation.id))
 					.map(conversation => conversation.id)
@@ -200,7 +202,7 @@ function MyRequest() {
 						}
 
 					}).then((response) => {
-		
+
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
 						// replace the old subscription with the new one
@@ -229,12 +231,12 @@ function MyRequest() {
 					}
 				}
 			}
-			
+
 			// get request id in the request store
 			const conversationRequestIds = subscriptionStore
 				.filter(subscription => subscription.subscriber === 'request')
 				.flatMap(subscription => subscription.subscriber_id);
-				
+
 			// get request id of all request which are not in the subscription
 			const idsNotInRequestSubscriptionStore = myRequestsStore
 				.filter(request => !conversationRequestIds.includes(request.id))
@@ -245,7 +247,7 @@ function MyRequest() {
 				const updatedRequestIds = [...conversationRequestIds, ...idsNotInRequestSubscriptionStore];
 
 				//add new request to subscription
-				if(updatedRequestIds && updatedRequestIds.length > 0) {
+				if (updatedRequestIds && updatedRequestIds.length > 0) {
 					subscriptionMutation({
 						variables: {
 							input: {
@@ -256,7 +258,7 @@ function MyRequest() {
 						}
 
 					}).then((response) => {
-					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
 						// Check if the subscriber already exists in subscriptionStore
 						const existingSubscription = subscriptionStore.find((subscription: SubscriptionProps) =>
@@ -284,30 +286,30 @@ function MyRequest() {
 			}
 		}
 	}, [myRequestsStore]);
-	
+
 	// useEffect to update user conversation by date
 	useEffect(() => {
-		
-		
+
+
 		if (userConvStore && selectedRequest && selectedRequest.conversation) {
-			
-			
+
+
 			// sort the messages by date to show the most recent user conversation
 			const conversation = selectedRequest.conversation;
-	
+
 			const conversationByDate = conversation.slice().sort((a, b) => {
 
 				const dateA = new Date(a.updated_at).getTime();
 				const dateB = new Date(b.updated_at).getTime();
 				return dateB - dateA;
 			});
-		
+
 			// take the user id from the conversation
 			const sortedUsers = conversationByDate.map(conversation => {
 				const user = userConvStore.find(user => user.id === (conversation.user_1 !== id ? conversation.user_1 : conversation.user_2));
 				return user;
 			});
-		
+
 			const filteredSortedUsers = sortedUsers.filter((user): user is UserDataProps => user !== undefined);
 			// Convert filteredSortedUsers to a Set to remove duplicates, then convert it back to an array
 			const uniqueUsers = Array.from(new Set(filteredSortedUsers.map(user => JSON.stringify(user)))).map(user => JSON.parse(user));
@@ -318,30 +320,30 @@ function MyRequest() {
 	// useEffect to update the message store
 	useEffect(() => {
 		if (messageData) {
-		
+
 			const messages: MessageProps[] = messageData.messages;
 			// Add the new messages to the store
 			myMessageDataStore.setState(prevState => {
 				if (prevState.messages.length > 0) {
-					
-					
+
+
 					const newMessages = messages.filter(
 						(newMessage) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
 					);
-		
+
 					return {
 						...prevState,
 						messages: [...prevState.messages, ...newMessages]
 					};
 				} else {
-					
+
 					return {
 						...prevState,
 						messages: [...messages]
 					};
 				}
 			});
-			
+
 		}
 	}, [messageData]);
 
@@ -350,12 +352,12 @@ function MyRequest() {
 		if (usersConversationData) {
 			// If offset is 0, it's the first query, so just replace the queries
 			if (userConvStore.length === 0) {
-				
-				
+
+
 				setUserConvStore(usersConversationData.users);
 
 				// if same users ids in the store don't add them
-			} else if (usersConversationData.users.every((user1: UserDataProps) => 
+			} else if (usersConversationData.users.every((user1: UserDataProps) =>
 				userConvStore.some(user2 => user2.id === user1.id))) {
 				return;
 
@@ -368,7 +370,7 @@ function MyRequest() {
 			}
 		}
 		setNewUserId([]);
-		
+
 
 	}, [usersConversationData]);
 
@@ -378,8 +380,8 @@ function MyRequest() {
 		// check if the message is already in the store
 		if (messageSubscription?.messageAdded) {
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
-						
-						
+
+
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
 
@@ -388,20 +390,20 @@ function MyRequest() {
 				const newMessages = messageAdded.filter(
 					(newMessage: MessageProps) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
 				);
-				
+
 				return {
 					...prevState,
 					messages: [...prevState.messages, ...newMessages]
 				};
 
 			});
-			
+
 			// add the conversation to the request
 			myRequestStore.setState(prevState => {
 				const updatedRequest = prevState.requests.map((request: RequestProps) => {
-				// if the conversation id is in the request
+					// if the conversation id is in the request
 					if (request.conversation && request.conversation.some((conversation) => conversation.id === messageAdded[0].conversation_id)) {
-						
+
 						const updatedConversation = request.conversation.map((conversation) => {
 							if (conversation.id === messageAdded[0].conversation_id) {
 								return { ...conversation, updated_at: newDate };
@@ -409,12 +411,12 @@ function MyRequest() {
 							return conversation;
 						});
 						return { ...request, conversation: updatedConversation };
-									
-					// if there is a conversation in the request but the conversation id is not in the request
-					} else if (request.id === messageAdded[0].request_id  && request.conversation?.some(
+
+						// if there is a conversation in the request but the conversation id is not in the request
+					} else if (request.id === messageAdded[0].request_id && request.conversation?.some(
 						conversation => conversation.id !== messageAdded[0].conversation_id)) {
-						
-										
+
+
 						const conversation = [
 							...request.conversation,
 							{
@@ -427,10 +429,10 @@ function MyRequest() {
 						return { ...request, conversation };
 
 					} else {
-					// if the request hasn't a conversation
-						if (request.id === messageAdded[0].request_id  && !request.conversation) {
-							
-										
+						// if the request hasn't a conversation
+						if (request.id === messageAdded[0].request_id && !request.conversation) {
+
+
 							const conversation = [
 								{
 									id: messageAdded[0].conversation_id,
@@ -439,30 +441,30 @@ function MyRequest() {
 									updated_at: newDate
 								}
 							];
-				
+
 							return { ...request, conversation };
-	
+
 						}
 					}
 					return request;
-							
+
 				});
 				return { ...prevState, requests: updatedRequest };
 			});
 
 			setSelectedRequest((prevState: RequestProps | null) => {
-			// if a conversation is already in selectedRequest
+				// if a conversation is already in selectedRequest
 				if (prevState && prevState.conversation && prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
 					const updatedRequest = prevState?.conversation.map(conversation => {
-			
+
 						if (conversation.id === messageAdded[0].conversation_id) {
 							return { ...conversation, updated_at: newDate };
 						}
 						return conversation;
 					});
-					return { ...prevState, conversation: updatedRequest };		
+					return { ...prevState, conversation: updatedRequest };
 
-				// if no conversation in the selectedRequest
+					// if no conversation in the selectedRequest
 				} else if (prevState && !prevState.conversation) {
 
 					const conversation = [
@@ -476,15 +478,15 @@ function MyRequest() {
 
 					// check if user is in userConvStore
 					if (!userConvStore.some(user => user.id === messageAdded[0].user_id)) {
-						
+
 						setNewUserId([messageAdded[0].user_id]);
 					}
 
 					return { ...prevState, conversation };
 
-				// if the conversation id is not in the selectedRequest
+					// if the conversation id is not in the selectedRequest
 				} else if (prevState && !prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
-								
+
 					const conversation = [
 						...prevState.conversation,
 						{
@@ -497,8 +499,8 @@ function MyRequest() {
 
 					// check if user is in userConvStore
 					if (!userConvStore.some(user => user.id === messageAdded[0].user_id)) {
-						
-									
+
+
 						setNewUserId([messageAdded[0].user_id]);
 					}
 
@@ -507,19 +509,19 @@ function MyRequest() {
 				} else {
 					return null;
 				}
-							
+
 			});
-			
-						
+
+
 			// send id to the mutation to find user
 			setNewUserId([]);
 			if (messageAdded[0].user_id !== id && !userConvStore.some(user => user.id === messageAdded[0].user_id)) {
 
 				setNewUserId([messageAdded[0].user_id]);
 			}
-						
-		}			
-	
+
+		}
+
 	}, [messageSubscription]);
 
 	// useEffect to scroll to the end of the messages
@@ -535,18 +537,19 @@ function MyRequest() {
 		event.preventDefault();
 
 		deleteRequest({
-			variables: 
-				{ input: 
-					{
-						id: requestId,
-						user_id: id,
-					}
+			variables:
+			{
+				input:
+				{
+					id: requestId,
+					user_id: id,
 				}
+			}
 
 		}).then((response) => {
 			// Get the conversation ids for the request
 			const conversationIds = myRequestStore.getState().requests.find(request => request.id === requestId)?.conversation?.map(conversation => conversation.id);
-			
+
 			if (response.data.deleteRequest) {
 				// Remove the request from the store
 				setMyRequestsStore(myRequestsStore.filter(request => request.id !== requestId));
@@ -554,7 +557,7 @@ function MyRequest() {
 			setUserConvState([]);
 			setModalArgs(null);
 			setDeleteItemModalIsOpen(false);
-		
+
 			// remove subscription for this request
 			const subscription = subscriptionStore.find(subscription => subscription.subscriber === 'request');
 			const updatedSubscription = Array.isArray(subscription?.subscriber_id) ? subscription?.subscriber_id.filter(id => id !== requestId) : [];
@@ -570,7 +573,7 @@ function MyRequest() {
 			}).then((response) => {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-				
+
 
 				subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
 					...prevState,
@@ -580,8 +583,8 @@ function MyRequest() {
 				}));
 
 				if (conversationIds) {
-					
-				
+
+
 					// remove subscription for this conversation
 					const conversationSubscription = subscriptionStore.find(subscription => subscription.subscriber === 'conversation');
 					const updatedConversationSubscription = Array.isArray(conversationSubscription?.subscriber_id) ? conversationSubscription?.subscriber_id.filter(id => !conversationIds.includes(id)) : [];
@@ -598,7 +601,7 @@ function MyRequest() {
 
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-						
+
 
 						subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
 							...prevState,
@@ -630,18 +633,18 @@ function MyRequest() {
 		if (deleteRequestError) {
 			throw new Error('Error while deleting request');
 		}
-		
+
 	};
 
 	// Function to handle the users ids for the conversation
 	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLDivElement>) => {
 		event?.preventDefault();
-		
+
 		if (!request.conversation) {
 
 			setUserConvState([]);
 
-		} else { 
+		} else {
 			// Get the user ids from the conversation
 			const ids = request?.conversation?.map(conversation => {
 				return conversation.user_1 !== id ? conversation.user_1 : conversation.user_2;
@@ -651,10 +654,10 @@ function MyRequest() {
 
 			// Filter out the user ids that are already in the userConvStore
 			const newIds = ids.filter(id => !idStore.includes(id));
-		
+
 			if (newIds.length > 0) {
 				setUserIds(newIds || []); // Provide a default value of an empty array
-			} 
+			}
 		}
 	};
 
@@ -663,8 +666,8 @@ function MyRequest() {
 		event.preventDefault();
 
 		// find the conversation id for the message
-		const conversationId = selectedRequest?.conversation?.find(conversation => 
-			(conversation.user_1 === id || conversation.user_2 === id) && 
+		const conversationId = selectedRequest?.conversation?.find(conversation =>
+			(conversation.user_1 === id || conversation.user_2 === id) &&
 			(conversation.user_1 === userId || conversation.user_2 === userId)
 		);
 
@@ -684,7 +687,7 @@ function MyRequest() {
 		// if the message is not empty or the file is not empty
 		if (conversationIdState ?? 0 > 0) {
 			if (messageValue.trim() !== '' || sendFile.length > 0) {
-				
+
 				message({
 					variables: {
 						id: id,
@@ -741,10 +744,10 @@ function MyRequest() {
 					myRequestStore.setState(prevRequests => {
 						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
 					});
-				
+
 					offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
 				}
-			
+
 			});
 		}
 	}
@@ -752,29 +755,29 @@ function MyRequest() {
 	return (
 		<div className="my-request">
 			<div className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}>
-				{requestLoading && <div className="spinner"><span className="loader"></span></div>}
+				{requestLoading && <Spinner />}
 				{!requestByDate && <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p>}
 				{requestByDate && (
-					<div className="my-request__list__detail" > 
+					<div className="my-request__list__detail" >
 						<InfiniteScroll
 							dataLength={myRequestsStore?.length}
-							next={ () => {
+							next={() => {
 
-								addRequest();	
+								addRequest();
 							}}
 							hasMore={true}
 							loader={<p ></p>}
 						>
 							{requestByDate.map((request) => (
 								<div
-									className={`my-request__list__detail__item ${request.urgent} ${selectedRequest === request ? 'selected' : ''} ` }
-									key={request.id} 
+									className={`my-request__list__detail__item ${request.urgent} ${selectedRequest === request ? 'selected' : ''} `}
+									key={request.id}
 									onClick={(event) => {
-										handleConversation(request, event), 
-										setSelectedRequest(request), 
-										setIsListOpen(false), 
-										setIsAnswerOpen(true),
-										setIsMessageOpen(false);
+										handleConversation(request, event),
+											setSelectedRequest(request),
+											setIsListOpen(false),
+											setIsAnswerOpen(true),
+											setIsMessageOpen(false);
 									}}
 								>
 									{request.urgent && <p className="my-request__list__detail__item urgent">URGENT</p>}
@@ -797,80 +800,80 @@ function MyRequest() {
 										</p>
 									</div>
 									<h1 className="my-request__list__detail__item title" >{request.title}</h1>
-									<p 
+									<p
 										//@ts-expect-error con't resolve this type
 										className={`my-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
 										onClick={(event) => {
 											//to open the message when the user clicks on it just for the selected request 
-											idRef.current = request?.id  ?? 0; // check if request or requestByDate is not undefined
-					
+											idRef.current = request?.id ?? 0; // check if request or requestByDate is not undefined
+
 											if (idRef.current !== undefined && setIsMessageExpanded) {
-												setIsMessageExpanded((prevState: ExpandedState)  => ({
+												setIsMessageExpanded((prevState: ExpandedState) => ({
 													...prevState,
 													[idRef.current as number]: !prevState[idRef.current]
 												}));
 											}
 											event.stopPropagation();
-										}} 
+										}}
 									>
 										{request.message}
 									</p>
 									<div className="my-request__list__detail__item__picture">
-								
+
 										{(() => {
 											const imageUrls = request.media?.map(media => media.url) || [];
 											return request.media?.map((media, index) => (
 												media ? (
 													media.name.endsWith('.pdf') ? (
-														<a 
-															href={media.url} 
-															key={media.id} 
-															download={media.name} 
-															target="_blank" 
-															rel="noopener noreferrer" 
-															onClick={(event) => {event.stopPropagation();}} >
-															<img 
-																className="my-request__list__detail__item__picture img" 
+														<a
+															href={media.url}
+															key={media.id}
+															download={media.name}
+															target="_blank"
+															rel="noopener noreferrer"
+															onClick={(event) => { event.stopPropagation(); }} >
+															<img
+																className="my-request__list__detail__item__picture img"
 																//key={media.id} 
-																src={pdfLogo} 
-																alt={media.name} 
+																src={pdfLogo}
+																alt={media.name}
 															/>
 														</a>
 													) : (
-														<img 
-															className="my-request__list__detail__item__picture img" 
-															key={media.id} 
-															src={media.url} 
+														<img
+															className="my-request__list__detail__item__picture img"
+															key={media.id}
+															src={media.url}
 															onClick={(event) => {
 																openModal(imageUrls, index),
-																event.stopPropagation();
+																	event.stopPropagation();
 															}}
-															alt={media.name} 
+															alt={media.name}
 														/>
 													)
 												) : null
 											));
 										})()}
-								
+
 									</div>
 									<button
 										id={`delete-request-${request.id}`}
-										className="my-request__list__detail__item__delete" 
-										type='button' 
+										className="my-request__list__detail__item__delete"
+										type='button'
 										onClick={(event) => {
 											setDeleteItemModalIsOpen(true);
 											console.log('requestId', request.id);
-											
+
 											setModalArgs({ event, requestId: request.id }),
-											//handleDeleteRequest(event, request.id), 
-											event.stopPropagation();
+												//handleDeleteRequest(event, request.id), 
+												event.stopPropagation();
 										}}>
 									</button>
-									<FaTrashAlt 
-										className="my-request__list__detail__item__delete-FaTrashAlt" 
+									<FaTrashAlt
+										className="my-request__list__detail__item__delete-FaTrashAlt"
 										onClick={(event) => {
 											document.getElementById(`delete-request-${request.id}`)?.click(),
-											event.stopPropagation();
+												event.stopPropagation();
 										}}
 									/>
 								</div>
@@ -880,36 +883,36 @@ function MyRequest() {
 				)}
 			</div>
 			<div className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''} ${conversationLoading ? 'loading' : ''}`}>
-				{conversationLoading && <div className="spinner"><span className="loader"></span></div>}
+				{conversationLoading && <Spinner />}
 				<InfiniteScroll
 					dataLength={myRequestsStore?.length}
-					next={ () => {
-						
+					next={() => {
+
 					}}
 					hasMore={true}
 					loader={<h4>Loading...</h4>}
 				>
-					<MdKeyboardArrowLeft 
-						className="my-request__answer-list return" 
+					<MdKeyboardArrowLeft
+						className="my-request__answer-list return"
 						onClick={() => {
-							setSelectedRequest(null), 
-							setIsListOpen(true), 
-							setIsAnswerOpen(false),
-							setIsMessageOpen(false);
+							setSelectedRequest(null),
+								setIsListOpen(true),
+								setIsAnswerOpen(false),
+								setIsMessageOpen(false);
 						}}
 					/>
 					{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
-					{userConvState && userConvState?.map((user: UserDataProps, index ) => (
+					{userConvState && userConvState?.map((user: UserDataProps, index) => (
 						<div
 							id={index === 0 ? 'first-user' : undefined}
-							className={`my-request__answer-list__user ${selectedUser === user ? 'selected-user' : ''}`} 
-							key={user.id} 
+							className={`my-request__answer-list__user ${selectedUser === user ? 'selected-user' : ''}`}
+							key={user.id}
 							onClick={(event) => {
-								handleMessageConversation(event, user.id), 
-								setSelectedUser(user), 
-								setIsMessageOpen(true), 
-								setIsAnswerOpen(false),
-								setIsListOpen(false);
+								handleMessageConversation(event, user.id),
+									setSelectedUser(user),
+									setIsMessageOpen(true),
+									setIsAnswerOpen(false),
+									setIsListOpen(false);
 							}}>
 
 							<div className="my-request__answer-list__user__header">
@@ -920,32 +923,32 @@ function MyRequest() {
 									<p className="my-request__answer-list__user__header denomination">{user.denomination}</p>
 								) : (
 									<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
-								) }
+								)}
 							</div>
 						</div>
 					))}
 				</InfiniteScroll>
 			</div>
 			<div className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`}>
-				{messageLoading && <div className="spinner"><span className="loader"></span></div>}
+				{messageLoading && <Spinner />}
 				<div className="my-request__message-list__user">
-					{selectedUser &&  (
+					{selectedUser && (
 						<div
-							className="my-request__message-list__user__header"  
+							className="my-request__message-list__user__header"
 							onClick={() => setUserDescription(!userDescription)}
 						>
-							<div 
+							<div
 								className="my-request__message-list__user__header__detail"
 							>
-								<MdKeyboardArrowLeft 
-									className="my-request__message-list__user__header__detail return" 
+								<MdKeyboardArrowLeft
+									className="my-request__message-list__user__header__detail return"
 									onClick={() => {
-										setSelectedUser(null), 
-										setIsMessageOpen(false), 
-										setIsAnswerOpen(true),
-										setIsListOpen(false);
+										setSelectedUser(null),
+											setIsMessageOpen(false),
+											setIsAnswerOpen(true),
+											setIsListOpen(false);
 									}}
-								/>								
+								/>
 								<img className="my-request__message-list__user__header__detail img" src={selectedUser.image ? selectedUser.image : logoProfile} alt="" />
 								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
 								{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
@@ -957,7 +960,7 @@ function MyRequest() {
 							</div>
 							{/* <p className="my-request__answer-list__user city">{user.city}</p> */}
 							{userDescription && <div>
-								<p className="my-request__message-list__user__header description">{selectedUser.description ? selectedUser.description : 'Pas de déscription'}</p> 
+								<p className="my-request__message-list__user__header description">{selectedUser.description ? selectedUser.description : 'Pas de déscription'}</p>
 							</div>
 							}
 						</div>
@@ -969,67 +972,67 @@ function MyRequest() {
 					<InfiniteScroll
 						className="infinite-scroll"
 						dataLength={messageStore?.length}
-						next={ () => {
-							
+						next={() => {
+
 						}}
 						hasMore={true}
 						loader={<p className="my-request__list no-req">Vous n&apos;avez pas de message</p>}
 					>
 						{Array.isArray(messageStore) &&
-								messageStore
-									.filter((message) => message.conversation_id === conversationIdState)
-									.map((message, index, array) => (
-										<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
-											{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
-											<div className={`content ${message.user_id === id ? 'me' : ''}`}>
-												{message.media[0].url &&  (
-													<div className="my-request__message-list__message__detail__image-container">
-														<div className={`map ${message.content ? 'message' : ''}`}>
-															{(() => {
-																const imageUrls = message.media?.map(media => media.url) || [];
-																return message.media?.map((media, index) => (
-																	media ? (
-																		media.name.endsWith('.pdf') ? (
-																			<a 
-																				className="a-pdf"
-																				href={media.url} 
-																				key={media.id} 
-																				download={media.name} 
-																				target="_blank" 
-																				rel="noopener noreferrer" 
-																				onClick={(event) => {event.stopPropagation();}} >
-																				<img 
-																					className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`} 
-																					//key={media.id} 
-																					src={pdfLogo} 
-																					alt={media.name} 
-																				/>
-																			</a>
-																		) : (
-																			<img 
-																				className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`} 
-																				key={media.id} 
-																				src={media.url} 
-																				onClick={() => openModal(imageUrls, index)}
-																				alt={media.name} 
+							messageStore
+								.filter((message) => message.conversation_id === conversationIdState)
+								.map((message, index, array) => (
+									<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
+										{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
+										<div className={`content ${message.user_id === id ? 'me' : ''}`}>
+											{message.media[0].url && (
+												<div className="my-request__message-list__message__detail__image-container">
+													<div className={`map ${message.content ? 'message' : ''}`}>
+														{(() => {
+															const imageUrls = message.media?.map(media => media.url) || [];
+															return message.media?.map((media, index) => (
+																media ? (
+																	media.name.endsWith('.pdf') ? (
+																		<a
+																			className="a-pdf"
+																			href={media.url}
+																			key={media.id}
+																			download={media.name}
+																			target="_blank"
+																			rel="noopener noreferrer"
+																			onClick={(event) => { event.stopPropagation(); }} >
+																			<img
+																				className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																				//key={media.id} 
+																				src={pdfLogo}
+																				alt={media.name}
 																			/>
-																		)
-																	) : null
-																));
-															})()}
-														</div>
+																		</a>
+																	) : (
+																		<img
+																			className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																			key={media.id}
+																			src={media.url}
+																			onClick={() => openModal(imageUrls, index)}
+																			alt={media.name}
+																		/>
+																	)
+																) : null
+															));
+														})()}
 													</div>
-												)}
-												{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
-											</div>
-											<div className="my-request__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
+												</div>
+											)}
+											{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
 										</div>
-									))
-					
+										<div className="my-request__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
+									</div>
+								))
+
 						}
 					</InfiniteScroll>
 				</div>
-				
+
 				<form className="my-request__message-list__form" onSubmit={(event) => {
 					event.preventDefault();
 					if (selectedUser) {
@@ -1040,7 +1043,7 @@ function MyRequest() {
 					{urlFile.length > 0 && <div className="my-request__message-list__form__preview">
 						{urlFile.map((file, index) => (
 							<div className="my-request__message-list__form__preview__container" key={index}>
-								
+
 								<img
 									className="my-request__message-list__form__preview__container__image"
 									src={file.type === 'application/pdf' ? pdfLogo : file.name}
@@ -1056,9 +1059,9 @@ function MyRequest() {
 						))}
 					</div>}
 					<label className="my-request__message-list__form__label">
-						<MdAttachFile 
+						<MdAttachFile
 							className="my-request__message-list__form__label__attach"
-							onClick={() =>document.getElementById('send-file')?.click()}
+							onClick={() => document.getElementById('send-file')?.click()}
 						/>
 						<FaCamera
 							className="my-request__message-list__form__label__camera"
@@ -1072,7 +1075,7 @@ function MyRequest() {
 							placeholder="Tapez votre message ici..."
 							maxLength={500}
 						/>
-						<MdSend 
+						<MdSend
 							className="my-request__message-list__form__label__send"
 							onClick={() => document.getElementById('send-message')?.click()}
 						/>
@@ -1087,35 +1090,35 @@ function MyRequest() {
 					/>
 					<input
 						id="file-camera"
-						className="my-request__message-list__form__input medi" 
-						type="file" 
-						accept="image/*" 
-						capture="environment" 
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)} 
+						className="my-request__message-list__form__input medi"
+						type="file"
+						accept="image/*"
+						capture="environment"
+						onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
 					/>
 					<button
-						id="send-message" 
-						className="my-request__message-list__form__button" 
+						id="send-message"
+						className="my-request__message-list__form__button"
 						type="submit"
 					>
-							Send
+						Send
 					</button>
 				</form>
 
 			</div>
 
-			<ImageModal 
-				modalIsOpen={modalIsOpen} 
-				closeModal={closeModal} 
-				selectedImage={selectedImage} 
+			<ImageModal
+				modalIsOpen={modalIsOpen}
+				closeModal={closeModal}
+				selectedImage={selectedImage}
 				nextImage={nextImage}
 				previousImage={previousImage}
 			/>
 			<DeleteItemModal
-				modalArgs={modalArgs} 
-				setModalArgs={setModalArgs} 
-				setDeleteItemModalIsOpen={setDeleteItemModalIsOpen} 
-				deleteItemModalIsOpen={deleteItemModalIsOpen} 
+				modalArgs={modalArgs}
+				setModalArgs={setModalArgs}
+				setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+				deleteItemModalIsOpen={deleteItemModalIsOpen}
 				handleDeleteRequest={handleDeleteRequest}
 			/>
 			{/* <ReactModal
@@ -1148,7 +1151,7 @@ function MyRequest() {
 			</ReactModal> */}
 		</div>
 
-		
+
 	);
 }
 

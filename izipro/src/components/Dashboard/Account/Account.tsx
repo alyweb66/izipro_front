@@ -18,8 +18,9 @@ import { Localization } from '../../Hook/Localization';
 import ReactModal from 'react-modal';
 
 import './Account.scss';
-import '../../../styles/spinner.scss';
+//import '../../../styles/spinner.scss';
 import profileLogo from '/logo/logo profile.jpeg';
+import Spinner from '../../Hook/Spinner';
 
 ReactModal.setAppElement('#root');
 
@@ -77,7 +78,7 @@ function Account() {
 	const resetUserData = userDataStore((state) => state.resetUserData);
 
 	// Mutation to update the user data
-	const [updateUser, {loading: updateUserLoading, error: updateUserError }] = useMutation(UPDATE_USER_MUTATION, {
+	const [updateUser, { loading: updateUserLoading, error: updateUserError }] = useMutation(UPDATE_USER_MUTATION, {
 		update(cache, { data: { updateUser } }) {
 			cache.modify({
 				fields: {
@@ -368,7 +369,7 @@ function Account() {
 		<div className="account">
 
 			< div className={`account__profile ${loading ? 'loading' : ''}`} >
-				{loading && <div className="spinner"><span className="loader"></span></div>}
+				{loading && <Spinner />}
 				{/* {error && <p className="account__profile__modification-error">{error}</p>}
 				{message && <p className="account__profile__modification-message">{message}</p>} */}
 				<div className="account__picture" >
@@ -390,12 +391,7 @@ function Account() {
 					<button className="account__profile__picture__delete" type='button' onClick={handleDeletePicture}>Supprimer</button>
 				</div >
 				<form className={`account__profile__form ${updateUserLoading ? 'loading' : ''}`} onSubmit={handleAccountSubmit} >
-					{updateUserLoading &&
-						<div className="spinner">
-							<span className="loader">
-							</span>
-						</div>
-					}
+					{updateUserLoading && <Spinner/> }
 					<h1 className="account__profile__form__title">Mes informations:</h1>
 					<div></div>
 					<label className="account__profile__form__label">
@@ -530,13 +526,10 @@ function Account() {
 					<button className="account__profile__button" type="submit">Valider</button>
 				</form>
 				<SettingAccount />
-				<form className={`account__profile__form password ${changepasswordLoading ? 'loading' : ''}` } onSubmit={handleSubmitNewPassword}>
-					{changepasswordLoading &&
-						<div className="spinner">
-							<span className="loader">
-							</span>
-						</div>
-					}
+				<form
+					className={`account__profile__form password ${changepasswordLoading ? 'loading' : ''}`}
+					onSubmit={handleSubmitNewPassword}>
+					{changepasswordLoading && <Spinner />}
 
 					<h1 className="account__profile__form__title">Changer le mot de passe:</h1>
 					<label className="account__profile__form__label">

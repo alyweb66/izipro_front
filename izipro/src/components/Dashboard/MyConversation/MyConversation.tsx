@@ -23,6 +23,7 @@ import { FaCamera } from 'react-icons/fa';
 import { MdAttachFile, MdKeyboardArrowLeft, MdSend } from 'react-icons/md';
 import TextareaAutosize from 'react-textarea-autosize';
 import logoProfile from '/logo/logo profile.jpeg';
+import Spinner from '../../Hook/Spinner';
 
 
 type useQueryUserConversationsProps = {
@@ -65,10 +66,10 @@ function MyConversation() {
 	const role = userDataStore((state) => state.role);
 
 	//mutation
-	const [conversation, { error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
-	const [message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
+	const [conversation, { loading: convMutLoading, error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
+	const [message, { loading: messageMutLoading, error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
-	const [hideRequest, { error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
+	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 
 	//query
 	const { loading: convLoading, data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
@@ -513,9 +514,12 @@ function MyConversation() {
 		setUrlFile(newUrlFileList);
 	};
 
+
+
+	
 	return (
 		<div className="my-conversation">
-			{convLoading && <div className="spinner"><span className="loader"></span></div>}
+			{(convLoading || hideRequestLoading) && <Spinner/>}
 			<div className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
 				{!requestByDate && <p>Vous n&apos;avez pas de demande</p>}
 				{requestByDate && (
@@ -568,8 +572,8 @@ function MyConversation() {
 				)}
 			</div>
 
-			<div className={`my-conversation__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`}>
-				{messageLoading && <div className="spinner"><span className="loader"></span></div>}
+			<div className={`my-conversation__message-list ${isMessageOpen ? 'open' : ''} ${(messageLoading || messageMutLoading || convMutLoading) ? 'loading' : ''}`}>
+				{(messageLoading || messageMutLoading || convMutLoading) && <Spinner/>}
 				<div className="my-conversation__message-list__user">
 					{selectedRequest && (
 						<div
@@ -590,7 +594,10 @@ function MyConversation() {
 										event.stopPropagation();
 									}}
 								/>
-								<img className="my-conversation__message-list__user__header__detail img" src={selectedRequest.image ? selectedRequest.image : logoProfile} alt="" />
+								<img 
+									className="my-conversation__message-list__user__header__detail img" 
+									src={selectedRequest.image ? selectedRequest.image : logoProfile} 
+									alt="" />
 								<p className="my-conversation__message-list__user__header__detail name">{selectedRequest.first_name} {selectedRequest.last_name}</p>
 
 							</div>
@@ -606,11 +613,7 @@ function MyConversation() {
 					<InfiniteScroll
 						className="infinite-scroll"
 						dataLength={messageStore?.length}
-						next={() => {
-							
-		
-							
-						}}
+						next={() => {}}
 						hasMore={true}
 						loader={<h4></h4>}
 						
@@ -646,6 +649,7 @@ function MyConversation() {
 																			/>
 																		</a>
 																	) : (
+																		
 																		<img
 																			className={`my-conversation__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
 																			key={media.id}
@@ -654,6 +658,7 @@ function MyConversation() {
 																			alt={media.name}
 																		/>
 																	)
+																	
 																) : null
 															));
 														})()}

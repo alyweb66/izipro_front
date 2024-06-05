@@ -16,6 +16,7 @@ import { SubscriptionProps } from '../../../Type/Subscription';
 import pdfLogo from '/logo/pdf-icon.svg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt } from 'react-icons/fa';
+import Spinner from '../../Hook/Spinner';
 
 
 type ExpandedState = {
@@ -275,7 +276,7 @@ console.log('getRequestsByJob', getRequestsByJob);
 	return (
 		<div className="client-request">
 			<div className="client-request__list">
-				{(requestJobLoading || hiddenLoading || subscribeLoading) &&  <div className="spinner"><span className="loader"></span></div>}
+				{(requestJobLoading || hiddenLoading || subscribeLoading) &&  <Spinner/>}
 				{!clientRequests?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>}
 				{clientRequests && (
 					<div className="client-request__list__detail"> 

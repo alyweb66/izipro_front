@@ -14,6 +14,7 @@ import { TbUrgent } from 'react-icons/tb';
 import { FaCamera } from 'react-icons/fa';
 
 import './Request.scss';
+import Spinner from '../../Hook/Spinner';
 import pdfLogo from '/logo/pdf-icon.svg';
 
 
@@ -55,10 +56,10 @@ function Request() {
 	const [createRequest, { loading: createLoading, error: requestError }] = useMutation(REQUEST_MUTATION);
 
 	// fetch categories 
-	const {loading: categoryLoading, categoriesData} = useQueryCategory();
+	const { loading: categoryLoading, categoriesData } = useQueryCategory();
 
 	// fetch jobs
-	const {loading: JobDataLoading, jobData} = useQueryJobs(selectedCategory);
+	const { loading: JobDataLoading, jobData } = useQueryJobs(selectedCategory);
 
 	// remove file
 	const handleRemove = (index: number) => {
@@ -182,7 +183,7 @@ function Request() {
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
 		if (urlFile.length < 3) {
 			handleFileChange(event);
-		}	
+		}
 	};
 
 	// Handle file drop
@@ -252,7 +253,7 @@ function Request() {
 
 	return (
 		<div className="request">
-			{categoryLoading || JobDataLoading || createLoading && <div className="spinner"><span className="loader"></span></div>}
+			{categoryLoading || JobDataLoading || createLoading && <Spinner />}
 
 			{(!address && !city && !postal_code && !first_name && !last_name) &&
 				(<p>Veuillez renseigner votre nom, prénom et adresse dans votre compte pour faire une demande</p>)}
@@ -372,7 +373,7 @@ function Request() {
 					<div className="request__form__input-media">
 						{urlFile.map((file, index) => (
 							<div className="request__form__input-media container" key={index}>
-								
+
 								<img
 									className="request__form__input-media preview"
 									style={{ width: '100px', height: '100px', objectFit: 'cover' }}
@@ -389,8 +390,8 @@ function Request() {
 						))}
 					</div>
 					<h2 className="request__form__title media">Ajoutez des photos (3 maximum):</h2>
-					<label 
-						htmlFor="file" 
+					<label
+						htmlFor="file"
 						className="request__form__label-file"
 						onDragOver={(event) => event.preventDefault()}
 						onDragEnter={(event) => event.preventDefault()}
@@ -449,14 +450,14 @@ function Request() {
 					/>
 					<input
 						id="fileInput"
-						className="request__form__input-media camera" 
-						type="file" 
-						accept="image/*" 
-						capture="environment" 
-						onChange={handleFileUpload} 
+						className="request__form__input-media camera"
+						type="file"
+						accept="image/*"
+						capture="environment"
+						onChange={handleFileUpload}
 					/>
-					<FaCamera 
-						className="request__form__input-media camera-icone " 
+					<FaCamera
+						className="request__form__input-media camera-icone "
 						onClick={() => document.getElementById('fileInput')?.click()}
 					/>
 
