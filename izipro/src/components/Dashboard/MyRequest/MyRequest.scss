@@ -16,23 +16,29 @@
             -5px 0 10px #ffffff17,
             5px 0 10px #6666661c;
 
-            &.no-req {
-                display: flex;
-                justify-content: center;
-                width: 100%;
-                margin: 0.5rem auto;
-                border-radius: 0.5rem;
-                box-shadow: none;
-                max-width: 90%;
-                color: v.$color-primary-orange;
-                text-align: center;
-    
-            }
+        /* for WebKit browser */
+        .my-request__list::-webkit-scrollbar {
+            width: 12px;
 
-            &.loading {
+        }
 
-                position: relative;
-            }
+        &.no-req {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 0.5rem auto;
+            border-radius: 0.5rem;
+            box-shadow: none;
+            max-width: 90%;
+            color: v.$color-primary-orange;
+            text-align: center;
+
+        }
+
+        &.loading {
+
+            position: relative;
+        }
 
 
         .my-request__list__detail {

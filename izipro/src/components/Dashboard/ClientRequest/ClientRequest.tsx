@@ -34,6 +34,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const [isHasMore, setIsHasMore] = useState(true);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
+	const [isLoading, setIsLoading] = useState(false);
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
 	const idRef = useRef<number>(0);
@@ -149,8 +150,9 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 
 			}
 
-			if (fetchMoreResult.data.requestsByJob.length === 0 || []) {
-				setIsHasMore(false);
+			// If there are no more requests, stop the infinite scroll
+			if (fetchMoreResult.data.requestsByJob.length === 0) {
+				//setIsHasMore(false);
 			}
 		});
 		
@@ -240,11 +242,15 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 				RangeFilter(requestByJob);
 				offsetRef.current = offsetRef.current + requestByJob?.length;
 			}
-		} else {
+		} 
+
+		// If there are no more requests, stop the infinite scroll
+		if (getRequestsByJob?.requestsByJob.length === 0) {
 			setIsHasMore(false);
 		}
 
 	}, [getRequestsByJob, settings]);
+	console.log('clientRequestsStore', clientRequestsStore);
 
 	// useEffect to subscribe to new requests
 	useEffect(() => {
@@ -307,6 +313,27 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 		}
 	};
 	console.log('isHasMore', isHasMore);
+
+	const handleNext = async () => {
+		if (!isLoading) {
+			setIsLoading(true);
+			const element = document.getElementById('scrollableClientRequest');
+			console.log('element', element);
+			
+			const distanceFromBottom = 0; // adjust this value as needed
+			const initialScrollHeight = element?.scrollHeight;
+			// Add a delay before fetching more data
+			await new Promise(resolve => setTimeout(resolve, 200));
+			addRequest();
+			setIsLoading(false);
+
+			// Slightly scroll up to avoid continuous triggering of `next`
+			if (element) {
+				const newScrollHeight = element.scrollHeight;
+				initialScrollHeight && element.scrollTo(0, newScrollHeight - initialScrollHeight - distanceFromBottom - 1);
+			}
+		}
+	};
 	
 	return (
 		<div className="client-request">
@@ -319,16 +346,17 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 					<div className="client-request__list__detail"> 
 						<InfiniteScroll
 							dataLength={clientRequestsStore.length}
-							next={ () => {
-								addRequest();
-							}}
-							hasMore={isHasMore}
+							next={ 
+								handleNext
+							}
+							hasMore={true}
 							loader={<p className="client-request__list no-req">Chargement...</p>}
 							endMessage={
 								clientRequestsStore.length >0 ? <p className="client-request__list no-req">Fin des résultats</p>
 									:
 									<p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>}
 							scrollableTarget="scrollableClientRequest"
+							
 						>
 							{clientRequestsStore.map((request) => (
 								<div

@@ -48,7 +48,7 @@ const RequestItem = ({
 			className={`my-conversation__list__detail__item 
 			${(request || requestByDate)?.urgent} 
 			${request ? 'new' : ''} 
-			${selectedRequest === (request || requestByDate) ? 'selected' : ''}
+			${selectedRequest?.id === (request || requestByDate)?.id ? 'selected' : ''}
 			${requestByDate?.deleted_at ? 'deleted' : ''} 
 			` }
 			key={((request || requestByDate)?.id)?.toString()} 

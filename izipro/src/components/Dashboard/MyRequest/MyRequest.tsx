@@ -139,7 +139,9 @@ function MyRequest() {
 					});
 				}
 			}
-		} else {
+		} 
+
+		if (getUserRequestsData?.user.requests.length === 0) {
 			setIsHasMore(false);
 		}
 	}, [getUserRequestsData]);
@@ -742,14 +744,18 @@ function MyRequest() {
 					offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
 				} 
 
-				// if there is no more request to fetch
-				if (fetchMoreResult.data.user.requests.length === 0 || []) {
+				// if there is no more request stop the infinite scroll
+				if (fetchMoreResult.data.user.requests.length === 0) {
 					setIsHasMore(false);
 				}
 
 			});
 		}
 	}
+console.log('myRequestsStore', myRequestsStore);
+console.log('isHasMore', isHasMore);
+console.log('selectedUser', selectedUser);
+
 
 	return (
 		<div className="my-request">
@@ -772,7 +778,7 @@ function MyRequest() {
 						>
 							{requestByDate.map((request) => (
 								<div
-									className={`my-request__list__detail__item ${request.urgent} ${selectedRequest === request ? 'selected' : ''} `}
+									className={`my-request__list__detail__item ${request.urgent} ${selectedRequest?.id === request?.id ? 'selected' : ''} `}
 									key={request.id}
 									onClick={(event) => {
 										handleConversation(request, event),
@@ -903,7 +909,7 @@ function MyRequest() {
 					{userConvState && userConvState?.map((user: UserDataProps, index) => (
 						<div
 							id={index === 0 ? 'first-user' : undefined}
-							className={`my-request__answer-list__user ${selectedUser === user ? 'selected-user' : ''}`}
+							className={`my-request__answer-list__user ${selectedUser?.id === user.id ? 'selected-user' : ''}`}
 							key={user.id}
 							onClick={(event) => {
 								handleMessageConversation(event, user.id),
