@@ -159,7 +159,8 @@ function MyConversation() {
 			}
 
 			offsetRef.current = requestsConversations?.length;
-
+		} else {
+			setIsHasMore(false);
 		}
 	}, [requestConv]);
 
@@ -544,7 +545,7 @@ function MyConversation() {
 		<div className="my-conversation">
 			{(convLoading || hideRequestLoading) && <Spinner/>}
 			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
-				{!requestByDate && <p>Vous n&apos;avez pas de demande</p>}
+				{/* {!requestByDate && <p>Vous n&apos;avez pas de demande</p>} */}
 				{requestByDate && (
 					<div className="my-conversation__list__detail" >
 						<InfiniteScroll
@@ -553,16 +554,19 @@ function MyConversation() {
 							hasMore={isHasMore}
 							loader={<p className="my-conversation__list no-req">Chargement...</p>}
 							scrollableTarget="scrollableList"
-							endMessage={<p className="my-conversation__list no-req">Fin des résultats</p>}
+							endMessage={
+								clientRequestsStore.length >0 ? <p className="my-conversation__list no-req">Fin des résultats</p>
+									:
+									<p className="my-conversation__list no-req">Vous n&apos;avez pas de conversation</p>}
 	
 						>
 							{request && request.id > 0 &&
 								<RequestItem
 									request={request}
-									isMessageOpen={isMessageOpen}
+									/* isMessageOpen={isMessageOpen} */
 									setIsMessageOpen={setIsMessageOpen}
 									resetRequest={resetRequest}
-									isListOpen={isListOpen}
+									/* isListOpen={isListOpen} */
 									selectedRequest={selectedRequest!} // Add '!' to assert that selectedRequest is not null
 									setSelectedRequest={setSelectedRequest}
 									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
@@ -577,9 +581,9 @@ function MyConversation() {
 								<RequestItem key={requestByDate.id}
 									index={index}
 									requestByDate={requestByDate}
-									isMessageOpen={isMessageOpen}
+									/* isMessageOpen={isMessageOpen} */
 									setIsMessageOpen={setIsMessageOpen}
-									isListOpen={isListOpen}
+									/* isListOpen={isListOpen} */
 									selectedRequest={selectedRequest!} // Add '!' to assert that selectedRequest is not null
 									setSelectedRequest={setSelectedRequest}
 									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
@@ -613,8 +617,8 @@ function MyConversation() {
 								<MdKeyboardArrowLeft
 									className="my-conversation__message-list__user__header__detail return"
 									onClick={(event) => {
-										setIsMessageOpen(!isMessageOpen), 
-										setIsListOpen(!isListOpen),
+										setIsMessageOpen(false), 
+										setIsListOpen(true),
 										event.stopPropagation();
 									}}
 								/>

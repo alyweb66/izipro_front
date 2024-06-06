@@ -10,9 +10,9 @@ type ExpandedState = {
 
 const RequestItem = ({ 
 	index,
-	isListOpen,
+	/* isListOpen, */
 	requestByDate,
-	isMessageOpen,
+	/* isMessageOpen, */
 	setIsMessageOpen,
 	request,
 	resetRequest,
@@ -26,9 +26,9 @@ const RequestItem = ({
 	openModal 
 }: {
 	index?: number,
-    isListOpen?: boolean,
+    /* isListOpen?: boolean, */
 	requestByDate?: RequestProps,
-	isMessageOpen?: boolean,
+	/* isMessageOpen?: boolean, */
 	setIsMessageOpen?: Function,
     request?: RequestProps,
 	resetRequest?: Function, // replace YourRequestType with the actual type of your request object
@@ -56,8 +56,8 @@ const RequestItem = ({
 				if ((request || requestByDate) && setSelectedRequest) {
 					setSelectedRequest && setSelectedRequest(request || requestByDate);
 				}
-				setIsListOpen && setIsListOpen(!isListOpen);
-				setIsMessageOpen && setIsMessageOpen(!isMessageOpen);
+				setIsListOpen && setIsListOpen(false);
+				setIsMessageOpen && setIsMessageOpen(true);
 			}}
 		>
 			{requestByDate?.deleted_at && <p className="my-conversation__list__detail__item__deleted">SUPPRIMÉ PAR L&apos;UTILISATEUR</p>}

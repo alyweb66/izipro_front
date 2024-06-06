@@ -7,7 +7,7 @@
     display: flex;
     justify-content: center;
     align-items: stretch;
-    max-height: 81.31vh;
+    height: 81.31vh;
     position: relative;
 
     .my-conversation__list {
@@ -19,6 +19,12 @@
         box-shadow: -5px 0 10px #6666661c,
             -5px 0 10px #ffffff17,
             5px 0 10px #6666661c;
+
+        /* Pour WebKit/Blink (Chrome, Safari, etc.) */
+        *::-webkit-scrollbar {
+            width: 12px;
+            /* Largeur de la scrollbar */
+        }
 
         &.no-req {
             display: flex;
@@ -307,7 +313,7 @@
                     }
                 }
 
-                /*  &.description {
+               /*   &.description {
                     width: 98%;
                     padding: 0.5rem;
                     box-shadow: none;

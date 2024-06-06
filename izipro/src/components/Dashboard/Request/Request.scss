@@ -17,6 +17,20 @@
 .request {
     position: relative;
     font-family: v.$font;
+    height: 81vh;
+
+    &.no-req {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin: 3rem auto;
+        border-radius: 0.5rem;
+        box-shadow: none;
+        max-width: 90%;
+        color: v.$color-primary-orange;
+        text-align: center;
+
+    }
 
     .request__form {
         width: 80%;

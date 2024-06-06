@@ -256,7 +256,7 @@ function Request() {
 			{categoryLoading || JobDataLoading || createLoading && <Spinner />}
 
 			{(!address && !city && !postal_code && !first_name && !last_name) &&
-				(<p>Veuillez renseigner votre nom, prénom et adresse dans votre compte pour faire une demande</p>)}
+				(<p className="request no-req">Veuillez renseigner les champs de &quot;Mes informations&quot; dans votre compte pour faire une demande</p>)}
 			{address && city && postal_code && first_name && last_name && (
 				<form className="request__form" onSubmit={handleSubmitRequest}>
 					<h2 className="request__form__title urgent">Si votre demande est une urgence cliquez sur URGENT:</h2>

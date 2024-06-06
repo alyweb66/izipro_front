@@ -138,8 +138,9 @@ function MyRequest() {
 						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
 					});
 				}
-				//setMyRequestsStore(getUserRequestsData.user.requests);
 			}
+		} else {
+			setIsHasMore(false);
 		}
 	}, [getUserRequestsData]);
 
@@ -763,7 +764,10 @@ function MyRequest() {
 							hasMore={isHasMore}
 							loader={<p className="my-request__list no-req">chargement...</p>}
 							scrollableTarget="scrollableRequest"
-							endMessage={<p className="my-request__list no-req">Fin des résultats</p>}
+							endMessage={
+								myRequestsStore.length > 0 ? <p className="my-request__list no-req">Fin des résultats</p>
+									:
+									<p className="my-request__list no-req">Vous n&apos;avez pas de demande</p>}
 							
 						>
 							{requestByDate.map((request) => (
@@ -926,39 +930,43 @@ function MyRequest() {
 			<div className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`}>
 				{messageLoading && <Spinner />}
 				<div className="my-request__message-list__user">
-					{selectedUser && (
+					{/* {selectedUser && ( */}
+					<div
+						className="my-request__message-list__user__header"
+						onClick={(event) => {
+							setUserDescription(!userDescription);
+							event.stopPropagation();
+						}}
+					>
 						<div
-							className="my-request__message-list__user__header"
-							onClick={() => setUserDescription(!userDescription)}
+							className="my-request__message-list__user__header__detail"
 						>
-							<div
-								className="my-request__message-list__user__header__detail"
-							>
-								<MdKeyboardArrowLeft
-									className="my-request__message-list__user__header__detail return"
-									onClick={() => {
-										setSelectedUser(null),
-										setIsMessageOpen(false),
-										setIsAnswerOpen(true),
-										setIsListOpen(false);
-									}}
-								/>
-								<img className="my-request__message-list__user__header__detail img" src={selectedUser.image ? selectedUser.image : logoProfile} alt="" />
-								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
-								{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
-								{selectedUser.denomination ? (
-									<p className="my-request__message-list__user__header__detail denomination">{selectedUser.denomination}</p>
-								) : (
-									<p className="my-request__message-list__user__header__detail name">{selectedUser.first_name} {selectedUser.last_name}</p>
-								)}
-							</div>
-							{/* <p className="my-request__answer-list__user city">{user.city}</p> */}
-							{userDescription && <div>
-								<p className="my-request__message-list__user__header description">{selectedUser.description ? selectedUser.description : 'Pas de déscription'}</p>
-							</div>
-							}
+							<MdKeyboardArrowLeft
+								className="my-request__message-list__user__header__detail return"
+								onClick={(event) => {
+									setSelectedUser(null),
+									setIsMessageOpen(false),
+									setIsAnswerOpen(true),
+									setIsListOpen(false);
+									event.stopPropagation();
+								}}
+							/>
+							<img className="my-request__message-list__user__header__detail img" src={selectedUser?.image ? selectedUser.image : logoProfile} alt="" />
+							{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
+							{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
+							{selectedUser?.denomination ? (
+								<p className="my-request__message-list__user__header__detail denomination">{selectedUser?.denomination}</p>
+							) : (
+								<p className="my-request__message-list__user__header__detail name">{selectedUser?.first_name} {selectedUser?.last_name}</p>
+							)}
 						</div>
-					)}
+						{/* <p className="my-request__answer-list__user city">{user.city}</p> */}
+						{userDescription && <div>
+							<p className="my-request__message-list__user__header description">{selectedUser?.description ? selectedUser?.description : 'Pas de déscription'}</p>
+						</div>
+						}
+					</div>
+					{/* 	)} */}
 
 				</div>
 				{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}

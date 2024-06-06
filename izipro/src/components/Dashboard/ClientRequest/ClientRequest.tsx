@@ -43,6 +43,11 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const jobs = userDataStore((state) => state.jobs);
 	const lng = userDataStore((state) => state.lng);
 	const lat = userDataStore((state) => state.lat);
+	const address = userDataStore((state) => state.address);
+	const city = userDataStore((state) => state.city);
+	const first_name = userDataStore((state) => state.first_name);
+	const last_name = userDataStore((state) => state.last_name);
+	const postal_code = userDataStore((state) => state.postal_code);
 	const settings = userDataStore((state) => state.settings);
 	const setRequest = requestDataStore((state) => state.setRequest);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
@@ -54,6 +59,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 
 	// get requests by job
 	const {loading: requestJobLoading, getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 4);
+	console.log('getRequestsByJob', getRequestsByJob);
 
 	// Function to filter the requests by the user's location and the request's location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
@@ -234,7 +240,10 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 				RangeFilter(requestByJob);
 				offsetRef.current = offsetRef.current + requestByJob?.length;
 			}
+		} else {
+			setIsHasMore(false);
 		}
+
 	}, [getRequestsByJob, settings]);
 
 	// useEffect to subscribe to new requests
@@ -297,13 +306,16 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 			throw new Error('Error while hiding request');
 		}
 	};
+	console.log('isHasMore', isHasMore);
 	
 	return (
 		<div className="client-request">
 			<div id="scrollableClientRequest" className="client-request__list">
 				{(requestJobLoading || hiddenLoading || subscribeLoading) &&  <Spinner/>}
-				{!clientRequestsStore?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>}
-				{clientRequestsStore && (
+				{(!address && !city && !postal_code && !first_name && !last_name) &&
+				(<p className="request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>)}
+				{/* {!clientRequestsStore?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>} */}
+				{(address && city && postal_code && first_name && last_name) && (
 					<div className="client-request__list__detail"> 
 						<InfiniteScroll
 							dataLength={clientRequestsStore.length}
@@ -312,7 +324,10 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 							}}
 							hasMore={isHasMore}
 							loader={<p className="client-request__list no-req">Chargement...</p>}
-							endMessage={<p className="client-request__list no-req">Fin des résultats</p>}
+							endMessage={
+								clientRequestsStore.length >0 ? <p className="client-request__list no-req">Fin des résultats</p>
+									:
+									<p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>}
 							scrollableTarget="scrollableClientRequest"
 						>
 							{clientRequestsStore.map((request) => (

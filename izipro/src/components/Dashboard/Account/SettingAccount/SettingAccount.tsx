@@ -158,7 +158,7 @@ function SettingAccount() {
 					<>
 						<form className={`setting-account__form ${jobLoading ? 'loading' : ''}`} onSubmit={handleSubmitJob}>
 							{jobLoading && <Spinner />}
-							<h1 className="setting-account__form__title">Indiquez vos métiers:</h1>
+							<h1 className="setting-account__form__title">Vos métiers:</h1>
 							<select
 								className="setting-account__form__select"
 								name="job"
@@ -207,7 +207,7 @@ function SettingAccount() {
 							<ul className={`setting-account__form__list job ${(userJobLoading || deleteJobLoading || categoryLoading) ? 'loading' : ''}`}>
 								{(userJobLoading || deleteJobLoading || categoryLoading) && <Spinner />}
 
-								<h2 className="setting-account__subtitle">Vos métiers:</h2>
+								<h2 className="setting-account__subtitle">Métiers actuel:</h2>
 								{selectedJob && selectedJob.map((job: JobProps, index: number) => (
 									<li className="setting-account__form__list__tag" key={index}>
 										{job.name}
