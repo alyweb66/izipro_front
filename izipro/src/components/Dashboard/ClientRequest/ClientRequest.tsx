@@ -30,6 +30,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	
 	// State
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
+	const [isHasMore, setIsHasMore] = useState(true);
 
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
@@ -50,7 +51,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const [subscriptionMutation, {loading: subscribeLoading, error: subscriptionError}] = useMutation(SUBSCRIPTION_MUTATION);
 
 	// get requests by job
-	const {loading: requestJobLoading, getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 10);
+	const {loading: requestJobLoading, getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 4);
 
 	// Function to filter the requests by the user's location and the request's location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
@@ -78,14 +79,12 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 					)
 				);
 			});
-
-			// Check if the request is already in the list
-			const newRequests = filteredRequests.filter(request => 
-				!clientRequestsStore?.some(prevRequest => prevRequest.id === request.id)
-			);
-			if (newRequests) {
-				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
+			
+			// Add the new requests to the top of the list
+			if (filteredRequests) {
+				setClientRequestsStore([...filteredRequests, ...(clientRequestsStore || [])]);
 			}
+
 			offsetRef.current = offsetRef.current + filteredRequests.length;
 
 		} else {
@@ -109,6 +108,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 						)
 				);
 			});
+			
 
 			if (requests) {
 				setClientRequestsStore([ ...requests, ...(clientRequestsStore || []),]);
@@ -125,16 +125,19 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 			},
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		}).then(fetchMoreResult => {
-			const data = fetchMoreResult.data.requestsByJob; // Access the 'data' property
+			const data = fetchMoreResult.data.requestsByJob; 
 
 			//get all request who are not in the store
 			const newRequests = data.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
-			console.log('newRequests', newRequests);
 			
 			if (newRequests.length > 0) {
-				RangeFilter(newRequests); // Access the 'requestsByJob' property
+				RangeFilter(newRequests);
 				offsetRef.current = offsetRef.current + data.length;
 
+			}
+
+			if (fetchMoreResult.data.requestsByJob.length === 0 || []) {
+				setIsHasMore(false);
 			}
 		});
 		
@@ -237,12 +240,21 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 				variables: { ids: jobs.map(job => job.job_id).filter(id => id != null) },
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				updateQuery: (prev: RequestProps , { subscriptionData }: { subscriptionData: any }) => {
-					
 
 					if (!subscriptionData.data) return prev;
+
 					const  requestAdded  = subscriptionData.data.requestAdded[0];
+
+					// Check if the request is already in the store
+					if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
+						console.log('requestAdded222222222', requestAdded);
+						
+						RangeFilter([requestAdded], true);
+
+					} else {
+						return prev;
+					}
 					
-					RangeFilter([requestAdded], true);
 					
 				},
 			});
@@ -281,7 +293,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	
 	return (
 		<div className="client-request">
-			<div className="client-request__list">
+			<div id="scrollableClientRequest" className="client-request__list">
 				{(requestJobLoading || hiddenLoading || subscribeLoading) &&  <Spinner/>}
 				{!clientRequestsStore?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>}
 				{clientRequestsStore && (
@@ -291,8 +303,10 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 							next={ () => {
 								addRequest();
 							}}
-							hasMore={true}
-							loader={<h4>Loading...</h4>}
+							hasMore={isHasMore}
+							loader={<p className="client-request__list no-req">Chargement...</p>}
+							endMessage={<p className="client-request__list no-req">Fin des résultats</p>}
+							scrollableTarget="scrollableClientRequest"
 						>
 							{clientRequestsStore.map((request) => (
 								<div

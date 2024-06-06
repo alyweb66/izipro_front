@@ -58,10 +58,10 @@ function MyRequest() {
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
+	const [isHasMore, setIsHasMore] = useState(true);
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
-	const limit = 4;
 
 	// store
 	const id = userDataStore((state) => state.id);
@@ -86,8 +86,8 @@ function MyRequest() {
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 
 	// Query to get the user requests
-	const { loading: requestLoading, getUserRequestsData, fetchMore } = useQueryUserRequests(id, 0, limit);
-	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, limit);
+	const { loading: requestLoading, getUserRequestsData, fetchMore } = useQueryUserRequests(id, 0, 4);
+	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 20);
 
 	// get the subscription
@@ -114,7 +114,7 @@ function MyRequest() {
 		}
 	}, [requestByDate]);
 
-	// useEffect to select the message at stasting
+	// useEffect to select the message at starting
 	useEffect(() => {
 
 		if (window.innerWidth > 1200) {
@@ -739,6 +739,11 @@ function MyRequest() {
 					});
 
 					offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
+				} 
+
+				// if there is no more request to fetch
+				if (fetchMoreResult.data.user.requests.length === 0 || []) {
+					setIsHasMore(false);
 				}
 
 			});
@@ -755,9 +760,10 @@ function MyRequest() {
 						<InfiniteScroll
 							dataLength={myRequestsStore?.length}
 							next={addRequest}
-							hasMore={true}
-							loader={<p ></p>}
+							hasMore={isHasMore}
+							loader={<p className="my-request__list no-req">chargement...</p>}
 							scrollableTarget="scrollableRequest"
+							endMessage={<p className="my-request__list no-req">Fin des résultats</p>}
 							
 						>
 							{requestByDate.map((request) => (
@@ -878,12 +884,9 @@ function MyRequest() {
 				{conversationLoading && <Spinner />}
 				<InfiniteScroll
 					dataLength={myRequestsStore?.length}
-					next={() => {
-						console.log('fetchMore user');
-						
-					}}
-					hasMore={true}
-					loader={<h4>Loading...</h4>}
+					next={() => {}}
+					hasMore={false}
+					loader={<h4></h4>}
 					scrollableTarget="scrollableAnswer"
 				>
 					<MdKeyboardArrowLeft
@@ -966,12 +969,10 @@ function MyRequest() {
 					<InfiniteScroll
 						className="infinite-scroll"
 						dataLength={messageStore?.length}
-						next={() => {
-							console.log('fetchMore message');
-
-						}}
-						hasMore={true}
-						loader={<p className="my-request__list no-req">Vous n&apos;avez pas de message</p>}
+						next={() => {}}
+						hasMore={false}
+						loader={<p className="my-request__list no-req"></p>}
+						endMessage={<p className="my-request__list no-req"></p>}
 						scrollableTarget="scrollableMessage"
 					>
 						{Array.isArray(messageStore) &&

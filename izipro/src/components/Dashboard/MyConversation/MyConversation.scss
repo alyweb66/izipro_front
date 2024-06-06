@@ -20,6 +20,19 @@
             -5px 0 10px #ffffff17,
             5px 0 10px #6666661c;
 
+        &.no-req {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 0.5rem auto;
+            border-radius: 0.5rem;
+            box-shadow: none;
+            max-width: 90%;
+            color: v.$color-primary-orange;
+            text-align: center;
+
+        }
+
         .my-conversation__list__detail {
 
             .my-conversation__list__detail__item {

@@ -50,6 +50,7 @@ function MyConversation() {
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [isMessageOpen, setIsMessageOpen] = useState(false);
 	const [requestTitle, setRequestTitle] = useState(true);
+	const [isHasMore, setIsHasMore] = useState(true);
 
 	//useRef
 	const offsetRef = useRef(0);
@@ -449,6 +450,12 @@ function MyConversation() {
 					const addRequest = [...(requestsConversationStore || []), ...newRequests];
 					setRequestsConversationStore(addRequest);
 				}
+
+				// if there is no more request to fetch
+				if (request.length === 0 || []) {
+					setIsHasMore(false);
+				}
+
 				offsetRef.current = offsetRef.current + request.length;
 			
 			});
@@ -529,21 +536,21 @@ function MyConversation() {
 		newUrlFileList.splice(index, 1);
 		setUrlFile(newUrlFileList);
 	};
-console.log('offset', offsetRef.current);
 
 	return (
 		<div className="my-conversation">
 			{(convLoading || hideRequestLoading) && <Spinner/>}
-			<div id="scrollabList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
+			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
 				{!requestByDate && <p>Vous n&apos;avez pas de demande</p>}
 				{requestByDate && (
 					<div className="my-conversation__list__detail" >
 						<InfiniteScroll
 							dataLength={requestsConversationStore?.length}
 							next={addRequest}
-							hasMore={true}
-							loader={<h4></h4>}
-							scrollableTarget="scrollabList"
+							hasMore={isHasMore}
+							loader={<p className="my-conversation__list no-req">Chargement...</p>}
+							scrollableTarget="scrollableList"
+							endMessage={<p className="my-conversation__list no-req">Fin des résultats</p>}
 	
 						>
 							{request && request.id > 0 &&
