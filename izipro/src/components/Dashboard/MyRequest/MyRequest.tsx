@@ -860,10 +860,7 @@ function MyRequest() {
 										type='button'
 										onClick={(event) => {
 											setDeleteItemModalIsOpen(true);
-											console.log('requestId', request.id);
-
 											setModalArgs({ event, requestId: request.id }),
-											//handleDeleteRequest(event, request.id), 
 											event.stopPropagation();
 										}}>
 									</button>

@@ -17,6 +17,7 @@ import pdfLogo from '/logo/pdf-icon.svg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt } from 'react-icons/fa';
 import Spinner from '../../Hook/Spinner';
+import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 
 
 type ExpandedState = {
@@ -31,7 +32,8 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	// State
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [isHasMore, setIsHasMore] = useState(true);
-
+	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
+	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
 	const idRef = useRef<number>(0);
@@ -79,10 +81,13 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 					)
 				);
 			});
+
+			//get all request who are not in the store
+			const newRequests = filteredRequests.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
 			
 			// Add the new requests to the top of the list
-			if (filteredRequests) {
-				setClientRequestsStore([...filteredRequests, ...(clientRequestsStore || [])]);
+			if (newRequests) {
+				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
 			}
 
 			offsetRef.current = offsetRef.current + filteredRequests.length;
@@ -108,10 +113,12 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 						)
 				);
 			});
-			
 
-			if (requests) {
-				setClientRequestsStore([ ...requests, ...(clientRequestsStore || []),]);
+			//get all request who are not in the store
+			const newRequests = requests.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
+
+			if (newRequests) {
+				setClientRequestsStore([ ...newRequests, ...(clientRequestsStore || []),]);
 			}
 			
 		}
@@ -263,7 +270,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	}, [ subscribeToMore]);
 
 	// Function to hide a request
-	const handleHideRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
+	const handleHideRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
 		event.preventDefault();
 		hideRequest({
 			variables: {
@@ -402,13 +409,16 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 										className="client-request__list__detail__item__delete" 
 										type='button' 
 										onClick={(event) => {
-											handleHideRequest(event, request.id),
+											setDeleteItemModalIsOpen(true);
+											setModalArgs({ event, requestId: request.id });
 											event.stopPropagation();
 										}}>
 									</button>
 									<FaTrashAlt 
 										className="client-request__list__detail__item__delete-FaTrashAlt" 
 										onClick={(event) => {
+											console.log('delete-request', request.id);
+											
 											document.getElementById(`delete-request-${request.id}`)?.click(),
 											event.stopPropagation();
 										}}
@@ -429,6 +439,13 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 				selectedImage={selectedImage} 
 				nextImage={nextImage}
 				previousImage={previousImage}
+			/>
+			<DeleteItemModal
+				modalArgs={modalArgs}
+				setModalArgs={setModalArgs}
+				setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+				deleteItemModalIsOpen={deleteItemModalIsOpen}
+				handleDeleteRequest={handleHideRequest}
 			/>
 		</div>
 	);

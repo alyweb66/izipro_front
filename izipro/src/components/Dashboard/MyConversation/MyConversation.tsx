@@ -24,6 +24,7 @@ import { MdAttachFile, MdKeyboardArrowLeft, MdSend } from 'react-icons/md';
 import TextareaAutosize from 'react-textarea-autosize';
 import logoProfile from '/logo/logo profile.jpeg';
 import Spinner from '../../Hook/Spinner';
+import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 
 
 type useQueryUserConversationsProps = {
@@ -51,6 +52,9 @@ function MyConversation() {
 	const [isMessageOpen, setIsMessageOpen] = useState(false);
 	const [requestTitle, setRequestTitle] = useState(true);
 	const [isHasMore, setIsHasMore] = useState(true);
+	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
+	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
+
 
 	//useRef
 	const offsetRef = useRef(0);
@@ -76,7 +80,6 @@ function MyConversation() {
 	//query
 	const { loading: convLoading, data: requestConv, fetchMore } = useQueryUserConversations(0, 4) as unknown as useQueryUserConversationsProps;
 	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
-
 
 	// file upload
 	const { file,urlFile, setUrlFile, setFile, handleFileChange } = useFileHandler();
@@ -463,7 +466,7 @@ function MyConversation() {
 	}
 
 	// Function to hide a client request
-	const handleHideRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
+	const handleHideRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
 		event.preventDefault();
 
 		hideRequest({
@@ -562,10 +565,11 @@ function MyConversation() {
 									isListOpen={isListOpen}
 									selectedRequest={selectedRequest!} // Add '!' to assert that selectedRequest is not null
 									setSelectedRequest={setSelectedRequest}
+									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
 									isMessageExpanded={isMessageExpanded}
 									setIsMessageExpanded={setIsMessageExpanded}
 									setIsListOpen={setIsListOpen}
-									handleHideRequest={handleHideRequest}
+									setModalArgs={setModalArgs}
 									openModal={openModal}
 								/>
 							}
@@ -578,10 +582,11 @@ function MyConversation() {
 									isListOpen={isListOpen}
 									selectedRequest={selectedRequest!} // Add '!' to assert that selectedRequest is not null
 									setSelectedRequest={setSelectedRequest}
+									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
 									isMessageExpanded={isMessageExpanded}
 									setIsMessageExpanded={setIsMessageExpanded}
 									setIsListOpen={setIsListOpen}
-									handleHideRequest={handleHideRequest}
+									setModalArgs={setModalArgs}
 									openModal={openModal}
 								/>
 							))}
@@ -775,6 +780,13 @@ function MyConversation() {
 				selectedImage={selectedImage}
 				nextImage={nextImage}
 				previousImage={previousImage}
+			/>
+			<DeleteItemModal
+				modalArgs={modalArgs}
+				setModalArgs={setModalArgs}
+				setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+				deleteItemModalIsOpen={deleteItemModalIsOpen}
+				handleDeleteRequest={handleHideRequest}
 			/>
 		</div>
 	);
