@@ -230,6 +230,16 @@
             -5px 0 10px #ffffff17,
             5px 0 10px #6666661c;
 
+            &.title {
+                margin: 0.5rem 0 1rem 0;
+                width: 100%;
+                box-shadow: none;
+                padding: 0 0.8rem 0 0.8rem;
+                color: v.$color-secondary-blue;
+                font-size: 1.2rem;
+                font-weight: 500;;
+            }
+
         &.loading {
             position: relative;
         }
@@ -648,6 +658,17 @@
 
         .my-request__answer-list {
             display: none;
+
+            &.title {
+                display: block;
+                margin: 0 0 1rem 0;
+                width: 100%;
+                box-shadow: none;
+                padding: 0 0.8rem 0 0.8rem;
+                color: v.$color-secondary-blue;
+                font-size: 1.2rem;
+                font-weight: 500;;
+            }
 
             &.open {
                 display: block;

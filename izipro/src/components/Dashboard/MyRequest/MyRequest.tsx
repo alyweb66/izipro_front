@@ -59,6 +59,8 @@ function MyRequest() {
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
 	const [isHasMore, setIsHasMore] = useState(true);
+	const [isUserMessageOpen, setIsUserMessageOpen] = useState(false);
+
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
@@ -76,6 +78,7 @@ function MyRequest() {
 	//const conversationIdRef = useRef(0);
 	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 	const idRef = useRef<number>(0);
+
 
 	// file upload
 	const { urlFile, setUrlFile, file, setFile, handleFileChange } = useFileHandler();
@@ -286,9 +289,7 @@ function MyRequest() {
 	// useEffect to update user conversation by date
 	useEffect(() => {
 
-
 		if (userConvStore && selectedRequest && selectedRequest.conversation) {
-
 
 			// sort the messages by date to show the most recent user conversation
 			const conversation = selectedRequest.conversation;
@@ -310,6 +311,7 @@ function MyRequest() {
 			// Convert filteredSortedUsers to a Set to remove duplicates, then convert it back to an array
 			const uniqueUsers = Array.from(new Set(filteredSortedUsers.map(user => JSON.stringify(user)))).map(user => JSON.parse(user));
 			setUserConvState(uniqueUsers);
+
 		}
 	}, [userConvStore, selectedRequest]);
 
@@ -322,7 +324,7 @@ function MyRequest() {
 			myMessageDataStore.setState(prevState => {
 				if (prevState.messages.length > 0) {
 
-
+					// Filter out messages that are already in the store
 					const newMessages = messages.filter(
 						(newMessage) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
 					);
@@ -527,6 +529,21 @@ function MyRequest() {
 		}, 200);
 	}, [messageStore]);
 
+	// useEffect to set the selected user when selectedRequest is updated
+	useEffect(() => {
+
+		setSelectedUser(userConvState[0]);
+
+	}, [userConvState]);
+		
+	// useEffect to set message when selecteduser is updated
+	useEffect(() => {
+
+		handleMessageConversation(selectedUser?.id as number);
+		setIsUserMessageOpen(true);
+
+	}, [selectedUser]);
+
 
 	// Function to delete a request
 	const handleDeleteRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
@@ -658,8 +675,9 @@ function MyRequest() {
 	};
 
 	// Function find conversation id for message
-	const handleMessageConversation = (event: React.MouseEvent<HTMLDivElement>, userId: number) => {
-		event.preventDefault();
+	const handleMessageConversation = ( userId: number, event?: React.MouseEvent<HTMLDivElement>) => {
+		event?.preventDefault();
+		console.log('userId', userId);
 
 		// find the conversation id for the message
 		const conversationId = selectedRequest?.conversation?.find(conversation =>
@@ -668,6 +686,7 @@ function MyRequest() {
 		);
 
 		setConversationIdState(conversationId?.id || 0);
+		console.log('conversationIdState', conversationIdState);
 
 
 	};
@@ -752,11 +771,7 @@ function MyRequest() {
 			});
 		}
 	}
-console.log('myRequestsStore', myRequestsStore);
-console.log('isHasMore', isHasMore);
-console.log('selectedUser', selectedUser);
-
-
+	console.log('userConvState', userConvState);
 	return (
 		<div className="my-request">
 			<div id="scrollableRequest" className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}>
@@ -905,6 +920,7 @@ console.log('selectedUser', selectedUser);
 							setIsMessageOpen(false);
 						}}
 					/>
+					{selectedRequest && <h2 className="my-request__answer-list title">{selectedRequest?.title}</h2>}
 					{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
 					{userConvState && userConvState?.map((user: UserDataProps, index) => (
 						<div
@@ -912,7 +928,8 @@ console.log('selectedUser', selectedUser);
 							className={`my-request__answer-list__user ${selectedUser?.id === user.id ? 'selected-user' : ''}`}
 							key={user.id}
 							onClick={(event) => {
-								handleMessageConversation(event, user.id),
+								handleMessageConversation(user.id, event),
+								setIsUserMessageOpen(true),
 								setSelectedUser(user),
 								setIsMessageOpen(true),
 								setIsAnswerOpen(false),
@@ -953,6 +970,7 @@ console.log('selectedUser', selectedUser);
 									setSelectedUser(null),
 									setIsMessageOpen(false),
 									setIsAnswerOpen(true),
+									setIsUserMessageOpen(false),
 									setIsListOpen(false);
 									event.stopPropagation();
 								}}
@@ -986,7 +1004,7 @@ console.log('selectedUser', selectedUser);
 						endMessage={<p className="my-request__list no-req"></p>}
 						scrollableTarget="scrollableMessage"
 					>
-						{Array.isArray(messageStore) &&
+						{Array.isArray(messageStore) && isUserMessageOpen &&
 							messageStore
 								.filter((message) => message.conversation_id === conversationIdState)
 								.map((message, index, array) => (
