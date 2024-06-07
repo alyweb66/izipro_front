@@ -108,6 +108,7 @@ function MyRequest() {
 	if (errorSubscription) {
 		throw new Error('Error while subscribing to message');
 	}
+console.log('userConvStore', userConvStore);
 
 	//useEffect to set request and user in starting
 	useEffect(() => {
@@ -925,7 +926,7 @@ function MyRequest() {
 					{userConvState && userConvState?.map((user: UserDataProps, index) => (
 						<div
 							id={index === 0 ? 'first-user' : undefined}
-							className={`my-request__answer-list__user ${selectedUser?.id === user.id ? 'selected-user' : ''}`}
+							className={`my-request__answer-list__user ${selectedUser?.id === user.id ? 'selected-user' : ''} ${user.deleted_at ? 'deleted' : ''}`}
 							key={user.id}
 							onClick={(event) => {
 								handleMessageConversation(user.id, event),
@@ -945,6 +946,7 @@ function MyRequest() {
 								) : (
 									<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
 								)}
+								{user.deleted_at && <p className="my-request__answer-list__user__header deleted">Utilisateur supprimé</p>}
 							</div>
 						</div>
 					))}
@@ -983,6 +985,7 @@ function MyRequest() {
 							) : (
 								<p className="my-request__message-list__user__header__detail name">{selectedUser?.first_name} {selectedUser?.last_name}</p>
 							)}
+							{selectedUser?.deleted_at && <p className="my-request__message-list__user__header__detail deleted">Utilisateur supprimé</p>}
 						</div>
 						{/* <p className="my-request__answer-list__user city">{user.city}</p> */}
 						{userDescription && <div>

@@ -270,6 +270,14 @@
                 -5px 0 10px #ffffff17,
                 5px 0 10px #6666661c;
 
+        
+
+            &.deleted {
+                background-color: v.$color-deleted-grey;
+                border: 1px solid v.$color-deleted-grey;
+               
+            }
+
             &.selected-user {
                 border: 1px solid v.$color-primary-orange;
                 background-color: #f37b041a;
@@ -307,6 +315,14 @@
                     background-color: transparent;
                     font-size: 0.8rem;
                     font-weight: 500;
+                }
+
+                &.deleted {
+                    color: v.$color-error;
+                    margin: auto 0.3rem auto 0;
+                    font-size: 1rem;
+                    font-weight: 500;
+                    word-break: break-all;
                 }
 
 
@@ -374,6 +390,13 @@
                         font-size: 1rem;
                         font-weight: 500;
 
+                    }
+
+                    &.deleted {
+                        color: v.$color-error;
+                        margin: auto 0.3rem auto 0;
+                        font-size: 1rem;
+                        font-weight: 500;
                     }
                 }
 

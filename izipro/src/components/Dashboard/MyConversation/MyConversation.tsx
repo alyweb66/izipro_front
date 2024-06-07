@@ -16,7 +16,7 @@ import { SubscriptionStore, subscriptionDataStore } from '../../../store/subscri
 import { SubscriptionProps } from '../../../Type/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
-import RequestItem from '../../Hook/Request';
+import RequestItem from '../../Hook/RequestHook';
 import pdfLogo from '/logo/pdf-icon.svg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaCamera } from 'react-icons/fa';
