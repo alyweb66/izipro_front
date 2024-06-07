@@ -55,6 +55,7 @@ function MyConversation() {
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 
+	const limit = 4;
 
 	//useRef
 	const offsetRef = useRef(0);
@@ -78,7 +79,7 @@ function MyConversation() {
 	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 
 	//query
-	const { loading: convLoading, data: requestConv, fetchMore } = useQueryUserConversations(0, 4) as unknown as useQueryUserConversationsProps;
+	const { loading: convLoading, data: requestConv, fetchMore } = useQueryUserConversations(0, limit) as unknown as useQueryUserConversationsProps;
 	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
 
 	// file upload
@@ -159,7 +160,9 @@ function MyConversation() {
 			}
 
 			offsetRef.current = requestsConversations?.length;
-		} else {
+		} 
+
+		if (requestConv?.user.requestsConversations.length < limit) {
 			setIsHasMore(false);
 		}
 	}, [requestConv]);
@@ -457,7 +460,7 @@ function MyConversation() {
 				}
 
 				// if there is no more request to fetch
-				if (request.length === 0 || []) {
+				if (request.length < limit) {
 					setIsHasMore(false);
 				}
 
@@ -549,7 +552,7 @@ function MyConversation() {
 				{/* {!requestByDate && <p>Vous n&apos;avez pas de demande</p>} */}
 				{requestByDate && (
 					<div className="my-conversation__list__detail" >
-						<InfiniteScroll
+						{/* <InfiniteScroll
 							dataLength={requestsConversationStore?.length}
 							next={addRequest}
 							hasMore={isHasMore}
@@ -560,8 +563,8 @@ function MyConversation() {
 									:
 									<p className="my-conversation__list no-req">Vous n&apos;avez pas de conversation</p>}
 	
-						>
-							{request && request.id > 0 &&
+						> */}
+						{request && request.id > 0 &&
 								<RequestItem
 									request={request}
 									/* isMessageOpen={isMessageOpen} */
@@ -577,28 +580,45 @@ function MyConversation() {
 									setModalArgs={setModalArgs}
 									openModal={openModal}
 								/>
-							}
-							{requestByDate.map((requestByDate, index) => (
-								<RequestItem key={requestByDate.id}
-									index={index}
-									requestByDate={requestByDate}
-									/* isMessageOpen={isMessageOpen} */
-									setIsMessageOpen={setIsMessageOpen}
-									/* isListOpen={isListOpen} */
-									selectedRequest={selectedRequest!} // Add '!' to assert that selectedRequest is not null
-									setSelectedRequest={setSelectedRequest}
-									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
-									isMessageExpanded={isMessageExpanded}
-									setIsMessageExpanded={setIsMessageExpanded}
-									setIsListOpen={setIsListOpen}
-									setModalArgs={setModalArgs}
-									openModal={openModal}
-								/>
-							))}
-						</InfiniteScroll>
+						}
+						{requestByDate.map((requestByDate, index) => (
+							<RequestItem key={requestByDate.id}
+								index={index}
+								requestByDate={requestByDate}
+								/* isMessageOpen={isMessageOpen} */
+								setIsMessageOpen={setIsMessageOpen}
+								/* isListOpen={isListOpen} */
+								selectedRequest={selectedRequest!} // Add '!' to assert that selectedRequest is not null
+								setSelectedRequest={setSelectedRequest}
+								setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+								isMessageExpanded={isMessageExpanded}
+								setIsMessageExpanded={setIsMessageExpanded}
+								setIsListOpen={setIsListOpen}
+								setModalArgs={setModalArgs}
+								openModal={openModal}
+							/>
+						))}
+						{/* </InfiniteScroll> */}
 
 					</div>
 				)}
+				<div className="my-conversation__list__fetch-button">
+					{isHasMore ? (<button 
+						className="Btn" 
+						onClick={(event) => {
+							event.preventDefault();
+							event.stopPropagation();
+							addRequest();
+						}
+						}>
+						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
+						<span className="icon2"></span>
+						<span className="tooltip">Charger plus</span>
+					</button>
+					) : (
+						<p className="my-conversation__list no-req">Fin des résultats</p>
+					)}
+				</div>
 			</div>
 
 			<div className={`my-conversation__message-list ${isMessageOpen ? 'open' : ''} ${(messageLoading || messageMutLoading || convMutLoading) ? 'loading' : ''}`}>

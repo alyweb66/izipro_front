@@ -34,10 +34,12 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const [isHasMore, setIsHasMore] = useState(true);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
-	const [isLoading, setIsLoading] = useState(false);
+/* 	const [isLoading, setIsLoading] = useState(false); */
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
 	const idRef = useRef<number>(0);
+
+	const limit = 4;
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -59,7 +61,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const [subscriptionMutation, {loading: subscribeLoading, error: subscriptionError}] = useMutation(SUBSCRIPTION_MUTATION);
 
 	// get requests by job
-	const {loading: requestJobLoading, getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 4);
+	const {loading: requestJobLoading, getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, limit);
 	console.log('getRequestsByJob', getRequestsByJob);
 
 	// Function to filter the requests by the user's location and the request's location
@@ -149,10 +151,11 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 				offsetRef.current = offsetRef.current + data.length;
 
 			}
+console.log('fetchMoreResult', fetchMoreResult);
 
 			// If there are no more requests, stop the infinite scroll
-			if (fetchMoreResult.data.requestsByJob.length === 0) {
-				//setIsHasMore(false);
+			if (fetchMoreResult.data.requestsByJob.length < limit) {
+				setIsHasMore(false);
 			}
 		});
 		
@@ -245,7 +248,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 		} 
 
 		// If there are no more requests, stop the infinite scroll
-		if (getRequestsByJob?.requestsByJob.length === 0) {
+		if (getRequestsByJob?.requestsByJob.length < limit) {
 			setIsHasMore(false);
 		}
 
@@ -312,9 +315,8 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 			throw new Error('Error while hiding request');
 		}
 	};
-	console.log('isHasMore', isHasMore);
 
-	const handleNext = async () => {
+	/* 	const handleNext = async () => {
 		if (!isLoading) {
 			setIsLoading(true);
 			const element = document.getElementById('scrollableClientRequest');
@@ -333,7 +335,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 				initialScrollHeight && element.scrollTo(0, newScrollHeight - initialScrollHeight - distanceFromBottom - 1);
 			}
 		}
-	};
+	}; */
 	
 	return (
 		<div className="client-request">
@@ -344,7 +346,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 				{/* {!clientRequestsStore?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>} */}
 				{(address && city && postal_code && first_name && last_name) && (
 					<div className="client-request__list__detail"> 
-						<InfiniteScroll
+						{/* <InfiniteScroll
 							dataLength={clientRequestsStore.length}
 							next={ 
 								handleNext
@@ -357,123 +359,140 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 									<p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>}
 							scrollableTarget="scrollableClientRequest"
 							
-						>
-							{clientRequestsStore.map((request) => (
-								<div
-									className={`client-request__list__detail__item ${request.urgent}`}
-									key={request.id} 
-									onClick={(event) => {
-										setRequest(request),
-										onDetailsClick(),
-										event.stopPropagation();
-									}}
+						> */}
+						{clientRequestsStore.map((request) => (
+							<div
+								className={`client-request__list__detail__item ${request.urgent}`}
+								key={request.id} 
+								onClick={(event) => {
+									setRequest(request),
+									onDetailsClick(),
+									event.stopPropagation();
+								}}
 								
-								>
-									{request.urgent && <p className="client-request__list__detail__item urgent">URGENT</p>}
-									<div className="client-request__list__detail__item__header">
-										<p className="client-request__list__detail__item__header date" >
-											<span className="client-request__list__detail__item__header date-span">
+							>
+								{request.urgent && <p className="client-request__list__detail__item urgent">URGENT</p>}
+								<div className="client-request__list__detail__item__header">
+									<p className="client-request__list__detail__item__header date" >
+										<span className="client-request__list__detail__item__header date-span">
 										Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
-										</p>
-										<p className="client-request__list__detail__item__header city" >
-											<span className="client-request__list__detail__item__header city-span">
-										Ville:</span>&nbsp;{request.city}
-										</p>
-										<h2 className="client-request__list__detail__item__header job" >
-											<span className="client-request__list__detail__item__header job-span">
-										Métier:</span>&nbsp;{request.job}
-										</h2>
-										<p className="client-request__list__detail__item__header name" >
-											<span className="client-request__list__detail__item__header name-span">
-										Nom:</span>&nbsp;{request.first_name} {request.last_name}
-										</p>
-									</div>
-									<h1 className="client-request__list__detail__item title" >{request.title}</h1>
-									<p 
-										//@ts-expect-error con't resolve this type
-										className={`client-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
-										onClick={(event: React.MouseEvent) => {
-											//to open the message when the user clicks on it just for the selected request 
-											idRef.current = request?.id  ?? 0; // check if request or requestByDate is not undefined
-											console.log('id', idRef.current);
-					
-											if (idRef.current !== undefined && setIsMessageExpanded) {
-												setIsMessageExpanded((prevState: ExpandedState)  => ({
-													...prevState,
-													[idRef.current as number]: !prevState[idRef.current]
-												}));
-											}
-											
-											event.stopPropagation();
-										}}  
-									>
-										{request.message}
 									</p>
-									<div className="client-request__list__detail__item__picture">
+									<p className="client-request__list__detail__item__header city" >
+										<span className="client-request__list__detail__item__header city-span">
+										Ville:</span>&nbsp;{request.city}
+									</p>
+									<h2 className="client-request__list__detail__item__header job" >
+										<span className="client-request__list__detail__item__header job-span">
+										Métier:</span>&nbsp;{request.job}
+									</h2>
+									<p className="client-request__list__detail__item__header name" >
+										<span className="client-request__list__detail__item__header name-span">
+										Nom:</span>&nbsp;{request.first_name} {request.last_name}
+									</p>
+								</div>
+								<h1 className="client-request__list__detail__item title" >{request.title}</h1>
+								<p 
+									//@ts-expect-error con't resolve this type
+									className={`client-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
+									onClick={(event: React.MouseEvent) => {
+										//to open the message when the user clicks on it just for the selected request 
+										idRef.current = request?.id  ?? 0; // check if request or requestByDate is not undefined
+										console.log('id', idRef.current);
+					
+										if (idRef.current !== undefined && setIsMessageExpanded) {
+											setIsMessageExpanded((prevState: ExpandedState)  => ({
+												...prevState,
+												[idRef.current as number]: !prevState[idRef.current]
+											}));
+										}
+											
+										event.stopPropagation();
+									}}  
+								>
+									{request.message}
+								</p>
+								<div className="client-request__list__detail__item__picture">
 						
-										{(() => {
-											const imageUrls = request.media?.map(media => media.url) || [];
-											return request.media?.map((media, index) => (
-												media ? (
-													media.name.endsWith('.pdf') ? (
-														<a 
-															href={media.url} 
-															key={media.id} 
-															download={media.name} 
-															target="_blank" 
-															rel="noopener noreferrer" 
-															onClick={(event) => {event.stopPropagation();}} >
-															<img 
-																className="client-request__list__detail__item__picture img" 
-																//key={media.id} 
-																src={pdfLogo} 
-																alt={media.name} 
-															/>
-														</a>
-													) : (
+									{(() => {
+										const imageUrls = request.media?.map(media => media.url) || [];
+										return request.media?.map((media, index) => (
+											media ? (
+												media.name.endsWith('.pdf') ? (
+													<a 
+														href={media.url} 
+														key={media.id} 
+														download={media.name} 
+														target="_blank" 
+														rel="noopener noreferrer" 
+														onClick={(event) => {event.stopPropagation();}} >
 														<img 
 															className="client-request__list__detail__item__picture img" 
-															key={media.id} 
-															src={media.url} 
-															onClick={(event: React.MouseEvent) => {
-																openModal(imageUrls, index),
-																event.stopPropagation();}}
+															//key={media.id} 
+															src={pdfLogo} 
 															alt={media.name} 
 														/>
-													)
-												) : null
-											));
-										})()}
+													</a>
+												) : (
+													<img 
+														className="client-request__list__detail__item__picture img" 
+														key={media.id} 
+														src={media.url} 
+														onClick={(event: React.MouseEvent) => {
+															openModal(imageUrls, index),
+															event.stopPropagation();}}
+														alt={media.name} 
+													/>
+												)
+											) : null
+										));
+									})()}
 						
-									</div>
-								
-									<button
-										id={`delete-request-${request.id}`}
-										className="client-request__list__detail__item__delete" 
-										type='button' 
-										onClick={(event) => {
-											setDeleteItemModalIsOpen(true);
-											setModalArgs({ event, requestId: request.id });
-											event.stopPropagation();
-										}}>
-									</button>
-									<FaTrashAlt 
-										className="client-request__list__detail__item__delete-FaTrashAlt" 
-										onClick={(event) => {
-											console.log('delete-request', request.id);
-											
-											document.getElementById(`delete-request-${request.id}`)?.click(),
-											event.stopPropagation();
-										}}
-									/>
 								</div>
-							))}
-						</InfiniteScroll>
-						<button onClick={addRequest}>
+								
+								<button
+									id={`delete-request-${request.id}`}
+									className="client-request__list__detail__item__delete" 
+									type='button' 
+									onClick={(event) => {
+										setDeleteItemModalIsOpen(true);
+										setModalArgs({ event, requestId: request.id });
+										event.stopPropagation();
+									}}>
+								</button>
+								<FaTrashAlt 
+									className="client-request__list__detail__item__delete-FaTrashAlt" 
+									onClick={(event) => {
+										console.log('delete-request', request.id);
+											
+										document.getElementById(`delete-request-${request.id}`)?.click(),
+										event.stopPropagation();
+									}}
+								/>
+							</div>
+						))}
+						{/* </InfiniteScroll> */}
+						{/* <button onClick={addRequest}>
 						fetchmore
-						</button>
+						</button> */}
 					</div>
 				)}
+				<div className="client-request__list__fetch-button">
+					{isHasMore ? (<button 
+						className="Btn" 
+						onClick={(event) => {
+							event.preventDefault();
+							event.stopPropagation();
+							addRequest();
+						}
+						}>
+						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
+						<span className="icon2"></span>
+						<span className="tooltip">Charger plus</span>
+					</button>
+					) : (
+						<p className="client-request__list no-req">Fin des résultats</p>
+					)}
+				</div>
 			</div>
 
 			<ImageModal 

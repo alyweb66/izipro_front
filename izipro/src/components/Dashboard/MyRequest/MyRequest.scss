@@ -40,6 +40,12 @@
             position: relative;
         }
 
+        .my-request__list__fetch-button {
+            display: flex;
+            justify-content: center;
+            @include v.fetch-button;
+        }
+
 
         .my-request__list__detail {
             .my-request__list__detail__item {
@@ -230,15 +236,16 @@
             -5px 0 10px #ffffff17,
             5px 0 10px #6666661c;
 
-            &.title {
-                margin: 0.5rem 0 1rem 0;
-                width: 100%;
-                box-shadow: none;
-                padding: 0 0.8rem 0 0.8rem;
-                color: v.$color-secondary-blue;
-                font-size: 1.2rem;
-                font-weight: 500;;
-            }
+        &.title {
+            margin: 0.5rem 0 1rem 0;
+            width: 100%;
+            box-shadow: none;
+            padding: 0 0.8rem 0 0.8rem;
+            color: v.$color-secondary-blue;
+            font-size: 1.2rem;
+            font-weight: 500;
+            ;
+        }
 
         &.loading {
             position: relative;
@@ -270,12 +277,12 @@
                 -5px 0 10px #ffffff17,
                 5px 0 10px #6666661c;
 
-        
+
 
             &.deleted {
                 background-color: v.$color-deleted-grey;
                 border: 1px solid v.$color-deleted-grey;
-               
+
             }
 
             &.selected-user {
@@ -690,7 +697,8 @@
                 padding: 0 0.8rem 0 0.8rem;
                 color: v.$color-secondary-blue;
                 font-size: 1.2rem;
-                font-weight: 500;;
+                font-weight: 500;
+                ;
             }
 
             &.open {

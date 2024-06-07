@@ -39,6 +39,12 @@
 
         }
 
+        .my-conversation__list__fetch-button {
+            display: flex;
+            justify-content: center;
+            @include v.fetch-button;
+        }
+
         .my-conversation__list__detail {
 
             .my-conversation__list__detail__item {
