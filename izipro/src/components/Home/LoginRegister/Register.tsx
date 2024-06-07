@@ -53,7 +53,6 @@ function Register() {
 			return;
 		}
  
-    
 		// Check if the siret is valid
 		if (siret && siret.length !== 14) {
 			setError('Siret invalide');
@@ -69,11 +68,6 @@ function Register() {
 				}
 			}
 		}).then((response) => {
-
-			if (response.data.createProUser.error) {
-				setError('Erreur siret');
-				return;
-			}
 			
 			if (response.data.createProUser.id) {
 				setUserCreated(true);
@@ -86,6 +80,7 @@ function Register() {
 
 		// handle errors
 		if (proUserError) {
+			setError('Erreur lors de la création de l\'utilisateur');
 			throw new Error('Submission error!');
 		}
    
@@ -125,7 +120,7 @@ function Register() {
 				}
 			}
 		}).then((response) => {
-			
+
 			if (response.data.createUser.id) {
 				setUserCreated(true);
 			} 
@@ -136,6 +131,7 @@ function Register() {
 					
 		// handle errors
 		if (userError) {
+			setError('Erreur lors de la création de l\'utilisateur');
 			throw new Error('Submission error!');
 		} 
    
@@ -145,7 +141,6 @@ function Register() {
 		<div>
 			<p className='create-account' ><span onClick={toggleRegisterVisibility}>Créer un compte</span></p>
 			{error && <p className='error-register'>{error}</p>}
-			{proUserError && <p className='error-register'>{'Siret inconnu'}</p>}
 			{userCreated && <p className='user-created'>Utilisateur créé avec succès, un email de validation vous a été envoyé </p>}
 			{isRegisterVisible && (
 				<div className="register-container">

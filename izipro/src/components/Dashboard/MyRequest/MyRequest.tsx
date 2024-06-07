@@ -525,7 +525,7 @@ function MyRequest() {
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {
 		setTimeout(() => {
-			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+			endOfMessagesRef.current?.scrollIntoView(/* { behavior: 'smooth' } */);
 		}, 200);
 	}, [messageStore]);
 
