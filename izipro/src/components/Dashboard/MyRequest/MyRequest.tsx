@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { userConversation, userDataStore } from '../../../store/UserData';
-import { useMutation, useSubscription } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { RequestProps } from '../../../Type/Request';
 import './MyRequest.scss';
 import { DELETE_REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
@@ -14,7 +14,7 @@ import { useFileHandler } from '../../Hook/useFileHandler';
 import { subscriptionDataStore, SubscriptionStore } from '../../../store/subscription';
 import { MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
 import { SubscriptionProps } from '../../../Type/Subscription';
-import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
+//import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 import { FaTrashAlt, FaCamera } from 'react-icons/fa';
 import { MdSend, MdAttachFile } from 'react-icons/md';
@@ -35,7 +35,12 @@ type ExpandedState = {
 	[key: number]: boolean;
 };
 
-function MyRequest() {
+
+type MyRequestProps = {
+	messageSubscription: { messageAdded: MessageProps[] } | undefined;
+};
+
+function MyRequest({ messageSubscription }: MyRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -95,12 +100,12 @@ function MyRequest() {
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 100);
 
-	// get the subscription
+	/* 	// get the subscription
 	const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
 	const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'conversation');
 
 	// Subscription to get new message
-	const { data: messageSubscription, error: errorSubscription } = useSubscription(MESSAGE_SUBSCRIPTION, {
+	const { data: messageSubscription, error: errorSubscription } = useSubscription<{ messageAdded: MessageProps[] }>(MESSAGE_SUBSCRIPTION, {
 		variables: {
 			conversation_ids: conversation?.subscriber_id,
 			request_ids: request?.subscriber_id,
@@ -109,7 +114,7 @@ function MyRequest() {
 	});
 	if (errorSubscription) {
 		throw new Error('Error while subscribing to message');
-	}
+	} */
 
 
 	//useEffect to set request and user in starting
@@ -145,35 +150,33 @@ function MyRequest() {
 					});
 				}
 			}
-		} 
+		}
 
 		if (getUserRequestsData?.user.requests.length < limit) {
 			setIsHasMore(false);
 		}
 	}, [getUserRequestsData]);
 
-	// useEffect to sort the requests by date
+	// useEffect to sort the requests by date and update the subscription
 	useEffect(() => {
 		if (myRequestsStore) {
-			const sortedRequests = [...myRequestsStore].sort((a, b) => {
-				// Check if a.conversation or b.conversation is empty
-				if (!a.conversation?.length) return 1;
-				if (!b.conversation?.length) return -1;
-
-				const dateA = a.conversation.some(c => c.updated_at)
-					? Math.max(...a.conversation.map(c => new Date(c.updated_at).getTime()))
-					: 0;
-
-				const dateB = b.conversation.some(c => c.updated_at)
-					? Math.max(...b.conversation.map(c => new Date(c.updated_at).getTime()))
-					: 0;
-
-				// For ascending order, swap dateA and dateB for descending order
+			// Sort the requests by date
+			const sortedRequests = [...myRequestsStore].sort((requestA, requestB) => {
+				const dateA = requestA.conversation?.length
+					? Math.max(...requestA.conversation.map(conv => isNaN(Date.parse(conv.updated_at)) ? Number(conv.updated_at) : new Date(conv.updated_at).getTime()))
+					: isNaN(Date.parse(requestA.created_at)) ? Number(requestA.created_at) : new Date(requestA.created_at).getTime();
+				
+				const dateB = requestB.conversation?.length
+					? Math.max(...requestB.conversation.map(conv => isNaN(Date.parse(conv.updated_at)) ? Number(conv.updated_at) : new Date(conv.updated_at).getTime()))
+					: isNaN(Date.parse(requestB.created_at)) ? Number(requestB.created_at) : new Date(requestB.created_at).getTime();
+		
+				// For descending order (most recent first)
 				return dateB - dateA;
 			});
 
 			setRequestByDate(sortedRequests);
 
+			// update the subscription by request and conversation
 			// get conversation id in subscriptionStore
 			const conversationIds = subscriptionStore
 				.filter(subscription => subscription.subscriber === 'conversation')
@@ -374,9 +377,11 @@ function MyRequest() {
 
 
 	}, [usersConversationData]);
+	console.log('messageStore', messageStore);
 
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
+		console.log('messageSubscription', messageSubscription);
 
 		// check if the message is already in the store
 		if (messageSubscription?.messageAdded) {
@@ -538,7 +543,7 @@ function MyRequest() {
 		setSelectedUser(userConvState[0]);
 
 	}, [userConvState]);
-		
+
 	// useEffect to set message when selecteduser is updated
 	useEffect(() => {
 
@@ -678,7 +683,7 @@ function MyRequest() {
 	};
 
 	// Function find conversation id for message
-	const handleMessageConversation = ( userId: number, event?: React.MouseEvent<HTMLDivElement>) => {
+	const handleMessageConversation = (userId: number, event?: React.MouseEvent<HTMLDivElement>) => {
 		event?.preventDefault();
 		console.log('userId', userId);
 
@@ -743,7 +748,6 @@ function MyRequest() {
 		newUrlFileList.splice(index, 1);
 		setUrlFile(newUrlFileList);
 	};
-console.log('myRequestsStore', myRequestsStore);
 
 	// Function to fetchmore requests
 	function addRequest() {
@@ -765,7 +769,7 @@ console.log('myRequestsStore', myRequestsStore);
 					});
 
 					offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
-				} 
+				}
 
 				// if there is no more request stop the infinite scroll
 				if (fetchMoreResult.data.user.requests.length < limit) {
@@ -811,19 +815,19 @@ console.log('myRequestsStore', myRequestsStore);
 								<div className="my-request__list__detail__item__header">
 									<p className="my-request__list__detail__item__header date" >
 										<span className="my-request__list__detail__item__header date-span">
-												Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
+											Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
 									</p>
 									<p className="my-request__list__detail__item__header city" >
 										<span className="my-request__list__detail__item__header city-span">
-												Ville:</span>&nbsp;{request.city}
+											Ville:</span>&nbsp;{request.city}
 									</p>
 									<h2 className="my-request__list__detail__item__header job" >
 										<span className="my-request__list__detail__item__header job-span">
-												Métier:</span>&nbsp;{request.job}
+											Métier:</span>&nbsp;{request.job}
 									</h2>
 									<p className="my-request__list__detail__item__header name" >
 										<span className="my-request__list__detail__item__header name-span">
-												Nom:</span>&nbsp;{request.first_name} {request.last_name}
+											Nom:</span>&nbsp;{request.first_name} {request.last_name}
 									</p>
 								</div>
 								<h1 className="my-request__list__detail__item title" >{request.title}</h1>
@@ -906,8 +910,8 @@ console.log('myRequestsStore', myRequestsStore);
 					</div>
 				)}
 				<div className="my-request__list__fetch-button">
-					{isHasMore ? (<button 
-						className="Btn" 
+					{isHasMore ? (<button
+						className="Btn"
 						onClick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
@@ -1021,7 +1025,7 @@ console.log('myRequestsStore', myRequestsStore);
 					<InfiniteScroll
 						className="infinite-scroll"
 						dataLength={messageStore?.length}
-						next={() => {}}
+						next={() => { }}
 						hasMore={false}
 						loader={<p className="my-request__list no-req"></p>}
 						endMessage={<p className="my-request__list no-req"></p>}

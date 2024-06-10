@@ -7,10 +7,10 @@ import { useQueryRequestByJob } from '../../Hook/Query';
 import { RequestProps } from '../../../Type/Request';
 import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
 import { useMutation} from '@apollo/client';
-import InfiniteScroll from 'react-infinite-scroll-component';
+//import InfiniteScroll from 'react-infinite-scroll-component';
 // @ts-expect-error turf is not typed
 import * as turf from '@turf/turf';
-import { REQUEST_SUBSCRIPTION } from '../../GraphQL/Subscription';
+//import { REQUEST_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import pdfLogo from '/logo/pdf-icon.svg';
@@ -24,7 +24,12 @@ type ExpandedState = {
 	[key: number]: boolean;
 };
 
-function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
+type clientRequestProps = {
+	onDetailsClick: () => void;
+	clientRequestSubscription?: { requestAdded: RequestProps[] };
+  };
+
+function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -34,7 +39,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const [isHasMore, setIsHasMore] = useState(true);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
-/* 	const [isLoading, setIsLoading] = useState(false); */
+	/* 	const [isLoading, setIsLoading] = useState(false); */
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
 	const idRef = useRef<number>(0);
@@ -61,7 +66,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const [subscriptionMutation, {loading: subscribeLoading, error: subscriptionError}] = useMutation(SUBSCRIPTION_MUTATION);
 
 	// get requests by job
-	const {loading: requestJobLoading, getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, limit);
+	const {loading: requestJobLoading, getRequestsByJob, fetchMore} = useQueryRequestByJob(jobs, 0, limit);
 	console.log('getRequestsByJob', getRequestsByJob);
 
 	// Function to filter the requests by the user's location and the request's location
@@ -151,7 +156,6 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 				offsetRef.current = offsetRef.current + data.length;
 
 			}
-console.log('fetchMoreResult', fetchMoreResult);
 
 			// If there are no more requests, stop the infinite scroll
 			if (fetchMoreResult.data.requestsByJob.length < limit) {
@@ -258,34 +262,38 @@ console.log('fetchMoreResult', fetchMoreResult);
 	// useEffect to subscribe to new requests
 	useEffect(() => {
 		
-		if (subscribeToMore) {
-		
-			subscribeToMore({
+		if (clientRequestSubscription) {
+			console.log('clientRequestSubscription', clientRequestSubscription);
+			if (clientRequestSubscription) {
+				const requestAdded = clientRequestSubscription.requestAdded[0];
+	
+				if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
+					RangeFilter([requestAdded], true);
+				}
+			}
+			/* subscribeToMore({
 				document: REQUEST_SUBSCRIPTION,
 				variables: { ids: jobs.map(job => job.job_id).filter(id => id != null) },
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				updateQuery: (prev: RequestProps , { subscriptionData }: { subscriptionData: any }) => {
+				updateQuery: (prev: RequestProps , { subscriptionData }: { subscriptionData: any }) => { */
 
-					if (!subscriptionData.data) return prev;
+			/* if (!clientRequestSubscription.data) return prev; */
 
-					const  requestAdded  = subscriptionData.data.requestAdded[0];
+			/* const  requestAdded  = clientRequestSubscription; */
 
-					// Check if the request is already in the store
-					if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
-						console.log('requestAdded222222222', requestAdded);
-						
-						RangeFilter([requestAdded], true);
+			// Check if the request is already in the store
+			/* if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
+	
+				RangeFilter([requestAdded], true);
 
-					} else {
-						return prev;
-					}
+			}  */
 					
 					
-				},
-			});
+			//},
+			//});
 		
 		}
-	}, [ subscribeToMore]);
+	}, [ clientRequestSubscription]);
 
 	// Function to hide a request
 	const handleHideRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {

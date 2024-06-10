@@ -24,15 +24,13 @@ function SettingAccount() {
 	const [radius, setRadius] = useState(settings[0]?.range || 0);
 	const [message, setMessage] = useState('');
 
-	// fetch jobs
+	// query
 	const { loading: categoryLoading, categoriesData } = useQueryCategory();
 	const { loading: jobLoading, jobData } = useQueryJobs(selectedCategory);
 	const jobDataName = useQueryJobData(jobs);
 
 	// set job with the value from the database
 	useEffect(() => {
-
-
 		setSelectedJob(jobDataName);
 	}, [jobDataName]);
 

@@ -14,6 +14,11 @@ import { useMutation } from '@apollo/client';
 import Footer from '../Footer/Footer';
 
 import Spinner from '../Hook/Spinner';
+import { useMyRequestMessageSubscriptions } from '../Hook/MyRequestSubscription';
+import { useClientRequestSubscriptions } from '../Hook/ClientRequestSubscription';
+import { useMyConversationSubscriptions } from '../Hook/MyConversationSubscription';
+
+
 
 function Dashboard() {
 	const navigate = useNavigate();
@@ -25,6 +30,7 @@ function Dashboard() {
 	const id = userDataStore((state) => state.id);
 	const role = userDataStore((state) => state.role);
 	const setAll = userDataStore((state) => state.setAll);
+	//const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 
 	//state for first page
 	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
@@ -37,7 +43,13 @@ function Dashboard() {
 
 	//mutation
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
-	
+
+	// Subscription
+	// Subscription to get new message
+	const { messageSubscription } = useMyRequestMessageSubscriptions();
+	const { clientRequestSubscription } = useClientRequestSubscriptions();
+	const { clientMessageSubscription } = useMyConversationSubscriptions();
+
 	// condition if user not logged in
 	let isLogged;
 	if (localStorage.getItem('ayl') === 'session') {
@@ -155,10 +167,13 @@ function Dashboard() {
 			<div className="dashboard__content">
 				
 				{selectedTab === 'Request' && <Request/>}
-				{selectedTab === 'My requests' && <MyRequest/>}
-				{selectedTab === 'My conversations' && <MyConversation/>}
+				{selectedTab === 'My requests' && <MyRequest messageSubscription={messageSubscription}/>}
+				{selectedTab === 'My conversations' && <MyConversation clientMessageSubscription={clientMessageSubscription}/>}
 				{selectedTab === 'My profile' && <Account />}
-				{selectedTab === 'Client request' && <ClientRequest onDetailsClick={handleMyConvesationNavigate} />}
+				{selectedTab === 'Client request' && <ClientRequest 
+					onDetailsClick={handleMyConvesationNavigate}
+					clientRequestSubscription={clientRequestSubscription}
+				/>}
 
 			</div>
 			<Footer />	
