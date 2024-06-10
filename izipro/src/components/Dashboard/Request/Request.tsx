@@ -16,6 +16,7 @@ import { FaCamera } from 'react-icons/fa';
 import './Request.scss';
 import Spinner from '../../Hook/Spinner';
 import pdfLogo from '/logo/pdf-icon.svg';
+import { myRequestStore } from '../../../store/Request';
 
 
 
@@ -31,6 +32,7 @@ function Request() {
 	const first_name = userDataStore((state) => state.first_name);
 	const last_name = userDataStore((state) => state.last_name);
 	const postal_code = userDataStore((state) => state.postal_code);
+	const [myRequestsStore, setMyRequestsStore] = myRequestStore((state) => [state.requests, state.setMyRequestStore]);
 
 	//state
 	const [urgent, setUrgent] = useState(false);
@@ -112,10 +114,16 @@ function Request() {
 			}).then((response) => {
 
 				if (response.data.createRequest) {
+
+					// Add the new request to the store
+					setMyRequestsStore([response.data.createRequest, ...myRequestsStore ]);
+
 					setSuccessMessage('Demande envoyée avec succès');
 					timer = setTimeout(() => {
 						setSuccessMessage('');
 					}, 5000); // 5000ms = 5s
+
+					// Clear fields
 					setTitleRequest('');
 					setDescriptionRequest('');
 					setFile([]);

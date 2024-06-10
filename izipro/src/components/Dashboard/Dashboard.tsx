@@ -16,7 +16,6 @@ import Footer from '../Footer/Footer';
 import Spinner from '../Hook/Spinner';
 import { useMyRequestMessageSubscriptions } from '../Hook/MyRequestSubscription';
 import { useClientRequestSubscriptions } from '../Hook/ClientRequestSubscription';
-import { MessageProps } from '../../Type/message';
 import { useMyConversationSubscriptions } from '../Hook/MyConversationSubscription';
 
 
@@ -50,9 +49,7 @@ function Dashboard() {
 	const { messageSubscription } = useMyRequestMessageSubscriptions();
 	const { clientRequestSubscription } = useClientRequestSubscriptions();
 	const { clientMessageSubscription } = useMyConversationSubscriptions();
-	console.log(clientRequestSubscription);
 
-	
 	// condition if user not logged in
 	let isLogged;
 	if (localStorage.getItem('ayl') === 'session') {

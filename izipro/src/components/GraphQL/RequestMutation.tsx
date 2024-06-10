@@ -7,11 +7,28 @@ export const REQUEST_MUTATION = gql`
             urgent
             title
             message
-            city
+            first_name
+            last_name
             lng
             lat
+            city
+            range
             user_id
             job_id
+            job 
+            media {
+                id
+                url
+                name
+            }
+            created_at
+            conversation {
+            id
+            user_1
+            user_2
+            updated_at
+            }
+            deleted_at   
         }
     }
 `;
