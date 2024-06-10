@@ -4,14 +4,14 @@ import './MyConversation.scss';
 import { requestDataStore, requestConversationStore, clientRequestStore } from '../../../store/Request';
 import { RequestProps } from '../../../Type/Request';
 import { CONVERSATION_MUTATION, MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
-import { useMutation, useSubscription } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { userDataStore } from '../../../store/UserData';
 import { useQueryMessagesByConversation, useQueryUserConversations } from '../../Hook/Query';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useFileHandler } from '../../Hook/useFileHandler';
 import { messageDataStore } from '../../../store/message';
 import { MessageProps, MessageStoreProps } from '../../../Type/message';
-import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
+//import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SubscriptionStore, subscriptionDataStore } from '../../../store/subscription';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
@@ -34,8 +34,12 @@ type useQueryUserConversationsProps = {
 	fetchMore: (options: { variables: { offset: number } }) => void;
 };
 
+type ClientMessageProps = {
+	clientMessageSubscription?: {messageAdded: MessageProps[]};
+};
 
-function MyConversation() {
+
+function MyConversation({clientMessageSubscription}: ClientMessageProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -85,7 +89,7 @@ function MyConversation() {
 	// file upload
 	const { file,urlFile, setUrlFile, setFile, handleFileChange } = useFileHandler();
 
-	// Message subscription
+	/* // Message subscription
 	const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
 	const { data: messageSubscription, error: errorSubscription } = useSubscription(MESSAGE_SUBSCRIPTION, {
 		variables: {
@@ -96,7 +100,7 @@ function MyConversation() {
 	});
 	if (errorSubscription) {
 		throw new Error('Error while subscribing to message');
-	}
+	} */
 
 	//useEffect to set request in starting
 	useEffect(() => {
@@ -198,8 +202,8 @@ function MyConversation() {
 	useEffect(() => {
 
 		// check if the message is already in the store
-		if (messageSubscription?.messageAdded) {
-			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
+		if (clientMessageSubscription?.messageAdded) {
+			const messageAdded: MessageProps[] = clientMessageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
 
@@ -232,7 +236,7 @@ function MyConversation() {
 			});
 		}
 
-	}, [messageSubscription]);
+	}, [clientMessageSubscription]);
 
 	// cleane the request store if the component is unmounted
 	useEffect(() => {

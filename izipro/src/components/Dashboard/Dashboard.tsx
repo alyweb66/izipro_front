@@ -17,6 +17,7 @@ import Spinner from '../Hook/Spinner';
 import { useMyRequestMessageSubscriptions } from '../Hook/MyRequestSubscription';
 import { useClientRequestSubscriptions } from '../Hook/ClientRequestSubscription';
 import { MessageProps } from '../../Type/message';
+import { useMyConversationSubscriptions } from '../Hook/MyConversationSubscription';
 
 
 
@@ -48,6 +49,7 @@ function Dashboard() {
 	// Subscription to get new message
 	const { messageSubscription } = useMyRequestMessageSubscriptions();
 	const { clientRequestSubscription } = useClientRequestSubscriptions();
+	const { clientMessageSubscription } = useMyConversationSubscriptions();
 	console.log(clientRequestSubscription);
 
 	
@@ -169,7 +171,7 @@ function Dashboard() {
 				
 				{selectedTab === 'Request' && <Request/>}
 				{selectedTab === 'My requests' && <MyRequest messageSubscription={messageSubscription}/>}
-				{selectedTab === 'My conversations' && <MyConversation/>}
+				{selectedTab === 'My conversations' && <MyConversation clientMessageSubscription={clientMessageSubscription}/>}
 				{selectedTab === 'My profile' && <Account />}
 				{selectedTab === 'Client request' && <ClientRequest 
 					onDetailsClick={handleMyConvesationNavigate}
