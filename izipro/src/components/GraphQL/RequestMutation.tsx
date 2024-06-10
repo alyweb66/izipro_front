@@ -9,6 +9,7 @@ export const REQUEST_MUTATION = gql`
             message
             first_name
             last_name
+            denomination
             lng
             lat
             city

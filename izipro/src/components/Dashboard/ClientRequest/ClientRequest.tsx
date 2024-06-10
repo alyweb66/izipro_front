@@ -393,10 +393,17 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 										<span className="client-request__list__detail__item__header job-span">
 										Métier:</span>&nbsp;{request.job}
 									</h2>
-									<p className="client-request__list__detail__item__header name" >
-										<span className="client-request__list__detail__item__header name-span">
+									{request.denomination ? (
+										<p className="client-request__list__detail__item__header name" >
+											<span className="client-request__list__detail__item__header name-span">
+										Entreprise:</span>&nbsp;{request.denomination}
+										</p>
+									) : (
+										<p className="client-request__list__detail__item__header name" >
+											<span className="client-request__list__detail__item__header name-span">
 										Nom:</span>&nbsp;{request.first_name} {request.last_name}
-									</p>
+										</p>
+									)}
 								</div>
 								<h1 className="client-request__list__detail__item title" >{request.title}</h1>
 								<p 

@@ -165,11 +165,11 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 				const dateA = requestA.conversation?.length
 					? Math.max(...requestA.conversation.map(conv => isNaN(Date.parse(conv.updated_at)) ? Number(conv.updated_at) : new Date(conv.updated_at).getTime()))
 					: isNaN(Date.parse(requestA.created_at)) ? Number(requestA.created_at) : new Date(requestA.created_at).getTime();
-				
+
 				const dateB = requestB.conversation?.length
 					? Math.max(...requestB.conversation.map(conv => isNaN(Date.parse(conv.updated_at)) ? Number(conv.updated_at) : new Date(conv.updated_at).getTime()))
 					: isNaN(Date.parse(requestB.created_at)) ? Number(requestB.created_at) : new Date(requestB.created_at).getTime();
-		
+
 				// For descending order (most recent first)
 				return dateB - dateA;
 			});
@@ -825,10 +825,17 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 										<span className="my-request__list__detail__item__header job-span">
 											Métier:</span>&nbsp;{request.job}
 									</h2>
-									<p className="my-request__list__detail__item__header name" >
-										<span className="my-request__list__detail__item__header name-span">
+									{request.denomination ? (
+										<p className="my-request__list__detail__item__header name" >
+											<span className="my-request__list__detail__item__header name-span">
+											Entreprise:</span>&nbsp;{request.denomination}
+										</p>
+									) : (
+										<p className="my-request__list__detail__item__header name" >
+											<span className="my-request__list__detail__item__header name-span">
 											Nom:</span>&nbsp;{request.first_name} {request.last_name}
-									</p>
+										</p>
+									)}
 								</div>
 								<h1 className="my-request__list__detail__item title" >{request.title}</h1>
 								<p
