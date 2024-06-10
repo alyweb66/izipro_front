@@ -7,7 +7,7 @@ import { useQueryRequestByJob } from '../../Hook/Query';
 import { RequestProps } from '../../../Type/Request';
 import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
 import { useMutation} from '@apollo/client';
-import InfiniteScroll from 'react-infinite-scroll-component';
+//import InfiniteScroll from 'react-infinite-scroll-component';
 // @ts-expect-error turf is not typed
 import * as turf from '@turf/turf';
 import { REQUEST_SUBSCRIPTION } from '../../GraphQL/Subscription';
@@ -34,7 +34,7 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const [isHasMore, setIsHasMore] = useState(true);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
-/* 	const [isLoading, setIsLoading] = useState(false); */
+	/* 	const [isLoading, setIsLoading] = useState(false); */
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
 	const idRef = useRef<number>(0);
@@ -151,7 +151,6 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 				offsetRef.current = offsetRef.current + data.length;
 
 			}
-console.log('fetchMoreResult', fetchMoreResult);
 
 			// If there are no more requests, stop the infinite scroll
 			if (fetchMoreResult.data.requestsByJob.length < limit) {

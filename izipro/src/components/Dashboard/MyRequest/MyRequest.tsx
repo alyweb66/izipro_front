@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { userConversation, userDataStore } from '../../../store/UserData';
-import { useMutation, useSubscription } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { RequestProps } from '../../../Type/Request';
 import './MyRequest.scss';
 import { DELETE_REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
@@ -14,7 +14,7 @@ import { useFileHandler } from '../../Hook/useFileHandler';
 import { subscriptionDataStore, SubscriptionStore } from '../../../store/subscription';
 import { MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
 import { SubscriptionProps } from '../../../Type/Subscription';
-import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
+//import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 import { FaTrashAlt, FaCamera } from 'react-icons/fa';
 import { MdSend, MdAttachFile } from 'react-icons/md';
@@ -35,7 +35,12 @@ type ExpandedState = {
 	[key: number]: boolean;
 };
 
-function MyRequest() {
+type MyRequestProps = {
+	messageAdded: MessageProps[];
+	messageSubscription:MessageProps[];
+};
+
+function MyRequest( messageSubscription: MyRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -95,7 +100,7 @@ function MyRequest() {
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 100);
 
-	// get the subscription
+	/* 	// get the subscription
 	const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
 	const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'conversation');
 
@@ -109,7 +114,7 @@ function MyRequest() {
 	});
 	if (errorSubscription) {
 		throw new Error('Error while subscribing to message');
-	}
+	} */
 
 
 	//useEffect to set request and user in starting
@@ -743,7 +748,6 @@ function MyRequest() {
 		newUrlFileList.splice(index, 1);
 		setUrlFile(newUrlFileList);
 	};
-console.log('myRequestsStore', myRequestsStore);
 
 	// Function to fetchmore requests
 	function addRequest() {
