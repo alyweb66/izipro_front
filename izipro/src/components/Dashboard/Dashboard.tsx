@@ -15,6 +15,10 @@ import Footer from '../Footer/Footer';
 
 import Spinner from '../Hook/Spinner';
 import { useMyRequestMessageSubscriptions } from '../Hook/MyRequestSubscription';
+import { useClientRequestSubscriptions } from '../Hook/ClientRequestSubscription';
+import { MessageProps } from '../../Type/message';
+
+
 
 function Dashboard() {
 	const navigate = useNavigate();
@@ -43,7 +47,8 @@ function Dashboard() {
 	// Subscription
 	// Subscription to get new message
 	const { messageSubscription } = useMyRequestMessageSubscriptions();
-	
+	const { clientRequestSubscription } = useClientRequestSubscriptions();
+	console.log(clientRequestSubscription);
 
 	
 	// condition if user not logged in
@@ -166,7 +171,10 @@ function Dashboard() {
 				{selectedTab === 'My requests' && <MyRequest messageSubscription={messageSubscription}/>}
 				{selectedTab === 'My conversations' && <MyConversation/>}
 				{selectedTab === 'My profile' && <Account />}
-				{selectedTab === 'Client request' && <ClientRequest onDetailsClick={handleMyConvesationNavigate} />}
+				{selectedTab === 'Client request' && <ClientRequest 
+					onDetailsClick={handleMyConvesationNavigate}
+					clientRequestSubscription={clientRequestSubscription}
+				/>}
 
 			</div>
 			<Footer />	

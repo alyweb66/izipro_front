@@ -35,12 +35,12 @@ type ExpandedState = {
 	[key: number]: boolean;
 };
 
+
 type MyRequestProps = {
-	messageAdded: MessageProps[];
-	messageSubscription:MessageProps[];
+	messageSubscription: { messageAdded: MessageProps[] } | undefined;
 };
 
-function MyRequest( messageSubscription: MyRequestProps) {
+function MyRequest({ messageSubscription }: MyRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -105,7 +105,7 @@ function MyRequest( messageSubscription: MyRequestProps) {
 	const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'conversation');
 
 	// Subscription to get new message
-	const { data: messageSubscription, error: errorSubscription } = useSubscription(MESSAGE_SUBSCRIPTION, {
+	const { data: messageSubscription, error: errorSubscription } = useSubscription<{ messageAdded: MessageProps[] }>(MESSAGE_SUBSCRIPTION, {
 		variables: {
 			conversation_ids: conversation?.subscriber_id,
 			request_ids: request?.subscriber_id,
@@ -150,7 +150,7 @@ function MyRequest( messageSubscription: MyRequestProps) {
 					});
 				}
 			}
-		} 
+		}
 
 		if (getUserRequestsData?.user.requests.length < limit) {
 			setIsHasMore(false);
@@ -379,9 +379,11 @@ function MyRequest( messageSubscription: MyRequestProps) {
 
 
 	}, [usersConversationData]);
+	console.log('messageStore', messageStore);
 
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
+		console.log('messageSubscription', messageSubscription);
 
 		// check if the message is already in the store
 		if (messageSubscription?.messageAdded) {
@@ -543,7 +545,7 @@ function MyRequest( messageSubscription: MyRequestProps) {
 		setSelectedUser(userConvState[0]);
 
 	}, [userConvState]);
-		
+
 	// useEffect to set message when selecteduser is updated
 	useEffect(() => {
 
@@ -683,7 +685,7 @@ function MyRequest( messageSubscription: MyRequestProps) {
 	};
 
 	// Function find conversation id for message
-	const handleMessageConversation = ( userId: number, event?: React.MouseEvent<HTMLDivElement>) => {
+	const handleMessageConversation = (userId: number, event?: React.MouseEvent<HTMLDivElement>) => {
 		event?.preventDefault();
 		console.log('userId', userId);
 
@@ -769,7 +771,7 @@ function MyRequest( messageSubscription: MyRequestProps) {
 					});
 
 					offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
-				} 
+				}
 
 				// if there is no more request stop the infinite scroll
 				if (fetchMoreResult.data.user.requests.length < limit) {
@@ -815,19 +817,19 @@ function MyRequest( messageSubscription: MyRequestProps) {
 								<div className="my-request__list__detail__item__header">
 									<p className="my-request__list__detail__item__header date" >
 										<span className="my-request__list__detail__item__header date-span">
-												Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
+											Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
 									</p>
 									<p className="my-request__list__detail__item__header city" >
 										<span className="my-request__list__detail__item__header city-span">
-												Ville:</span>&nbsp;{request.city}
+											Ville:</span>&nbsp;{request.city}
 									</p>
 									<h2 className="my-request__list__detail__item__header job" >
 										<span className="my-request__list__detail__item__header job-span">
-												Métier:</span>&nbsp;{request.job}
+											Métier:</span>&nbsp;{request.job}
 									</h2>
 									<p className="my-request__list__detail__item__header name" >
 										<span className="my-request__list__detail__item__header name-span">
-												Nom:</span>&nbsp;{request.first_name} {request.last_name}
+											Nom:</span>&nbsp;{request.first_name} {request.last_name}
 									</p>
 								</div>
 								<h1 className="my-request__list__detail__item title" >{request.title}</h1>
@@ -910,8 +912,8 @@ function MyRequest( messageSubscription: MyRequestProps) {
 					</div>
 				)}
 				<div className="my-request__list__fetch-button">
-					{isHasMore ? (<button 
-						className="Btn" 
+					{isHasMore ? (<button
+						className="Btn"
 						onClick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
@@ -1025,7 +1027,7 @@ function MyRequest( messageSubscription: MyRequestProps) {
 					<InfiniteScroll
 						className="infinite-scroll"
 						dataLength={messageStore?.length}
-						next={() => {}}
+						next={() => { }}
 						hasMore={false}
 						loader={<p className="my-request__list no-req"></p>}
 						endMessage={<p className="my-request__list no-req"></p>}
