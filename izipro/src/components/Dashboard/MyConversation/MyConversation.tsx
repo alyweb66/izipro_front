@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useRef, useState } from 'react';
 import './MyConversation.scss';
-import { requestDataStore, requestConversationStore } from '../../../store/Request';
+import { requestDataStore, requestConversationStore, clientRequestStore } from '../../../store/Request';
 import { RequestProps } from '../../../Type/Request';
 import { CONVERSATION_MUTATION, MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
 import { useMutation, useSubscription } from '@apollo/client';
@@ -16,7 +16,7 @@ import { SubscriptionStore, subscriptionDataStore } from '../../../store/subscri
 import { SubscriptionProps } from '../../../Type/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
-import RequestItem from '../../Hook/Request';
+import RequestItem from '../../Hook/RequestHook';
 import pdfLogo from '/logo/pdf-icon.svg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaCamera } from 'react-icons/fa';
@@ -24,6 +24,7 @@ import { MdAttachFile, MdKeyboardArrowLeft, MdSend } from 'react-icons/md';
 import TextareaAutosize from 'react-textarea-autosize';
 import logoProfile from '/logo/logo profile.jpeg';
 import Spinner from '../../Hook/Spinner';
+import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 
 
 type useQueryUserConversationsProps = {
@@ -50,6 +51,11 @@ function MyConversation() {
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [isMessageOpen, setIsMessageOpen] = useState(false);
 	const [requestTitle, setRequestTitle] = useState(true);
+	const [isHasMore, setIsHasMore] = useState(true);
+	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
+	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
+
+	const limit = 4;
 
 	//useRef
 	const offsetRef = useRef(0);
@@ -64,6 +70,7 @@ function MyConversation() {
 	const [messageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const role = userDataStore((state) => state.role);
+	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 
 	//mutation
 	const [conversation, { loading: convMutLoading, error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
@@ -72,7 +79,7 @@ function MyConversation() {
 	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 
 	//query
-	const { loading: convLoading, data, fetchMore } = useQueryUserConversations(0, 3) as unknown as useQueryUserConversationsProps;
+	const { loading: convLoading, data: requestConv, fetchMore } = useQueryUserConversations(0, limit) as unknown as useQueryUserConversationsProps;
 	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
 
 	// file upload
@@ -138,17 +145,27 @@ function MyConversation() {
 		}
 	}, [selectedRequest]);
 
-	// useEffect to update the data to the requests state
+	// useEffect to update the request to the requests store
 	useEffect(() => {
-		if (data && data.user) {
+		if (requestConv && requestConv.user) {
 
-			const requestsConversations: RequestProps[] = data.user.requestsConversations;
-			//setRequestsConversationStore(requestsConversations); // Fix: Pass an array as the argument
-			requestConversationStore.setState({ requests: requestsConversations });
+			const requestsConversations: RequestProps[] = requestConv.user.requestsConversations;
+
+			//get all request who are not in the store
+			const newRequests = requestsConversations.filter((request: RequestProps) => requestsConversationStore?.every(prevRequest => prevRequest.id !== request.id));
+
+			// add the new request to the requestsConversationStore
+			if (newRequests.length > 0) {
+				requestConversationStore.setState(prevState => ({ ...prevState, requests: [...requestsConversationStore, ...newRequests] }));
+			}
+
 			offsetRef.current = requestsConversations?.length;
+		} 
 
+		if (requestConv?.user.requestsConversations.length < limit) {
+			setIsHasMore(false);
 		}
-	}, [data]);
+	}, [requestConv]);
 
 	// useEffect to sort the requests by date
 	useEffect(() => {
@@ -176,11 +193,10 @@ function MyConversation() {
 		}
 	}, [requestsConversationStore]);
 
+
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
 
-
-		
 		// check if the message is already in the store
 		if (messageSubscription?.messageAdded) {
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
@@ -217,7 +233,6 @@ function MyConversation() {
 		}
 
 	}, [messageSubscription]);
-
 
 	// cleane the request store if the component is unmounted
 	useEffect(() => {
@@ -274,10 +289,15 @@ function MyConversation() {
 					// if the request is a new client request, add the request to the requestsConversationStore
 					if (newClientRequest) {
 						if (!updatedRequest) return;
+						
 						const addNewRequestConversation = [updatedRequest, ...requestsConversationStore];
 						requestConversationStore.setState({ requests: addNewRequestConversation });
 						//setRequestsConversationStore(addNewRequestConversation);
 					}
+
+					// remove request from clientRequestStore
+					setClientRequestsStore(clientRequestsStore.filter(clientRequest => clientRequest.id !== request.id));
+					// remove file from the file list and request
 					resetRequest();
 					setFile([]);
 					setUrlFile([]);
@@ -418,6 +438,8 @@ function MyConversation() {
 	// Function to load more requests with infinite scroll
 	function addRequest() {
 		if (fetchMore) {
+			console.log('coucou fetchmore');
+			
 			fetchMore({
 				variables: {
 					offset: offsetRef.current, // Next offset
@@ -426,13 +448,22 @@ function MyConversation() {
 			}).then((fetchMoreResult: { data: { user: { requestsConversations: RequestProps[] } } }) => {
 
 				const request = fetchMoreResult.data.user.requestsConversations;
+
+				//get all request who are not in the store
+				const newRequests = request.filter((request: RequestProps) => requestsConversationStore?.every(prevRequest => prevRequest.id !== request.id));
 			
 				if (!fetchMoreResult.data) return;
 				// add the new request to the requestsConversationStore
-				if (request) {
-					const addRequest = [...(requestsConversationStore || []), ...request];
+				if (newRequests) {
+					const addRequest = [...(requestsConversationStore || []), ...newRequests];
 					setRequestsConversationStore(addRequest);
 				}
+
+				// if there is no more request to fetch
+				if (request.length < limit) {
+					setIsHasMore(false);
+				}
+
 				offsetRef.current = offsetRef.current + request.length;
 			
 			});
@@ -440,7 +471,7 @@ function MyConversation() {
 	}
 
 	// Function to hide a client request
-	const handleHideRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
+	const handleHideRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
 		event.preventDefault();
 
 		hideRequest({
@@ -514,62 +545,80 @@ function MyConversation() {
 		setUrlFile(newUrlFileList);
 	};
 
-
-
-	
 	return (
 		<div className="my-conversation">
 			{(convLoading || hideRequestLoading) && <Spinner/>}
-			<div className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
-				{!requestByDate && <p>Vous n&apos;avez pas de demande</p>}
+			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
+				{/* {!requestByDate && <p>Vous n&apos;avez pas de demande</p>} */}
 				{requestByDate && (
 					<div className="my-conversation__list__detail" >
-						<InfiniteScroll
+						{/* <InfiniteScroll
 							dataLength={requestsConversationStore?.length}
-							next={() => {
-
-								addRequest();
-
-							}}
-							hasMore={true}
-							loader={<h4>Loading...</h4>}
-						>
-							{request && request.id > 0 &&
+							next={addRequest}
+							hasMore={isHasMore}
+							loader={<p className="my-conversation__list no-req">Chargement...</p>}
+							scrollableTarget="scrollableList"
+							endMessage={
+								clientRequestsStore.length >0 ? <p className="my-conversation__list no-req">Fin des résultats</p>
+									:
+									<p className="my-conversation__list no-req">Vous n&apos;avez pas de conversation</p>}
+	
+						> */}
+						{request && request.id > 0 &&
 								<RequestItem
 									request={request}
-									isMessageOpen={isMessageOpen}
+									/* isMessageOpen={isMessageOpen} */
 									setIsMessageOpen={setIsMessageOpen}
 									resetRequest={resetRequest}
-									isListOpen={isListOpen}
+									/* isListOpen={isListOpen} */
 									selectedRequest={selectedRequest!} // Add '!' to assert that selectedRequest is not null
 									setSelectedRequest={setSelectedRequest}
+									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
 									isMessageExpanded={isMessageExpanded}
 									setIsMessageExpanded={setIsMessageExpanded}
 									setIsListOpen={setIsListOpen}
-									handleHideRequest={handleHideRequest}
+									setModalArgs={setModalArgs}
 									openModal={openModal}
 								/>
-							}
-							{requestByDate.map((requestByDate, index) => (
-								<RequestItem key={requestByDate.id}
-									index={index}
-									requestByDate={requestByDate}
-									isMessageOpen={isMessageOpen}
-									setIsMessageOpen={setIsMessageOpen}
-									isListOpen={isListOpen}
-									selectedRequest={selectedRequest!} // Add '!' to assert that selectedRequest is not null
-									setSelectedRequest={setSelectedRequest}
-									isMessageExpanded={isMessageExpanded}
-									setIsMessageExpanded={setIsMessageExpanded}
-									setIsListOpen={setIsListOpen}
-									handleHideRequest={handleHideRequest}
-									openModal={openModal}
-								/>
-							))}
-						</InfiniteScroll>
+						}
+						{requestByDate.map((requestByDate, index) => (
+							<RequestItem key={requestByDate.id}
+								index={index}
+								requestByDate={requestByDate}
+								/* isMessageOpen={isMessageOpen} */
+								setIsMessageOpen={setIsMessageOpen}
+								/* isListOpen={isListOpen} */
+								selectedRequest={selectedRequest!} // Add '!' to assert that selectedRequest is not null
+								setSelectedRequest={setSelectedRequest}
+								setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+								isMessageExpanded={isMessageExpanded}
+								setIsMessageExpanded={setIsMessageExpanded}
+								setIsListOpen={setIsListOpen}
+								setModalArgs={setModalArgs}
+								openModal={openModal}
+							/>
+						))}
+						{/* </InfiniteScroll> */}
 
 					</div>
 				)}
+				<div className="my-conversation__list__fetch-button">
+					{isHasMore ? (<button 
+						className="Btn" 
+						onClick={(event) => {
+							event.preventDefault();
+							event.stopPropagation();
+							addRequest();
+						}
+						}>
+						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
+						<span className="icon2"></span>
+						<span className="tooltip">Charger plus</span>
+					</button>
+					) : (
+						<p className="my-conversation__list no-req">Fin des résultats</p>
+					)}
+				</div>
 			</div>
 
 			<div className={`my-conversation__message-list ${isMessageOpen ? 'open' : ''} ${(messageLoading || messageMutLoading || convMutLoading) ? 'loading' : ''}`}>
@@ -589,8 +638,8 @@ function MyConversation() {
 								<MdKeyboardArrowLeft
 									className="my-conversation__message-list__user__header__detail return"
 									onClick={(event) => {
-										setIsMessageOpen(!isMessageOpen), 
-										setIsListOpen(!isListOpen),
+										setIsMessageOpen(false), 
+										setIsListOpen(true),
 										event.stopPropagation();
 									}}
 								/>
@@ -609,13 +658,14 @@ function MyConversation() {
 
 				</div>
 				{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
-				<div className="my-conversation__message-list__message">
+				<div id="scrollableMessageList" className="my-conversation__message-list__message">
 					<InfiniteScroll
 						className="infinite-scroll"
 						dataLength={messageStore?.length}
 						next={() => {}}
 						hasMore={true}
 						loader={<h4></h4>}
+						scrollableTarget="scrollableMessageList"
 						
 					>
 						{Array.isArray(messageStore) &&
@@ -755,6 +805,13 @@ function MyConversation() {
 				selectedImage={selectedImage}
 				nextImage={nextImage}
 				previousImage={previousImage}
+			/>
+			<DeleteItemModal
+				modalArgs={modalArgs}
+				setModalArgs={setModalArgs}
+				setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+				deleteItemModalIsOpen={deleteItemModalIsOpen}
+				handleDeleteRequest={handleHideRequest}
 			/>
 		</div>
 	);

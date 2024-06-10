@@ -14,17 +14,31 @@
       -5px 0 10px #ffffff17,
       5px 0 10px #6666661c;
 
-      &.no-req {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        margin: 1rem auto;
-        border-radius: 0.5rem;
-        box-shadow: none;
-        max-width: 90%;
-        color: v.$color-primary-orange;
-        text-align: center;
+    /* for WebKit browser */
+    .client-request__list::-webkit-scrollbar {
+      width: 2px;
 
+    }
+
+
+    &.no-req {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      height: auto;
+      margin: 1rem auto;
+      border-radius: 0.5rem;
+      box-shadow: none;
+      max-width: 90%;
+      color: v.$color-primary-orange;
+      text-align: center;
+
+    }
+
+    .client-request__list__fetch-button {
+      display: flex;
+      justify-content: center;
+      @include v.fetch-button;
     }
 
 
@@ -261,4 +275,3 @@
     }
   }
 }
-

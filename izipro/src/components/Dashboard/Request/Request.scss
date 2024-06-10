@@ -17,6 +17,20 @@
 .request {
     position: relative;
     font-family: v.$font;
+    height: 81vh;
+
+    &.no-req {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin: 3rem auto;
+        border-radius: 0.5rem;
+        box-shadow: none;
+        max-width: 90%;
+        color: v.$color-primary-orange;
+        text-align: center;
+
+    }
 
     .request__form {
         width: 80%;
@@ -28,6 +42,14 @@
         box-shadow: -5px 0 10px #6666661c,
             -5px 0 10px #ffffff17,
             5px 0 10px #6666661c;
+
+        &.error {
+            width: 100%;
+            text-align: center;
+            font-size: 1rem;
+            color: v.$color-error;
+            box-shadow: none;
+        }
 
         .urgent-button {
             display: flex;
@@ -165,7 +187,7 @@
                 }
 
                 &:focus {
-                    
+
                     outline: none; // Remove default focus indicator
                     border-radius: 0.2rem;
                     box-shadow: 0 0 0 1px v.$color-primary-blue; // Add your own focus indicator
@@ -183,8 +205,8 @@
 
             &.preview {
                 box-shadow: -5px 0 10px #6666661e,
-                -5px 0 10px #ffffff62,
-                5px 0 10px #66666680;
+                    -5px 0 10px #ffffff62,
+                    5px 0 10px #66666680;
             }
 
             &.remove {
@@ -216,9 +238,9 @@
                 font-size: 2rem;
                 cursor: pointer;
                 color: v.$color-primary-orange;
-                
+
             }
-      
+
         }
 
         .request__form__input title {
@@ -247,11 +269,11 @@
             margin: 1rem auto;
         }
 
- 
+
         .message {
             margin: auto;
             margin-top: 1rem;
-            
+
             font-size: 0.8rem;
 
             .message__error {
@@ -282,7 +304,7 @@
                 margin: 0 10%;
             }
 
-           
+
         }
     }
 }

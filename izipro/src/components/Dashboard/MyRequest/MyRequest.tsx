@@ -58,17 +58,12 @@ function MyRequest() {
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
-
-	console.log('isAnswerOpen', isAnswerOpen);
-	console.log('isMessageOpen', isMessageOpen);
-	console.log('isListOpen', isListOpen);
-
-
+	const [isHasMore, setIsHasMore] = useState(true);
+	const [isUserMessageOpen, setIsUserMessageOpen] = useState(false);
 
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
-	const limit = 2;
 
 	// store
 	const id = userDataStore((state) => state.id);
@@ -84,6 +79,9 @@ function MyRequest() {
 	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 	const idRef = useRef<number>(0);
 
+	const limit = 4;
+
+
 	// file upload
 	const { urlFile, setUrlFile, file, setFile, handleFileChange } = useFileHandler();
 
@@ -94,8 +92,8 @@ function MyRequest() {
 
 	// Query to get the user requests
 	const { loading: requestLoading, getUserRequestsData, fetchMore } = useQueryUserRequests(id, 0, limit);
-	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, limit);
-	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 20);
+	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
+	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 100);
 
 	// get the subscription
 	const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
@@ -113,6 +111,7 @@ function MyRequest() {
 		throw new Error('Error while subscribing to message');
 	}
 
+
 	//useEffect to set request and user in starting
 	useEffect(() => {
 		if (requestByDate && !selectedRequest && (requestByDate?.length ?? 0) > 0) {
@@ -121,7 +120,7 @@ function MyRequest() {
 		}
 	}, [requestByDate]);
 
-	// useEffect to select the message at stasting
+	// useEffect to select the message at starting
 	useEffect(() => {
 
 		if (window.innerWidth > 1200) {
@@ -145,8 +144,11 @@ function MyRequest() {
 						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
 					});
 				}
-				//setMyRequestsStore(getUserRequestsData.user.requests);
 			}
+		} 
+
+		if (getUserRequestsData?.user.requests.length < limit) {
+			setIsHasMore(false);
 		}
 	}, [getUserRequestsData]);
 
@@ -290,9 +292,7 @@ function MyRequest() {
 	// useEffect to update user conversation by date
 	useEffect(() => {
 
-
 		if (userConvStore && selectedRequest && selectedRequest.conversation) {
-
 
 			// sort the messages by date to show the most recent user conversation
 			const conversation = selectedRequest.conversation;
@@ -314,6 +314,7 @@ function MyRequest() {
 			// Convert filteredSortedUsers to a Set to remove duplicates, then convert it back to an array
 			const uniqueUsers = Array.from(new Set(filteredSortedUsers.map(user => JSON.stringify(user)))).map(user => JSON.parse(user));
 			setUserConvState(uniqueUsers);
+
 		}
 	}, [userConvStore, selectedRequest]);
 
@@ -326,7 +327,7 @@ function MyRequest() {
 			myMessageDataStore.setState(prevState => {
 				if (prevState.messages.length > 0) {
 
-
+					// Filter out messages that are already in the store
 					const newMessages = messages.filter(
 						(newMessage) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
 					);
@@ -527,9 +528,24 @@ function MyRequest() {
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {
 		setTimeout(() => {
-			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+			endOfMessagesRef.current?.scrollIntoView(/* { behavior: 'smooth' } */);
 		}, 200);
 	}, [messageStore]);
+
+	// useEffect to set the selected user when selectedRequest is updated
+	useEffect(() => {
+
+		setSelectedUser(userConvState[0]);
+
+	}, [userConvState]);
+		
+	// useEffect to set message when selecteduser is updated
+	useEffect(() => {
+
+		handleMessageConversation(selectedUser?.id as number);
+		setIsUserMessageOpen(true);
+
+	}, [selectedUser]);
 
 
 	// Function to delete a request
@@ -662,8 +678,9 @@ function MyRequest() {
 	};
 
 	// Function find conversation id for message
-	const handleMessageConversation = (event: React.MouseEvent<HTMLDivElement>, userId: number) => {
-		event.preventDefault();
+	const handleMessageConversation = ( userId: number, event?: React.MouseEvent<HTMLDivElement>) => {
+		event?.preventDefault();
+		console.log('userId', userId);
 
 		// find the conversation id for the message
 		const conversationId = selectedRequest?.conversation?.find(conversation =>
@@ -672,6 +689,7 @@ function MyRequest() {
 		);
 
 		setConversationIdState(conversationId?.id || 0);
+		console.log('conversationIdState', conversationIdState);
 
 
 	};
@@ -725,6 +743,7 @@ function MyRequest() {
 		newUrlFileList.splice(index, 1);
 		setUrlFile(newUrlFileList);
 	};
+console.log('myRequestsStore', myRequestsStore);
 
 	// Function to fetchmore requests
 	function addRequest() {
@@ -746,6 +765,11 @@ function MyRequest() {
 					});
 
 					offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
+				} 
+
+				// if there is no more request stop the infinite scroll
+				if (fetchMoreResult.data.user.requests.length < limit) {
+					setIsHasMore(false);
 				}
 
 			});
@@ -754,231 +778,256 @@ function MyRequest() {
 
 	return (
 		<div className="my-request">
-			<div className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}>
+			<div id="scrollableRequest" className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}>
 				{requestLoading && <Spinner />}
 				{!requestByDate && <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p>}
 				{requestByDate && (
 					<div className="my-request__list__detail" >
-						<InfiniteScroll
+						{/* <InfiniteScroll
 							dataLength={myRequestsStore?.length}
-							next={() => {
-
-								addRequest();
-							}}
-							hasMore={true}
-							loader={<p ></p>}
-						>
-							{requestByDate.map((request) => (
-								<div
-									className={`my-request__list__detail__item ${request.urgent} ${selectedRequest === request ? 'selected' : ''} `}
-									key={request.id}
+							next={addRequest}
+							hasMore={isHasMore}
+							loader={<p className="my-request__list no-req">chargement...</p>}
+							scrollableTarget="scrollableRequest"
+							endMessage={
+								myRequestsStore.length > 0 ? <p className="my-request__list no-req">Fin des résultats</p>
+									:
+									<p className="my-request__list no-req">Vous n&apos;avez pas de demande</p>}
+							
+						> */}
+						{requestByDate.map((request) => (
+							<div
+								className={`my-request__list__detail__item ${request.urgent} ${selectedRequest?.id === request?.id ? 'selected' : ''} `}
+								key={request.id}
+								onClick={(event) => {
+									handleConversation(request, event),
+									setSelectedRequest(request),
+									setIsListOpen(false),
+									setIsAnswerOpen(true),
+									setIsMessageOpen(false);
+								}}
+							>
+								{request.urgent && <p className="my-request__list__detail__item urgent">URGENT</p>}
+								<div className="my-request__list__detail__item__header">
+									<p className="my-request__list__detail__item__header date" >
+										<span className="my-request__list__detail__item__header date-span">
+												Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
+									</p>
+									<p className="my-request__list__detail__item__header city" >
+										<span className="my-request__list__detail__item__header city-span">
+												Ville:</span>&nbsp;{request.city}
+									</p>
+									<h2 className="my-request__list__detail__item__header job" >
+										<span className="my-request__list__detail__item__header job-span">
+												Métier:</span>&nbsp;{request.job}
+									</h2>
+									<p className="my-request__list__detail__item__header name" >
+										<span className="my-request__list__detail__item__header name-span">
+												Nom:</span>&nbsp;{request.first_name} {request.last_name}
+									</p>
+								</div>
+								<h1 className="my-request__list__detail__item title" >{request.title}</h1>
+								<p
+									//@ts-expect-error con't resolve this type
+									className={`my-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
 									onClick={(event) => {
-										handleConversation(request, event),
-											setSelectedRequest(request),
-											setIsListOpen(false),
-											setIsAnswerOpen(true),
-											setIsMessageOpen(false);
+										//to open the message when the user clicks on it just for the selected request 
+										idRef.current = request?.id ?? 0; // check if request or requestByDate is not undefined
+
+										if (idRef.current !== undefined && setIsMessageExpanded) {
+											setIsMessageExpanded((prevState: ExpandedState) => ({
+												...prevState,
+												[idRef.current as number]: !prevState[idRef.current]
+											}));
+										}
+										event.stopPropagation();
 									}}
 								>
-									{request.urgent && <p className="my-request__list__detail__item urgent">URGENT</p>}
-									<div className="my-request__list__detail__item__header">
-										<p className="my-request__list__detail__item__header date" >
-											<span className="my-request__list__detail__item__header date-span">
-												Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
-										</p>
-										<p className="my-request__list__detail__item__header city" >
-											<span className="my-request__list__detail__item__header city-span">
-												Ville:</span>&nbsp;{request.city}
-										</p>
-										<h2 className="my-request__list__detail__item__header job" >
-											<span className="my-request__list__detail__item__header job-span">
-												Métier:</span>&nbsp;{request.job}
-										</h2>
-										<p className="my-request__list__detail__item__header name" >
-											<span className="my-request__list__detail__item__header name-span">
-												Nom:</span>&nbsp;{request.first_name} {request.last_name}
-										</p>
-									</div>
-									<h1 className="my-request__list__detail__item title" >{request.title}</h1>
-									<p
-										//@ts-expect-error con't resolve this type
-										className={`my-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
-										onClick={(event) => {
-											//to open the message when the user clicks on it just for the selected request 
-											idRef.current = request?.id ?? 0; // check if request or requestByDate is not undefined
+									{request.message}
+								</p>
+								<div className="my-request__list__detail__item__picture">
 
-											if (idRef.current !== undefined && setIsMessageExpanded) {
-												setIsMessageExpanded((prevState: ExpandedState) => ({
-													...prevState,
-													[idRef.current as number]: !prevState[idRef.current]
-												}));
-											}
-											event.stopPropagation();
-										}}
-									>
-										{request.message}
-									</p>
-									<div className="my-request__list__detail__item__picture">
-
-										{(() => {
-											const imageUrls = request.media?.map(media => media.url) || [];
-											return request.media?.map((media, index) => (
-												media ? (
-													media.name.endsWith('.pdf') ? (
-														<a
-															href={media.url}
-															key={media.id}
-															download={media.name}
-															target="_blank"
-															rel="noopener noreferrer"
-															onClick={(event) => { event.stopPropagation(); }} >
-															<img
-																className="my-request__list__detail__item__picture img"
-																//key={media.id} 
-																src={pdfLogo}
-																alt={media.name}
-															/>
-														</a>
-													) : (
+									{(() => {
+										const imageUrls = request.media?.map(media => media.url) || [];
+										return request.media?.map((media, index) => (
+											media ? (
+												media.name.endsWith('.pdf') ? (
+													<a
+														href={media.url}
+														key={media.id}
+														download={media.name}
+														target="_blank"
+														rel="noopener noreferrer"
+														onClick={(event) => { event.stopPropagation(); }} >
 														<img
 															className="my-request__list__detail__item__picture img"
-															key={media.id}
-															src={media.url}
-															onClick={(event) => {
-																openModal(imageUrls, index),
-																	event.stopPropagation();
-															}}
+															//key={media.id} 
+															src={pdfLogo}
 															alt={media.name}
 														/>
-													)
-												) : null
-											));
-										})()}
+													</a>
+												) : (
+													<img
+														className="my-request__list__detail__item__picture img"
+														key={media.id}
+														src={media.url}
+														onClick={(event) => {
+															openModal(imageUrls, index),
+															event.stopPropagation();
+														}}
+														alt={media.name}
+													/>
+												)
+											) : null
+										));
+									})()}
 
-									</div>
-									<button
-										id={`delete-request-${request.id}`}
-										className="my-request__list__detail__item__delete"
-										type='button'
-										onClick={(event) => {
-											setDeleteItemModalIsOpen(true);
-											console.log('requestId', request.id);
-
-											setModalArgs({ event, requestId: request.id }),
-												//handleDeleteRequest(event, request.id), 
-												event.stopPropagation();
-										}}>
-									</button>
-									<FaTrashAlt
-										className="my-request__list__detail__item__delete-FaTrashAlt"
-										onClick={(event) => {
-											document.getElementById(`delete-request-${request.id}`)?.click(),
-												event.stopPropagation();
-										}}
-									/>
 								</div>
-							))}
-						</InfiniteScroll>
+								<button
+									id={`delete-request-${request.id}`}
+									className="my-request__list__detail__item__delete"
+									type='button'
+									onClick={(event) => {
+										setDeleteItemModalIsOpen(true);
+										setModalArgs({ event, requestId: request.id }),
+										event.stopPropagation();
+									}}>
+								</button>
+								<FaTrashAlt
+									className="my-request__list__detail__item__delete-FaTrashAlt"
+									onClick={(event) => {
+										document.getElementById(`delete-request-${request.id}`)?.click(),
+										event.stopPropagation();
+									}}
+								/>
+							</div>
+						))}
+						{/* </InfiniteScroll> */}
 					</div>
 				)}
+				<div className="my-request__list__fetch-button">
+					{isHasMore ? (<button 
+						className="Btn" 
+						onClick={(event) => {
+							event.preventDefault();
+							event.stopPropagation();
+							addRequest();
+						}
+						}>
+						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
+						<span className="icon2"></span>
+						<span className="tooltip">Charger plus</span>
+					</button>
+					) : (
+						<p className="my-request__list no-req">Fin des résultats</p>
+					)}
+				</div>
 			</div>
-			<div className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''} ${conversationLoading ? 'loading' : ''}`}>
+			<div id="scrollableAnswer" className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''} ${conversationLoading ? 'loading' : ''}`}>
 				{conversationLoading && <Spinner />}
-				<InfiniteScroll
+				{/* <InfiniteScroll
 					dataLength={myRequestsStore?.length}
-					next={() => {
-
+					next={() => {}}
+					hasMore={false}
+					loader={<h4></h4>}
+					scrollableTarget="scrollableAnswer"
+				> */}
+				<MdKeyboardArrowLeft
+					className="my-request__answer-list return"
+					onClick={() => {
+						setSelectedRequest(null),
+						setIsListOpen(true),
+						setIsAnswerOpen(false),
+						setIsMessageOpen(false);
 					}}
-					hasMore={true}
-					loader={<h4>Loading...</h4>}
-				>
-					<MdKeyboardArrowLeft
-						className="my-request__answer-list return"
-						onClick={() => {
-							setSelectedRequest(null),
-								setIsListOpen(true),
-								setIsAnswerOpen(false),
-								setIsMessageOpen(false);
-						}}
-					/>
-					{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
-					{userConvState && userConvState?.map((user: UserDataProps, index) => (
-						<div
-							id={index === 0 ? 'first-user' : undefined}
-							className={`my-request__answer-list__user ${selectedUser === user ? 'selected-user' : ''}`}
-							key={user.id}
-							onClick={(event) => {
-								handleMessageConversation(event, user.id),
-									setSelectedUser(user),
-									setIsMessageOpen(true),
-									setIsAnswerOpen(false),
-									setIsListOpen(false);
-							}}>
+				/>
+				{selectedRequest && <h2 className="my-request__answer-list title">{selectedRequest?.title}</h2>}
+				{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
+				{userConvState && userConvState?.map((user: UserDataProps, index) => (
+					<div
+						id={index === 0 ? 'first-user' : undefined}
+						className={`my-request__answer-list__user ${selectedUser?.id === user.id ? 'selected-user' : ''} ${user.deleted_at ? 'deleted' : ''}`}
+						key={user.id}
+						onClick={(event) => {
+							handleMessageConversation(user.id, event),
+							setIsUserMessageOpen(true),
+							setSelectedUser(user),
+							setIsMessageOpen(true),
+							setIsAnswerOpen(false),
+							setIsListOpen(false);
+						}}>
 
-							<div className="my-request__answer-list__user__header">
-								<img className="my-request__answer-list__user__header img" src={user.image ? user.image : logoProfile} alt="" />
-								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
-								{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
-								{user.denomination ? (
-									<p className="my-request__answer-list__user__header denomination">{user.denomination}</p>
-								) : (
-									<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
-								)}
-							</div>
+						<div className="my-request__answer-list__user__header">
+							<img className="my-request__answer-list__user__header img" src={user.image ? user.image : logoProfile} alt="" />
+							{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
+							{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
+							{user.denomination ? (
+								<p className="my-request__answer-list__user__header denomination">{user.denomination}</p>
+							) : (
+								<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
+							)}
+							{user.deleted_at && <p className="my-request__answer-list__user__header deleted">Utilisateur supprimé</p>}
 						</div>
-					))}
-				</InfiniteScroll>
+					</div>
+				))}
+				{/* </InfiniteScroll> */}
 			</div>
 			<div className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`}>
 				{messageLoading && <Spinner />}
 				<div className="my-request__message-list__user">
-					{selectedUser && (
+					{/* {selectedUser && ( */}
+					<div
+						className="my-request__message-list__user__header"
+						onClick={(event) => {
+							setUserDescription(!userDescription);
+							event.stopPropagation();
+						}}
+					>
 						<div
-							className="my-request__message-list__user__header"
-							onClick={() => setUserDescription(!userDescription)}
+							className="my-request__message-list__user__header__detail"
 						>
-							<div
-								className="my-request__message-list__user__header__detail"
-							>
-								<MdKeyboardArrowLeft
-									className="my-request__message-list__user__header__detail return"
-									onClick={() => {
-										setSelectedUser(null),
-											setIsMessageOpen(false),
-											setIsAnswerOpen(true),
-											setIsListOpen(false);
-									}}
-								/>
-								<img className="my-request__message-list__user__header__detail img" src={selectedUser.image ? selectedUser.image : logoProfile} alt="" />
-								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
-								{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
-								{selectedUser.denomination ? (
-									<p className="my-request__message-list__user__header__detail denomination">{selectedUser.denomination}</p>
-								) : (
-									<p className="my-request__message-list__user__header__detail name">{selectedUser.first_name} {selectedUser.last_name}</p>
-								)}
-							</div>
-							{/* <p className="my-request__answer-list__user city">{user.city}</p> */}
-							{userDescription && <div>
-								<p className="my-request__message-list__user__header description">{selectedUser.description ? selectedUser.description : 'Pas de déscription'}</p>
-							</div>
-							}
+							<MdKeyboardArrowLeft
+								className="my-request__message-list__user__header__detail return"
+								onClick={(event) => {
+									setSelectedUser(null),
+									setIsMessageOpen(false),
+									setIsAnswerOpen(true),
+									setIsUserMessageOpen(false),
+									setIsListOpen(false);
+									event.stopPropagation();
+								}}
+							/>
+							<img className="my-request__message-list__user__header__detail img" src={selectedUser?.image ? selectedUser.image : logoProfile} alt="" />
+							{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
+							{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
+							{selectedUser?.denomination ? (
+								<p className="my-request__message-list__user__header__detail denomination">{selectedUser?.denomination}</p>
+							) : (
+								<p className="my-request__message-list__user__header__detail name">{selectedUser?.first_name} {selectedUser?.last_name}</p>
+							)}
+							{selectedUser?.deleted_at && <p className="my-request__message-list__user__header__detail deleted">Utilisateur supprimé</p>}
 						</div>
-					)}
+						{/* <p className="my-request__answer-list__user city">{user.city}</p> */}
+						{userDescription && <div>
+							<p className="my-request__message-list__user__header description">{selectedUser?.description ? selectedUser?.description : 'Pas de déscription'}</p>
+						</div>
+						}
+					</div>
+					{/* 	)} */}
 
 				</div>
 				{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
-				<div className="my-request__message-list__message">
+				<div id="scrollableMessage" className="my-request__message-list__message">
 					<InfiniteScroll
 						className="infinite-scroll"
 						dataLength={messageStore?.length}
-						next={() => {
-
-						}}
-						hasMore={true}
-						loader={<p className="my-request__list no-req">Vous n&apos;avez pas de message</p>}
+						next={() => {}}
+						hasMore={false}
+						loader={<p className="my-request__list no-req"></p>}
+						endMessage={<p className="my-request__list no-req"></p>}
+						scrollableTarget="scrollableMessage"
 					>
-						{Array.isArray(messageStore) &&
+						{Array.isArray(messageStore) && isUserMessageOpen &&
 							messageStore
 								.filter((message) => message.conversation_id === conversationIdState)
 								.map((message, index, array) => (

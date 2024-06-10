@@ -40,6 +40,7 @@ function Request() {
 	const [descriptionRequest, setDescriptionRequest] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 	const [successMessage, setSuccessMessage] = useState('');
+	const [uploadFileError, setUploadFileError] = useState('');
 	//const [description, setDescription] = useState('');
 
 	// file upload
@@ -181,17 +182,41 @@ function Request() {
 
 	// Handle file upload
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if (urlFile.length < 3) {
-			handleFileChange(event);
+		event.preventDefault(); 
+		setUploadFileError('');
+
+		// Check if the number of files is less than 3
+		const remainingSlots = 3 - urlFile.length;
+
+		if (event.target.files) {
+
+			if (remainingSlots > 0) {
+				const filesToUpload = Array.from(event.target.files).slice(0, remainingSlots);
+				handleFileChange(undefined, undefined, filesToUpload as File[]);
+			}
+			if (remainingSlots <= 0) {
+				setUploadFileError('Nombre de fichiers maximum atteint');
+			}
 		}
 	};
 
 	// Handle file drop
 	const handleFileDrop = (event: React.DragEvent<HTMLLabelElement>) => {
-		event.preventDefault(); // Get dropped files
-		if (urlFile.length < 3) {
-			const onDrag = true;
-			handleFileChange(event, onDrag); // Use your existing file handler
+		event.preventDefault(); 
+		setUploadFileError('');
+
+		// Check if the number of files is less than 3
+		const remainingSlots = 3 - urlFile.length;
+
+		if (event.dataTransfer.files) {
+
+			if (remainingSlots > 0) {
+				const filesToUpload = Array.from(event.dataTransfer.files).slice(0, remainingSlots);
+				handleFileChange(undefined, undefined, filesToUpload as File[]);
+			}
+			if (remainingSlots <= 0) {
+				setUploadFileError('Nombre de fichiers maximum atteint');
+			}
 		}
 	};
 	// Update zoom level when radius changes
@@ -256,7 +281,7 @@ function Request() {
 			{categoryLoading || JobDataLoading || createLoading && <Spinner />}
 
 			{(!address && !city && !postal_code && !first_name && !last_name) &&
-				(<p>Veuillez renseigner votre nom, prénom et adresse dans votre compte pour faire une demande</p>)}
+				(<p className="request no-req">Veuillez renseigner les champs de &quot;Mes informations&quot; dans votre compte pour faire une demande</p>)}
 			{address && city && postal_code && first_name && last_name && (
 				<form className="request__form" onSubmit={handleSubmitRequest}>
 					<h2 className="request__form__title urgent">Si votre demande est une urgence cliquez sur URGENT:</h2>
@@ -389,6 +414,7 @@ function Request() {
 							</div>
 						))}
 					</div>
+					<p className="request__form error">{uploadFileError}</p>
 					<h2 className="request__form__title media">Ajoutez des photos (3 maximum):</h2>
 					<label
 						htmlFor="file"

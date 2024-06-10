@@ -4,7 +4,7 @@
     width: 100%;
     display: flex;
     align-items: stretch;
-    max-height: 81.31vh;
+    height: 80vh;
 
     .my-request__list {
         overflow-y: auto;
@@ -16,27 +16,38 @@
             -5px 0 10px #ffffff17,
             5px 0 10px #6666661c;
 
-            &.no-req {
-                display: flex;
-                justify-content: center;
-                width: 100%;
-                margin: 0.5rem auto;
-                border-radius: 0.5rem;
-                box-shadow: none;
-                max-width: 90%;
-                color: v.$color-primary-orange;
-                text-align: center;
-    
-            }
+        /* for WebKit browser */
+        .my-request__list::-webkit-scrollbar {
+            width: 12px;
+
+        }
+
+        &.no-req {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 0.5rem auto;
+            border-radius: 0.5rem;
+            box-shadow: none;
+            max-width: 90%;
+            color: v.$color-primary-orange;
+            text-align: center;
+
+        }
+
+        &.loading {
+
+            position: relative;
+        }
+
+        .my-request__list__fetch-button {
+            display: flex;
+            justify-content: center;
+            @include v.fetch-button;
+        }
+
 
         .my-request__list__detail {
-
-            &.loading {
-
-                position: relative;
-            }
-
-
             .my-request__list__detail__item {
                 cursor: pointer;
                 display: flex;
@@ -225,6 +236,17 @@
             -5px 0 10px #ffffff17,
             5px 0 10px #6666661c;
 
+        &.title {
+            margin: 0.5rem 0 1rem 0;
+            width: 100%;
+            box-shadow: none;
+            padding: 0 0.8rem 0 0.8rem;
+            color: v.$color-secondary-blue;
+            font-size: 1.2rem;
+            font-weight: 500;
+            ;
+        }
+
         &.loading {
             position: relative;
         }
@@ -254,6 +276,14 @@
             box-shadow: -5px 0 10px #6666661c,
                 -5px 0 10px #ffffff17,
                 5px 0 10px #6666661c;
+
+
+
+            &.deleted {
+                background-color: v.$color-deleted-grey;
+                border: 1px solid v.$color-deleted-grey;
+
+            }
 
             &.selected-user {
                 border: 1px solid v.$color-primary-orange;
@@ -292,6 +322,14 @@
                     background-color: transparent;
                     font-size: 0.8rem;
                     font-weight: 500;
+                }
+
+                &.deleted {
+                    color: v.$color-error;
+                    margin: auto 0.3rem auto 0;
+                    font-size: 1rem;
+                    font-weight: 500;
+                    word-break: break-all;
                 }
 
 
@@ -359,6 +397,13 @@
                         font-size: 1rem;
                         font-weight: 500;
 
+                    }
+
+                    &.deleted {
+                        color: v.$color-error;
+                        margin: auto 0.3rem auto 0;
+                        font-size: 1rem;
+                        font-weight: 500;
                     }
                 }
 
@@ -643,6 +688,18 @@
 
         .my-request__answer-list {
             display: none;
+
+            &.title {
+                display: block;
+                margin: 0 0 1rem 0;
+                width: 100%;
+                box-shadow: none;
+                padding: 0 0.8rem 0 0.8rem;
+                color: v.$color-secondary-blue;
+                font-size: 1.2rem;
+                font-weight: 500;
+                ;
+            }
 
             &.open {
                 display: block;

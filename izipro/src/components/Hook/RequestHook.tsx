@@ -2,7 +2,7 @@
 import { FaTrashAlt } from 'react-icons/fa';
 import pdfLogo from '/logo/pdf-icon.svg';
 import { RequestProps } from '../../Type/Request';
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 
 type ExpandedState = {
 	[key: number]: boolean;
@@ -10,33 +10,35 @@ type ExpandedState = {
 
 const RequestItem = ({ 
 	index,
-	isListOpen,
+	/* isListOpen, */
 	requestByDate,
-	isMessageOpen,
+	/* isMessageOpen, */
 	setIsMessageOpen,
 	request,
 	resetRequest,
 	selectedRequest, 
 	setSelectedRequest, 
+	setDeleteItemModalIsOpen,
 	isMessageExpanded, 
 	setIsMessageExpanded, 
 	setIsListOpen, 
-	handleHideRequest, 
+	setModalArgs, 
 	openModal 
 }: {
 	index?: number,
-    isListOpen?: boolean,
+    /* isListOpen?: boolean, */
 	requestByDate?: RequestProps,
-	isMessageOpen?: boolean,
+	/* isMessageOpen?: boolean, */
 	setIsMessageOpen?: Function,
     request?: RequestProps,
 	resetRequest?: Function, // replace YourRequestType with the actual type of your request object
     selectedRequest?: RequestProps,
     setSelectedRequest?: Function,
+	setDeleteItemModalIsOpen: React.Dispatch<React.SetStateAction<boolean>>,
     isMessageExpanded?: Object,
     setIsMessageExpanded?: Function,
     setIsListOpen?: Function,
-    handleHideRequest?: Function,
+    setModalArgs: React.Dispatch<React.SetStateAction<{ event: React.MouseEvent, requestId: number } | null>>,
     openModal?: Function
   }) => {
 	const idRef = useRef<number>(0);
@@ -46,7 +48,7 @@ const RequestItem = ({
 			className={`my-conversation__list__detail__item 
 			${(request || requestByDate)?.urgent} 
 			${request ? 'new' : ''} 
-			${selectedRequest === (request || requestByDate) ? 'selected' : ''}
+			${selectedRequest?.id === (request || requestByDate)?.id ? 'selected' : ''}
 			${requestByDate?.deleted_at ? 'deleted' : ''} 
 			` }
 			key={((request || requestByDate)?.id)?.toString()} 
@@ -54,8 +56,8 @@ const RequestItem = ({
 				if ((request || requestByDate) && setSelectedRequest) {
 					setSelectedRequest && setSelectedRequest(request || requestByDate);
 				}
-				setIsListOpen && setIsListOpen(!isListOpen);
-				setIsMessageOpen && setIsMessageOpen(!isMessageOpen);
+				setIsListOpen && setIsListOpen(false);
+				setIsMessageOpen && setIsMessageOpen(true);
 			}}
 		>
 			{requestByDate?.deleted_at && <p className="my-conversation__list__detail__item__deleted">SUPPRIMÉ PAR L&apos;UTILISATEUR</p>}
@@ -136,14 +138,20 @@ const RequestItem = ({
 								
 			</div>
 			<button
-				id={`delete-request-${request || requestByDate}`}
+				id={`delete-request-${(request || requestByDate)?.id ?? ''}`}
 				className="my-conversation__list__detail__item__delete" 
 				type='button' 
 				onClick={(event) => {
 					if (request?.id) {
 						resetRequest && resetRequest();
 					} else {
-						handleHideRequest && handleHideRequest(event, requestByDate?.id);
+						setDeleteItemModalIsOpen(true);
+						/* handleHideRequest && handleHideRequest(event, requestByDate?.id); */
+						if (requestByDate) {
+							setModalArgs({ event, requestId: requestByDate.id });
+							console.log('requestByDateID', requestByDate.id);
+							
+						}
 					}
 					event.stopPropagation();
 				}}>
@@ -151,7 +159,7 @@ const RequestItem = ({
 			<FaTrashAlt 
 				className="my-conversation__list__detail__item__delete-FaTrashAlt" 
 				onClick={(event) => {
-					document.getElementById(`delete-request-${request || requestByDate}`)?.click(),
+					document.getElementById(`delete-request-${(request || requestByDate)?.id}`)?.click(),
 					event.stopPropagation();
 				}}
 			/>

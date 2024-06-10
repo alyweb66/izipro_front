@@ -20,7 +20,12 @@ export type MyRequestStore = {
 	requests: RequestProps[];
 	setMyRequestStore: (data: RequestProps[]) => void;
 	resetMyRequest: () => void;
-	
+}
+
+export type ClientRequestStore = {
+	requests: RequestProps[];
+	setClientRequestStore: (data: RequestProps[]) => void;
+	resetClientRequest: () => void;
 }
 
 export const requestDataStore = create<RequestStore>((set: (state: Partial<RequestStore>) => void) => ({
@@ -91,4 +96,10 @@ export const myRequestStore = create<MyRequestStore>((set) => ({
 	requests:[],
 	setMyRequestStore: (data) => set({ requests: data }),
 	resetMyRequest: () => set({ requests: [] })
+}));
+
+export const clientRequestStore = create<ClientRequestStore>((set) => ({
+	requests:[],
+	setClientRequestStore: (data) => set({ requests: data }),
+	resetClientRequest: () => set({ requests: [] })
 }));

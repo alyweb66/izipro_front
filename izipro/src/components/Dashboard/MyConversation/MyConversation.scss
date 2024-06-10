@@ -1,12 +1,13 @@
 @use '../../../styles/variables' as v;
 
 .my-conversation {
+    // position for spinner
     position: relative;
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: stretch;
-    max-height: 81.31vh;
+    height: 81.31vh;
     position: relative;
 
     .my-conversation__list {
@@ -19,10 +20,34 @@
             -5px 0 10px #ffffff17,
             5px 0 10px #6666661c;
 
+        /* Pour WebKit/Blink (Chrome, Safari, etc.) */
+        *::-webkit-scrollbar {
+            width: 12px;
+            /* Largeur de la scrollbar */
+        }
+
+        &.no-req {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 0.5rem auto;
+            border-radius: 0.5rem;
+            box-shadow: none;
+            max-width: 90%;
+            color: v.$color-primary-orange;
+            text-align: center;
+
+        }
+
+        .my-conversation__list__fetch-button {
+            display: flex;
+            justify-content: center;
+            @include v.fetch-button;
+        }
+
         .my-conversation__list__detail {
 
             .my-conversation__list__detail__item {
-  
                 cursor: pointer;
                 display: flex;
                 flex-direction: column;
@@ -294,7 +319,7 @@
                     }
                 }
 
-                /*  &.description {
+               /*   &.description {
                     width: 98%;
                     padding: 0.5rem;
                     box-shadow: none;

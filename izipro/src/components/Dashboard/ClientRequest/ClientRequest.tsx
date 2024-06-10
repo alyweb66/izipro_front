@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { userDataStore } from '../../../store/UserData';
-import { requestDataStore } from '../../../store/Request';
+import { requestDataStore, clientRequestStore } from '../../../store/Request';
 import { subscriptionDataStore } from '../../../store/subscription';
 import './clientRequest.scss';
 import { useQueryRequestByJob } from '../../Hook/Query';
@@ -17,6 +17,7 @@ import pdfLogo from '/logo/pdf-icon.svg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt } from 'react-icons/fa';
 import Spinner from '../../Hook/Spinner';
+import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 
 
 type ExpandedState = {
@@ -29,41 +30,45 @@ function ClientRequest ({onDetailsClick}: {onDetailsClick: () => void}) {
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
 	
 	// State
-	const [clientRequests, setClientRequests] = useState<RequestProps[] | null>(null);
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
-
+	const [isHasMore, setIsHasMore] = useState(true);
+	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
+	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
+/* 	const [isLoading, setIsLoading] = useState(false); */
 	// Create a ref for the scroll position
 	const offsetRef = useRef(0);
 	const idRef = useRef<number>(0);
+
+	const limit = 4;
 
 	//store
 	const id = userDataStore((state) => state.id);
 	const jobs = userDataStore((state) => state.jobs);
 	const lng = userDataStore((state) => state.lng);
 	const lat = userDataStore((state) => state.lat);
+	const address = userDataStore((state) => state.address);
+	const city = userDataStore((state) => state.city);
+	const first_name = userDataStore((state) => state.first_name);
+	const last_name = userDataStore((state) => state.last_name);
+	const postal_code = userDataStore((state) => state.postal_code);
 	const settings = userDataStore((state) => state.settings);
 	const setRequest = requestDataStore((state) => state.setRequest);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
+	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 
 	// mutation
 	const [hideRequest, {loading: hiddenLoading, error: hideRequestError}] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 	const [subscriptionMutation, {loading: subscribeLoading, error: subscriptionError}] = useMutation(SUBSCRIPTION_MUTATION);
 
 	// get requests by job
-	const {loading: requestJobLoading, getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, 10);
-
-console.log('getRequestsByJob', getRequestsByJob);
-
+	const {loading: requestJobLoading, getRequestsByJob, subscribeToMore, fetchMore} = useQueryRequestByJob(jobs, 0, limit);
+	console.log('getRequestsByJob', getRequestsByJob);
 
 	// Function to filter the requests by the user's location and the request's location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
 		// If the function is called from the subscription, we need to add the new request to the top of list
-		
-		
-		
 		if (fromSubscribeToMore) {
-			
-			
+
 			const filteredRequests = requests.filter((request: RequestProps) => {
 				// Define the two points
 				const requestPoint = turf.point([request.lng, request.lat]);
@@ -86,29 +91,27 @@ console.log('getRequestsByJob', getRequestsByJob);
 				);
 			});
 
-			setClientRequests((prevState) => {
-				const newRequests = filteredRequests.filter(request => 
-					!prevState?.some(prevRequest => prevRequest.id === request.id)
-				);
-				return [...newRequests, ...(prevState || [])];
-			});
+			//get all request who are not in the store
+			const newRequests = filteredRequests.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
+			
+			// Add the new requests to the top of the list
+			if (newRequests) {
+				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
+			}
+
 			offsetRef.current = offsetRef.current + filteredRequests.length;
 
 		} else {
 			// If the function is called from the query, we need to add the new requests to the bottom of the list
-		
-			setClientRequests((prevState) => [
-				...prevState || [],
-				...requests.filter((request: RequestProps) => {
-					// Define the two points
-					const requestPoint = turf.point([request.lng, request.lat]);
-					const userPoint = turf.point([lng, lat]);
-					// Calculate the distance in kilometers (default)
-					const distance = turf.distance(requestPoint, userPoint);
+			requests.filter((request: RequestProps) => {
+				// Define the two points
+				const requestPoint = turf.point([request.lng, request.lat]);
+				const userPoint = turf.point([lng, lat]);
+				// Calculate the distance in kilometers (default)
+				const distance = turf.distance(requestPoint, userPoint);
 
-	
-					return (
-						(distance < request.range / 1000 || request.range === 0) &&
+				return (
+					(distance < request.range / 1000 || request.range === 0) &&
 						(distance < settings[0].range / 1000 || settings[0].range === 0) &&
 						// Check if the user is already in conversation with the request
 						(request.conversation === null || request.conversation === undefined || 
@@ -117,9 +120,16 @@ console.log('getRequestsByJob', getRequestsByJob);
 						(conversation.user_1 === id || conversation.user_2 === id)
 							)
 						)
-					);
-				})
-			]);
+				);
+			});
+
+			//get all request who are not in the store
+			const newRequests = requests.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
+
+			if (newRequests) {
+				setClientRequestsStore([ ...newRequests, ...(clientRequestsStore || []),]);
+			}
+			
 		}
 	}
 
@@ -131,11 +141,21 @@ console.log('getRequestsByJob', getRequestsByJob);
 			},
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		}).then(fetchMoreResult => {
-			const data = fetchMoreResult.data; // Access the 'data' property
-			if (data) {
-				RangeFilter(data.requestsByJob); // Access the 'requestsByJob' property
-				offsetRef.current = offsetRef.current + data.requestsByJob.length;
+			const data = fetchMoreResult.data.requestsByJob; 
 
+			//get all request who are not in the store
+			const newRequests = data.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
+			
+			if (newRequests.length > 0) {
+				RangeFilter(newRequests);
+				offsetRef.current = offsetRef.current + data.length;
+
+			}
+console.log('fetchMoreResult', fetchMoreResult);
+
+			// If there are no more requests, stop the infinite scroll
+			if (fetchMoreResult.data.requestsByJob.length < limit) {
+				setIsHasMore(false);
 			}
 		});
 		
@@ -212,17 +232,28 @@ console.log('getRequestsByJob', getRequestsByJob);
 
 	}, [jobs]);
 	
-
 	// useEffect to filter the requests by the user's location and the request's location
 	useEffect(() => {
 		if (getRequestsByJob) {
+			const requestByJob = getRequestsByJob.requestsByJob;
+			
+			//get all request who are not in the store
+			const newRequests = requestByJob.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
 			
 			// Filter the requests
-			RangeFilter(getRequestsByJob.requestsByJob);
-			offsetRef.current = offsetRef.current + getRequestsByJob.requestsByJob?.length;
+			if (newRequests.length > 0) {
+				RangeFilter(requestByJob);
+				offsetRef.current = offsetRef.current + requestByJob?.length;
+			}
+		} 
 
+		// If there are no more requests, stop the infinite scroll
+		if (getRequestsByJob?.requestsByJob.length < limit) {
+			setIsHasMore(false);
 		}
+
 	}, [getRequestsByJob, settings]);
+	console.log('clientRequestsStore', clientRequestsStore);
 
 	// useEffect to subscribe to new requests
 	useEffect(() => {
@@ -234,12 +265,21 @@ console.log('getRequestsByJob', getRequestsByJob);
 				variables: { ids: jobs.map(job => job.job_id).filter(id => id != null) },
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				updateQuery: (prev: RequestProps , { subscriptionData }: { subscriptionData: any }) => {
-					
 
 					if (!subscriptionData.data) return prev;
+
 					const  requestAdded  = subscriptionData.data.requestAdded[0];
+
+					// Check if the request is already in the store
+					if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
+						console.log('requestAdded222222222', requestAdded);
+						
+						RangeFilter([requestAdded], true);
+
+					} else {
+						return prev;
+					}
 					
-					RangeFilter([requestAdded], true);
 					
 				},
 			});
@@ -248,7 +288,7 @@ console.log('getRequestsByJob', getRequestsByJob);
 	}, [ subscribeToMore]);
 
 	// Function to hide a request
-	const handleHideRequest = (event: React.MouseEvent<HTMLButtonElement>, requestId: number) => {
+	const handleHideRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
 		event.preventDefault();
 		hideRequest({
 			variables: {
@@ -260,147 +300,199 @@ console.log('getRequestsByJob', getRequestsByJob);
 		}).then((response) => {
 
 			if (response.data.createHiddenClientRequest) {
-				setClientRequests((prevClientRequests) => {
+
+				setClientRequestsStore(clientRequestsStore.filter(request => request.id !== requestId));
+				
+			/* 	clientRequestStore((prevClientRequests: RequestProps[]) => {
 					if (prevClientRequests) {
 						return prevClientRequests.filter((request) => request.id !== requestId);
 					}
 					return null;
-				});
+				}); */
 			}
 		});
 		if (hideRequestError) {
 			throw new Error('Error while hiding request');
 		}
 	};
+
+	/* 	const handleNext = async () => {
+		if (!isLoading) {
+			setIsLoading(true);
+			const element = document.getElementById('scrollableClientRequest');
+			console.log('element', element);
+			
+			const distanceFromBottom = 0; // adjust this value as needed
+			const initialScrollHeight = element?.scrollHeight;
+			// Add a delay before fetching more data
+			await new Promise(resolve => setTimeout(resolve, 200));
+			addRequest();
+			setIsLoading(false);
+
+			// Slightly scroll up to avoid continuous triggering of `next`
+			if (element) {
+				const newScrollHeight = element.scrollHeight;
+				initialScrollHeight && element.scrollTo(0, newScrollHeight - initialScrollHeight - distanceFromBottom - 1);
+			}
+		}
+	}; */
 	
 	return (
 		<div className="client-request">
-			<div className="client-request__list">
+			<div id="scrollableClientRequest" className="client-request__list">
 				{(requestJobLoading || hiddenLoading || subscribeLoading) &&  <Spinner/>}
-				{!clientRequests?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>}
-				{clientRequests && (
+				{(!address && !city && !postal_code && !first_name && !last_name) &&
+				(<p className="request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>)}
+				{/* {!clientRequestsStore?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>} */}
+				{(address && city && postal_code && first_name && last_name) && (
 					<div className="client-request__list__detail"> 
-						<InfiniteScroll
-							dataLength={clientRequests.length}
-							next={ () => {
-								addRequest();
-							}}
+						{/* <InfiniteScroll
+							dataLength={clientRequestsStore.length}
+							next={ 
+								handleNext
+							}
 							hasMore={true}
-							loader={<h4>Loading...</h4>}
-						>
-							{clientRequests.map((request) => (
-								<div
-									className={`client-request__list__detail__item ${request.urgent}`}
-									key={request.id} 
-									onClick={(event) => {
-										setRequest(request),
-										onDetailsClick(),
-										event.stopPropagation();
-									}}
+							loader={<p className="client-request__list no-req">Chargement...</p>}
+							endMessage={
+								clientRequestsStore.length >0 ? <p className="client-request__list no-req">Fin des résultats</p>
+									:
+									<p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>}
+							scrollableTarget="scrollableClientRequest"
+							
+						> */}
+						{clientRequestsStore.map((request) => (
+							<div
+								className={`client-request__list__detail__item ${request.urgent}`}
+								key={request.id} 
+								onClick={(event) => {
+									setRequest(request),
+									onDetailsClick(),
+									event.stopPropagation();
+								}}
 								
-								>
-									{request.urgent && <p className="client-request__list__detail__item urgent">URGENT</p>}
-									<div className="client-request__list__detail__item__header">
-										<p className="client-request__list__detail__item__header date" >
-											<span className="client-request__list__detail__item__header date-span">
+							>
+								{request.urgent && <p className="client-request__list__detail__item urgent">URGENT</p>}
+								<div className="client-request__list__detail__item__header">
+									<p className="client-request__list__detail__item__header date" >
+										<span className="client-request__list__detail__item__header date-span">
 										Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
-										</p>
-										<p className="client-request__list__detail__item__header city" >
-											<span className="client-request__list__detail__item__header city-span">
-										Ville:</span>&nbsp;{request.city}
-										</p>
-										<h2 className="client-request__list__detail__item__header job" >
-											<span className="client-request__list__detail__item__header job-span">
-										Métier:</span>&nbsp;{request.job}
-										</h2>
-										<p className="client-request__list__detail__item__header name" >
-											<span className="client-request__list__detail__item__header name-span">
-										Nom:</span>&nbsp;{request.first_name} {request.last_name}
-										</p>
-									</div>
-									<h1 className="client-request__list__detail__item title" >{request.title}</h1>
-									<p 
-										//@ts-expect-error con't resolve this type
-										className={`client-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
-										onClick={(event: React.MouseEvent) => {
-											//to open the message when the user clicks on it just for the selected request 
-											idRef.current = request?.id  ?? 0; // check if request or requestByDate is not undefined
-											console.log('id', idRef.current);
-					
-											if (idRef.current !== undefined && setIsMessageExpanded) {
-												setIsMessageExpanded((prevState: ExpandedState)  => ({
-													...prevState,
-													[idRef.current as number]: !prevState[idRef.current]
-												}));
-											}
-											
-											event.stopPropagation();
-										}}  
-									>
-										{request.message}
 									</p>
-									<div className="client-request__list__detail__item__picture">
+									<p className="client-request__list__detail__item__header city" >
+										<span className="client-request__list__detail__item__header city-span">
+										Ville:</span>&nbsp;{request.city}
+									</p>
+									<h2 className="client-request__list__detail__item__header job" >
+										<span className="client-request__list__detail__item__header job-span">
+										Métier:</span>&nbsp;{request.job}
+									</h2>
+									<p className="client-request__list__detail__item__header name" >
+										<span className="client-request__list__detail__item__header name-span">
+										Nom:</span>&nbsp;{request.first_name} {request.last_name}
+									</p>
+								</div>
+								<h1 className="client-request__list__detail__item title" >{request.title}</h1>
+								<p 
+									//@ts-expect-error con't resolve this type
+									className={`client-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
+									onClick={(event: React.MouseEvent) => {
+										//to open the message when the user clicks on it just for the selected request 
+										idRef.current = request?.id  ?? 0; // check if request or requestByDate is not undefined
+										console.log('id', idRef.current);
+					
+										if (idRef.current !== undefined && setIsMessageExpanded) {
+											setIsMessageExpanded((prevState: ExpandedState)  => ({
+												...prevState,
+												[idRef.current as number]: !prevState[idRef.current]
+											}));
+										}
+											
+										event.stopPropagation();
+									}}  
+								>
+									{request.message}
+								</p>
+								<div className="client-request__list__detail__item__picture">
 						
-										{(() => {
-											const imageUrls = request.media?.map(media => media.url) || [];
-											return request.media?.map((media, index) => (
-												media ? (
-													media.name.endsWith('.pdf') ? (
-														<a 
-															href={media.url} 
-															key={media.id} 
-															download={media.name} 
-															target="_blank" 
-															rel="noopener noreferrer" 
-															onClick={(event) => {event.stopPropagation();}} >
-															<img 
-																className="client-request__list__detail__item__picture img" 
-																//key={media.id} 
-																src={pdfLogo} 
-																alt={media.name} 
-															/>
-														</a>
-													) : (
+									{(() => {
+										const imageUrls = request.media?.map(media => media.url) || [];
+										return request.media?.map((media, index) => (
+											media ? (
+												media.name.endsWith('.pdf') ? (
+													<a 
+														href={media.url} 
+														key={media.id} 
+														download={media.name} 
+														target="_blank" 
+														rel="noopener noreferrer" 
+														onClick={(event) => {event.stopPropagation();}} >
 														<img 
 															className="client-request__list__detail__item__picture img" 
-															key={media.id} 
-															src={media.url} 
-															onClick={(event: React.MouseEvent) => {
-																openModal(imageUrls, index),
-																event.stopPropagation();}}
+															//key={media.id} 
+															src={pdfLogo} 
 															alt={media.name} 
 														/>
-													)
-												) : null
-											));
-										})()}
+													</a>
+												) : (
+													<img 
+														className="client-request__list__detail__item__picture img" 
+														key={media.id} 
+														src={media.url} 
+														onClick={(event: React.MouseEvent) => {
+															openModal(imageUrls, index),
+															event.stopPropagation();}}
+														alt={media.name} 
+													/>
+												)
+											) : null
+										));
+									})()}
 						
-									</div>
-								
-									<button
-										id={`delete-request-${request.id}`}
-										className="client-request__list__detail__item__delete" 
-										type='button' 
-										onClick={(event) => {
-											handleHideRequest(event, request.id),
-											event.stopPropagation();
-										}}>
-									</button>
-									<FaTrashAlt 
-										className="client-request__list__detail__item__delete-FaTrashAlt" 
-										onClick={(event) => {
-											document.getElementById(`delete-request-${request.id}`)?.click(),
-											event.stopPropagation();
-										}}
-									/>
 								</div>
-							))}
-						</InfiniteScroll>
-						<button onClick={addRequest}>
+								
+								<button
+									id={`delete-request-${request.id}`}
+									className="client-request__list__detail__item__delete" 
+									type='button' 
+									onClick={(event) => {
+										setDeleteItemModalIsOpen(true);
+										setModalArgs({ event, requestId: request.id });
+										event.stopPropagation();
+									}}>
+								</button>
+								<FaTrashAlt 
+									className="client-request__list__detail__item__delete-FaTrashAlt" 
+									onClick={(event) => {
+										console.log('delete-request', request.id);
+											
+										document.getElementById(`delete-request-${request.id}`)?.click(),
+										event.stopPropagation();
+									}}
+								/>
+							</div>
+						))}
+						{/* </InfiniteScroll> */}
+						{/* <button onClick={addRequest}>
 						fetchmore
-						</button>
+						</button> */}
 					</div>
 				)}
+				<div className="client-request__list__fetch-button">
+					{isHasMore ? (<button 
+						className="Btn" 
+						onClick={(event) => {
+							event.preventDefault();
+							event.stopPropagation();
+							addRequest();
+						}
+						}>
+						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
+						<span className="icon2"></span>
+						<span className="tooltip">Charger plus</span>
+					</button>
+					) : (
+						<p className="client-request__list no-req">Fin des résultats</p>
+					)}
+				</div>
 			</div>
 
 			<ImageModal 
@@ -409,6 +501,13 @@ console.log('getRequestsByJob', getRequestsByJob);
 				selectedImage={selectedImage} 
 				nextImage={nextImage}
 				previousImage={previousImage}
+			/>
+			<DeleteItemModal
+				modalArgs={modalArgs}
+				setModalArgs={setModalArgs}
+				setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+				deleteItemModalIsOpen={deleteItemModalIsOpen}
+				handleDeleteRequest={handleHideRequest}
 			/>
 		</div>
 	);
