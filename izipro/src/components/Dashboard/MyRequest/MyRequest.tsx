@@ -157,28 +157,26 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 		}
 	}, [getUserRequestsData]);
 
-	// useEffect to sort the requests by date
+	// useEffect to sort the requests by date and update the subscription
 	useEffect(() => {
 		if (myRequestsStore) {
-			const sortedRequests = [...myRequestsStore].sort((a, b) => {
-				// Check if a.conversation or b.conversation is empty
-				if (!a.conversation?.length) return 1;
-				if (!b.conversation?.length) return -1;
-
-				const dateA = a.conversation.some(c => c.updated_at)
-					? Math.max(...a.conversation.map(c => new Date(c.updated_at).getTime()))
-					: 0;
-
-				const dateB = b.conversation.some(c => c.updated_at)
-					? Math.max(...b.conversation.map(c => new Date(c.updated_at).getTime()))
-					: 0;
-
-				// For ascending order, swap dateA and dateB for descending order
+			// Sort the requests by date
+			const sortedRequests = [...myRequestsStore].sort((requestA, requestB) => {
+				const dateA = requestA.conversation?.length
+					? Math.max(...requestA.conversation.map(conv => isNaN(Date.parse(conv.updated_at)) ? Number(conv.updated_at) : new Date(conv.updated_at).getTime()))
+					: isNaN(Date.parse(requestA.created_at)) ? Number(requestA.created_at) : new Date(requestA.created_at).getTime();
+				
+				const dateB = requestB.conversation?.length
+					? Math.max(...requestB.conversation.map(conv => isNaN(Date.parse(conv.updated_at)) ? Number(conv.updated_at) : new Date(conv.updated_at).getTime()))
+					: isNaN(Date.parse(requestB.created_at)) ? Number(requestB.created_at) : new Date(requestB.created_at).getTime();
+		
+				// For descending order (most recent first)
 				return dateB - dateA;
 			});
 
 			setRequestByDate(sortedRequests);
 
+			// update the subscription by request and conversation
 			// get conversation id in subscriptionStore
 			const conversationIds = subscriptionStore
 				.filter(subscription => subscription.subscriber === 'conversation')

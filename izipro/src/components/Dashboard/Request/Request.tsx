@@ -19,9 +19,7 @@ import pdfLogo from '/logo/pdf-icon.svg';
 import { myRequestStore } from '../../../store/Request';
 
 
-
 function Request() {
-
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -95,7 +93,6 @@ function Request() {
 				file,
 			}));
 
-
 			createRequest({
 				variables: {
 					input: {
@@ -141,7 +138,6 @@ function Request() {
 			throw new Error('Error while creating request');
 		}
 	};
-
 
 	// radius on map
 	useEffect(() => {
