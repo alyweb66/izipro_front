@@ -38,9 +38,13 @@ type ExpandedState = {
 
 type MyRequestProps = {
 	messageSubscription: { messageAdded: MessageProps[] } | undefined;
+	selectedRequest: RequestProps | null;
+	setSelectedRequest: (request: RequestProps) => void;
+	newUserId: number[];
+	setNewUserId: (id: number[]) => void;
 };
 
-function MyRequest({ messageSubscription }: MyRequestProps) {
+function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, newUserId, setNewUserId }: MyRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -48,12 +52,12 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 	//state
 	//const [requests, setRequests] = useState<RequestProps[]>([]);
 	//const [loading, setLoading] = useState(false);
-	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
+	//
 	const [userIds, setUserIds] = useState<number[]>([]);
 	const [conversationIdState, setConversationIdState] = useState<number>(0);
 	const [messageValue, setMessageValue] = useState('');
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
-	const [newUserId, setNewUserId] = useState<number[]>([]);
+	//const [newUserId, setNewUserId] = useState<number[]>([]);
 	const [userConvState, setUserConvState] = useState<UserDataProps[]>([]);
 	const [selectedUser, setSelectedUser] = useState<UserDataProps | null>(null);
 	const [userDescription, setUserDescription] = useState<boolean>(false);
@@ -381,13 +385,9 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
-		console.log('messageSubscription', messageSubscription);
-
 		// check if the message is already in the store
 		if (messageSubscription?.messageAdded) {
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
-
-
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
 
@@ -421,7 +421,6 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 						// if there is a conversation in the request but the conversation id is not in the request
 					} else if (request.id === messageAdded[0].request_id && request.conversation?.some(
 						conversation => conversation.id !== messageAdded[0].conversation_id)) {
-
 
 						const conversation = [
 							...request.conversation,
@@ -517,7 +516,6 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 				}
 
 			});
-
 
 			// send id to the mutation to find user
 			setNewUserId([]);

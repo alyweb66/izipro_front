@@ -7,10 +7,6 @@ import { useQueryRequestByJob } from '../../Hook/Query';
 import { RequestProps } from '../../../Type/Request';
 import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
 import { useMutation } from '@apollo/client';
-//import InfiniteScroll from 'react-infinite-scroll-component';
-// @ts-expect-error turf is not typed
-import * as turf from '@turf/turf';
-//import { REQUEST_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import pdfLogo from '/logo/pdf-icon.svg';
@@ -27,10 +23,11 @@ type ExpandedState = {
 
 type clientRequestProps = {
 	onDetailsClick: () => void;
-	clientRequestSubscription?: { requestAdded: RequestProps[] };
+	//clientRequestSubscription?: { requestAdded: RequestProps[] };
+	RangeFilter: (requests: RequestProps[], fromSubscribeToMore?: boolean) => void;
 };
 
-function ClientRequest({ onDetailsClick, clientRequestSubscription }: clientRequestProps) {
+function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -50,8 +47,6 @@ function ClientRequest({ onDetailsClick, clientRequestSubscription }: clientRequ
 	//store
 	const id = userDataStore((state) => state.id);
 	const jobs = userDataStore((state) => state.jobs);
-	const lng = userDataStore((state) => state.lng);
-	const lat = userDataStore((state) => state.lat);
 	const address = userDataStore((state) => state.address);
 	const city = userDataStore((state) => state.city);
 	const first_name = userDataStore((state) => state.first_name);
@@ -71,7 +66,7 @@ function ClientRequest({ onDetailsClick, clientRequestSubscription }: clientRequ
 	const { loading: requestJobLoading, getRequestsByJob, fetchMore } = useQueryRequestByJob(jobs, 0, limit);
 	console.log('getRequestsByJob', getRequestsByJob);
 
-	// Function to filter the requests by the user's location and the request's location
+	/* // Function to filter the requests by the user's location and the request's location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
 		// If the function is called from the subscription, we need to add the new request to the top of list
 		if (fromSubscribeToMore) {
@@ -146,9 +141,9 @@ function ClientRequest({ onDetailsClick, clientRequestSubscription }: clientRequ
 			}
 
 		}
-	}
+	} */
 
-	console.log('clientRequestViewedStore', clientRequestViewedStore);
+	console.log('clientRequestViewedStore22', clientRequestViewedStore);
 
 	// Function to load more requests with infinite scroll
 	function addRequest() {
@@ -269,43 +264,7 @@ function ClientRequest({ onDetailsClick, clientRequestSubscription }: clientRequ
 		}
 
 	}, [getRequestsByJob, settings]);
-	console.log('clientRequestsStore', clientRequestsStore);
 
-	// useEffect to subscribe to new requests
-	useEffect(() => {
-
-		if (clientRequestSubscription) {
-			console.log('clientRequestSubscription', clientRequestSubscription);
-			if (clientRequestSubscription) {
-				const requestAdded = clientRequestSubscription.requestAdded[0];
-
-				if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
-					RangeFilter([requestAdded], true);
-				}
-			}
-			/* subscribeToMore({
-				document: REQUEST_SUBSCRIPTION,
-				variables: { ids: jobs.map(job => job.job_id).filter(id => id != null) },
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				updateQuery: (prev: RequestProps , { subscriptionData }: { subscriptionData: any }) => { */
-
-			/* if (!clientRequestSubscription.data) return prev; */
-
-			/* const  requestAdded  = clientRequestSubscription; */
-
-			// Check if the request is already in the store
-			/* if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
-	
-				RangeFilter([requestAdded], true);
-
-			}  */
-
-
-			//},
-			//});
-
-		}
-	}, [clientRequestSubscription]);
 
 	// Function to hide a request
 	const handleHideRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
@@ -340,23 +299,23 @@ function ClientRequest({ onDetailsClick, clientRequestSubscription }: clientRequ
 	useEffect(() => {
 		// Create an IntersectionObserver
 		const observer = new IntersectionObserver((entries) => {
-			entries.forEach(entry => {
-				if (entry.isIntersecting) {
+			const requestIdsInView = entries
+				.filter(entry => entry.isIntersecting)
+				.map(entry => {
 					const requestIdString = entry.target.getAttribute('data-request-id');
-					const requestId = requestIdString !== null ? parseInt(requestIdString) : null;
-					if (requestId) {
-						if (clientRequestViewedStore.some((value) => value === requestId)) {
-							setTimeout(() => {
-							// remove the request.id from the viewedClientRequestStore
-								setClientRequestViewedStore(clientRequestViewedStore.filter((value) => value !== requestId));
-							}, 3000);
-						}
-					}
-				}
-			});
+					return requestIdString !== null ? parseInt(requestIdString) : null;
+				})
+				.filter(requestId => requestId !== null && clientRequestViewedStore.includes(requestId));
+
+			if (requestIdsInView.length > 0) {
+				setTimeout(() => {
+					// remove all requestIdsInView from the viewedClientRequestStore at once
+					setClientRequestViewedStore(clientRequestViewedStore.filter(value => !requestIdsInView.includes(value)));
+				}, 3000);
+			}
 		});
 
-		
+
 		// Observe all elements with a data-request-id attribute
 		const elements = document.querySelectorAll('[data-request-id]');
 		elements.forEach(element => observer.observe(element));
@@ -365,7 +324,7 @@ function ClientRequest({ onDetailsClick, clientRequestSubscription }: clientRequ
 		return () => {
 			elements.forEach(element => observer.unobserve(element));
 		};
-		
+
 	}, [clientRequestViewedStore]);
 
 
@@ -380,13 +339,13 @@ function ClientRequest({ onDetailsClick, clientRequestSubscription }: clientRequ
 					<div className="client-request__list__detail">
 						{clientRequestsStore.map((request) => (
 							<div
-								className={`client-request__list__detail__item ${request.urgent} ${clientRequestViewedStore.includes(request.id ) ? 'not-viewed' : ''}` }
+								className={`client-request__list__detail__item ${request.urgent} ${clientRequestViewedStore.includes(request.id) ? 'not-viewed' : ''}`}
 								data-request-id={request?.id}
 								key={request.id}
 								onClick={(event) => {
 									setRequest(request),
-									onDetailsClick(),
-									event.stopPropagation();
+										onDetailsClick(),
+										event.stopPropagation();
 								}}
 
 							>
@@ -465,7 +424,7 @@ function ClientRequest({ onDetailsClick, clientRequestSubscription }: clientRequ
 														src={media.url}
 														onClick={(event: React.MouseEvent) => {
 															openModal(imageUrls, index),
-															event.stopPropagation();
+																event.stopPropagation();
 														}}
 														alt={media.name}
 													/>
@@ -492,7 +451,7 @@ function ClientRequest({ onDetailsClick, clientRequestSubscription }: clientRequ
 										console.log('delete-request', request.id);
 
 										document.getElementById(`delete-request-${request.id}`)?.click(),
-										event.stopPropagation();
+											event.stopPropagation();
 									}}
 								/>
 							</div>

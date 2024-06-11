@@ -73,6 +73,11 @@
 
                 }
 
+                &.not-viewed {
+                    background-color: rgba(7, 175, 7, 0.185);
+                    border: 1px solid green;
+                }
+
                 &.new {
                     background-color: v.$color-chat-orange;
                     border: 1px solid v.$color-primary-orange;
@@ -319,7 +324,7 @@
                     }
                 }
 
-               /*   &.description {
+                /*   &.description {
                     width: 98%;
                     padding: 0.5rem;
                     box-shadow: none;

@@ -1,8 +1,8 @@
 @use './variables' as v;
 
 .notification-badge {
-    background-color: rgb(28, 199, 28);
-    color: rgb(0, 0, 0);
+   // background-color: rgba(7, 190, 236, 0.336);
+    color: rgb(233, 12, 23);
    // padding: 5px 10px;
     border-radius: 50%;
   //  position: fixed;
@@ -11,9 +11,7 @@
    margin: 0.5rem 0 0 0;
    font-family: v.$font;
    border-radius: 50px;
-   background: linear-gradient(45deg, #39f832, #f9fcf8);
-
-    font-size: 13px;
+    font-size: 18px;
     font-weight: 500;
     display: flex;
     justify-content: center;
