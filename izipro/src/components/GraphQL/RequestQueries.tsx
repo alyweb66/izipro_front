@@ -32,6 +32,7 @@ export const GET_USER_REQUESTS = gql`
                 message
                 first_name
                 last_name
+                denomination
                 lng
                 lat
                 city
@@ -66,6 +67,7 @@ export const GET_REQUEST_BY_JOB = gql`
             message
             first_name
             last_name
+            denomination
             lng
             lat
             city

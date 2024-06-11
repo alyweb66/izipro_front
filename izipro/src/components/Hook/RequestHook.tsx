@@ -75,10 +75,18 @@ const RequestItem = ({
 					<span className="my-conversation__list__detail__item__header job-span">
 												Métier:</span>&nbsp;{(request || requestByDate)?.job}
 				</h2>
-				<p className="my-conversation__list__detail__item__header name" >
-					<span className="my-conversation__list__detail__item__header name-span">
-												Nom:</span>&nbsp;{(request || requestByDate)?.first_name} {(request || requestByDate)?.last_name}
-				</p>
+				{(request || requestByDate)?.denomination ? (
+					<p className="my-conversation__list__detail__item__header name" >
+						<span className="my-conversation__list__detail__item__header name-span">
+										Entreprise:</span>&nbsp;{(request || requestByDate)?.denomination}
+					</p>
+				) : (
+					<p className="my-conversation__list__detail__item__header name" >
+						<span className="my-conversation__list__detail__item__header name-span">
+										Nom:</span>&nbsp;{(request || requestByDate)?.first_name} {(request || requestByDate)?.last_name}
+					</p>
+				)}
+				
 			</div>
 			<h1 className="my-conversation__list__detail__item title" >{(request || requestByDate)?.title}</h1>
 			<p 
