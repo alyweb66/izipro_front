@@ -1095,7 +1095,7 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 
 				<form className="my-request__message-list__form" onSubmit={(event) => {
 					event.preventDefault();
-					if (selectedUser) {
+					if (selectedUser?.id && !selectedUser?.deleted_at) {
 						handleMessageSubmit(event);
 					}
 
