@@ -17,6 +17,8 @@ import Spinner from '../Hook/Spinner';
 import { useMyRequestMessageSubscriptions } from '../Hook/MyRequestSubscription';
 import { useClientRequestSubscriptions } from '../Hook/ClientRequestSubscription';
 import { useMyConversationSubscriptions } from '../Hook/MyConversationSubscription';
+import { viewedClientMessageStore, viewedClientRequestStore, viewedMyRequestMessageStore } from '../../store/Viewed';
+import { ClientRequestBadge } from '../Hook/Badge';
 
 
 
@@ -25,20 +27,22 @@ function Dashboard() {
 
 	// State
 	const [isOpen, setIsOpen] = useState(false);
+	const [selectedTab, setSelectedTab] = useState('');
 
 	//store
 	const id = userDataStore((state) => state.id);
 	const role = userDataStore((state) => state.role);
 	const setAll = userDataStore((state) => state.setAll);
-	//const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
-
-	//state for first page
 	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
-	
-	const [selectedTab, setSelectedTab] = useState('');
+
+	//store viewed
+	const [clientMessageViewedStore, setClientMessageViewedStore] = viewedClientMessageStore((state) => [state.viewed, state.setViewedStore]);
+	const [myRequestMessageViewedStore, setMyRequestMessageViewedStore] = viewedMyRequestMessageStore((state) => [state.viewed, state.setViewedStore]);
+	const [clientRequestViewedStore, setClientRequestViewedStore] = viewedClientRequestStore((state) => [state.viewed, state.setViewedStore]);
+
 
 	// Query to get the user data
-	const {loading: userDataLoading, getUserData} = useQueryUserData();
+	const { loading: userDataLoading, getUserData } = useQueryUserData();
 	const getUserSubscription = useQueryUserSubscriptions();
 
 	//mutation
@@ -53,7 +57,7 @@ function Dashboard() {
 	// condition if user not logged in
 	let isLogged;
 	if (localStorage.getItem('ayl') === 'session') {
-		isLogged = {value: true};
+		isLogged = { value: true };
 	} else {
 		isLogged = JSON.parse(localStorage.getItem('ayl') || '{}');
 	}
@@ -61,10 +65,10 @@ function Dashboard() {
 	// set user subscription to the store
 	useEffect(() => {
 		if (getUserSubscription) {
-			
+
 			setSubscription(getUserSubscription?.user.subscription);
 		}
-	},[getUserSubscription]);
+	}, [getUserSubscription]);
 
 	// set the default tab based on the user role
 	useEffect(() => {
@@ -76,9 +80,8 @@ function Dashboard() {
 			}
 
 		}
-	},[role]);
+	}, [role]);
 
-	
 	// function to check if user is logged in
 	useEffect(() => {
 		// clear local storage and session storage when user leaves the page if local storage is set to session
@@ -107,32 +110,31 @@ function Dashboard() {
 			if (new Date().getTime() > isLogged.expiry) {
 				// The data has expired
 				localStorage.removeItem('ayl');
-				
-				
+
+
 				if (window.location.pathname !== '/') {
 					navigate('/');
 				}
-			} 
+			}
 		} else {
-			
-			
+
+
 			if (window.location.pathname !== '/') {
 				navigate('/');
 			}
 			// if user logged in, set the user data to the store
-		} 
+		}
 
-	},[]);
-
+	}, []);
 
 	// set user data to the store
 	useEffect(() => {
 		if (getUserData) {
-			
-			
+
+
 			setAll(getUserData?.user);
 		}
-	},[getUserData]);
+	}, [getUserData]);
 
 	// function to handle navigation to my conversation
 	const handleMyConvesationNavigate = () => {
@@ -144,9 +146,9 @@ function Dashboard() {
 		setIsOpen(!isOpen);
 	};
 
-	return(
+	return (
 		<div className='dashboard'>
-			{userDataLoading && <Spinner/>}
+			{userDataLoading && <Spinner />}
 			<nav className="dashboard__nav">
 				<button className="dashboard__nav__burger-menu" onClick={toggleMenu}>
 					<div className='burger-icon'>
@@ -156,29 +158,63 @@ function Dashboard() {
 					</div>
 				</button>
 				<ul className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}>
-					<li className={`dashboard__nav__menu__tab ${selectedTab === 'Request' ? 'active' : ''}`} onClick={() => {setSelectedTab('Request'), setIsOpen(!isOpen);}}>Demande</li>
-					<li className={`dashboard__nav__menu__tab ${selectedTab === 'My requests' ? 'active' : ''}`} onClick={() => {setSelectedTab('My requests'), setIsOpen(!isOpen);}}>Mes demandes</li>
-					{role === 'pro' && <li className={`dashboard__nav__menu__tab ${selectedTab === 'Client request' ? 'active' : ''}`} onClick={() => {setSelectedTab('Client request'), setIsOpen(!isOpen);}}>Client</li>}
-					{role === 'pro' &&<li className={`dashboard__nav__menu__tab ${selectedTab === 'My conversations' ? 'active' : ''}`} onClick={() => {setSelectedTab('My conversations'), setIsOpen(!isOpen);}}>Mes échanges</li>}
-					<li className={`dashboard__nav__menu__tab ${selectedTab === 'My profile' ? 'active' : ''}`} onClick={() => {setSelectedTab('My profile'), setIsOpen(!isOpen);}}>Mon compte</li>
+					<div className="dashboard__nav__menu__content">
+						<li
+							className={`dashboard__nav__menu__content__tab ${selectedTab === 'Request' ? 'active' : ''}`}
+							onClick={() => { setSelectedTab('Request'), setIsOpen(!isOpen); }}>Demande
+						</li>
+					</div>
+					<div className="dashboard__nav__menu__content">
+						<li
+							className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
+							onClick={() => { setSelectedTab('My requests'), setIsOpen(!isOpen); }}>Mes demandes
+						</li>
+					</div>
+					{role === 'pro' && 
+					<div className="dashboard__nav__menu__content">
+						<li
+							className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
+							onClick={() => { setSelectedTab('Client request'), setIsOpen(!isOpen); }}>Client
+						</li>
+						{clientRequestViewedStore.length > 0 && <ClientRequestBadge count={clientRequestViewedStore.length} /> }
+					</div>
+					}
+					{role === 'pro' && 
+					<div className="dashboard__nav__menu__content">
+						<li
+							className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
+							onClick={() => { setSelectedTab('My conversations'), setIsOpen(!isOpen); }}>Mes échanges
+						</li>
+					</div>
+					}
+					<div className="dashboard__nav__menu__content">
+						<li
+							className={`dashboard__nav__menu__content__tab ${selectedTab === 'My profile' ? 'active' : ''}`}
+							onClick={() => { setSelectedTab('My profile'), setIsOpen(!isOpen); }}>Mon compte
+						</li>
+					</div>
 				</ul>
 			</nav>
 
 			<div className="dashboard__content">
-				
-				{selectedTab === 'Request' && <Request/>}
-				{selectedTab === 'My requests' && <MyRequest messageSubscription={messageSubscription}/>}
-				{selectedTab === 'My conversations' && <MyConversation clientMessageSubscription={clientMessageSubscription}/>}
+
+				{selectedTab === 'Request' && <Request />}
+				{selectedTab === 'My requests' && <MyRequest
+					messageSubscription={messageSubscription} 
+				/>}
+				{selectedTab === 'My conversations' && <MyConversation
+					clientMessageSubscription={clientMessageSubscription} 
+				/>}
 				{selectedTab === 'My profile' && <Account />}
-				{selectedTab === 'Client request' && <ClientRequest 
+				{selectedTab === 'Client request' && <ClientRequest
 					onDetailsClick={handleMyConvesationNavigate}
 					clientRequestSubscription={clientRequestSubscription}
 				/>}
 
 			</div>
-			<Footer />	
+			<Footer />
 		</div>
-		
+
 	);
 }
 

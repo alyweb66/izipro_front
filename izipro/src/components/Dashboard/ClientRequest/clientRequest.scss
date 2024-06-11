@@ -68,6 +68,11 @@
 
       }
 
+      &.not-viewed {
+        background-color: rgba(0, 128, 0, 0.336);
+        border-color: green;
+      }
+
 
 
       .client-request__list__detail__item__header {

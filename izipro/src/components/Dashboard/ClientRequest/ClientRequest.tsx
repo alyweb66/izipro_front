@@ -6,7 +6,7 @@ import './clientRequest.scss';
 import { useQueryRequestByJob } from '../../Hook/Query';
 import { RequestProps } from '../../../Type/Request';
 import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
-import { useMutation} from '@apollo/client';
+import { useMutation } from '@apollo/client';
 //import InfiniteScroll from 'react-infinite-scroll-component';
 // @ts-expect-error turf is not typed
 import * as turf from '@turf/turf';
@@ -18,6 +18,7 @@ import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt } from 'react-icons/fa';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+import { viewedClientRequestStore } from '../../../store/Viewed';
 
 
 type ExpandedState = {
@@ -27,13 +28,13 @@ type ExpandedState = {
 type clientRequestProps = {
 	onDetailsClick: () => void;
 	clientRequestSubscription?: { requestAdded: RequestProps[] };
-  };
+};
 
-function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientRequestProps) {
+function ClientRequest({ onDetailsClick, clientRequestSubscription }: clientRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
-	
+
 	// State
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [isHasMore, setIsHasMore] = useState(true);
@@ -60,13 +61,14 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 	const setRequest = requestDataStore((state) => state.setRequest);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
+	const [clientRequestViewedStore, setClientRequestViewedStore] = viewedClientRequestStore((state) => [state.viewed, state.setViewedStore]);
 
 	// mutation
-	const [hideRequest, {loading: hiddenLoading, error: hideRequestError}] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
-	const [subscriptionMutation, {loading: subscribeLoading, error: subscriptionError}] = useMutation(SUBSCRIPTION_MUTATION);
+	const [hideRequest, { loading: hiddenLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
+	const [subscriptionMutation, { loading: subscribeLoading, error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 
 	// get requests by job
-	const {loading: requestJobLoading, getRequestsByJob, fetchMore} = useQueryRequestByJob(jobs, 0, limit);
+	const { loading: requestJobLoading, getRequestsByJob, fetchMore } = useQueryRequestByJob(jobs, 0, limit);
 	console.log('getRequestsByJob', getRequestsByJob);
 
 	// Function to filter the requests by the user's location and the request's location
@@ -85,11 +87,11 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 					// Check if the request is in the user's range
 					(distance < request.range / 1000 || request.range === 0) &&
 					// Check if the request is in the user's settings range
-					(distance < settings[0].range / 1000 || settings[0].range === 0)  &&
+					(distance < settings[0].range / 1000 || settings[0].range === 0) &&
 					// Check if the user is already in conversation with the request
-					(request.conversation === null || request.conversation === undefined || 
-						!request.conversation.some(conversation => 
-							(conversation.user_1 !== null && conversation.user_2 !== null) && 
+					(request.conversation === null || request.conversation === undefined ||
+						!request.conversation.some(conversation =>
+							(conversation.user_1 !== null && conversation.user_2 !== null) &&
 							(conversation.user_1 === id || conversation.user_2 === id)
 						)
 					)
@@ -98,10 +100,14 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 
 			//get all request who are not in the store
 			const newRequests = filteredRequests.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
-			
+
 			// Add the new requests to the top of the list
 			if (newRequests) {
 				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
+
+				// add the request.id to the viewedClientRequestStore
+				setClientRequestViewedStore([...newRequests.map(request => request.id), ...(clientRequestViewedStore || [])]);
+
 			}
 
 			offsetRef.current = offsetRef.current + filteredRequests.length;
@@ -117,26 +123,32 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 
 				return (
 					(distance < request.range / 1000 || request.range === 0) &&
-						(distance < settings[0].range / 1000 || settings[0].range === 0) &&
-						// Check if the user is already in conversation with the request
-						(request.conversation === null || request.conversation === undefined || 
-							!request.conversation.some(conversation => 
-								(conversation.user_1 !== null && conversation.user_2 !== null) && 
-						(conversation.user_1 === id || conversation.user_2 === id)
-							)
+					(distance < settings[0].range / 1000 || settings[0].range === 0) &&
+					// Check if the user is already in conversation with the request
+					(request.conversation === null || request.conversation === undefined ||
+						!request.conversation.some(conversation =>
+							(conversation.user_1 !== null && conversation.user_2 !== null) &&
+							(conversation.user_1 === id || conversation.user_2 === id)
 						)
+					)
 				);
 			});
 
 			//get all request who are not in the store
 			const newRequests = requests.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
 
+			// Add the new requests to the bottom of the list
 			if (newRequests) {
-				setClientRequestsStore([ ...newRequests, ...(clientRequestsStore || []),]);
+				setClientRequestsStore([...newRequests, ...(clientRequestsStore || []),]);
+
+				// add the request.id to the viewedClientRequestStore
+				setClientRequestViewedStore([...newRequests.map(request => request.id), ...(clientRequestViewedStore || [])]);
 			}
-			
+
 		}
 	}
+
+	console.log('clientRequestViewedStore', clientRequestViewedStore);
 
 	// Function to load more requests with infinite scroll
 	function addRequest() {
@@ -146,11 +158,11 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 			},
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		}).then(fetchMoreResult => {
-			const data = fetchMoreResult.data.requestsByJob; 
+			const data = fetchMoreResult.data.requestsByJob;
 
 			//get all request who are not in the store
 			const newRequests = data.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
-			
+
 			if (newRequests.length > 0) {
 				RangeFilter(newRequests);
 				offsetRef.current = offsetRef.current + data.length;
@@ -162,15 +174,15 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 				setIsHasMore(false);
 			}
 		});
-		
+
 	}
 
 	// add jobs to setSubscriptionJob if there are not already in, or have the same id
 	useEffect(() => {
-		
+
 		// If there are subscriptions, check if the jobs are in the subscription
 		if (subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest')) {
-			
+
 			subscriptionStore.forEach((subscription) => {
 				if (subscription.subscriber === 'jobRequest' && Array.isArray(subscription.subscriber_id)) {
 					const jobIds = jobs.map((job) => job.job_id);
@@ -195,7 +207,7 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 							// eslint-disable-next-line @typescript-eslint/no-unused-vars
 							const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
 							// replace the old subscription with the new one
-							const newSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) => 
+							const newSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
 								subscription.subscriber === 'jobRequest' ? subscriptionWithoutTimestamps : subscription
 							);
 							if (newSubscriptionStore) {
@@ -235,21 +247,21 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 		}
 
 	}, [jobs]);
-	
+
 	// useEffect to filter the requests by the user's location and the request's location
 	useEffect(() => {
 		if (getRequestsByJob) {
 			const requestByJob = getRequestsByJob.requestsByJob;
-			
+
 			//get all request who are not in the store
 			const newRequests = requestByJob.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
-			
+
 			// Filter the requests
 			if (newRequests.length > 0) {
 				RangeFilter(requestByJob);
 				offsetRef.current = offsetRef.current + requestByJob?.length;
 			}
-		} 
+		}
 
 		// If there are no more requests, stop the infinite scroll
 		if (getRequestsByJob?.requestsByJob.length < limit) {
@@ -261,12 +273,12 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 
 	// useEffect to subscribe to new requests
 	useEffect(() => {
-		
+
 		if (clientRequestSubscription) {
 			console.log('clientRequestSubscription', clientRequestSubscription);
 			if (clientRequestSubscription) {
 				const requestAdded = clientRequestSubscription.requestAdded[0];
-	
+
 				if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
 					RangeFilter([requestAdded], true);
 				}
@@ -287,13 +299,13 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 				RangeFilter([requestAdded], true);
 
 			}  */
-					
-					
+
+
 			//},
 			//});
-		
+
 		}
-	}, [ clientRequestSubscription]);
+	}, [clientRequestSubscription]);
 
 	// Function to hide a request
 	const handleHideRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
@@ -310,13 +322,13 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 			if (response.data.createHiddenClientRequest) {
 
 				setClientRequestsStore(clientRequestsStore.filter(request => request.id !== requestId));
-				
-			/* 	clientRequestStore((prevClientRequests: RequestProps[]) => {
-					if (prevClientRequests) {
-						return prevClientRequests.filter((request) => request.id !== requestId);
-					}
-					return null;
-				}); */
+
+				/* 	clientRequestStore((prevClientRequests: RequestProps[]) => {
+						if (prevClientRequests) {
+							return prevClientRequests.filter((request) => request.id !== requestId);
+						}
+						return null;
+					}); */
 			}
 		});
 		if (hideRequestError) {
@@ -324,176 +336,172 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 		}
 	};
 
-	/* 	const handleNext = async () => {
-		if (!isLoading) {
-			setIsLoading(true);
-			const element = document.getElementById('scrollableClientRequest');
-			console.log('element', element);
-			
-			const distanceFromBottom = 0; // adjust this value as needed
-			const initialScrollHeight = element?.scrollHeight;
-			// Add a delay before fetching more data
-			await new Promise(resolve => setTimeout(resolve, 200));
-			addRequest();
-			setIsLoading(false);
+	// useEffect to see if the request is viewed
+	useEffect(() => {
+		// Create an IntersectionObserver
+		const observer = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if (entry.isIntersecting) {
+					const requestIdString = entry.target.getAttribute('data-request-id');
+					const requestId = requestIdString !== null ? parseInt(requestIdString) : null;
+					if (requestId) {
+						if (clientRequestViewedStore.some((value) => value === requestId)) {
+							setTimeout(() => {
+							// remove the request.id from the viewedClientRequestStore
+								setClientRequestViewedStore(clientRequestViewedStore.filter((value) => value !== requestId));
+							}, 3000);
+						}
+					}
+				}
+			});
+		});
 
-			// Slightly scroll up to avoid continuous triggering of `next`
-			if (element) {
-				const newScrollHeight = element.scrollHeight;
-				initialScrollHeight && element.scrollTo(0, newScrollHeight - initialScrollHeight - distanceFromBottom - 1);
-			}
-		}
-	}; */
-	
+		
+		// Observe all elements with a data-request-id attribute
+		const elements = document.querySelectorAll('[data-request-id]');
+		elements.forEach(element => observer.observe(element));
+
+		// Clean up
+		return () => {
+			elements.forEach(element => observer.unobserve(element));
+		};
+		
+	}, [clientRequestViewedStore]);
+
+
 	return (
 		<div className="client-request">
 			<div id="scrollableClientRequest" className="client-request__list">
-				{(requestJobLoading || hiddenLoading || subscribeLoading) &&  <Spinner/>}
+				{(requestJobLoading || hiddenLoading || subscribeLoading) && <Spinner />}
 				{(!address && !city && !postal_code && !first_name && !last_name) &&
-				(<p className="request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>)}
+					(<p className="request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>)}
 				{/* {!clientRequestsStore?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>} */}
 				{(address && city && postal_code && first_name && last_name) && (
-					<div className="client-request__list__detail"> 
-						{/* <InfiniteScroll
-							dataLength={clientRequestsStore.length}
-							next={ 
-								handleNext
-							}
-							hasMore={true}
-							loader={<p className="client-request__list no-req">Chargement...</p>}
-							endMessage={
-								clientRequestsStore.length >0 ? <p className="client-request__list no-req">Fin des résultats</p>
-									:
-									<p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>}
-							scrollableTarget="scrollableClientRequest"
-							
-						> */}
+					<div className="client-request__list__detail">
 						{clientRequestsStore.map((request) => (
 							<div
-								className={`client-request__list__detail__item ${request.urgent}`}
-								key={request.id} 
+								className={`client-request__list__detail__item ${request.urgent} ${clientRequestViewedStore.includes(request.id ) ? 'not-viewed' : ''}` }
+								data-request-id={request?.id}
+								key={request.id}
 								onClick={(event) => {
 									setRequest(request),
 									onDetailsClick(),
 									event.stopPropagation();
 								}}
-								
+
 							>
 								{request.urgent && <p className="client-request__list__detail__item urgent">URGENT</p>}
 								<div className="client-request__list__detail__item__header">
 									<p className="client-request__list__detail__item__header date" >
 										<span className="client-request__list__detail__item__header date-span">
-										Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
+											Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
 									</p>
 									<p className="client-request__list__detail__item__header city" >
 										<span className="client-request__list__detail__item__header city-span">
-										Ville:</span>&nbsp;{request.city}
+											Ville:</span>&nbsp;{request.city}
 									</p>
 									<h2 className="client-request__list__detail__item__header job" >
 										<span className="client-request__list__detail__item__header job-span">
-										Métier:</span>&nbsp;{request.job}
+											Métier:</span>&nbsp;{request.job}
 									</h2>
 									{request.denomination ? (
 										<p className="client-request__list__detail__item__header name" >
 											<span className="client-request__list__detail__item__header name-span">
-										Entreprise:</span>&nbsp;{request.denomination}
+												Entreprise:</span>&nbsp;{request.denomination}
 										</p>
 									) : (
 										<p className="client-request__list__detail__item__header name" >
 											<span className="client-request__list__detail__item__header name-span">
-										Nom:</span>&nbsp;{request.first_name} {request.last_name}
+												Nom:</span>&nbsp;{request.first_name} {request.last_name}
 										</p>
 									)}
 								</div>
 								<h1 className="client-request__list__detail__item title" >{request.title}</h1>
-								<p 
+								<p
 									//@ts-expect-error con't resolve this type
 									className={`client-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
 									onClick={(event: React.MouseEvent) => {
 										//to open the message when the user clicks on it just for the selected request 
-										idRef.current = request?.id  ?? 0; // check if request or requestByDate is not undefined
+										idRef.current = request?.id ?? 0; // check if request or requestByDate is not undefined
 										console.log('id', idRef.current);
-					
+
 										if (idRef.current !== undefined && setIsMessageExpanded) {
-											setIsMessageExpanded((prevState: ExpandedState)  => ({
+											setIsMessageExpanded((prevState: ExpandedState) => ({
 												...prevState,
 												[idRef.current as number]: !prevState[idRef.current]
 											}));
 										}
-											
+
 										event.stopPropagation();
-									}}  
+									}}
 								>
 									{request.message}
 								</p>
 								<div className="client-request__list__detail__item__picture">
-						
+
 									{(() => {
 										const imageUrls = request.media?.map(media => media.url) || [];
 										return request.media?.map((media, index) => (
 											media ? (
 												media.name.endsWith('.pdf') ? (
-													<a 
-														href={media.url} 
-														key={media.id} 
-														download={media.name} 
-														target="_blank" 
-														rel="noopener noreferrer" 
-														onClick={(event) => {event.stopPropagation();}} >
-														<img 
-															className="client-request__list__detail__item__picture img" 
+													<a
+														href={media.url}
+														key={media.id}
+														download={media.name}
+														target="_blank"
+														rel="noopener noreferrer"
+														onClick={(event) => { event.stopPropagation(); }} >
+														<img
+															className="client-request__list__detail__item__picture img"
 															//key={media.id} 
-															src={pdfLogo} 
-															alt={media.name} 
+															src={pdfLogo}
+															alt={media.name}
 														/>
 													</a>
 												) : (
-													<img 
-														className="client-request__list__detail__item__picture img" 
-														key={media.id} 
-														src={media.url} 
+													<img
+														className="client-request__list__detail__item__picture img"
+														key={media.id}
+														src={media.url}
 														onClick={(event: React.MouseEvent) => {
 															openModal(imageUrls, index),
-															event.stopPropagation();}}
-														alt={media.name} 
+															event.stopPropagation();
+														}}
+														alt={media.name}
 													/>
 												)
 											) : null
 										));
 									})()}
-						
+
 								</div>
-								
+
 								<button
 									id={`delete-request-${request.id}`}
-									className="client-request__list__detail__item__delete" 
-									type='button' 
+									className="client-request__list__detail__item__delete"
+									type='button'
 									onClick={(event) => {
 										setDeleteItemModalIsOpen(true);
 										setModalArgs({ event, requestId: request.id });
 										event.stopPropagation();
 									}}>
 								</button>
-								<FaTrashAlt 
-									className="client-request__list__detail__item__delete-FaTrashAlt" 
+								<FaTrashAlt
+									className="client-request__list__detail__item__delete-FaTrashAlt"
 									onClick={(event) => {
 										console.log('delete-request', request.id);
-											
+
 										document.getElementById(`delete-request-${request.id}`)?.click(),
 										event.stopPropagation();
 									}}
 								/>
 							</div>
 						))}
-						{/* </InfiniteScroll> */}
-						{/* <button onClick={addRequest}>
-						fetchmore
-						</button> */}
 					</div>
 				)}
 				<div className="client-request__list__fetch-button">
-					{isHasMore ? (<button 
-						className="Btn" 
+					{isHasMore ? (<button
+						className="Btn"
 						onClick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
@@ -510,10 +518,10 @@ function ClientRequest ({onDetailsClick, clientRequestSubscription}: clientReque
 				</div>
 			</div>
 
-			<ImageModal 
-				modalIsOpen={modalIsOpen} 
-				closeModal={closeModal} 
-				selectedImage={selectedImage} 
+			<ImageModal
+				modalIsOpen={modalIsOpen}
+				closeModal={closeModal}
+				selectedImage={selectedImage}
 				nextImage={nextImage}
 				previousImage={previousImage}
 			/>
