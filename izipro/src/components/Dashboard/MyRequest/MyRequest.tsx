@@ -342,7 +342,7 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 
 			const messages: MessageProps[] = messageData.messages;
 			// Add the new messages to the store
-			
+
 			// Filter out messages that are already in the store
 			const newMessages = messages.filter(
 				(newMessage) => !messageStore.find((existingMessage) => existingMessage.id === newMessage.id)
@@ -557,6 +557,14 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 				conversation.user_1 === selectedUser?.id || conversation.user_2 === selectedUser?.id)?.id as number));
 
 	}, [selectedUser]);
+
+
+
+	useEffect(() => {
+		return () => {
+			setSelectedRequest(null);
+		};
+	}, []);
 
 
 	// Function to delete a request
@@ -800,7 +808,7 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 
 					// remove the conversation id from the myRequestMessageViewedStore
 					setMyRequestMessageViewedStore(myRequestMessageViewedStore.filter(id => !messageIds.includes(id)));
-				
+
 					// update viewed message in the store
 					myMessageDataStore.setState(prevState => {
 						const updatedMessages = prevState.messages.map(message => {
@@ -853,10 +861,10 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 								key={request.id}
 								onClick={(event) => {
 									handleConversation(request, event),
-									setSelectedRequest(request),
-									setIsListOpen(false),
-									setIsAnswerOpen(true),
-									setIsMessageOpen(false);
+										setSelectedRequest(request),
+										setIsListOpen(false),
+										setIsAnswerOpen(true),
+										setIsMessageOpen(false);
 								}}
 							>
 								{request.urgent && <p className="my-request__list__detail__item urgent">URGENT</p>}
@@ -932,7 +940,7 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 														src={media.url}
 														onClick={(event) => {
 															openModal(imageUrls, index),
-															event.stopPropagation();
+																event.stopPropagation();
 														}}
 														alt={media.name}
 													/>
@@ -949,14 +957,14 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 									onClick={(event) => {
 										setDeleteItemModalIsOpen(true);
 										setModalArgs({ event, requestId: request.id }),
-										event.stopPropagation();
+											event.stopPropagation();
 									}}>
 								</button>
 								<FaTrashAlt
 									className="my-request__list__detail__item__delete-FaTrashAlt"
 									onClick={(event) => {
 										document.getElementById(`delete-request-${request.id}`)?.click(),
-										event.stopPropagation();
+											event.stopPropagation();
 									}}
 								/>
 							</div>
@@ -995,9 +1003,9 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 					className="my-request__answer-list return"
 					onClick={() => {
 						setSelectedRequest(null),
-						setIsListOpen(true),
-						setIsAnswerOpen(false),
-						setIsMessageOpen(false);
+							setIsListOpen(true),
+							setIsAnswerOpen(false),
+							setIsMessageOpen(false);
 					}}
 				/>
 				{selectedRequest && <h2 className="my-request__answer-list title">{selectedRequest?.title}</h2>}
@@ -1008,18 +1016,18 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 						className={`my-request__answer-list__user 
 							${selectedUser?.id === user.id ? 'selected-user' : ''} 
 							${user.deleted_at ? 'deleted' : ''}
-							${messageStore.some(message => message.user_id === user.id && message.viewed === false ) ? 'not-viewed' : ''}`
+							${messageStore.some(message => message.user_id === user.id && message.viewed === false) ? 'not-viewed' : ''}`
 
 						}
 						key={user.id}
 						onClick={(event) => {
 							handleMessageConversation(user.id, event),
-							updateViewedMessage(),
-							setIsUserMessageOpen(true),
-							setSelectedUser(user),
-							setIsMessageOpen(true),
-							setIsAnswerOpen(false),
-							setIsListOpen(false);
+								updateViewedMessage(),
+								setIsUserMessageOpen(true),
+								setSelectedUser(user),
+								setIsMessageOpen(true),
+								setIsAnswerOpen(false),
+								setIsListOpen(false);
 						}}>
 
 						<div className="my-request__answer-list__user__header">
@@ -1055,10 +1063,10 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 								className="my-request__message-list__user__header__detail return"
 								onClick={(event) => {
 									setSelectedUser(null),
-									setIsMessageOpen(false),
-									setIsAnswerOpen(true),
-									setIsUserMessageOpen(false),
-									setIsListOpen(false);
+										setIsMessageOpen(false),
+										setIsAnswerOpen(true),
+										setIsUserMessageOpen(false),
+										setIsListOpen(false);
 									event.stopPropagation();
 								}}
 							/>
@@ -1093,55 +1101,55 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 						scrollableTarget="scrollableMessage"
 					> */}
 					{Array.isArray(messageStore) && isUserMessageOpen &&
-							messageStore
-								.filter((message) => message.conversation_id === conversationIdState)
-								.map((message, index, array) => (
-									<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
-										{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
-										<div className={`content ${message.user_id === id ? 'me' : ''}`}>
-											{message.media[0].url && (
-												<div className="my-request__message-list__message__detail__image-container">
-													<div className={`map ${message.content ? 'message' : ''}`}>
-														{(() => {
-															const imageUrls = message.media?.map(media => media.url) || [];
-															return message.media?.map((media, index) => (
-																media ? (
-																	media.name.endsWith('.pdf') ? (
-																		<a
-																			className="a-pdf"
-																			href={media.url}
-																			key={media.id}
-																			download={media.name}
-																			target="_blank"
-																			rel="noopener noreferrer"
-																			onClick={(event) => { event.stopPropagation(); }} >
-																			<img
-																				className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																				//key={media.id} 
-																				src={pdfLogo}
-																				alt={media.name}
-																			/>
-																		</a>
-																	) : (
+						messageStore
+							.filter((message) => message.conversation_id === conversationIdState)
+							.map((message, index, array) => (
+								<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
+									{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
+									<div className={`content ${message.user_id === id ? 'me' : ''}`}>
+										{message.media[0].url && (
+											<div className="my-request__message-list__message__detail__image-container">
+												<div className={`map ${message.content ? 'message' : ''}`}>
+													{(() => {
+														const imageUrls = message.media?.map(media => media.url) || [];
+														return message.media?.map((media, index) => (
+															media ? (
+																media.name.endsWith('.pdf') ? (
+																	<a
+																		className="a-pdf"
+																		href={media.url}
+																		key={media.id}
+																		download={media.name}
+																		target="_blank"
+																		rel="noopener noreferrer"
+																		onClick={(event) => { event.stopPropagation(); }} >
 																		<img
-																			className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																			key={media.id}
-																			src={media.url}
-																			onClick={() => openModal(imageUrls, index)}
+																			className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																			//key={media.id} 
+																			src={pdfLogo}
 																			alt={media.name}
 																		/>
-																	)
-																) : null
-															));
-														})()}
-													</div>
+																	</a>
+																) : (
+																	<img
+																		className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																		key={media.id}
+																		src={media.url}
+																		onClick={() => openModal(imageUrls, index)}
+																		alt={media.name}
+																	/>
+																)
+															) : null
+														));
+													})()}
 												</div>
-											)}
-											{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
-										</div>
-										<div className="my-request__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
+											</div>
+										)}
+										{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
 									</div>
-								))
+									<div className="my-request__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
+								</div>
+							))
 
 					}
 					{/* </InfiniteScroll> */}
