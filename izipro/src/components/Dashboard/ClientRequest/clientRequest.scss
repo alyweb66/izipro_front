@@ -69,8 +69,7 @@
       }
 
       &.not-viewed {
-        background-color: rgba(7, 175, 7, 0.185);
-        border: 1px solid green;
+        @include v.not-viewed
       }
 
 

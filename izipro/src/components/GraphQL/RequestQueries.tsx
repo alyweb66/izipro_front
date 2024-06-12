@@ -50,6 +50,7 @@ export const GET_USER_REQUESTS = gql`
                 id
                 user_1
                 user_2
+                request_id
                 updated_at
                 }
                 deleted_at
@@ -85,6 +86,7 @@ export const GET_REQUEST_BY_JOB = gql`
                 id
                 user_1
                 user_2
+                request_id
                 updated_at
             }
             deleted_at

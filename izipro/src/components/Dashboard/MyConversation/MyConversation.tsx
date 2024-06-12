@@ -151,6 +151,7 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 
 		}
 	}, [selectedRequest]);
+console.log('messageStore', messageStore);
 
 	// useEffect to update the request to the requests store
 	useEffect(() => {

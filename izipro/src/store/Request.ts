@@ -1,19 +1,19 @@
-import {create } from 'zustand';
+import { create } from 'zustand';
 import { RequestSoreProps, RequestProps } from '../Type/Request';
 
 
 type RequestStore = RequestSoreProps & {
-    setRequest: (data: RequestSoreProps['request']) => void;
+	setRequest: (data: RequestSoreProps['request']) => void;
 
 	resetRequest: () => void;
-	
+
 }
 
 type RequestConversationStore = {
 	requests: RequestProps[];
 	setRequestConversation: (data: RequestProps[]) => void;
 	resetRequestConversation: () => void;
-	
+
 }
 
 export type MyRequestStore = {
@@ -29,8 +29,8 @@ export type ClientRequestStore = {
 }
 
 export const requestDataStore = create<RequestStore>((set: (state: Partial<RequestStore>) => void) => ({
-	request:{
-		id:0,
+	request: {
+		id: 0,
 		urgent: false,
 		title: '',
 		message: '',
@@ -55,53 +55,60 @@ export const requestDataStore = create<RequestStore>((set: (state: Partial<Reque
 			id: 0,
 			user_1: 0,
 			user_2: 0,
+			request_id: 0,
 			updated_at: '',
 		}],
 		deleted_at: '',
 	},
 
 	setRequest: (data: RequestSoreProps['request']) => set({ request: data }),
-	resetRequest: () => set({ 
+	resetRequest: () => set({
 		request: {
-			id: 0, 
-			urgent: false, 
-			title: '', 
-			message: '', 
-			first_name: '', 
-			last_name: '', 
+			id: 0,
+			urgent: false,
+			title: '',
+			message: '',
+			first_name: '',
+			last_name: '',
 			denomination: '',
 			image: '',
-			city: '', 
-			lng: 0, 
-			lat: 0, 
-			range: 0, 
-			user_id: 0, 
-			job_id: 0, 
-			job: '', 
-			media: [{id: 0, url: '', name: ''}], 
-			created_at: '', 
-			conversation: [{id: 0, user_1: 0, user_2: 0, updated_at: ''}],
+			city: '',
+			lng: 0,
+			lat: 0,
+			range: 0,
+			user_id: 0,
+			job_id: 0,
+			job: '',
+			media: [{ id: 0, url: '', name: '' }],
+			created_at: '',
+			conversation: [{
+				id: 0,
+				user_1: 0,
+				user_2: 0,
+				request_id: 0,
+				updated_at: ''
+			}],
 			deleted_at: ''
-		} 
+		}
 	})
-    
-	
+
+
 }));
 
 export const requestConversationStore = create<RequestConversationStore>((set) => ({
-	requests:[],
+	requests: [],
 	setRequestConversation: (data) => set({ requests: data }),
 	resetRequestConversation: () => set({ requests: [] })
 }));
 
 export const myRequestStore = create<MyRequestStore>((set) => ({
-	requests:[],
+	requests: [],
 	setMyRequestStore: (data) => set({ requests: data }),
 	resetMyRequest: () => set({ requests: [] })
 }));
 
 export const clientRequestStore = create<ClientRequestStore>((set) => ({
-	requests:[],
+	requests: [],
 	setClientRequestStore: (data) => set({ requests: data }),
 	resetClientRequest: () => set({ requests: [] })
 }));

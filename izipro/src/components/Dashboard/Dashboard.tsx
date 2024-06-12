@@ -38,6 +38,7 @@ function Dashboard() {
 	//selectedRequest for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [newUserId, setNewUserId] = useState<number[]>([]);
+	const [viewedMessageState, setViewedMessageState] = useState<number[]>([]);
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -53,7 +54,9 @@ function Dashboard() {
 	myMessageDataStore((state) => [state.messages, state.setMessageStore]);
 	myRequestStore((state) => [state.requests, state.setMyRequestStore]);
 	const [userConvStore] = userConversation((state) => [state.users, state.setUsers]);
-	
+	// MyRequest store
+	const [messageStore] = myMessageDataStore((state) => [state.messages, state.setMessageStore]);
+
 	//store viewed
 	const [clientMessageViewedStore, setClientMessageViewedStore] = viewedClientMessageStore((state) => [state.viewed, state.setViewedStore]);
 	const [myRequestMessageViewedStore, setMyRequestMessageViewedStore] = viewedMyRequestMessageStore((state) => [state.viewed, state.setViewedStore]);
@@ -161,20 +164,20 @@ function Dashboard() {
 			const messageAdded: MessageProps[] = clientMessageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
-	
+
 			// add the new message to the message store
 			messageDataStore.setState(prevState => {
 				const newMessages = messageAdded.filter(
 					(newMessage: MessageProps) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
 				);
-	
+
 				return {
 					...prevState,
 					messages: [...prevState.messages, ...newMessages]
 				};
-	
+
 			});
-	
+
 			// add updated_at to the request.conversation
 			requestConversationStore.setState(prevState => {
 				const updatedRequest = prevState.requests.map((request: RequestProps) => {
@@ -184,12 +187,12 @@ function Dashboard() {
 						}
 						return conversation;
 					});
-	
+
 					return { ...request, conversation: updatedConversation };
 				});
 				return { requests: updatedRequest };
 			});
-	
+
 			//check if the conversation is already in the clientMessageViewedStore
 			if (!clientMessageViewedStore.some(id => messageAdded[0].conversation_id === id)) {
 				// add the conversation_id to the clientMessageViewedStore
@@ -198,9 +201,9 @@ function Dashboard() {
 
 			// add the conversation_id to the clientMessageViewedStore
 			//setClientMessageViewedStore([...messageAdded.map(message => message.conversation_id), ...(clientMessageViewedStore || [])]);
-	
+
 		}
-	
+
 	}, [clientMessageSubscription]);
 
 	// useEffect subscribe to new client Clientrequest
@@ -214,7 +217,7 @@ function Dashboard() {
 					RangeFilter([requestAdded], true);
 				}
 			}
-			
+
 
 		}
 	}, [clientRequestSubscription]);
@@ -226,26 +229,26 @@ function Dashboard() {
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
-	
+
 			// add the new message to the message store
 			myMessageDataStore.setState(prevState => {
 				const newMessages = messageAdded.filter(
 					(newMessage: MessageProps) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
 				);
-	
+
 				return {
 					...prevState,
 					messages: [...prevState.messages, ...newMessages]
 				};
-	
+
 			});
-	
+
 			// add the conversation to the request
 			myRequestStore.setState(prevState => {
 				const updatedRequest = prevState.requests.map((request: RequestProps) => {
 					// if the conversation id is in the request
 					if (request.conversation && request.conversation.some((conversation) => conversation.id === messageAdded[0].conversation_id)) {
-	
+
 						const updatedConversation = request.conversation.map((conversation) => {
 							if (conversation.id === messageAdded[0].conversation_id) {
 								return { ...conversation, updated_at: newDate };
@@ -253,117 +256,141 @@ function Dashboard() {
 							return conversation;
 						});
 						return { ...request, conversation: updatedConversation };
-	
+
 						// if there is a conversation in the request but the conversation id is not in the request
 					} else if (request.id === messageAdded[0].request_id && request.conversation?.some(
 						conversation => conversation.id !== messageAdded[0].conversation_id)) {
-	
+
 						const conversation = [
 							...request.conversation,
 							{
 								id: messageAdded[0].conversation_id,
 								user_1: messageAdded[0].user_id,
 								user_2: id,
+								request_id: messageAdded[0].request_id,
 								updated_at: newDate
 							}
 						];
 						return { ...request, conversation };
-	
+
 					} else {
 						// if the request hasn't a conversation
 						if (request.id === messageAdded[0].request_id && !request.conversation) {
-	
-	
+
+
 							const conversation = [
 								{
 									id: messageAdded[0].conversation_id,
 									user_1: messageAdded[0].user_id,
 									user_2: id,
+									request_id: messageAdded[0].request_id,
 									updated_at: newDate
 								}
 							];
-	
+
 							return { ...request, conversation };
-	
+
 						}
 					}
 					return request;
-	
+
 				});
 				return { ...prevState, requests: updatedRequest };
 			});
-	
+
 			setSelectedRequest((prevState: RequestProps | null) => {
 				// if a conversation is already in selectedRequest
 				if (prevState && prevState.conversation && prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
 					const updatedRequest = prevState?.conversation.map(conversation => {
-	
+
 						if (conversation.id === messageAdded[0].conversation_id) {
 							return { ...conversation, updated_at: newDate };
 						}
 						return conversation;
 					});
 					return { ...prevState, conversation: updatedRequest };
-	
+
 					// if no conversation in the selectedRequest
 				} else if (prevState && !prevState.conversation) {
-	
+
 					const conversation = [
 						{
 							id: messageAdded[0].conversation_id,
 							user_1: messageAdded[0].user_id,
 							user_2: id,
+							request_id: messageAdded[0].request_id,
 							updated_at: newDate
 						}
 					];
-	
+
 					// check if user is in userConvStore
 					if (!userConvStore.some(user => user.id === messageAdded[0].user_id)) {
-	
+
 						setNewUserId([messageAdded[0].user_id]);
 					}
-	
+
 					return { ...prevState, conversation };
-	
+
 					// if the conversation id is not in the selectedRequest
 				} else if (prevState && !prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
-	
+
 					const conversation = [
 						...prevState.conversation,
 						{
 							id: messageAdded[0].conversation_id,
 							user_1: messageAdded[0].user_id,
 							user_2: id,
+							request_id: messageAdded[0].request_id,
 							updated_at: newDate
 						}
 					];
-	
+
 					// check if user is in userConvStore
 					if (!userConvStore.some(user => user.id === messageAdded[0].user_id)) {
-	
-	
+
+
 						setNewUserId([messageAdded[0].user_id]);
 					}
-	
+
 					return { ...prevState, conversation };
-	
+
 				} else {
 					return null;
 				}
-	
+
 			});
-	
+
 			// send id to the mutation to find user
 			setNewUserId([]);
 			if (messageAdded[0].user_id !== id && !userConvStore.some(user => user.id === messageAdded[0].user_id)) {
-	
+
 				setNewUserId([messageAdded[0].user_id]);
 			}
-	
+
+			//check if the conversation is already in the clientMessageViewedStore
+			if (!myRequestMessageViewedStore.some(id => messageAdded[0].conversation_id === id) && messageAdded[0].viewed === false) {
+				// add the conversation_id to the clientMessageViewedStore
+				setMyRequestMessageViewedStore([...messageAdded.map(message => message.conversation_id), ...(myRequestMessageViewedStore || [])]);
+			}
+
 		}
-	
+
 	}, [messageSubscription]);
 
+	useEffect(() => {
+		if (messageStore.length > 0) {
+			// count the number of conversation that are not viewed message
+			const unviewedConversations = new Set(
+				messageStore
+					.filter(message => message.viewed === false)
+					.map(message => message.conversation_id)
+			);
+
+			setViewedMessageState([...unviewedConversations]);
+
+		}
+
+	}, [messageStore]);
 	// function to handle navigation to my conversation
 	const handleMyConvesationNavigate = () => {
 		setSelectedTab('My conversations');
@@ -474,24 +501,25 @@ function Dashboard() {
 							className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
 							onClick={() => { setSelectedTab('My requests'), setIsOpen(!isOpen); }}>Mes demandes
 						</li>
+						{viewedMessageState.length > 0 && <ClientRequestBadge count={viewedMessageState.length} />}
 					</div>
-					{role === 'pro' && 
-					<div className="dashboard__nav__menu__content">
-						<li
-							className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('Client request'), setIsOpen(!isOpen); }}>Client
-						</li>
-						{clientRequestViewedStore.length > 0 && <ClientRequestBadge count={clientRequestViewedStore.length } /> }
-					</div>
+					{role === 'pro' &&
+						<div className="dashboard__nav__menu__content">
+							<li
+								className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
+								onClick={() => { setSelectedTab('Client request'), setIsOpen(!isOpen); }}>Client
+							</li>
+							{clientRequestViewedStore.length > 0 && <ClientRequestBadge count={clientRequestViewedStore.length} />}
+						</div>
 					}
-					{role === 'pro' && 
-					<div className="dashboard__nav__menu__content">
-						<li
-							className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My conversations'), setIsOpen(!isOpen); }}>Mes échanges
-							{clientMessageViewedStore.length > 0 && <ClientRequestBadge count={clientMessageViewedStore.length } /> }
-						</li>
-					</div>
+					{role === 'pro' &&
+						<div className="dashboard__nav__menu__content">
+							<li
+								className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
+								onClick={() => { setSelectedTab('My conversations'), setIsOpen(!isOpen); }}>Mes échanges
+							</li>
+							{clientMessageViewedStore.length > 0 && <ClientRequestBadge count={clientMessageViewedStore.length} />}
+						</div>
 					}
 					<div className="dashboard__nav__menu__content">
 						<li
@@ -506,14 +534,14 @@ function Dashboard() {
 
 				{selectedTab === 'Request' && <Request />}
 				{selectedTab === 'My requests' && <MyRequest
-					messageSubscription={messageSubscription} 
+					messageSubscription={messageSubscription}
 					selectedRequest={selectedRequest}
 					setSelectedRequest={setSelectedRequest}
 					newUserId={newUserId}
 					setNewUserId={setNewUserId}
 				/>}
 				{selectedTab === 'My conversations' && <MyConversation
-					clientMessageSubscription={clientMessageSubscription} 
+					clientMessageSubscription={clientMessageSubscription}
 				/>}
 				{selectedTab === 'My profile' && <Account />}
 				{selectedTab === 'Client request' && <ClientRequest

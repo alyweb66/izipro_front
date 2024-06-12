@@ -47,13 +47,13 @@ const RequestItem = ({
 	return (
 		<div
 			id={index === 0 ? 'first-user' : undefined}
-			data-request-conv-id={(request || requestByDate)?.id} 
+			/* data-request-conv-id={(request || requestByDate)?.id}  */
 			className={`my-conversation__list__detail__item
 			${(request || requestByDate)?.urgent} 
 			${request ? 'new' : ''} 
 			${selectedRequest?.id === (request || requestByDate)?.id ? 'selected' : ''}
 			${requestByDate?.deleted_at ? 'deleted' : ''}
-			${clientMessageViewedStore.some(id => (request || requestByDate)?.conversation.some(conv => conv.id === id)) ? 'not-viewed' : ''}
+			${clientMessageViewedStore?.some(id => (request || requestByDate)?.conversation?.some(conv => conv.id === id)) ? 'not-viewed' : ''}
 			` }
 			key={((request || requestByDate)?.id)?.toString()} 
 			onClick={() => {

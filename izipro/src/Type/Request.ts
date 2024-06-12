@@ -18,14 +18,13 @@ type RequestProps = {
         id: number
 		url: string
 		name: string
-        
-	
 	}[]
     created_at: string
     conversation: {
         id: number
         user_1: number
         user_2: number
+        request_id: number
         updated_at: string
     }[]
     deleted_at: string
@@ -59,6 +58,7 @@ type RequestSoreProps = {
             id: number
             user_1: number
             user_2: number
+            request_id: number
             updated_at: string
         }[]
         deleted_at: string

@@ -23,8 +23,11 @@ export const REQUEST_SUBSCRIPTION = gql`
             }
             created_at
             conversation {
+                id
                 user_1
                 user_2
+                request_id
+                updated_at
             }
         }
     }
@@ -39,6 +42,7 @@ export const MESSAGE_SUBSCRIPTION = gql`
             conversation_id
             request_id
             created_at
+            viewed
             media {
                 id
                 url

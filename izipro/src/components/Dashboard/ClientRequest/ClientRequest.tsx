@@ -320,9 +320,22 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 		const elements = document.querySelectorAll('[data-request-id]');
 		elements.forEach(element => observer.observe(element));
 
+		// Function to handle visibility change
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === 'visible') {
+				elements.forEach(element => observer.observe(element));
+			} else {
+				elements.forEach(element => observer.unobserve(element));
+			}
+		};
+	
+		// Listen for visibility change events
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+
 		// Clean up
 		return () => {
 			elements.forEach(element => observer.unobserve(element));
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
 		};
 
 	}, [clientRequestViewedStore]);
