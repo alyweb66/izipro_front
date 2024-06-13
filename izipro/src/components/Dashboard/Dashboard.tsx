@@ -298,67 +298,69 @@ function Dashboard() {
 				return { ...prevState, requests: updatedRequest };
 			});
 
-			setSelectedRequest((prevState: RequestProps | null) => {
+			if (selectedRequest?.id === messageAdded[0].request_id) {
+				setSelectedRequest((prevState: RequestProps | null) => {
 				// if a conversation is already in selectedRequest
-				if (prevState && prevState.conversation && prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
-					const updatedRequest = prevState?.conversation.map(conversation => {
+					if (prevState && prevState.conversation && prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
+						const updatedRequest = prevState?.conversation.map(conversation => {
 
-						if (conversation.id === messageAdded[0].conversation_id) {
-							return { ...conversation, updated_at: newDate };
-						}
-						return conversation;
-					});
-					return { ...prevState, conversation: updatedRequest };
+							if (conversation.id === messageAdded[0].conversation_id) {
+								return { ...conversation, updated_at: newDate };
+							}
+							return conversation;
+						});
+						return { ...prevState, conversation: updatedRequest };
 
 					// if no conversation in the selectedRequest
-				} else if (prevState && !prevState.conversation) {
+					} else if (prevState && !prevState.conversation ) {
 
-					const conversation = [
-						{
-							id: messageAdded[0].conversation_id,
-							user_1: messageAdded[0].user_id,
-							user_2: id,
-							request_id: messageAdded[0].request_id,
-							updated_at: newDate
+						const conversation = [
+							{
+								id: messageAdded[0].conversation_id,
+								user_1: messageAdded[0].user_id,
+								user_2: id,
+								request_id: messageAdded[0].request_id,
+								updated_at: newDate
+							}
+						];
+
+						// check if user is in userConvStore
+						if (!userConvStore.some(user => user.id === messageAdded[0].user_id)) {
+
+							setNewUserId([messageAdded[0].user_id]);
 						}
-					];
 
-					// check if user is in userConvStore
-					if (!userConvStore.some(user => user.id === messageAdded[0].user_id)) {
-
-						setNewUserId([messageAdded[0].user_id]);
-					}
-
-					return { ...prevState, conversation };
+						return { ...prevState, conversation };
 
 					// if the conversation id is not in the selectedRequest
-				} else if (prevState && !prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
+					} else if (prevState && !prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
 
-					const conversation = [
-						...prevState.conversation,
-						{
-							id: messageAdded[0].conversation_id,
-							user_1: messageAdded[0].user_id,
-							user_2: id,
-							request_id: messageAdded[0].request_id,
-							updated_at: newDate
+						const conversation = [
+							...prevState.conversation,
+							{
+								id: messageAdded[0].conversation_id,
+								user_1: messageAdded[0].user_id,
+								user_2: id,
+								request_id: messageAdded[0].request_id,
+								updated_at: newDate
+							}
+						];
+
+						// check if user is in userConvStore
+						if (!userConvStore.some(user => user.id === messageAdded[0].user_id)) {
+
+
+							setNewUserId([messageAdded[0].user_id]);
 						}
-					];
 
-					// check if user is in userConvStore
-					if (!userConvStore.some(user => user.id === messageAdded[0].user_id)) {
+						return { ...prevState, conversation };
 
-
-						setNewUserId([messageAdded[0].user_id]);
+					} else {
+						return null;
 					}
 
-					return { ...prevState, conversation };
-
-				} else {
-					return null;
-				}
-
-			});
+				});
+			}
 
 			// send id to the mutation to find user
 			setNewUserId([]);
@@ -368,10 +370,10 @@ function Dashboard() {
 			}
 
 			//check if the conversation is already in the clientMessageViewedStore
-			if (!myRequestMessageViewedStore.some(id => messageAdded[0].conversation_id === id) && messageAdded[0].viewed === false) {
+			/* if (!myRequestMessageViewedStore.some(id => messageAdded[0].conversation_id === id) && messageAdded[0].viewed === false) {
 				// add the conversation_id to the clientMessageViewedStore
 				setMyRequestMessageViewedStore([...messageAdded.map(message => message.conversation_id), ...(myRequestMessageViewedStore || [])]);
-			}
+			} */
 
 		}
 

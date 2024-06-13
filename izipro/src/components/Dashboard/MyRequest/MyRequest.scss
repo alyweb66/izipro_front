@@ -281,7 +281,7 @@
                 -5px 0 10px #ffffff17,
                 5px 0 10px #6666661c;
 
-          
+
 
             &.deleted {
                 background-color: v.$color-deleted-grey;
@@ -289,15 +289,17 @@
 
             }
 
+
             &.selected-user {
                 border: 1px solid v.$color-primary-orange;
                 background-color: #f37b041a;
-                ;
+                
             }
 
             &.not-viewed {
                 @include v.not-viewed
             }
+
 
 
             .my-request__answer-list__user__header {
