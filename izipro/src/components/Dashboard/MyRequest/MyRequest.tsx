@@ -5,7 +5,6 @@ import { RequestProps } from '../../../Type/Request';
 import './MyRequest.scss';
 import { DELETE_REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
 import { useQueryMyMessagesByConversation, useQueryUserRequests, useQueryUsersConversation } from '../../Hook/Query';
-import InfiniteScroll from 'react-infinite-scroll-component';
 import { myRequestStore } from '../../../store/Request';
 import { UserDataProps } from '../../../Type/User';
 import { myMessageDataStore } from '../../../store/message';
@@ -28,7 +27,6 @@ import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import Spinner from '../../Hook/Spinner';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
-import { viewedMyRequestMessageStore } from '../../../store/Viewed';
 import { VIEWED_MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 ReactModal.setAppElement('#root');
 
@@ -39,14 +37,13 @@ type ExpandedState = {
 
 
 type MyRequestProps = {
-	messageSubscription: { messageAdded: MessageProps[] } | undefined;
 	selectedRequest: RequestProps | null;
 	setSelectedRequest: (request: RequestProps | null) => void;
 	newUserId: number[];
 	setNewUserId: (id: number[]) => void;
 };
 
-function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, newUserId, setNewUserId }: MyRequestProps) {
+function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserId }: MyRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -651,18 +648,6 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 				{!requestByDate && <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p>}
 				{requestByDate && (
 					<div className="my-request__list__detail" >
-						{/* <InfiniteScroll
-							dataLength={myRequestsStore?.length}
-							next={addRequest}
-							hasMore={isHasMore}
-							loader={<p className="my-request__list no-req">chargement...</p>}
-							scrollableTarget="scrollableRequest"
-							endMessage={
-								myRequestsStore.length > 0 ? <p className="my-request__list no-req">Fin des résultats</p>
-									:
-									<p className="my-request__list no-req">Vous n&apos;avez pas de demande</p>}
-							
-						> */}
 						{requestByDate.map((request, index) => (
 							<div
 								id={index === 0 ? 'first-request' : undefined}
@@ -781,7 +766,6 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 								/>
 							</div>
 						))}
-						{/* </InfiniteScroll> */}
 					</div>
 				)}
 				<div className="my-request__list__fetch-button">
@@ -804,13 +788,6 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 			</div>
 			<div id="scrollableAnswer" className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''} ${conversationLoading ? 'loading' : ''}`}>
 				{conversationLoading && <Spinner />}
-				{/* <InfiniteScroll
-					dataLength={myRequestsStore?.length}
-					next={() => {}}
-					hasMore={false}
-					loader={<h4></h4>}
-					scrollableTarget="scrollableAnswer"
-				> */}
 				<MdKeyboardArrowLeft
 					className="my-request__answer-list return"
 					onClick={() => {
@@ -857,7 +834,6 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 						</div>
 					</div>
 				))}
-				{/* </InfiniteScroll> */}
 			</div>
 			<div className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`}>
 				{messageLoading && <Spinner />}
@@ -885,8 +861,6 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 								}}
 							/>
 							<img className="my-request__message-list__user__header__detail img" src={selectedUser?.image ? selectedUser.image : logoProfile} alt="" />
-							{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
-							{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
 							{selectedUser?.denomination ? (
 								<p className="my-request__message-list__user__header__detail denomination">{selectedUser?.denomination}</p>
 							) : (
@@ -894,7 +868,7 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 							)}
 							{selectedUser?.deleted_at && <p className="my-request__message-list__user__header__detail deleted">Utilisateur supprimé</p>}
 						</div>
-						{/* <p className="my-request__answer-list__user city">{user.city}</p> */}
+
 						{userDescription && <div>
 							<p className="my-request__message-list__user__header description">{selectedUser?.description ? selectedUser?.description : 'Pas de déscription'}</p>
 						</div>
@@ -903,17 +877,9 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 					{/* 	)} */}
 
 				</div>
-				{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
+
 				<div id="scrollableMessage" className="my-request__message-list__message">
-					{/* <InfiniteScroll
-						className="infinite-scroll"
-						dataLength={messageStore?.length}
-						next={() => { }}
-						hasMore={false}
-						loader={<p className="my-request__list no-req"></p>}
-						endMessage={<p className="my-request__list no-req"></p>}
-						scrollableTarget="scrollableMessage"
-					> */}
+
 					{Array.isArray(messageStore) && isUserMessageOpen &&
 						messageStore
 							.filter((message) => message.conversation_id === conversationIdState)
@@ -966,7 +932,6 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 							))
 
 					}
-					{/* </InfiniteScroll> */}
 				</div>
 
 				<form className="my-request__message-list__form" onSubmit={(event) => {
@@ -1057,34 +1022,7 @@ function MyRequest({ messageSubscription, selectedRequest, setSelectedRequest, n
 				deleteItemModalIsOpen={deleteItemModalIsOpen}
 				handleDeleteRequest={handleDeleteRequest}
 			/>
-			{/* <ReactModal
-				className="modal"
-				isOpen={deleteItemModalIsOpen}
-				contentLabel="Delete Account"
-				shouldCloseOnOverlayClick={false}
-				aria-label="supprimer mon compte"
-			>
-				<div className="modal__container">
-					<h1 className="modal__title">ATTENTION!!</h1>
-					<p className="modal__description">Vous allez supprimer cette demande, êtes vous sur?</p>
-					<div className="modal__container__button">
-						<button 
-							className="modal__delete" 
-							onClick={() => {
-								if (modalArgs?.event && modalArgs?.requestId) {
-									handleDeleteRequest(modalArgs.event, modalArgs.requestId);
-								}
-							}}
-						>
-							Supprimer
-						</button>
-						<button className="modal__cancel" onClick={() => {
-							setDeleteItemModalIsOpen(!deleteItemModalIsOpen),
-							setModalArgs(null);
-						}}>Annuler</button>
-					</div>
-				</div>
-			</ReactModal> */}
+
 		</div>
 
 
