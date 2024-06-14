@@ -7,11 +7,9 @@ import { CONVERSATION_MUTATION, MESSAGE_MUTATION } from '../../GraphQL/Conversat
 import { useMutation } from '@apollo/client';
 import { userDataStore } from '../../../store/UserData';
 import { useQueryMessagesByConversation, useQueryUserConversations } from '../../Hook/Query';
-import InfiniteScroll from 'react-infinite-scroll-component';
 import { useFileHandler } from '../../Hook/useFileHandler';
 import { messageDataStore } from '../../../store/message';
 import { MessageProps, MessageStoreProps } from '../../../Type/message';
-//import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SubscriptionStore, subscriptionDataStore } from '../../../store/subscription';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
@@ -25,7 +23,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import logoProfile from '/logo/logo profile.jpeg';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
-import { viewedClientMessageStore } from '../../../store/Viewed';
+import { VIEWED_MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 
 
 type useQueryUserConversationsProps = {
@@ -47,8 +45,6 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 
 	//state
 	const [messageValue, setMessageValue] = useState('');
-	//const [messages, setMessages] = useState<string[]>([]);
-	//const [requestConversation, setRequestConversation] = useState<RequestProps[] | null>(null);
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [conversationIdState, setConversationIdState] = useState<number>(0);
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
@@ -76,33 +72,20 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const role = userDataStore((state) => state.role);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
-	const [clientMessageViewedStore, setClientMessageViewedStore] = viewedClientMessageStore((state) => [state.viewed, state.setViewedStore]);
 
 	//mutation
 	const [conversation, { loading: convMutLoading, error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
 	const [message, { loading: messageMutLoading, error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
-
+	const [viewedMessage, { error: viewedMessageError }] = useMutation(VIEWED_MESSAGE_MUTATION);
+	
 	//query
 	const { loading: convLoading, data: requestConv, fetchMore } = useQueryUserConversations(0, limit) as unknown as useQueryUserConversationsProps;
 	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
 
 	// file upload
 	const { file, urlFile, setUrlFile, setFile, handleFileChange } = useFileHandler();
-
-	/* // Message subscription
-	const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
-	const { data: messageSubscription, error: errorSubscription } = useSubscription(MESSAGE_SUBSCRIPTION, {
-		variables: {
-			conversation_ids: Subscription?.subscriber_id,
-			request_ids: [],
-			is_request: false
-		},
-	});
-	if (errorSubscription) {
-		throw new Error('Error while subscribing to message');
-	} */
 
 	//useEffect to set request in starting
 	useEffect(() => {
@@ -147,11 +130,10 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 				conversation.user_1 === id || conversation.user_2 === id
 			));
 			setConversationIdState(conversationId?.id ?? 0);
-			setClientMessageViewedStore(clientMessageViewedStore.filter((value) => value !== conversationId?.id));
 
 		}
 	}, [selectedRequest]);
-console.log('messageStore', messageStore);
+	console.log('messageStore', messageStore);
 
 	// useEffect to update the request to the requests store
 	useEffect(() => {
@@ -238,9 +220,6 @@ console.log('messageStore', messageStore);
 				});
 				return { requests: updatedRequest };
 			});
-
-			// add the conversation_id to the clientMessageViewedStore
-			setClientMessageViewedStore([...messageAdded.map(message => message.conversation_id), ...(clientMessageViewedStore || [])]);
 
 		}
 
@@ -547,44 +526,68 @@ console.log('messageStore', messageStore);
 
 	// remove file
 	const handleRemove = (index: number) => {
-		// Remove file from file list
+
 		const newFiles = [...file];
 		newFiles.splice(index, 1);
 		setFile(newFiles);
-		// Remove file from urlFile list
+
 		const newUrlFileList = [...urlFile];
 		newUrlFileList.splice(index, 1);
 		setUrlFile(newUrlFileList);
+	};
+
+	const handleViewedMessage = () => {
+		// change viewed status of the message
+		if (selectedRequest && selectedRequest.conversation) {
+			
+			const messageIds = messageStore.filter(message => message.conversation_id === conversationIdState && message.viewed === false).map(message => message.id);
+
+			if (messageIds.length > 0) {
+				viewedMessage({
+					variables: {
+						input: {
+							id: messageIds,
+						}
+					}
+				}).then(() => {
+
+					// update viewed message in the store
+					messageDataStore.setState(prevState => {
+						const updatedMessages = prevState.messages.map(message => {
+							if (messageIds.includes(message.id)) {
+								return { ...message, viewed: true };
+							}
+							return message;
+						});
+						return {
+							...prevState,
+							messages: [...updatedMessages]
+						};
+					});
+				});
+			}
+
+			if (viewedMessageError) {
+				throw new Error('Error while updating message');
+			}
+		}
 	};
 
 	return (
 		<div className="my-conversation">
 			{(convLoading || hideRequestLoading) && <Spinner />}
 			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
-				{/* {!requestByDate && <p>Vous n&apos;avez pas de demande</p>} */}
 				{requestByDate && (
 					<div className="my-conversation__list__detail" >
-						{/* <InfiniteScroll
-							dataLength={requestsConversationStore?.length}
-							next={addRequest}
-							hasMore={isHasMore}
-							loader={<p className="my-conversation__list no-req">Chargement...</p>}
-							scrollableTarget="scrollableList"
-							endMessage={
-								clientRequestsStore.length >0 ? <p className="my-conversation__list no-req">Fin des résultats</p>
-									:
-									<p className="my-conversation__list no-req">Vous n&apos;avez pas de conversation</p>}
-	
-						> */}
+					
 						{request && request.id > 0 &&
 							<RequestItem
 								request={request}
-								clientMessageViewedStore={clientMessageViewedStore}
-								/* isMessageOpen={isMessageOpen} */
+								handleViewedMessage={handleViewedMessage}
+								messageStore={messageStore}
 								setIsMessageOpen={setIsMessageOpen}
 								resetRequest={resetRequest}
-								/* isListOpen={isListOpen} */
-								selectedRequest={selectedRequest!} // Add '!' to assert that selectedRequest is not null
+								selectedRequest={selectedRequest!} 
 								setSelectedRequest={setSelectedRequest}
 								setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
 								isMessageExpanded={isMessageExpanded}
@@ -599,11 +602,10 @@ console.log('messageStore', messageStore);
 								key={requestByDate.id}
 								index={index}
 								requestByDate={requestByDate}
-								clientMessageViewedStore={clientMessageViewedStore}
-								/* isMessageOpen={isMessageOpen} */
+								handleViewedMessage={handleViewedMessage}
+								messageStore={messageStore}
 								setIsMessageOpen={setIsMessageOpen}
-								/* isListOpen={isListOpen} */
-								selectedRequest={selectedRequest!} // Add '!' to assert that selectedRequest is not null
+								selectedRequest={selectedRequest!} 
 								setSelectedRequest={setSelectedRequest}
 								setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
 								isMessageExpanded={isMessageExpanded}
@@ -613,7 +615,6 @@ console.log('messageStore', messageStore);
 								openModal={openModal}
 							/>
 						))}
-						{/* </InfiniteScroll> */}
 
 					</div>
 				)}
@@ -674,16 +675,8 @@ console.log('messageStore', messageStore);
 				</div>
 				{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
 				<div id="scrollableMessageList" className="my-conversation__message-list__message">
-					<InfiniteScroll
-						className="infinite-scroll"
-						dataLength={messageStore?.length}
-						next={() => { }}
-						hasMore={true}
-						loader={<h4></h4>}
-						scrollableTarget="scrollableMessageList"
-
-					>
-						{Array.isArray(messageStore) &&
+					
+					{Array.isArray(messageStore) &&
 							messageStore
 								.filter((message) => message.conversation_id === conversationIdState)
 								.map((message, index, array) => (
@@ -736,8 +729,8 @@ console.log('messageStore', messageStore);
 									</div>
 								))
 
-						}
-					</InfiniteScroll>
+					}
+
 				</div>
 
 				<form className="my-conversation__message-list__form" onSubmit={(event) => {
@@ -774,7 +767,6 @@ console.log('messageStore', messageStore);
 							onClick={() => document.getElementById('file-camera')?.click()}
 						/>
 						<TextareaAutosize
-							//key={messageValue || 'empty'}
 							className="my-conversation__message-list__form__label__input"
 							value={messageValue}
 							onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}

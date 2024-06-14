@@ -65,8 +65,6 @@ export const GET_USER_REQUEST_BY_CONVERSATIONS = gql`
   }
 `;
 
-
-
 export const GET_USER_SUBSCRIPTION = gql`
   query Subscription {
     user {
@@ -93,4 +91,15 @@ export const GET_USERS_CONVERSATION = gql`
       deleted_at
     }
   }
+`;
+
+export const GET_USER_NOT_VIEWED_REQUESTS = gql`
+query NotViewedRequest {
+  user {
+    userHasNotViewedRequest {
+      request_id
+      user_id
+    }
+  }
+}
 `;

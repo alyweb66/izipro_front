@@ -87,6 +87,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	//const conversationIdRef = useRef(0);
 	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 	const idRef = useRef<number>(0);
+	const selectedRequestRef = useRef<RequestProps | null>(null);
 
 	const limit = 4;
 
@@ -291,8 +292,12 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			if (firstUserElement) {
 				firstUserElement.click();
 			} */
-			setSelectedUser(null);
-			setConversationIdState(0);
+
+			if (selectedRequest.id !== selectedRequestRef.current?.id) {
+				setSelectedUser(null);
+				setConversationIdState(0);
+				selectedRequestRef.current = selectedRequest;
+			}
 		}
 
 	}, [userConvStore, selectedRequest]);
@@ -378,6 +383,9 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			setSelectedRequest(null);
 		};
 	}, []);
+
+	
+
 
 	// Function to delete a request
 	const handleDeleteRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
@@ -586,10 +594,10 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					setMessageValue('');
 					setFile([]);
 					setUrlFile([]);
-					const textarea = document.querySelector('.my-request__message-list__form__label__input') as HTMLTextAreaElement;
+					/* const textarea = document.querySelector('.my-request__message-list__form__label__input') as HTMLTextAreaElement;
 					if (textarea) {
 						textarea.style.height = 'auto';
-					}
+					} */
 				});
 			}
 		}
@@ -654,13 +662,16 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								className={`my-request__list__detail__item 
 									${request.urgent}
 									${selectedRequest?.id === request?.id ? 'selected' : ''} 
-									${messageStore.some(message => message.request_id === request.id && message.viewed === false) ? 'not-viewed' : ''} `}
+									${messageStore.some(message => message.request_id === request.id && message.viewed === false && message.user_id !== id) ? 'not-viewed' : ''} `}
 								key={request.id}
 								onClick={(event) => {
-									handleConversation(request, event),
-									setSelectedRequest(request),
-									setIsListOpen(false),
-									setIsAnswerOpen(true),
+									if (!selectedRequest) {
+										selectedRequestRef.current = request;
+									}
+									handleConversation(request, event);
+									setSelectedRequest(request);
+									setIsListOpen(false);
+									setIsAnswerOpen(true);
 									setIsMessageOpen(false);
 								}}
 							>

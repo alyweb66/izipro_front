@@ -3,6 +3,8 @@ import { FaTrashAlt } from 'react-icons/fa';
 import pdfLogo from '/logo/pdf-icon.svg';
 import { RequestProps } from '../../Type/Request';
 import React, { useRef } from 'react';
+import { MessageProps } from '../../Type/message';
+import { userDataStore } from '../../store/UserData';
 
 type ExpandedState = {
 	[key: number]: boolean;
@@ -11,9 +13,9 @@ type ExpandedState = {
 const RequestItem = ({ 
 	index,
 	/* isListOpen, */
-	clientMessageViewedStore,
+	messageStore,
 	requestByDate,
-	/* isMessageOpen, */
+	handleViewedMessage,
 	setIsMessageOpen,
 	request,
 	resetRequest,
@@ -29,8 +31,8 @@ const RequestItem = ({
 	index?: number,
     /* isListOpen?: boolean, */
 	requestByDate?: RequestProps,
-	clientMessageViewedStore: number[],
-	/* isMessageOpen?: boolean, */
+	messageStore?: MessageProps[],
+	handleViewedMessage: Function,
 	setIsMessageOpen?: Function,
     request?: RequestProps,
 	resetRequest?: Function, // replace YourRequestType with the actual type of your request object
@@ -44,6 +46,8 @@ const RequestItem = ({
     openModal?: Function
   }) => {
 	const idRef = useRef<number>(0);
+	//store
+	const id = userDataStore((state) => state.id);
 	return (
 		<div
 			id={index === 0 ? 'first-user' : undefined}
@@ -53,13 +57,14 @@ const RequestItem = ({
 			${request ? 'new' : ''} 
 			${selectedRequest?.id === (request || requestByDate)?.id ? 'selected' : ''}
 			${requestByDate?.deleted_at ? 'deleted' : ''}
-			${clientMessageViewedStore?.some(id => (request || requestByDate)?.conversation?.some(conv => conv.id === id)) ? 'not-viewed' : ''}
+			${messageStore?.some(message => message.viewed === false && message.user_id !== id && message.request_id === (request || requestByDate)?.id ) ? 'not-viewed' : ''}
 			` }
 			key={((request || requestByDate)?.id)?.toString()} 
 			onClick={() => {
 				if ((request || requestByDate) && setSelectedRequest) {
 					setSelectedRequest && setSelectedRequest(request || requestByDate);
 				}
+				handleViewedMessage();
 				setIsListOpen && setIsListOpen(false);
 				setIsMessageOpen && setIsMessageOpen(true);
 			}}

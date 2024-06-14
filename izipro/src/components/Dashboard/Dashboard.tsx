@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Account from './Account/Account';
 import Request from './Request/Request';
@@ -6,7 +6,7 @@ import MyRequest from './MyRequest/MyRequest';
 import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import { userConversation, userDataStore } from '../../store/UserData';
-import { useQueryUserData, useQueryUserSubscriptions } from '../Hook/Query';
+import { useQueryNotViewedRequests, useQueryUserData, useQueryUserSubscriptions } from '../Hook/Query';
 import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
 import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
@@ -17,7 +17,7 @@ import Spinner from '../Hook/Spinner';
 import { useMyRequestMessageSubscriptions } from '../Hook/MyRequestSubscription';
 import { useClientRequestSubscriptions } from '../Hook/ClientRequestSubscription';
 import { useMyConversationSubscriptions } from '../Hook/MyConversationSubscription';
-import { viewedClientMessageStore, viewedClientRequestStore, viewedMyRequestMessageStore } from '../../store/Viewed';
+import { notViewedRequest, notViewedRequestRef } from '../../store/Viewed';
 import { ClientRequestBadge } from '../Hook/Badge';
 
 import { RequestProps } from '../../Type/Request';
@@ -27,6 +27,7 @@ import * as turf from '@turf/turf';
 import { clientRequestStore, myRequestStore, requestConversationStore } from '../../store/Request';
 import { MessageProps } from '../../Type/message';
 import { messageDataStore, myMessageDataStore } from '../../store/message';
+import { DELETE_NOT_VIEWED_REQUEST_MUTATION, NOT_VIEWED_REQUEST_MUTATION } from '../GraphQL/NotViewedRequestMutation';
 
 
 function Dashboard() {
@@ -39,6 +40,8 @@ function Dashboard() {
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [newUserId, setNewUserId] = useState<number[]>([]);
 	const [viewedMessageState, setViewedMessageState] = useState<number[]>([]);
+	const [viewedMyConversationMessageState, setViewedMyConversationMessageState] = useState<number[]>([]);
+	const [hasQueryRun, setHasQueryRun] = useState<boolean>(false);
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -54,20 +57,27 @@ function Dashboard() {
 	myMessageDataStore((state) => [state.messages, state.setMessageStore]);
 	myRequestStore((state) => [state.requests, state.setMyRequestStore]);
 	const [userConvStore] = userConversation((state) => [state.users, state.setUsers]);
+	const [notViewedRequestStore, setNotViewedRequestStore] = notViewedRequest((state) => [state.notViewed, state.setNotViewedStore]);
 	// MyRequest store
 	const [messageStore] = myMessageDataStore((state) => [state.messages, state.setMessageStore]);
+	//MyConversation store
+	const [myConversationMessageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
+	//ClientRequest store
+	//	const [setNotViewedRequestRefStore] = notViewedRequestRef((state) => [state.setNotViewedStore]);
 
-	//store viewed
-	const [clientMessageViewedStore, setClientMessageViewedStore] = viewedClientMessageStore((state) => [state.viewed, state.setViewedStore]);
-	const [myRequestMessageViewedStore, setMyRequestMessageViewedStore] = viewedMyRequestMessageStore((state) => [state.viewed, state.setViewedStore]);
-	const [clientRequestViewedStore, setClientRequestViewedStore] = viewedClientRequestStore((state) => [state.viewed, state.setViewedStore]);
+	//useRef
+	const notViewedRequestRef = useRef<number[]>([]);
 
 	// Query to get the user data
 	const { loading: userDataLoading, getUserData } = useQueryUserData();
 	const getUserSubscription = useQueryUserSubscriptions();
+	const notViewedRequestQuery = useQueryNotViewedRequests();
 
 	//mutation
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
+	const [notViewedClientRequest, { error: notViewedClientRequestError }] = useMutation(NOT_VIEWED_REQUEST_MUTATION);
+	const [deleteNotViewedRequest, { error: deleteNotViewedRequestError }] = useMutation(DELETE_NOT_VIEWED_REQUEST_MUTATION);
+
 
 	// Subscription to get new message
 	const { messageSubscription } = useMyRequestMessageSubscriptions();
@@ -81,6 +91,30 @@ function Dashboard() {
 	} else {
 		isLogged = JSON.parse(localStorage.getItem('ayl') || '{}');
 	}
+	console.log('notViewedRequestStore', notViewedRequestStore);
+
+	useEffect(() => {
+		if (notViewedRequestQuery && !hasQueryRun) {
+
+			const viewedRequestResult = notViewedRequestQuery?.viewedData?.user.userHasNotViewedRequest;
+
+			if (viewedRequestResult) {
+				const viewedRequestArray = viewedRequestResult.map((request: { request_id: number }) => request.request_id);
+
+				if (notViewedRequestQuery && viewedRequestArray.some((id: number) => !notViewedRequestStore.includes(id))) {
+					// get the request id that are not in the store
+					const newId = viewedRequestArray.filter((id: number) => !notViewedRequestStore.includes(id));
+					console.log('newId', newId);
+
+					setNotViewedRequestStore(newId);
+					//setNotViewedRequestRefStore(viewedRequestArray);
+					//notViewedRequestRef.current = viewedRequestArray;
+					setHasQueryRun(true);
+				}
+			}
+		}
+
+	}, [notViewedRequestQuery]);
 
 	// set user subscription to the store
 	useEffect(() => {
@@ -192,14 +226,6 @@ function Dashboard() {
 				});
 				return { requests: updatedRequest };
 			});
-
-			//check if the conversation is already in the clientMessageViewedStore
-			if (!clientMessageViewedStore.some(id => messageAdded[0].conversation_id === id)) {
-				// add the conversation_id to the clientMessageViewedStore
-				setClientMessageViewedStore([...messageAdded.map(message => message.conversation_id), ...(clientMessageViewedStore || [])]);
-			}
-
-			// add the conversation_id to the clientMessageViewedStore
 			//setClientMessageViewedStore([...messageAdded.map(message => message.conversation_id), ...(clientMessageViewedStore || [])]);
 
 		}
@@ -215,6 +241,24 @@ function Dashboard() {
 
 				if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
 					RangeFilter([requestAdded], true);
+
+					/* // add request.id to the viewedRequestStore
+					setNotViewedRequestStore([...notViewedRequestStore, requestAdded.id]);
+
+					if(addNotViewedRequest.length > 0) {
+						notViewedClientRequest({
+							variables: {
+								input: {
+									user_id: id,
+									request_id: addNotViewedRequest
+								}
+							}
+						});
+	
+						if (notViewedClientRequestError) {
+							throw new Error('Error while updating viewed Clientrequests');
+						}
+					} */
 				}
 			}
 
@@ -300,7 +344,7 @@ function Dashboard() {
 
 			if (selectedRequest?.id === messageAdded[0].request_id) {
 				setSelectedRequest((prevState: RequestProps | null) => {
-				// if a conversation is already in selectedRequest
+					// if a conversation is already in selectedRequest
 					if (prevState && prevState.conversation && prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
 						const updatedRequest = prevState?.conversation.map(conversation => {
 
@@ -311,8 +355,8 @@ function Dashboard() {
 						});
 						return { ...prevState, conversation: updatedRequest };
 
-					// if no conversation in the selectedRequest
-					} else if (prevState && !prevState.conversation ) {
+						// if no conversation in the selectedRequest
+					} else if (prevState && !prevState.conversation) {
 
 						const conversation = [
 							{
@@ -332,7 +376,7 @@ function Dashboard() {
 
 						return { ...prevState, conversation };
 
-					// if the conversation id is not in the selectedRequest
+						// if the conversation id is not in the selectedRequest
 					} else if (prevState && !prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
 
 						const conversation = [
@@ -379,6 +423,7 @@ function Dashboard() {
 
 	}, [messageSubscription]);
 
+	// useEffect to count the number of conversation that are not viewed message in MyRequest
 	useEffect(() => {
 		if (messageStore.length > 0) {
 			// count the number of conversation that are not viewed message
@@ -393,6 +438,74 @@ function Dashboard() {
 		}
 
 	}, [messageStore]);
+
+	// useEffect to count the number of conversation that are not viewed message in MyConversation
+	useEffect(() => {
+		if (myConversationMessageStore.length > 0) {
+			// count the number of conversation that are not viewed message
+			const unviewedConversations = new Set(
+				myConversationMessageStore
+					.filter(message => message.viewed === false)
+					.map(message => message.request_id)
+			);
+
+			setViewedMyConversationMessageState([...unviewedConversations]);
+
+		}
+
+	}, [myConversationMessageStore]);
+	/* 
+	useEffect(() => {
+		const handleBeforeUnload = () => {
+			console.log('before unload');
+			
+			// compare the notViewedRequestStore with notViewedRequestRef.current
+			const deleteViewedRequest = notViewedRequestRef.current.filter(id => !notViewedRequestStore.includes(id));
+			const addNotViewedRequest = notViewedRequestStore.filter(id => !notViewedRequestRef.current.includes(id));
+
+			if (addNotViewedRequest.length > 0) {
+				
+				notViewedClientRequest({
+					variables: {
+						input: {
+							user_id: id,
+							request_id: addNotViewedRequest
+						}
+					}
+				});
+	
+				if (notViewedClientRequestError) {
+					throw new Error('Error while updating viewed Clientrequests');
+				}
+			}
+
+			if (deleteViewedRequest.length > 0) {
+				
+				deleteNotViewedRequest({
+					variables: {
+						input: {
+							user_id: id,
+							request_id: deleteViewedRequest
+						}
+					}
+				});
+
+				if (deleteNotViewedRequestError) {
+					throw new Error('Error while deleting viewed Clientrequests');
+				}
+			}
+		};
+
+		document.addEventListener('visibilitychange', handleBeforeUnload);
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
+		return () => {
+			document.removeEventListener('visibilitychange', handleBeforeUnload);
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
+	}); */
+
+
 	// function to handle navigation to my conversation
 	const handleMyConvesationNavigate = () => {
 		setSelectedTab('My conversations');
@@ -430,9 +543,29 @@ function Dashboard() {
 			// Add the new requests to the top of the list
 			if (newRequests) {
 				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
+				console.log('newRequests', newRequests);
 
-				// add the request.id to the viewedClientRequestStore
-				setClientRequestViewedStore([...newRequests.map(request => request.id), ...(clientRequestViewedStore || [])]);
+				// add request.id to the viewedRequestStore
+				if (notViewedRequestStore.length === 0 || notViewedRequestStore.some(id => id !== newRequests[0].id)) {
+					console.log('passed');
+
+					setNotViewedRequestStore([...notViewedRequestStore, newRequests[0].id]);
+					//add id to the dabase
+					if (newRequests[0].id) {
+						notViewedClientRequest({
+							variables: {
+								input: {
+									user_id: id,
+									request_id: [newRequests[0].id]
+								}
+							}
+						});
+
+						if (notViewedClientRequestError) {
+							throw new Error('Error while updating viewed Clientrequests');
+						}
+					}
+				}
 
 			}
 
@@ -466,9 +599,35 @@ function Dashboard() {
 			// Add the new requests to the bottom of the list
 			if (newRequests) {
 				setClientRequestsStore([...newRequests, ...(clientRequestsStore || []),]);
+console.log('newRequests1', newRequests);
 
-				// add the request.id to the viewedClientRequestStore
-				setClientRequestViewedStore([...newRequests.map(request => request.id), ...(clientRequestViewedStore || [])]);
+				// add request.id to the viewedRequestStore
+				/* if (notViewedRequestStore.length === 0 || notViewedRequestStore.some(id => newRequests.some(request => request.id !== id))) {
+					console.log('passed2', newRequests[0].id, notViewedRequestStore);
+					// select only the id who are not in the store
+					const newId = newRequests.filter((request: RequestProps) => !notViewedRequestStore.includes(request.id)).map(request => request.id);
+console.log('newId2', newId);
+
+					if (newId.length > 0) {
+						setNotViewedRequestStore([...notViewedRequestStore, ...newId]);
+						// add request.id to the database
+						if (newRequests[0].id) {
+							notViewedClientRequest({
+								variables: {
+									input: {
+										user_id: id,
+										request_id: [newRequests[0].id]
+									}
+								}
+							});
+
+							if (notViewedClientRequestError) {
+								throw new Error('Error while updating viewed Clientrequests');
+							}
+						}
+					}
+				} */
+
 			}
 
 		}
@@ -511,7 +670,7 @@ function Dashboard() {
 								className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
 								onClick={() => { setSelectedTab('Client request'), setIsOpen(!isOpen); }}>Client
 							</li>
-							{clientRequestViewedStore.length > 0 && <ClientRequestBadge count={clientRequestViewedStore.length} />}
+							{notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />}
 						</div>
 					}
 					{role === 'pro' &&
@@ -520,7 +679,7 @@ function Dashboard() {
 								className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
 								onClick={() => { setSelectedTab('My conversations'), setIsOpen(!isOpen); }}>Mes échanges
 							</li>
-							{clientMessageViewedStore.length > 0 && <ClientRequestBadge count={clientMessageViewedStore.length} />}
+							{viewedMyConversationMessageState.length > 0 && <ClientRequestBadge count={viewedMyConversationMessageState.length} />}
 						</div>
 					}
 					<div className="dashboard__nav__menu__content">
@@ -536,7 +695,6 @@ function Dashboard() {
 
 				{selectedTab === 'Request' && <Request />}
 				{selectedTab === 'My requests' && <MyRequest
-					messageSubscription={messageSubscription}
 					selectedRequest={selectedRequest}
 					setSelectedRequest={setSelectedRequest}
 					newUserId={newUserId}

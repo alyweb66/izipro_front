@@ -14,7 +14,10 @@ import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt } from 'react-icons/fa';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
-import { viewedClientRequestStore } from '../../../store/Viewed';
+import { notViewedRequest, notViewedRequestRef } from '../../../store/Viewed';
+import { DELETE_NOT_VIEWED_REQUEST_MUTATION } from '../../GraphQL/NotViewedRequestMutation';
+
+
 
 
 type ExpandedState = {
@@ -56,15 +59,18 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 	const setRequest = requestDataStore((state) => state.setRequest);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
-	const [clientRequestViewedStore, setClientRequestViewedStore] = viewedClientRequestStore((state) => [state.viewed, state.setViewedStore]);
+	const [notViewedRequestStore, setNotViewedRequestStore] = notViewedRequest((state) => [state.notViewed, state.setNotViewedStore]);
+	//const [notViewedRequestRefStore, setNotViewedRequestRefStore] = notViewedRequestRef((state) => [state.notViewed, state.setNotViewedStore]);
 
 	// mutation
 	const [hideRequest, { loading: hiddenLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 	const [subscriptionMutation, { loading: subscribeLoading, error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
+	const [deleteNotViewedRequest, {error: deleteNotViewedRequestError}] = useMutation(DELETE_NOT_VIEWED_REQUEST_MUTATION);
+
+	
 
 	// get requests by job
 	const { loading: requestJobLoading, getRequestsByJob, fetchMore } = useQueryRequestByJob(jobs, 0, limit);
-	console.log('getRequestsByJob', getRequestsByJob);
 
 	/* // Function to filter the requests by the user's location and the request's location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
@@ -143,7 +149,6 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 		}
 	} */
 
-	console.log('clientRequestViewedStore22', clientRequestViewedStore);
 
 	// Function to load more requests with infinite scroll
 	function addRequest() {
@@ -298,20 +303,71 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 	// useEffect to see if the request is viewed
 	useEffect(() => {
 		// Create an IntersectionObserver
+		
 		const observer = new IntersectionObserver((entries) => {
+			console.log('coucou');
 			const requestIdsInView = entries
 				.filter(entry => entry.isIntersecting)
 				.map(entry => {
 					const requestIdString = entry.target.getAttribute('data-request-id');
 					return requestIdString !== null ? parseInt(requestIdString) : null;
 				})
-				.filter(requestId => requestId !== null && clientRequestViewedStore.includes(requestId));
+				.filter(requestId => requestId !== null && notViewedRequestStore.includes(requestId));
 
+				console.log('requestIdsInView', requestIdsInView);
 			if (requestIdsInView.length > 0) {
+				// check if the id is in the notViewedRequestStore
+				const isAnyIdInViewInStore = requestIdsInView.some(id => notViewedRequestStore.includes(id as number));
+
 				setTimeout(() => {
-					// remove all requestIdsInView from the viewedClientRequestStore at once
-					setClientRequestViewedStore(clientRequestViewedStore.filter(value => !requestIdsInView.includes(value)));
+				// remove all requestIdsInView from the viewedClientRequestStore at once
+					if (isAnyIdInViewInStore) {
+						console.log('addNotViewedRequest', isAnyIdInViewInStore);
+						
+						notViewedRequest.setState(prevState => ({ notViewed: prevState.notViewed.filter(value => !requestIdsInView.includes(value)) }));
+					//setNotViewedRequestStore(notViewedRequestStore.filter(value => !requestIdsInView.includes(value)));
+					}
+					//notViewedRequest.setState({ notViewed: notViewedRequestStore.filter(value => !requestIdsInView.includes(value)) });
+
+					// remove not viewed request from the database
+					if (requestIdsInView.length > 0) {
+						console.log('deleteNotViewedRequest');
+						console.log('notViewedRequestStore ', notViewedRequestStore);
+					
+						deleteNotViewedRequest({
+							variables: {
+								input: {
+									user_id: id,
+									request_id: requestIdsInView
+								}
+							}
+						});
+	
+						if (deleteNotViewedRequestError) {
+							throw new Error('Error while deleting viewed Clientrequests');
+						}
+					}
 				}, 3000);
+				
+
+	
+				/* if(addNotViewedRequest.length > 0) {
+					notViewedClientRequest({
+						variables: {
+							input: {
+								user_id: id,
+								request_id: addNotViewedRequest
+							}
+						}
+					});
+	
+					if (notViewedClientRequestError) {
+						throw new Error('Error while updating viewed Clientrequests');
+					}
+				} */
+	
+
+
 			}
 		});
 
@@ -338,7 +394,7 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 			document.removeEventListener('visibilitychange', handleVisibilityChange);
 		};
 
-	}, [clientRequestViewedStore]);
+	});
 
 
 	return (
@@ -352,13 +408,13 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 					<div className="client-request__list__detail">
 						{clientRequestsStore.map((request) => (
 							<div
-								className={`client-request__list__detail__item ${request.urgent} ${clientRequestViewedStore.includes(request.id) ? 'not-viewed' : ''}`}
+								className={`client-request__list__detail__item ${request.urgent} ${notViewedRequestStore.some(id => id === request.id) ? 'not-viewed' : ''} `}
 								data-request-id={request?.id}
 								key={request.id}
 								onClick={(event) => {
 									setRequest(request),
-										onDetailsClick(),
-										event.stopPropagation();
+									onDetailsClick(),
+									event.stopPropagation();
 								}}
 
 							>
@@ -437,7 +493,7 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 														src={media.url}
 														onClick={(event: React.MouseEvent) => {
 															openModal(imageUrls, index),
-																event.stopPropagation();
+															event.stopPropagation();
 														}}
 														alt={media.name}
 													/>
@@ -464,7 +520,7 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 										console.log('delete-request', request.id);
 
 										document.getElementById(`delete-request-${request.id}`)?.click(),
-											event.stopPropagation();
+										event.stopPropagation();
 									}}
 								/>
 							</div>
