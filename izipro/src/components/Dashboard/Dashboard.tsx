@@ -40,7 +40,7 @@ function Dashboard() {
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [newUserId, setNewUserId] = useState<number[]>([]);
 	const [viewedMessageState, setViewedMessageState] = useState<number[]>([]);
-	const [viewedMyConversationMessageState, setViewedMyConversationMessageState] = useState<number[]>([]);
+	const [viewedMyConversationState, setViewedMyConversationState] = useState<number[]>([]);
 	const [hasQueryRun, setHasQueryRun] = useState<boolean>(false);
 
 	//store
@@ -53,7 +53,7 @@ function Dashboard() {
 	const settings = userDataStore((state) => state.settings);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 	messageDataStore((state) => [state.messages, state.setMessageStore]);
-	requestConversationStore((state) => [state.requests, state.setRequestConversation]);
+	const [requestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 	myMessageDataStore((state) => [state.messages, state.setMessageStore]);
 	const [requestStore] = myRequestStore((state) => [state.requests, state.setMyRequestStore]);
 	const [userConvStore] = userConversation((state) => [state.users, state.setUsers]);
@@ -128,7 +128,7 @@ function Dashboard() {
 	useEffect(() => {
 		if (role) {
 			if (role === 'pro') {
-				setSelectedTab('Client request');
+				setSelectedTab('My conversations');
 			} else {
 				setSelectedTab('My requests');
 			}
@@ -217,7 +217,7 @@ function Dashboard() {
 				const updatedRequest = prevState.requests.map((request: RequestProps) => {
 					const updatedConversation = request.conversation?.map((conversation) => {
 						if (conversation.id === messageAdded[0].conversation_id) {
-							return { ...conversation, updated_at: newDate };
+							return { ...conversation, updated_at: newDate, sender: messageAdded[0].user_id };
 						}
 						return conversation;
 					});
@@ -295,11 +295,11 @@ function Dashboard() {
 
 						const updatedConversation = request.conversation.map((conversation) => {
 							if (conversation.id === messageAdded[0].conversation_id) {
-								return { ...conversation, updated_at: newDate, viewed_message: false };
+								return { ...conversation, updated_at: newDate, sender: messageAdded[0].user_id };
 							}
 							return conversation;
 						});
-						return { ...request, conversation: updatedConversation, viewed_conv: false};
+						return { ...request, conversation: updatedConversation };
 
 						// if there is a conversation in the request but the conversation id is not in the request
 					} else if (request.id === messageAdded[0].request_id && request.conversation?.some(
@@ -313,10 +313,10 @@ function Dashboard() {
 								user_2: id,
 								request_id: messageAdded[0].request_id,
 								updated_at: newDate,
-								viewed_message: false
+								sender: messageAdded[0].user_id
 							}
 						];
-						return { ...request, conversation, viewed_conv: false };
+						return { ...request, conversation };
 
 					} else {
 						// if the request hasn't a conversation
@@ -330,11 +330,11 @@ function Dashboard() {
 									user_2: id,
 									request_id: messageAdded[0].request_id,
 									updated_at: newDate,
-									viewed_message: false
+									sender: messageAdded[0].user_id
 								}
 							];
 
-							return { ...request, conversation, viewed_conv: false };
+							return { ...request, conversation };
 
 						}
 					}
@@ -352,11 +352,11 @@ function Dashboard() {
 						const updatedRequest = prevState?.conversation.map(conversation => {
 
 							if (conversation.id === messageAdded[0].conversation_id) {
-								return { ...conversation, updated_at: newDate, viewed_message: false};
+								return { ...conversation, updated_at: newDate, sender: messageAdded[0].user_id};
 							}
 							return conversation;
 						});
-						return { ...prevState, conversation: updatedRequest, viewed_conv: false };
+						return { ...prevState, conversation: updatedRequest };
 
 						// if no conversation in the selectedRequest
 					} else if (prevState && !prevState.conversation) {
@@ -368,7 +368,7 @@ function Dashboard() {
 								user_2: id,
 								request_id: messageAdded[0].request_id,
 								updated_at: newDate,
-								viewed_message: false
+								sender: messageAdded[0].user_id
 							}
 						];
 
@@ -378,7 +378,7 @@ function Dashboard() {
 							setNewUserId([messageAdded[0].user_id]);
 						}
 
-						return { ...prevState, conversation, viewed_conv: false };
+						return { ...prevState, conversation };
 
 						// if the conversation id is not in the selectedRequest
 					} else if (prevState && !prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
@@ -391,7 +391,7 @@ function Dashboard() {
 								user_2: id,
 								request_id: messageAdded[0].request_id,
 								updated_at: newDate,
-								viewed_message: false
+								sender: messageAdded[0].user_id
 							}
 						];
 
@@ -402,7 +402,7 @@ function Dashboard() {
 							setNewUserId([messageAdded[0].user_id]);
 						}
 
-						return { ...prevState, conversation, viewed_conv: false };
+						return { ...prevState, conversation };
 
 					} else {
 						return null;
@@ -435,7 +435,7 @@ function Dashboard() {
 			// count the number of conversation that are not viewed message
 			const unviewedConversationIds = requestStore
 				.flatMap(request => request.conversation || [])
-				.filter(conversation => conversation.viewed_message === false)
+				.filter(conversation => conversation.sender !== id && conversation.sender !== 0)
 				.map(conversation => conversation.id);
 
 			setViewedMessageState([...unviewedConversationIds]);
@@ -445,19 +445,19 @@ function Dashboard() {
 
 	// useEffect to count the number of conversation that are not viewed message in MyConversation
 	useEffect(() => {
-		if (myConversationMessageStore.length > 0) {
-			// count the number of conversation that are not viewed message
-			const unviewedConversations = new Set(
-				myConversationMessageStore
-					.filter(message => message.viewed === false)
-					.map(message => message.request_id)
-			);
+		if (requestsConversationStore.length > 0) {
+			// count the number of conversation who is not viewed
+			const unviewedConversations = requestsConversationStore
+				.flatMap(request => request.conversation
+					.filter(conversation => conversation.sender !== id && conversation.sender !== 0 && (conversation.user_1 === id || conversation.user_2 === id))
+					.map(conversation => conversation.id)
+				);
 
-			setViewedMyConversationMessageState([...unviewedConversations]);
+			setViewedMyConversationState(unviewedConversations);
 
 		}
 
-	}, [myConversationMessageStore]);
+	}, [requestsConversationStore]);
 	
 	// function to handle navigation to my conversation
 	const handleMyConvesationNavigate = () => {
@@ -632,7 +632,7 @@ console.log('newId2', newId);
 								className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
 								onClick={() => { setSelectedTab('My conversations'), setIsOpen(!isOpen); }}>Mes échanges
 							</li>
-							{viewedMyConversationMessageState.length > 0 && <ClientRequestBadge count={viewedMyConversationMessageState.length} />}
+							{viewedMyConversationState.length > 0 && <ClientRequestBadge count={viewedMyConversationState.length} />}
 						</div>
 					}
 					<div className="dashboard__nav__menu__content">

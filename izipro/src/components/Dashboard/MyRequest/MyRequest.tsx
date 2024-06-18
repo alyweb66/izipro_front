@@ -11,7 +11,7 @@ import { myMessageDataStore } from '../../../store/message';
 import { MessageProps } from '../../../Type/message';
 import { useFileHandler } from '../../Hook/useFileHandler';
 import { subscriptionDataStore, SubscriptionStore } from '../../../store/subscription';
-import { MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
+import { MESSAGE_MUTATION, UPDATE_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
 import { SubscriptionProps } from '../../../Type/Subscription';
 //import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
@@ -27,7 +27,7 @@ import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import Spinner from '../../Hook/Spinner';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
-import { VIEWED_MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
+//import { VIEWED_MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 ReactModal.setAppElement('#root');
 
 
@@ -100,7 +100,8 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [deleteRequest, { error: deleteRequestError }] = useMutation(DELETE_REQUEST_MUTATION);
 	const [message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
-	const [viewedMessage, { error: viewedMessageError }] = useMutation(VIEWED_MESSAGE_MUTATION);
+	//const [viewedMessage, { error: viewedMessageError }] = useMutation(VIEWED_MESSAGE_MUTATION);
+	const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
 
 	// Query to get the user requests
 	const { loading: requestLoading, getUserRequestsData, fetchMore } = useQueryUserRequests(id, 0, limit);
@@ -373,25 +374,43 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {
-		// change viewed status of the message
+		// change viewed status of the conversation
 		console.log('viewedIds', viewedIds);
 		if (selectedRequest && selectedRequest.conversation) {
-			const messageIds = messageStore
+			/* const messageIds = messageStore
 				.filter(message => message.conversation_id === viewedIds 
 				&& message.viewed === false
 				&& message.user_id !== id)
-				.map(message => message.id);
-			console.log('messageIds', messageIds);
+				.map(message => message.id); */
+			//console.log('messageIds', messageIds);
 			
-			if (messageIds.length > 0) {
-				viewedMessage({
+			if (viewedIds > 0 && viewedIds !== id) {
+				updateConversation({
 					variables: {
 						input: {
-							id: messageIds,
+							id: viewedIds,
 						}
 					}
 				}).then(() => {
+					//update conversation viewed status in the store
+					myRequestStore.setState(prevState => {
+						const updatedRequests = prevState.requests.map(request => {
+							if (request.id === selectedRequest?.id) {
+								return {
+									...request, conversation: selectedRequest.conversation.map(conversation =>
+										conversation.id === viewedIds ? { ...conversation, sender: 0 } : conversation
+									)
+								};
+							}
+							return request;
+						});
+						return {
+							...prevState,
+							requests: [...updatedRequests]
+						};
+					});
 
+					/* // update the message store
 					myMessageDataStore.setState(prevState => {
 						console.log('before map', prevState);
 	
@@ -401,7 +420,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							if (messageIds.includes(message.id)) {
 								console.log('message to true');
 	
-								return { ...message, viewed: true };
+								return { ...message, sender: 0 };
 							}
 							return message;
 						});
@@ -409,12 +428,12 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							...prevState,
 							messages: [...updatedMessages]
 						};
-					});
+					}); */
 				});
 			}
 
-			if (viewedMessageError) {
-				throw new Error('Error while updating message');
+			if (updateConversationError) {
+				throw new Error('Error while updating conversation');
 			}
 			setViewedI(0);
 		}
@@ -425,7 +444,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}, 200);
 	}, [messageStore]);
 
-	// useEffect to update the request viewed status
+	/* // useEffect to update the request viewed status
 	useEffect(() => {
 		// check if all converation are viewed to update the request viewed status
 		myRequestStore.setState(prevState => {
@@ -440,7 +459,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				requests: [...updatedRequests]
 			};
 		});
-	}, [selectedRequest]);
+	}, [selectedRequest]); */
 
 	//  set selected request at null when the component is unmounted
 	useEffect(() => {
@@ -579,7 +598,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	};
 
-
+	// Function to handle the user message and update the conversation viewed status
 	const handleMessageConversation = (userId: number, event?: React.MouseEvent<HTMLDivElement>) => {
 		event?.preventDefault();
 
@@ -600,7 +619,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				if (request.id === selectedRequest?.id) {
 					return {
 						...request, conversation: selectedRequest.conversation.map(conversation =>
-							conversation.id === conversationId?.id ? { ...conversation, viewed_message: true } : conversation
+							conversation.id === conversationId?.id ? { ...conversation, sender: 0 } : conversation
 						)
 					};
 				}
@@ -617,7 +636,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			const updatedRequest: RequestProps = {
 				...selectedRequest,
 				conversation: (selectedRequest?.conversation || []).map(conversation =>
-					conversation.id === (conversationId?.id || 0) ? { ...conversation, viewed_message: true } : conversation
+					conversation.id === (conversationId?.id || 0) ? { ...conversation, sender: 0 } : conversation
 				)
 			};
 			setSelectedRequest(updatedRequest);
@@ -721,7 +740,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								className={`my-request__list__detail__item 
 									${request.urgent}
 									${selectedRequest?.id === request?.id ? 'selected' : ''} 
-									${request.viewed_conv === false ? 'not-viewed' : ''} `}
+									${request.conversation?.some(conv => conv.sender !== id && conv.sender !== 0 ) ? 'not-viewed' : ''} `}
 
 								key={request.id}
 								onClick={(event) => {
@@ -876,7 +895,10 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						className={`my-request__answer-list__user 
 							${selectedUser?.id === user.id ? 'selected-user' : ''} 
 							${user.deleted_at ? 'deleted' : ''}
-							${(selectedRequest?.conversation.some(conv => conv.viewed_message === false && conv.user_1 === user.id || conv.user_2 === user.id)) ? 'not-viewed' : ''}`
+							${(selectedRequest?.conversation
+						.some(conv => conv.sender !== id 
+									&& conv.sender !== 0 
+									&& conv.user_1 === user.id || conv.user_2 === user.id)) ? 'not-viewed' : ''}`
 
 						}
 						key={user.id}

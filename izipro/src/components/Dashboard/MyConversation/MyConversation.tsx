@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import './MyConversation.scss';
 import { requestDataStore, requestConversationStore, clientRequestStore } from '../../../store/Request';
 import { RequestProps } from '../../../Type/Request';
-import { CONVERSATION_MUTATION, MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
+import { CONVERSATION_MUTATION, MESSAGE_MUTATION, UPDATE_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
 import { useMutation } from '@apollo/client';
 import { userDataStore } from '../../../store/UserData';
 import { useQueryMessagesByConversation, useQueryUserConversations } from '../../Hook/Query';
@@ -79,6 +79,7 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 	const [viewedMessage, { error: viewedMessageError }] = useMutation(VIEWED_MESSAGE_MUTATION);
+	const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
 	
 	//query
 	const { loading: convLoading, data: requestConv, fetchMore } = useQueryUserConversations(0, limit) as unknown as useQueryUserConversationsProps;
@@ -88,14 +89,14 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 	const { file, urlFile, setUrlFile, setFile, handleFileChange } = useFileHandler();
 
 	//useEffect to set request in starting
-	useEffect(() => {
+	/* useEffect(() => {
 		if (requestByDate && selectedRequest?.id === 0 && (requestByDate?.length ?? 0) > 0) {
 			setSelectedRequest(requestByDate[0]);
 			setTimeout(() => {
 				document.getElementById('first-user')?.click();
 			}, 200);
 		}
-	}, [requestByDate]);
+	}, [requestByDate]); */
 
 	// useEffect to set the new selected request
 	useEffect(() => {
@@ -132,6 +133,7 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 			setConversationIdState(conversationId?.id ?? 0);
 
 		}
+
 	}, [selectedRequest]);
 	console.log('messageStore', messageStore);
 
@@ -239,6 +241,53 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {
+console.log('before if');
+
+		if (selectedRequest?.conversation.some(conv => conv.sender !== id && conv.sender !== 0 && (conv.user_1 === id || conv.user_2 === id))) {
+			console.log('update conversation');
+			
+			updateConversation({
+				variables: {
+					input: {
+						id: conversationIdState,
+					}
+				}
+			}).then(() => {
+				// update viewed message in the store
+				/* messageDataStore.setState(prevState => {
+					const updatedMessages = prevState.messages.map(message => {
+						if (messageIds.includes(message.id)) {
+							return { ...message, viewed: true };
+						}
+						return message;
+					});
+					return {
+						...prevState,
+						messages: [...updatedMessages]
+					};
+				}); */
+
+				// update request.conversation of the store
+				requestConversationStore.setState(prevState => {
+					const updatedRequests = prevState.requests.map(request => {
+						const updatedConversation = request.conversation?.map(conversation => {
+							if (conversation.id === conversationIdState) {
+								return { ...conversation, sender: 0 };
+							}
+							return conversation;
+						});
+						return { ...request, conversation: updatedConversation };
+					});
+					return { requests: updatedRequests };
+				});
+				
+		
+				if (updateConversationError) {
+					throw new Error('Error updating conversation');
+				}
+			});
+		}
+
 		setTimeout(() => {
 			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
 		}, 200);
@@ -537,7 +586,7 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 	};
 
 	const handleViewedMessage = () => {
-		// change viewed status of the message
+	/* 	// change viewed status of the message
 		if (selectedRequest && selectedRequest.conversation) {
 			
 			const messageIds = messageStore
@@ -554,28 +603,61 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 							id: messageIds,
 						}
 					}
-				}).then(() => {
+				}).then(() => { */
+		/* 	const messageIds = messageStore
+			.filter(
+				message => message.conversation_id === conversationIdState 
+				&& message.user_id !== id)
+			.map(message => message.id); */
 
-					// update viewed message in the store
-					messageDataStore.setState(prevState => {
-						const updatedMessages = prevState.messages.map(message => {
-							if (messageIds.includes(message.id)) {
-								return { ...message, viewed: true };
-							}
-							return message;
-						});
-						return {
-							...prevState,
-							messages: [...updatedMessages]
-						};
+		if (selectedRequest?.conversation.some(conv => conv.sender !== id && conv.sender !== 0 && (conv.user_1 === id || conv.user_2 === id))) {
+			updateConversation({
+				variables: {
+					input: {
+						id: conversationIdState,
+					}
+				}
+			}).then(() => {
+				// update viewed message in the store
+				/* messageDataStore.setState(prevState => {
+					const updatedMessages = prevState.messages.map(message => {
+						if (messageIds.includes(message.id)) {
+							return { ...message, viewed: true };
+						}
+						return message;
 					});
-				});
-			}
+					return {
+						...prevState,
+						messages: [...updatedMessages]
+					};
+				}); */
 
-			if (viewedMessageError) {
-				throw new Error('Error while updating message');
-			}
+				// update request.conversation of the store
+				requestConversationStore.setState(prevState => {
+					const updatedRequests = prevState.requests.map(request => {
+						const updatedConversation = request.conversation?.map(conversation => {
+							if (conversation.id === conversationIdState) {
+								return { ...conversation, sender: 0 };
+							}
+							return conversation;
+						});
+						return { ...request, conversation: updatedConversation };
+					});
+					return { requests: updatedRequests };
+				});
+				
+		
+				if (updateConversationError) {
+					throw new Error('Error updating conversation');
+				}
+			});
 		}
+
+
+		/* if (viewedMessageError) {
+			throw new Error('Error while updating message');
+		} */
+		
 	};
 
 	return (

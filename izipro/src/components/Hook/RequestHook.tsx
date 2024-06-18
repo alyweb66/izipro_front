@@ -57,7 +57,7 @@ const RequestItem = ({
 			${request ? 'new' : ''} 
 			${selectedRequest?.id === (request || requestByDate)?.id ? 'selected' : ''}
 			${requestByDate?.deleted_at ? 'deleted' : ''}
-			${messageStore?.some(message => message.viewed === false && message.user_id !== id && message.request_id === (request || requestByDate)?.id ) ? 'not-viewed' : ''}
+			${(request || requestByDate)?.conversation.some(conv => conv.sender !== id && conv.sender !== 0 && (conv.user_1 === id || conv.user_2 === id)) ? 'not-viewed' : ''}
 			` }
 			key={((request || requestByDate)?.id)?.toString()} 
 			onClick={() => {

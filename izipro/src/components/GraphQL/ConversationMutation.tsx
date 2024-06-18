@@ -18,3 +18,9 @@ export const MESSAGE_MUTATION = gql`
   
 }
 `;
+
+export const UPDATE_CONVERSATION_MUTATION = gql`
+  mutation UpdateConversationMutation($input: UpdateConversationInput!) {
+    updateConversation(input: $input)
+  }
+`;
