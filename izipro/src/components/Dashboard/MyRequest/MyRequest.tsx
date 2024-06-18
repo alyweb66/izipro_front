@@ -68,6 +68,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
 	const [isHasMore, setIsHasMore] = useState(true);
 	const [isUserMessageOpen, setIsUserMessageOpen] = useState(false);
+	const [viewedIds, setViewedI] = useState<number>(0);
 
 
 	// Create a state for the scroll position
@@ -123,7 +124,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			}
 		}
 
-		if (getUserRequestsData?.user.requests.length < limit) {
+		if (getUserRequestsData?.user.requests?.length < limit) {
 			setIsHasMore(false);
 		}
 	}, [getUserRequestsData]);
@@ -216,7 +217,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			// get request id of all request which are not in the subscription
 			const idsNotInRequestSubscriptionStore = myRequestsStore
 				.filter(request => !conversationRequestIds.includes(request.id))
-				.map(request => request.id); // map to an array of ids
+				.map(request => request.id); // map to an array of viewedIds
 
 			// check if the request is already in the subscription
 			if (idsNotInRequestSubscriptionStore.length ?? 0 > 0) {
@@ -260,9 +261,11 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					}
 				}
 			}
+
+
 		}
 	}, [myRequestsStore]);
-	
+
 	// useEffect to update user conversation by date
 	useEffect(() => {
 		if (userConvStore && selectedRequest && selectedRequest.conversation) {
@@ -316,14 +319,11 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 			myMessageDataStore.setState(prevState => {
 				if (prevState.messages.length > 0) {
-
-
 					return {
 						...prevState,
 						messages: [...prevState.messages, ...newMessages]
 					};
 				} else {
-
 					return {
 						...prevState,
 						messages: [...messages]
@@ -352,7 +352,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 				setUserConvStore(usersConversationData.users);
 
-				// if same users ids in the store don't add them
+				// if same users viewedIds in the store don't add them
 			} else if (usersConversationData.users.every((user1: UserDataProps) =>
 				userConvStore.some(user2 => user2.id === user1.id))) {
 				return;
@@ -370,12 +370,77 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	}, [usersConversationData]);
 
+
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {
+		// change viewed status of the message
+		console.log('viewedIds', viewedIds);
+		if (selectedRequest && selectedRequest.conversation) {
+			const messageIds = messageStore
+				.filter(message => message.conversation_id === viewedIds 
+				&& message.viewed === false
+				&& message.user_id !== id)
+				.map(message => message.id);
+			console.log('messageIds', messageIds);
+			
+			if (messageIds.length > 0) {
+				viewedMessage({
+					variables: {
+						input: {
+							id: messageIds,
+						}
+					}
+				}).then(() => {
+
+					myMessageDataStore.setState(prevState => {
+						console.log('before map', prevState);
+	
+						const updatedMessages = prevState.messages.map(message => {
+							console.log('before if', messageIds, message.id);
+	
+							if (messageIds.includes(message.id)) {
+								console.log('message to true');
+	
+								return { ...message, viewed: true };
+							}
+							return message;
+						});
+						return {
+							...prevState,
+							messages: [...updatedMessages]
+						};
+					});
+				});
+			}
+
+			if (viewedMessageError) {
+				throw new Error('Error while updating message');
+			}
+			setViewedI(0);
+		}
+
+
 		setTimeout(() => {
 			endOfMessagesRef.current?.scrollIntoView(/* { behavior: 'smooth' } */);
 		}, 200);
 	}, [messageStore]);
+
+	// useEffect to update the request viewed status
+	useEffect(() => {
+		// check if all converation are viewed to update the request viewed status
+		myRequestStore.setState(prevState => {
+			const updatedRequests = prevState.requests.map(request => {
+				if (request.id === selectedRequest?.id && request.conversation) {
+					return { ...request, viewed_conv: request.conversation.every(conversation => conversation.viewed_message) };
+				}
+				return request;
+			});
+			return {
+				...prevState,
+				requests: [...updatedRequests]
+			};
+		});
+	}, [selectedRequest]);
 
 	//  set selected request at null when the component is unmounted
 	useEffect(() => {
@@ -383,8 +448,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			setSelectedRequest(null);
 		};
 	}, []);
-
-	
 
 
 	// Function to delete a request
@@ -402,7 +465,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			}
 
 		}).then((response) => {
-			// Get the conversation ids for the request
+			// Get the conversation viewedIds for the request
 			const conversationIds = myRequestStore.getState().requests.find(request => request.id === requestId)?.conversation?.map(conversation => conversation.id);
 
 			if (response.data.deleteRequest) {
@@ -465,7 +528,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							)
 						}));
 
-						// delete from message store all message with this conversation ids
+						// delete from message store all message with this conversation viewedIds
 						myMessageDataStore.setState(prevState => {
 							const newMessages = prevState.messages.filter(
 								(message: MessageProps) => !conversationIds.includes(message.conversation_id)
@@ -491,7 +554,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	};
 
-	// Function to handle the users ids for the conversation
+	// Function to handle the users viewedIds for the conversation
 	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLDivElement>) => {
 		event?.preventDefault();
 
@@ -500,26 +563,25 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			setUserConvState([]);
 
 		} else {
-			// Get the user ids from the conversation
-			const ids = request?.conversation?.map(conversation => {
+			// Get the user viewedIds from the conversation
+			const viewedIds = request?.conversation?.map(conversation => {
 				return conversation.user_1 !== id ? conversation.user_1 : conversation.user_2;
 			});
 
 
-			// Filter out the user ids that are already in the userConvStore
+			// Filter out the user viewedIds that are already in the userConvStore
 			const idStore = userConvStore.map(user => user.id);
-			const newIds = ids.filter(id => !idStore.includes(id));
+			const newIds = viewedIds.filter(id => !idStore.includes(id));
 
 			if (newIds.length > 0) {
 				setUserIds(newIds || []); // Provide a default value of an empty array
 			}
 		}
 	};
-	
-	// Function find conversation id for message
+
+
 	const handleMessageConversation = (userId: number, event?: React.MouseEvent<HTMLDivElement>) => {
 		event?.preventDefault();
-	
 
 		// find the conversation id for the message
 		const conversationId = selectedRequest?.conversation?.find(conversation =>
@@ -529,43 +591,38 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		if (conversationId?.id !== conversationIdState) {
 			setConversationIdState(conversationId?.id || 0);
+			setViewedI(conversationId?.id || 0);
 		}
+		
+		//update conversation viewed status in the store
+		myRequestStore.setState(prevState => {
+			const updatedRequests = prevState.requests.map(request => {
+				if (request.id === selectedRequest?.id) {
+					return {
+						...request, conversation: selectedRequest.conversation.map(conversation =>
+							conversation.id === conversationId?.id ? { ...conversation, viewed_message: true } : conversation
+						)
+					};
+				}
+				return request;
+			});
+			return {
+				...prevState,
+				requests: [...updatedRequests]
+			};
+		});
 
-
-		// change viewed status of the message
-		if (selectedRequest && selectedRequest.conversation) {
-
-			const messageIds = messageStore.filter(message => message.conversation_id === conversationId?.id && message.viewed === false).map(message => message.id);
-
-			if (messageIds.length > 0) {
-				viewedMessage({
-					variables: {
-						input: {
-							id: messageIds,
-						}
-					}
-				}).then(() => {
-
-					// update viewed message in the store
-					myMessageDataStore.setState(prevState => {
-						const updatedMessages = prevState.messages.map(message => {
-							if (messageIds.includes(message.id)) {
-								return { ...message, viewed: true };
-							}
-							return message;
-						});
-						return {
-							...prevState,
-							messages: [...updatedMessages]
-						};
-					});
-				});
-			}
-
-			if (viewedMessageError) {
-				throw new Error('Error while updating message');
-			}
+		// Create a new updated object
+		if (selectedRequest) {
+			const updatedRequest: RequestProps = {
+				...selectedRequest,
+				conversation: (selectedRequest?.conversation || []).map(conversation =>
+					conversation.id === (conversationId?.id || 0) ? { ...conversation, viewed_message: true } : conversation
+				)
+			};
+			setSelectedRequest(updatedRequest);
 		}
+	
 	};
 
 	// Function to send message and create conversation
@@ -626,12 +683,11 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					offset: myRequestsStore.length // Next offset
 				},
 			}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
-				console.log('fetchMoreResult', fetchMoreResult.data.user.requests);
 
 				// remove request who is already in the store
 				const requestsIds = myRequestsStore.map(request => request.id);
 				const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIds.includes(request.id));
-				console.log('newRequests', newRequests);
+
 				if (newRequests.length > 0) {
 					myRequestStore.setState(prevRequests => {
 						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
@@ -649,6 +705,9 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	};
 
+	console.log('requestByDate', requestByDate);
+	
+
 	return (
 		<div className="my-request">
 			<div id="scrollableRequest" className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}>
@@ -662,7 +721,8 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								className={`my-request__list__detail__item 
 									${request.urgent}
 									${selectedRequest?.id === request?.id ? 'selected' : ''} 
-									${messageStore.some(message => message.request_id === request.id && message.viewed === false && message.user_id !== id) ? 'not-viewed' : ''} `}
+									${request.viewed_conv === false ? 'not-viewed' : ''} `}
+
 								key={request.id}
 								onClick={(event) => {
 									if (!selectedRequest) {
@@ -816,19 +876,17 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						className={`my-request__answer-list__user 
 							${selectedUser?.id === user.id ? 'selected-user' : ''} 
 							${user.deleted_at ? 'deleted' : ''}
-							${messageStore.some(
-						message => message.user_id === user.id 
-								&& message.viewed === false && selectedRequest?.conversation.some(conv => conv.id === message.conversation_id)) ? 'not-viewed' : ''}`
+							${(selectedRequest?.conversation.some(conv => conv.viewed_message === false && conv.user_1 === user.id || conv.user_2 === user.id)) ? 'not-viewed' : ''}`
 
 						}
 						key={user.id}
 						onClick={(event) => {
-							handleMessageConversation(user.id, event),	
+							setSelectedUser(user);
+							handleMessageConversation(user.id, event);
 							//updateViewedMessage();
-							setIsUserMessageOpen(true),
-							setSelectedUser(user),
-							setIsMessageOpen(true),
-							setIsAnswerOpen(false),
+							setIsUserMessageOpen(true);
+							setIsMessageOpen(true);
+							setIsAnswerOpen(false);
 							setIsListOpen(false);
 						}}>
 
@@ -894,6 +952,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					{Array.isArray(messageStore) && isUserMessageOpen &&
 						messageStore
 							.filter((message) => message.conversation_id === conversationIdState)
+							.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
 							.map((message, index, array) => (
 								<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
 									{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}

@@ -14,7 +14,7 @@ import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt } from 'react-icons/fa';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
-import { notViewedRequest, notViewedRequestRef } from '../../../store/Viewed';
+import { notViewedRequest } from '../../../store/Viewed';
 import { DELETE_NOT_VIEWED_REQUEST_MUTATION } from '../../GraphQL/NotViewedRequestMutation';
 
 
@@ -59,15 +59,13 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 	const setRequest = requestDataStore((state) => state.setRequest);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
-	const [notViewedRequestStore, setNotViewedRequestStore] = notViewedRequest((state) => [state.notViewed, state.setNotViewedStore]);
+	const [notViewedRequestStore] = notViewedRequest((state) => [state.notViewed]);
 	//const [notViewedRequestRefStore, setNotViewedRequestRefStore] = notViewedRequestRef((state) => [state.notViewed, state.setNotViewedStore]);
 
 	// mutation
 	const [hideRequest, { loading: hiddenLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 	const [subscriptionMutation, { loading: subscribeLoading, error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [deleteNotViewedRequest, {error: deleteNotViewedRequestError}] = useMutation(DELETE_NOT_VIEWED_REQUEST_MUTATION);
-
-	
 
 	// get requests by job
 	const { loading: requestJobLoading, getRequestsByJob, fetchMore } = useQueryRequestByJob(jobs, 0, limit);
@@ -176,6 +174,7 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 		});
 
 	}
+
 
 	// add jobs to setSubscriptionJob if there are not already in, or have the same id
 	useEffect(() => {
@@ -314,7 +313,6 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 				})
 				.filter(requestId => requestId !== null && notViewedRequestStore.includes(requestId));
 
-				console.log('requestIdsInView', requestIdsInView);
 			if (requestIdsInView.length > 0) {
 				// check if the id is in the notViewedRequestStore
 				const isAnyIdInViewInStore = requestIdsInView.some(id => notViewedRequestStore.includes(id as number));

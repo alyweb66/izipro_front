@@ -540,7 +540,12 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 		// change viewed status of the message
 		if (selectedRequest && selectedRequest.conversation) {
 			
-			const messageIds = messageStore.filter(message => message.conversation_id === conversationIdState && message.viewed === false).map(message => message.id);
+			const messageIds = messageStore
+				.filter(
+					message => message.conversation_id === conversationIdState 
+				&& message.viewed === false 
+				&& message.user_id !== id)
+				.map(message => message.id);
 
 			if (messageIds.length > 0) {
 				viewedMessage({

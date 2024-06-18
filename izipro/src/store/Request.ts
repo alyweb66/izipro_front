@@ -4,9 +4,7 @@ import { RequestSoreProps, RequestProps } from '../Type/Request';
 
 type RequestStore = RequestSoreProps & {
 	setRequest: (data: RequestSoreProps['request']) => void;
-
 	resetRequest: () => void;
-
 }
 
 type RequestConversationStore = {
@@ -51,11 +49,13 @@ export const requestDataStore = create<RequestStore>((set: (state: Partial<Reque
 			name: '',
 		}],
 		created_at: '',
+		viewed_conv: false,
 		conversation: [{
 			id: 0,
 			user_1: 0,
 			user_2: 0,
 			request_id: 0,
+			viewed_message: false,
 			updated_at: '',
 		}],
 		deleted_at: '',
@@ -81,11 +81,13 @@ export const requestDataStore = create<RequestStore>((set: (state: Partial<Reque
 			job: '',
 			media: [{ id: 0, url: '', name: '' }],
 			created_at: '',
+			viewed_conv: false,
 			conversation: [{
 				id: 0,
 				user_1: 0,
 				user_2: 0,
 				request_id: 0,
+				viewed_message: false,
 				updated_at: ''
 			}],
 			deleted_at: ''

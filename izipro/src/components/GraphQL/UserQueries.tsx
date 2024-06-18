@@ -52,11 +52,13 @@ export const GET_USER_REQUEST_BY_CONVERSATIONS = gql`
           name
         }
         created_at
+        viewed_conv
         conversation {
           id
           user_1
           user_2
           request_id
+          viewed_message
           updated_at
         }
         deleted_at

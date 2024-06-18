@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Account from './Account/Account';
 import Request from './Request/Request';
@@ -17,7 +17,7 @@ import Spinner from '../Hook/Spinner';
 import { useMyRequestMessageSubscriptions } from '../Hook/MyRequestSubscription';
 import { useClientRequestSubscriptions } from '../Hook/ClientRequestSubscription';
 import { useMyConversationSubscriptions } from '../Hook/MyConversationSubscription';
-import { notViewedRequest, notViewedRequestRef } from '../../store/Viewed';
+import { notViewedRequest } from '../../store/Viewed';
 import { ClientRequestBadge } from '../Hook/Badge';
 
 import { RequestProps } from '../../Type/Request';
@@ -27,7 +27,7 @@ import * as turf from '@turf/turf';
 import { clientRequestStore, myRequestStore, requestConversationStore } from '../../store/Request';
 import { MessageProps } from '../../Type/message';
 import { messageDataStore, myMessageDataStore } from '../../store/message';
-import { DELETE_NOT_VIEWED_REQUEST_MUTATION, NOT_VIEWED_REQUEST_MUTATION } from '../GraphQL/NotViewedRequestMutation';
+import {NOT_VIEWED_REQUEST_MUTATION } from '../GraphQL/NotViewedRequestMutation';
 
 
 function Dashboard() {
@@ -55,18 +55,18 @@ function Dashboard() {
 	messageDataStore((state) => [state.messages, state.setMessageStore]);
 	requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 	myMessageDataStore((state) => [state.messages, state.setMessageStore]);
-	myRequestStore((state) => [state.requests, state.setMyRequestStore]);
+	const [requestStore] = myRequestStore((state) => [state.requests, state.setMyRequestStore]);
 	const [userConvStore] = userConversation((state) => [state.users, state.setUsers]);
 	const [notViewedRequestStore, setNotViewedRequestStore] = notViewedRequest((state) => [state.notViewed, state.setNotViewedStore]);
 	// MyRequest store
-	const [messageStore] = myMessageDataStore((state) => [state.messages, state.setMessageStore]);
+	myMessageDataStore((state) => [state.messages, state.setMessageStore]);
 	//MyConversation store
 	const [myConversationMessageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
 	//ClientRequest store
 	//	const [setNotViewedRequestRefStore] = notViewedRequestRef((state) => [state.setNotViewedStore]);
 
 	//useRef
-	const notViewedRequestRef = useRef<number[]>([]);
+	//const notViewedRequestRef = useRef<number[]>([]);
 
 	// Query to get the user data
 	const { loading: userDataLoading, getUserData } = useQueryUserData();
@@ -76,7 +76,7 @@ function Dashboard() {
 	//mutation
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
 	const [notViewedClientRequest, { error: notViewedClientRequestError }] = useMutation(NOT_VIEWED_REQUEST_MUTATION);
-	const [deleteNotViewedRequest, { error: deleteNotViewedRequestError }] = useMutation(DELETE_NOT_VIEWED_REQUEST_MUTATION);
+	//const [deleteNotViewedRequest, { error: deleteNotViewedRequestError }] = useMutation(DELETE_NOT_VIEWED_REQUEST_MUTATION);
 
 
 	// Subscription to get new message
@@ -91,8 +91,8 @@ function Dashboard() {
 	} else {
 		isLogged = JSON.parse(localStorage.getItem('ayl') || '{}');
 	}
-	console.log('notViewedRequestStore', notViewedRequestStore);
 
+	// set the notViewedRequestStore
 	useEffect(() => {
 		if (notViewedRequestQuery && !hasQueryRun) {
 
@@ -295,11 +295,11 @@ function Dashboard() {
 
 						const updatedConversation = request.conversation.map((conversation) => {
 							if (conversation.id === messageAdded[0].conversation_id) {
-								return { ...conversation, updated_at: newDate };
+								return { ...conversation, updated_at: newDate, viewed_message: false };
 							}
 							return conversation;
 						});
-						return { ...request, conversation: updatedConversation };
+						return { ...request, conversation: updatedConversation, viewed_conv: false};
 
 						// if there is a conversation in the request but the conversation id is not in the request
 					} else if (request.id === messageAdded[0].request_id && request.conversation?.some(
@@ -312,10 +312,11 @@ function Dashboard() {
 								user_1: messageAdded[0].user_id,
 								user_2: id,
 								request_id: messageAdded[0].request_id,
-								updated_at: newDate
+								updated_at: newDate,
+								viewed_message: false
 							}
 						];
-						return { ...request, conversation };
+						return { ...request, conversation, viewed_conv: false };
 
 					} else {
 						// if the request hasn't a conversation
@@ -328,11 +329,12 @@ function Dashboard() {
 									user_1: messageAdded[0].user_id,
 									user_2: id,
 									request_id: messageAdded[0].request_id,
-									updated_at: newDate
+									updated_at: newDate,
+									viewed_message: false
 								}
 							];
 
-							return { ...request, conversation };
+							return { ...request, conversation, viewed_conv: false };
 
 						}
 					}
@@ -342,6 +344,7 @@ function Dashboard() {
 				return { ...prevState, requests: updatedRequest };
 			});
 
+			// check if the selectedRequest is the same as the messageAdded and update the conversation
 			if (selectedRequest?.id === messageAdded[0].request_id) {
 				setSelectedRequest((prevState: RequestProps | null) => {
 					// if a conversation is already in selectedRequest
@@ -349,11 +352,11 @@ function Dashboard() {
 						const updatedRequest = prevState?.conversation.map(conversation => {
 
 							if (conversation.id === messageAdded[0].conversation_id) {
-								return { ...conversation, updated_at: newDate };
+								return { ...conversation, updated_at: newDate, viewed_message: false};
 							}
 							return conversation;
 						});
-						return { ...prevState, conversation: updatedRequest };
+						return { ...prevState, conversation: updatedRequest, viewed_conv: false };
 
 						// if no conversation in the selectedRequest
 					} else if (prevState && !prevState.conversation) {
@@ -364,7 +367,8 @@ function Dashboard() {
 								user_1: messageAdded[0].user_id,
 								user_2: id,
 								request_id: messageAdded[0].request_id,
-								updated_at: newDate
+								updated_at: newDate,
+								viewed_message: false
 							}
 						];
 
@@ -374,7 +378,7 @@ function Dashboard() {
 							setNewUserId([messageAdded[0].user_id]);
 						}
 
-						return { ...prevState, conversation };
+						return { ...prevState, conversation, viewed_conv: false };
 
 						// if the conversation id is not in the selectedRequest
 					} else if (prevState && !prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
@@ -386,7 +390,8 @@ function Dashboard() {
 								user_1: messageAdded[0].user_id,
 								user_2: id,
 								request_id: messageAdded[0].request_id,
-								updated_at: newDate
+								updated_at: newDate,
+								viewed_message: false
 							}
 						];
 
@@ -397,7 +402,7 @@ function Dashboard() {
 							setNewUserId([messageAdded[0].user_id]);
 						}
 
-						return { ...prevState, conversation };
+						return { ...prevState, conversation, viewed_conv: false };
 
 					} else {
 						return null;
@@ -425,19 +430,18 @@ function Dashboard() {
 
 	// useEffect to count the number of conversation that are not viewed message in MyRequest
 	useEffect(() => {
-		if (messageStore.length > 0) {
+	
+		if (requestStore.length > 0) {
 			// count the number of conversation that are not viewed message
-			const unviewedConversations = new Set(
-				messageStore
-					.filter(message => message.viewed === false)
-					.map(message => message.conversation_id)
-			);
+			const unviewedConversationIds = requestStore
+				.flatMap(request => request.conversation || [])
+				.filter(conversation => conversation.viewed_message === false)
+				.map(conversation => conversation.id);
 
-			setViewedMessageState([...unviewedConversations]);
-
+			setViewedMessageState([...unviewedConversationIds]);
 		}
 
-	}, [messageStore]);
+	}, [requestStore]);
 
 	// useEffect to count the number of conversation that are not viewed message in MyConversation
 	useEffect(() => {
@@ -454,58 +458,7 @@ function Dashboard() {
 		}
 
 	}, [myConversationMessageStore]);
-	/* 
-	useEffect(() => {
-		const handleBeforeUnload = () => {
-			console.log('before unload');
-			
-			// compare the notViewedRequestStore with notViewedRequestRef.current
-			const deleteViewedRequest = notViewedRequestRef.current.filter(id => !notViewedRequestStore.includes(id));
-			const addNotViewedRequest = notViewedRequestStore.filter(id => !notViewedRequestRef.current.includes(id));
-
-			if (addNotViewedRequest.length > 0) {
-				
-				notViewedClientRequest({
-					variables: {
-						input: {
-							user_id: id,
-							request_id: addNotViewedRequest
-						}
-					}
-				});
 	
-				if (notViewedClientRequestError) {
-					throw new Error('Error while updating viewed Clientrequests');
-				}
-			}
-
-			if (deleteViewedRequest.length > 0) {
-				
-				deleteNotViewedRequest({
-					variables: {
-						input: {
-							user_id: id,
-							request_id: deleteViewedRequest
-						}
-					}
-				});
-
-				if (deleteNotViewedRequestError) {
-					throw new Error('Error while deleting viewed Clientrequests');
-				}
-			}
-		};
-
-		document.addEventListener('visibilitychange', handleBeforeUnload);
-		window.addEventListener('beforeunload', handleBeforeUnload);
-
-		return () => {
-			document.removeEventListener('visibilitychange', handleBeforeUnload);
-			window.removeEventListener('beforeunload', handleBeforeUnload);
-		};
-	}); */
-
-
 	// function to handle navigation to my conversation
 	const handleMyConvesationNavigate = () => {
 		setSelectedTab('My conversations');
@@ -599,7 +552,7 @@ function Dashboard() {
 			// Add the new requests to the bottom of the list
 			if (newRequests) {
 				setClientRequestsStore([...newRequests, ...(clientRequestsStore || []),]);
-console.log('newRequests1', newRequests);
+
 
 				// add request.id to the viewedRequestStore
 				/* if (notViewedRequestStore.length === 0 || notViewedRequestStore.some(id => newRequests.some(request => request.id !== id))) {
