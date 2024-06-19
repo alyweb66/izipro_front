@@ -3,6 +3,8 @@ import { FaTrashAlt } from 'react-icons/fa';
 import pdfLogo from '/logo/pdf-icon.svg';
 import { RequestProps } from '../../Type/Request';
 import React, { useRef } from 'react';
+//import { MessageProps } from '../../Type/message';
+import { userDataStore } from '../../store/UserData';
 
 type ExpandedState = {
 	[key: number]: boolean;
@@ -10,9 +12,9 @@ type ExpandedState = {
 
 const RequestItem = ({ 
 	index,
-	/* isListOpen, */
+	//messageStore,
 	requestByDate,
-	/* isMessageOpen, */
+	handleViewedMessage,
 	setIsMessageOpen,
 	request,
 	resetRequest,
@@ -26,9 +28,9 @@ const RequestItem = ({
 	openModal 
 }: {
 	index?: number,
-    /* isListOpen?: boolean, */
 	requestByDate?: RequestProps,
-	/* isMessageOpen?: boolean, */
+	//messageStore?: MessageProps[],
+	handleViewedMessage: Function,
 	setIsMessageOpen?: Function,
     request?: RequestProps,
 	resetRequest?: Function, // replace YourRequestType with the actual type of your request object
@@ -42,20 +44,25 @@ const RequestItem = ({
     openModal?: Function
   }) => {
 	const idRef = useRef<number>(0);
+	//store
+	const id = userDataStore((state) => state.id);
 	return (
 		<div
 			id={index === 0 ? 'first-user' : undefined}
-			className={`my-conversation__list__detail__item 
+			/* data-request-conv-id={(request || requestByDate)?.id}  */
+			className={`my-conversation__list__detail__item
 			${(request || requestByDate)?.urgent} 
 			${request ? 'new' : ''} 
 			${selectedRequest?.id === (request || requestByDate)?.id ? 'selected' : ''}
-			${requestByDate?.deleted_at ? 'deleted' : ''} 
+			${requestByDate?.deleted_at ? 'deleted' : ''}
+			${(request || requestByDate)?.conversation?.some(conv => conv.sender !== id && conv.sender !== 0 && (conv.user_1 === id || conv.user_2 === id)) ? 'not-viewed' : ''}
 			` }
 			key={((request || requestByDate)?.id)?.toString()} 
 			onClick={() => {
 				if ((request || requestByDate) && setSelectedRequest) {
 					setSelectedRequest && setSelectedRequest(request || requestByDate);
 				}
+				handleViewedMessage();
 				setIsListOpen && setIsListOpen(false);
 				setIsMessageOpen && setIsMessageOpen(true);
 			}}

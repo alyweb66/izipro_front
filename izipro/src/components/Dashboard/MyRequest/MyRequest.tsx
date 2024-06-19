@@ -5,14 +5,13 @@ import { RequestProps } from '../../../Type/Request';
 import './MyRequest.scss';
 import { DELETE_REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
 import { useQueryMyMessagesByConversation, useQueryUserRequests, useQueryUsersConversation } from '../../Hook/Query';
-import InfiniteScroll from 'react-infinite-scroll-component';
 import { myRequestStore } from '../../../store/Request';
 import { UserDataProps } from '../../../Type/User';
 import { myMessageDataStore } from '../../../store/message';
 import { MessageProps } from '../../../Type/message';
 import { useFileHandler } from '../../Hook/useFileHandler';
 import { subscriptionDataStore, SubscriptionStore } from '../../../store/subscription';
-import { MESSAGE_MUTATION } from '../../GraphQL/ConversationMutation';
+import { MESSAGE_MUTATION, UPDATE_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
 import { SubscriptionProps } from '../../../Type/Subscription';
 //import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
@@ -28,6 +27,7 @@ import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import Spinner from '../../Hook/Spinner';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
+//import { VIEWED_MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 ReactModal.setAppElement('#root');
 
 
@@ -37,10 +37,15 @@ type ExpandedState = {
 
 
 type MyRequestProps = {
-	messageSubscription: { messageAdded: MessageProps[] } | undefined;
+	conversationIdState: number;
+	setConversationIdState: (id: number) => void;
+	selectedRequest: RequestProps | null;
+	setSelectedRequest: (request: RequestProps | null) => void;
+	newUserId: number[];
+	setNewUserId: (id: number[]) => void;
 };
 
-function MyRequest({ messageSubscription }: MyRequestProps) {
+function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserId, conversationIdState, setConversationIdState }: MyRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -48,12 +53,12 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 	//state
 	//const [requests, setRequests] = useState<RequestProps[]>([]);
 	//const [loading, setLoading] = useState(false);
-	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
+	//
 	const [userIds, setUserIds] = useState<number[]>([]);
-	const [conversationIdState, setConversationIdState] = useState<number>(0);
+	//const [conversationIdState, setConversationIdState] = useState<number>(0);
 	const [messageValue, setMessageValue] = useState('');
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
-	const [newUserId, setNewUserId] = useState<number[]>([]);
+	//const [newUserId, setNewUserId] = useState<number[]>([]);
 	const [userConvState, setUserConvState] = useState<UserDataProps[]>([]);
 	const [selectedUser, setSelectedUser] = useState<UserDataProps | null>(null);
 	const [userDescription, setUserDescription] = useState<boolean>(false);
@@ -65,6 +70,7 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
 	const [isHasMore, setIsHasMore] = useState(true);
 	const [isUserMessageOpen, setIsUserMessageOpen] = useState(false);
+	const [viewedIds, setViewedI] = useState<number>(0);
 
 
 	// Create a state for the scroll position
@@ -76,6 +82,7 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 	const [userConvStore, setUserConvStore] = userConversation((state) => [state.users, state.setUsers]);
 	const [messageStore] = myMessageDataStore((state) => [state.messages, state.setMessageStore]);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
+	//const [myRequestMessageViewedStore, setMyRequestMessageViewedStore] = viewedMyRequestMessageStore((state) => [state.viewed, state.setViewedStore]);
 
 	//useRef
 	//const updateSubscriptionRef = useRef<SubscriptionProps[]>([]);
@@ -83,6 +90,7 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 	//const conversationIdRef = useRef(0);
 	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 	const idRef = useRef<number>(0);
+	const selectedRequestRef = useRef<RequestProps | null>(null);
 
 	const limit = 4;
 
@@ -94,47 +102,14 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 	const [deleteRequest, { error: deleteRequestError }] = useMutation(DELETE_REQUEST_MUTATION);
 	const [message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
+	//const [viewedMessage, { error: viewedMessageError }] = useMutation(VIEWED_MESSAGE_MUTATION);
+	const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
 
 	// Query to get the user requests
 	const { loading: requestLoading, getUserRequestsData, fetchMore } = useQueryUserRequests(id, 0, limit);
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 100);
 
-	/* 	// get the subscription
-	const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
-	const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'conversation');
-
-	// Subscription to get new message
-	const { data: messageSubscription, error: errorSubscription } = useSubscription<{ messageAdded: MessageProps[] }>(MESSAGE_SUBSCRIPTION, {
-		variables: {
-			conversation_ids: conversation?.subscriber_id,
-			request_ids: request?.subscriber_id,
-			is_request: true
-		}
-	});
-	if (errorSubscription) {
-		throw new Error('Error while subscribing to message');
-	} */
-
-
-	//useEffect to set request and user in starting
-	useEffect(() => {
-		if (requestByDate && !selectedRequest && (requestByDate?.length ?? 0) > 0) {
-			setSelectedRequest(requestByDate[0]);
-			handleConversation(requestByDate[0]);
-		}
-	}, [requestByDate]);
-
-	// useEffect to select the message at starting
-	useEffect(() => {
-
-		if (window.innerWidth > 1200) {
-			setTimeout(() => {
-				document.getElementById('first-user')?.click();
-			}, 300);
-		}
-
-	}, []);
 
 	// useEffect to update the requests store
 	useEffect(() => {
@@ -152,7 +127,7 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 			}
 		}
 
-		if (getUserRequestsData?.user.requests.length < limit) {
+		if (getUserRequestsData?.user.requests?.length < limit) {
 			setIsHasMore(false);
 		}
 	}, [getUserRequestsData]);
@@ -245,7 +220,7 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 			// get request id of all request which are not in the subscription
 			const idsNotInRequestSubscriptionStore = myRequestsStore
 				.filter(request => !conversationRequestIds.includes(request.id))
-				.map(request => request.id); // map to an array of ids
+				.map(request => request.id); // map to an array of viewedIds
 
 			// check if the request is already in the subscription
 			if (idsNotInRequestSubscriptionStore.length ?? 0 > 0) {
@@ -289,12 +264,13 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 					}
 				}
 			}
+
+
 		}
 	}, [myRequestsStore]);
 
 	// useEffect to update user conversation by date
 	useEffect(() => {
-
 		if (userConvStore && selectedRequest && selectedRequest.conversation) {
 
 			// sort the messages by date to show the most recent user conversation
@@ -318,7 +294,18 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 			const uniqueUsers = Array.from(new Set(filteredSortedUsers.map(user => JSON.stringify(user)))).map(user => JSON.parse(user));
 			setUserConvState(uniqueUsers);
 
+			/* const firstUserElement = document.getElementById('first-user');
+			if (firstUserElement) {
+				firstUserElement.click();
+			} */
+
+			if (selectedRequest.id !== selectedRequestRef.current?.id) {
+				setSelectedUser(null);
+				setConversationIdState(0);
+				selectedRequestRef.current = selectedRequest;
+			}
 		}
+
 	}, [userConvStore, selectedRequest]);
 
 	// useEffect to update the message store
@@ -327,26 +314,34 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 
 			const messages: MessageProps[] = messageData.messages;
 			// Add the new messages to the store
+
+			// Filter out messages that are already in the store
+			const newMessages = messages.filter(
+				(newMessage) => !messageStore.find((existingMessage) => existingMessage.id === newMessage.id)
+			);
+
 			myMessageDataStore.setState(prevState => {
 				if (prevState.messages.length > 0) {
-
-					// Filter out messages that are already in the store
-					const newMessages = messages.filter(
-						(newMessage) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
-					);
-
 					return {
 						...prevState,
 						messages: [...prevState.messages, ...newMessages]
 					};
 				} else {
-
 					return {
 						...prevState,
 						messages: [...messages]
 					};
 				}
 			});
+
+			/* //check if the conversation is already in the clientMessageViewedStore
+			if (!myRequestMessageViewedStore.some(id => newMessages.filter(message => message.conversation_id === id))) {
+
+				//select only message with viewed is false
+				const messageAdded = newMessages.filter(message => message.viewed === false);
+				// add the conversation_id to the clientMessageViewedStore
+				setMyRequestMessageViewedStore([...messageAdded.map(message => message.conversation_id), ...(myRequestMessageViewedStore || [])]);
+			} */
 
 		}
 	}, [messageData]);
@@ -360,7 +355,7 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 
 				setUserConvStore(usersConversationData.users);
 
-				// if same users ids in the store don't add them
+				// if same users viewedIds in the store don't add them
 			} else if (usersConversationData.users.every((user1: UserDataProps) =>
 				userConvStore.some(user2 => user2.id === user1.id))) {
 				return;
@@ -377,180 +372,103 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 
 
 	}, [usersConversationData]);
-	console.log('messageStore', messageStore);
 
-	// useEffect to subscribe to new message requests
-	useEffect(() => {
-		console.log('messageSubscription', messageSubscription);
-
-		// check if the message is already in the store
-		if (messageSubscription?.messageAdded) {
-			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
-
-
-			const date = new Date(Number(messageAdded[0].created_at));
-			const newDate = date.toISOString();
-
-			// add the new message to the message store
-			myMessageDataStore.setState(prevState => {
-				const newMessages = messageAdded.filter(
-					(newMessage: MessageProps) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
-				);
-
-				return {
-					...prevState,
-					messages: [...prevState.messages, ...newMessages]
-				};
-
-			});
-
-			// add the conversation to the request
-			myRequestStore.setState(prevState => {
-				const updatedRequest = prevState.requests.map((request: RequestProps) => {
-					// if the conversation id is in the request
-					if (request.conversation && request.conversation.some((conversation) => conversation.id === messageAdded[0].conversation_id)) {
-
-						const updatedConversation = request.conversation.map((conversation) => {
-							if (conversation.id === messageAdded[0].conversation_id) {
-								return { ...conversation, updated_at: newDate };
-							}
-							return conversation;
-						});
-						return { ...request, conversation: updatedConversation };
-
-						// if there is a conversation in the request but the conversation id is not in the request
-					} else if (request.id === messageAdded[0].request_id && request.conversation?.some(
-						conversation => conversation.id !== messageAdded[0].conversation_id)) {
-
-
-						const conversation = [
-							...request.conversation,
-							{
-								id: messageAdded[0].conversation_id,
-								user_1: messageAdded[0].user_id,
-								user_2: id,
-								updated_at: newDate
-							}
-						];
-						return { ...request, conversation };
-
-					} else {
-						// if the request hasn't a conversation
-						if (request.id === messageAdded[0].request_id && !request.conversation) {
-
-
-							const conversation = [
-								{
-									id: messageAdded[0].conversation_id,
-									user_1: messageAdded[0].user_id,
-									user_2: id,
-									updated_at: newDate
-								}
-							];
-
-							return { ...request, conversation };
-
-						}
-					}
-					return request;
-
-				});
-				return { ...prevState, requests: updatedRequest };
-			});
-
-			setSelectedRequest((prevState: RequestProps | null) => {
-				// if a conversation is already in selectedRequest
-				if (prevState && prevState.conversation && prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
-					const updatedRequest = prevState?.conversation.map(conversation => {
-
-						if (conversation.id === messageAdded[0].conversation_id) {
-							return { ...conversation, updated_at: newDate };
-						}
-						return conversation;
-					});
-					return { ...prevState, conversation: updatedRequest };
-
-					// if no conversation in the selectedRequest
-				} else if (prevState && !prevState.conversation) {
-
-					const conversation = [
-						{
-							id: messageAdded[0].conversation_id,
-							user_1: messageAdded[0].user_id,
-							user_2: id,
-							updated_at: newDate
-						}
-					];
-
-					// check if user is in userConvStore
-					if (!userConvStore.some(user => user.id === messageAdded[0].user_id)) {
-
-						setNewUserId([messageAdded[0].user_id]);
-					}
-
-					return { ...prevState, conversation };
-
-					// if the conversation id is not in the selectedRequest
-				} else if (prevState && !prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
-
-					const conversation = [
-						...prevState.conversation,
-						{
-							id: messageAdded[0].conversation_id,
-							user_1: messageAdded[0].user_id,
-							user_2: id,
-							updated_at: newDate
-						}
-					];
-
-					// check if user is in userConvStore
-					if (!userConvStore.some(user => user.id === messageAdded[0].user_id)) {
-
-
-						setNewUserId([messageAdded[0].user_id]);
-					}
-
-					return { ...prevState, conversation };
-
-				} else {
-					return null;
-				}
-
-			});
-
-
-			// send id to the mutation to find user
-			setNewUserId([]);
-			if (messageAdded[0].user_id !== id && !userConvStore.some(user => user.id === messageAdded[0].user_id)) {
-
-				setNewUserId([messageAdded[0].user_id]);
-			}
-
-		}
-
-	}, [messageSubscription]);
 
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {
+		// change viewed status of the conversation
+		console.log('viewedIds', viewedIds);
+		if (selectedRequest && selectedRequest.conversation) {
+			/* const messageIds = messageStore
+				.filter(message => message.conversation_id === viewedIds 
+				&& message.viewed === false
+				&& message.user_id !== id)
+				.map(message => message.id); */
+			//console.log('messageIds', messageIds);
+			
+			if (viewedIds > 0 && viewedIds !== id) {
+				updateConversation({
+					variables: {
+						input: {
+							id: viewedIds,
+						}
+					}
+				}).then(() => {
+					//update conversation viewed status in the store
+					myRequestStore.setState(prevState => {
+						const updatedRequests = prevState.requests.map(request => {
+							if (request.id === selectedRequest?.id) {
+								return {
+									...request, conversation: selectedRequest.conversation.map(conversation =>
+										conversation.id === viewedIds ? { ...conversation, sender: 0 } : conversation
+									)
+								};
+							}
+							return request;
+						});
+						return {
+							...prevState,
+							requests: [...updatedRequests]
+						};
+					});
+
+					/* // update the message store
+					myMessageDataStore.setState(prevState => {
+						console.log('before map', prevState);
+	
+						const updatedMessages = prevState.messages.map(message => {
+							console.log('before if', messageIds, message.id);
+	
+							if (messageIds.includes(message.id)) {
+								console.log('message to true');
+	
+								return { ...message, sender: 0 };
+							}
+							return message;
+						});
+						return {
+							...prevState,
+							messages: [...updatedMessages]
+						};
+					}); */
+				});
+			}
+
+			if (updateConversationError) {
+				throw new Error('Error while updating conversation');
+			}
+			setViewedI(0);
+		}
+
+
 		setTimeout(() => {
 			endOfMessagesRef.current?.scrollIntoView(/* { behavior: 'smooth' } */);
 		}, 200);
 	}, [messageStore]);
 
-	// useEffect to set the selected user when selectedRequest is updated
+	/* // useEffect to update the request viewed status
 	useEffect(() => {
+		// check if all converation are viewed to update the request viewed status
+		myRequestStore.setState(prevState => {
+			const updatedRequests = prevState.requests.map(request => {
+				if (request.id === selectedRequest?.id && request.conversation) {
+					return { ...request, viewed_conv: request.conversation.every(conversation => conversation.viewed_message) };
+				}
+				return request;
+			});
+			return {
+				...prevState,
+				requests: [...updatedRequests]
+			};
+		});
+	}, [selectedRequest]); */
 
-		setSelectedUser(userConvState[0]);
-
-	}, [userConvState]);
-
-	// useEffect to set message when selecteduser is updated
+	//  set selected request at null when the component is unmounted
 	useEffect(() => {
-
-		handleMessageConversation(selectedUser?.id as number);
-		setIsUserMessageOpen(true);
-
-	}, [selectedUser]);
+		return () => {
+			setSelectedRequest(null);
+		};
+	}, []);
 
 
 	// Function to delete a request
@@ -568,7 +486,7 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 			}
 
 		}).then((response) => {
-			// Get the conversation ids for the request
+			// Get the conversation viewedIds for the request
 			const conversationIds = myRequestStore.getState().requests.find(request => request.id === requestId)?.conversation?.map(conversation => conversation.id);
 
 			if (response.data.deleteRequest) {
@@ -631,7 +549,7 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 							)
 						}));
 
-						// delete from message store all message with this conversation ids
+						// delete from message store all message with this conversation viewedIds
 						myMessageDataStore.setState(prevState => {
 							const newMessages = prevState.messages.filter(
 								(message: MessageProps) => !conversationIds.includes(message.conversation_id)
@@ -657,7 +575,7 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 
 	};
 
-	// Function to handle the users ids for the conversation
+	// Function to handle the users viewedIds for the conversation
 	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLDivElement>) => {
 		event?.preventDefault();
 
@@ -666,15 +584,15 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 			setUserConvState([]);
 
 		} else {
-			// Get the user ids from the conversation
-			const ids = request?.conversation?.map(conversation => {
+			// Get the user viewedIds from the conversation
+			const viewedIds = request?.conversation?.map(conversation => {
 				return conversation.user_1 !== id ? conversation.user_1 : conversation.user_2;
 			});
 
-			const idStore = userConvStore.map(user => user.id);
 
-			// Filter out the user ids that are already in the userConvStore
-			const newIds = ids.filter(id => !idStore.includes(id));
+			// Filter out the user viewedIds that are already in the userConvStore
+			const idStore = userConvStore.map(user => user.id);
+			const newIds = viewedIds.filter(id => !idStore.includes(id));
 
 			if (newIds.length > 0) {
 				setUserIds(newIds || []); // Provide a default value of an empty array
@@ -682,10 +600,9 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 		}
 	};
 
-	// Function find conversation id for message
+	// Function to handle the user message and update the conversation viewed status
 	const handleMessageConversation = (userId: number, event?: React.MouseEvent<HTMLDivElement>) => {
 		event?.preventDefault();
-		console.log('userId', userId);
 
 		// find the conversation id for the message
 		const conversationId = selectedRequest?.conversation?.find(conversation =>
@@ -693,10 +610,40 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 			(conversation.user_1 === userId || conversation.user_2 === userId)
 		);
 
-		setConversationIdState(conversationId?.id || 0);
-		console.log('conversationIdState', conversationIdState);
+		if (conversationId?.id !== conversationIdState) {
+			setConversationIdState(conversationId?.id || 0);
+			setViewedI(conversationId?.id || 0);
+		}
+		
+		//update conversation viewed status in the store
+		myRequestStore.setState(prevState => {
+			const updatedRequests = prevState.requests.map(request => {
+				if (request.id === selectedRequest?.id) {
+					return {
+						...request, conversation: selectedRequest.conversation.map(conversation =>
+							conversation.id === conversationId?.id ? { ...conversation, sender: 0 } : conversation
+						)
+					};
+				}
+				return request;
+			});
+			return {
+				...prevState,
+				requests: [...updatedRequests]
+			};
+		});
 
-
+		// Create a new updated object
+		if (selectedRequest) {
+			const updatedRequest: RequestProps = {
+				...selectedRequest,
+				conversation: (selectedRequest?.conversation || []).map(conversation =>
+					conversation.id === (conversationId?.id || 0) ? { ...conversation, sender: 0 } : conversation
+				)
+			};
+			setSelectedRequest(updatedRequest);
+		}
+	
 	};
 
 	// Function to send message and create conversation
@@ -725,10 +672,10 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 					setMessageValue('');
 					setFile([]);
 					setUrlFile([]);
-					const textarea = document.querySelector('.my-request__message-list__form__label__input') as HTMLTextAreaElement;
+					/* const textarea = document.querySelector('.my-request__message-list__form__label__input') as HTMLTextAreaElement;
 					if (textarea) {
 						textarea.style.height = 'auto';
-					}
+					} */
 				});
 			}
 		}
@@ -750,19 +697,18 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 	};
 
 	// Function to fetchmore requests
-	function addRequest() {
+	const addRequest = () => {
 		if (fetchMore) {
 			fetchMore({
 				variables: {
 					offset: myRequestsStore.length // Next offset
 				},
 			}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
-				console.log('fetchMoreResult', fetchMoreResult.data.user.requests);
 
 				// remove request who is already in the store
 				const requestsIds = myRequestsStore.map(request => request.id);
 				const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIds.includes(request.id));
-				console.log('newRequests', newRequests);
+
 				if (newRequests.length > 0) {
 					myRequestStore.setState(prevRequests => {
 						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
@@ -778,7 +724,10 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 
 			});
 		}
-	}
+	};
+
+	console.log('requestByDate', requestByDate);
+	
 
 	return (
 		<div className="my-request">
@@ -787,27 +736,23 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 				{!requestByDate && <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p>}
 				{requestByDate && (
 					<div className="my-request__list__detail" >
-						{/* <InfiniteScroll
-							dataLength={myRequestsStore?.length}
-							next={addRequest}
-							hasMore={isHasMore}
-							loader={<p className="my-request__list no-req">chargement...</p>}
-							scrollableTarget="scrollableRequest"
-							endMessage={
-								myRequestsStore.length > 0 ? <p className="my-request__list no-req">Fin des résultats</p>
-									:
-									<p className="my-request__list no-req">Vous n&apos;avez pas de demande</p>}
-							
-						> */}
-						{requestByDate.map((request) => (
+						{requestByDate.map((request, index) => (
 							<div
-								className={`my-request__list__detail__item ${request.urgent} ${selectedRequest?.id === request?.id ? 'selected' : ''} `}
+								id={index === 0 ? 'first-request' : undefined}
+								className={`my-request__list__detail__item 
+									${request.urgent}
+									${selectedRequest?.id === request?.id ? 'selected' : ''} 
+									${request.conversation?.some(conv => conv.sender !== id && conv.sender !== 0 ) ? 'not-viewed' : ''} `}
+
 								key={request.id}
 								onClick={(event) => {
-									handleConversation(request, event),
-									setSelectedRequest(request),
-									setIsListOpen(false),
-									setIsAnswerOpen(true),
+									if (!selectedRequest) {
+										selectedRequestRef.current = request;
+									}
+									handleConversation(request, event);
+									setSelectedRequest(request);
+									setIsListOpen(false);
+									setIsAnswerOpen(true);
 									setIsMessageOpen(false);
 								}}
 							>
@@ -828,12 +773,12 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 									{request.denomination ? (
 										<p className="my-request__list__detail__item__header name" >
 											<span className="my-request__list__detail__item__header name-span">
-											Entreprise:</span>&nbsp;{request.denomination}
+												Entreprise:</span>&nbsp;{request.denomination}
 										</p>
 									) : (
 										<p className="my-request__list__detail__item__header name" >
 											<span className="my-request__list__detail__item__header name-span">
-											Nom:</span>&nbsp;{request.first_name} {request.last_name}
+												Nom:</span>&nbsp;{request.first_name} {request.last_name}
 										</p>
 									)}
 								</div>
@@ -913,7 +858,6 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 								/>
 							</div>
 						))}
-						{/* </InfiniteScroll> */}
 					</div>
 				)}
 				<div className="my-request__list__fetch-button">
@@ -936,13 +880,6 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 			</div>
 			<div id="scrollableAnswer" className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''} ${conversationLoading ? 'loading' : ''}`}>
 				{conversationLoading && <Spinner />}
-				{/* <InfiniteScroll
-					dataLength={myRequestsStore?.length}
-					next={() => {}}
-					hasMore={false}
-					loader={<h4></h4>}
-					scrollableTarget="scrollableAnswer"
-				> */}
 				<MdKeyboardArrowLeft
 					className="my-request__answer-list return"
 					onClick={() => {
@@ -957,14 +894,23 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 				{userConvState && userConvState?.map((user: UserDataProps, index) => (
 					<div
 						id={index === 0 ? 'first-user' : undefined}
-						className={`my-request__answer-list__user ${selectedUser?.id === user.id ? 'selected-user' : ''} ${user.deleted_at ? 'deleted' : ''}`}
+						className={`my-request__answer-list__user 
+							${selectedUser?.id === user.id ? 'selected-user' : ''} 
+							${user.deleted_at ? 'deleted' : ''}
+							${(selectedRequest?.conversation
+						.some(conv => conv.sender !== id 
+									&& conv.sender !== 0 
+									&& conv.user_1 === user.id || conv.user_2 === user.id)) ? 'not-viewed' : ''}`
+
+						}
 						key={user.id}
 						onClick={(event) => {
-							handleMessageConversation(user.id, event),
-							setIsUserMessageOpen(true),
-							setSelectedUser(user),
-							setIsMessageOpen(true),
-							setIsAnswerOpen(false),
+							setSelectedUser(user);
+							handleMessageConversation(user.id, event);
+							//updateViewedMessage();
+							setIsUserMessageOpen(true);
+							setIsMessageOpen(true);
+							setIsAnswerOpen(false);
 							setIsListOpen(false);
 						}}>
 
@@ -981,7 +927,6 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 						</div>
 					</div>
 				))}
-				{/* </InfiniteScroll> */}
 			</div>
 			<div className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`}>
 				{messageLoading && <Spinner />}
@@ -1009,8 +954,6 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 								}}
 							/>
 							<img className="my-request__message-list__user__header__detail img" src={selectedUser?.image ? selectedUser.image : logoProfile} alt="" />
-							{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
-							{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
 							{selectedUser?.denomination ? (
 								<p className="my-request__message-list__user__header__detail denomination">{selectedUser?.denomination}</p>
 							) : (
@@ -1018,7 +961,7 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 							)}
 							{selectedUser?.deleted_at && <p className="my-request__message-list__user__header__detail deleted">Utilisateur supprimé</p>}
 						</div>
-						{/* <p className="my-request__answer-list__user city">{user.city}</p> */}
+
 						{userDescription && <div>
 							<p className="my-request__message-list__user__header description">{selectedUser?.description ? selectedUser?.description : 'Pas de déscription'}</p>
 						</div>
@@ -1027,70 +970,62 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 					{/* 	)} */}
 
 				</div>
-				{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
+
 				<div id="scrollableMessage" className="my-request__message-list__message">
-					<InfiniteScroll
-						className="infinite-scroll"
-						dataLength={messageStore?.length}
-						next={() => { }}
-						hasMore={false}
-						loader={<p className="my-request__list no-req"></p>}
-						endMessage={<p className="my-request__list no-req"></p>}
-						scrollableTarget="scrollableMessage"
-					>
-						{Array.isArray(messageStore) && isUserMessageOpen &&
-							messageStore
-								.filter((message) => message.conversation_id === conversationIdState)
-								.map((message, index, array) => (
-									<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
-										{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
-										<div className={`content ${message.user_id === id ? 'me' : ''}`}>
-											{message.media[0].url && (
-												<div className="my-request__message-list__message__detail__image-container">
-													<div className={`map ${message.content ? 'message' : ''}`}>
-														{(() => {
-															const imageUrls = message.media?.map(media => media.url) || [];
-															return message.media?.map((media, index) => (
-																media ? (
-																	media.name.endsWith('.pdf') ? (
-																		<a
-																			className="a-pdf"
-																			href={media.url}
-																			key={media.id}
-																			download={media.name}
-																			target="_blank"
-																			rel="noopener noreferrer"
-																			onClick={(event) => { event.stopPropagation(); }} >
-																			<img
-																				className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																				//key={media.id} 
-																				src={pdfLogo}
-																				alt={media.name}
-																			/>
-																		</a>
-																	) : (
+
+					{Array.isArray(messageStore) && isUserMessageOpen &&
+						messageStore
+							.filter((message) => message.conversation_id === conversationIdState)
+							.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
+							.map((message, index, array) => (
+								<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
+									{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
+									<div className={`content ${message.user_id === id ? 'me' : ''}`}>
+										{message.media[0].url && (
+											<div className="my-request__message-list__message__detail__image-container">
+												<div className={`map ${message.content ? 'message' : ''}`}>
+													{(() => {
+														const imageUrls = message.media?.map(media => media.url) || [];
+														return message.media?.map((media, index) => (
+															media ? (
+																media.name.endsWith('.pdf') ? (
+																	<a
+																		className="a-pdf"
+																		href={media.url}
+																		key={media.id}
+																		download={media.name}
+																		target="_blank"
+																		rel="noopener noreferrer"
+																		onClick={(event) => { event.stopPropagation(); }} >
 																		<img
-																			className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																			key={media.id}
-																			src={media.url}
-																			onClick={() => openModal(imageUrls, index)}
+																			className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																			//key={media.id} 
+																			src={pdfLogo}
 																			alt={media.name}
 																		/>
-																	)
-																) : null
-															));
-														})()}
-													</div>
+																	</a>
+																) : (
+																	<img
+																		className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																		key={media.id}
+																		src={media.url}
+																		onClick={() => openModal(imageUrls, index)}
+																		alt={media.name}
+																	/>
+																)
+															) : null
+														));
+													})()}
 												</div>
-											)}
-											{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
-										</div>
-										<div className="my-request__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
+											</div>
+										)}
+										{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
 									</div>
-								))
+									<div className="my-request__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
+								</div>
+							))
 
-						}
-					</InfiniteScroll>
+					}
 				</div>
 
 				<form className="my-request__message-list__form" onSubmit={(event) => {
@@ -1181,34 +1116,7 @@ function MyRequest({ messageSubscription }: MyRequestProps) {
 				deleteItemModalIsOpen={deleteItemModalIsOpen}
 				handleDeleteRequest={handleDeleteRequest}
 			/>
-			{/* <ReactModal
-				className="modal"
-				isOpen={deleteItemModalIsOpen}
-				contentLabel="Delete Account"
-				shouldCloseOnOverlayClick={false}
-				aria-label="supprimer mon compte"
-			>
-				<div className="modal__container">
-					<h1 className="modal__title">ATTENTION!!</h1>
-					<p className="modal__description">Vous allez supprimer cette demande, êtes vous sur?</p>
-					<div className="modal__container__button">
-						<button 
-							className="modal__delete" 
-							onClick={() => {
-								if (modalArgs?.event && modalArgs?.requestId) {
-									handleDeleteRequest(modalArgs.event, modalArgs.requestId);
-								}
-							}}
-						>
-							Supprimer
-						</button>
-						<button className="modal__cancel" onClick={() => {
-							setDeleteItemModalIsOpen(!deleteItemModalIsOpen),
-							setModalArgs(null);
-						}}>Annuler</button>
-					</div>
-				</div>
-			</ReactModal> */}
+
 		</div>
 
 

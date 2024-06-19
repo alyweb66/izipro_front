@@ -1,0 +1,22 @@
+@use './variables' as v;
+
+.notification-badge {
+   // background-color: rgba(7, 190, 236, 0.336);
+    color: rgb(233, 12, 23);
+   // padding: 5px 10px;
+    border-radius: 50%;
+  //  position: fixed;
+   // top: 10px;
+   // right: 10px;
+   margin: 0.5rem 0 0 0;
+   font-family: v.$font;
+   border-radius: 50px;
+    font-size: 18px;
+    font-weight: 500;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25px;
+    height: 25px;
+  }
+  

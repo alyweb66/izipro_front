@@ -68,6 +68,10 @@
 
       }
 
+      &.not-viewed {
+        @include v.not-viewed
+      }
+
 
 
       .client-request__list__detail__item__header {

@@ -52,36 +52,19 @@ export const GET_USER_REQUEST_BY_CONVERSATIONS = gql`
           name
         }
         created_at
+        viewed_conv
         conversation {
           id
           user_1
           user_2
+          request_id
+          sender
           updated_at
         }
         deleted_at
       }
     }
   }
-`;
-
-export const GET_MESSAGES_BY_CONVERSATION = gql`
-  query User( $conversationId: Int!, $offset: Int!, $limit: Int!) {
-      user {
-        messages(conversationId: $conversationId, offset: $offset, limit: $limit) {
-          id
-          content
-          user_id
-          conversation_id
-          request_id
-          created_at
-          media {
-            id
-            url
-            name
-          }
-        }
-      }
-}
 `;
 
 export const GET_USER_SUBSCRIPTION = gql`
@@ -112,20 +95,13 @@ export const GET_USERS_CONVERSATION = gql`
   }
 `;
 
-export const GET_MY_MESSAGES_BY_CONVERSATION = gql`
-  query MessageByConversation($conversationId: Int!, $offset: Int, $limit: Int) {
-    messages(conversationId: $conversationId, offset: $offset, limit: $limit) {
-          id
-          content
-          user_id
-          conversation_id
-          request_id
-          created_at
-          media {
-            id
-            url
-            name
-          }
+export const GET_USER_NOT_VIEWED_REQUESTS = gql`
+query NotViewedRequest {
+  user {
+    userHasNotViewedRequest {
+      request_id
+      user_id
     }
   }
+}
 `;

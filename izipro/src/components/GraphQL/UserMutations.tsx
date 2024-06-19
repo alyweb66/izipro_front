@@ -123,8 +123,11 @@ export const USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION = gql`
     }
 `;
 
-export  const DELETE_PROFILE_PICTURE_MUTATION = gql`
+export const DELETE_PROFILE_PICTURE_MUTATION = gql`
     mutation DeleteProfilPicture($id: Int!) {
         deleteProfilePicture(id: $id)
     }
 `;
+
+
+

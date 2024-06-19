@@ -27,6 +27,7 @@ export const REQUEST_MUTATION = gql`
             id
             user_1
             user_2
+            request_id
             updated_at
             }
             deleted_at   

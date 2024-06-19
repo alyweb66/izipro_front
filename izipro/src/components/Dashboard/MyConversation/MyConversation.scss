@@ -73,6 +73,10 @@
 
                 }
 
+                &.not-viewed {
+                    @include v.not-viewed
+                }
+
                 &.new {
                     background-color: v.$color-chat-orange;
                     border: 1px solid v.$color-primary-orange;
@@ -319,7 +323,7 @@
                     }
                 }
 
-               /*   &.description {
+                /*   &.description {
                     width: 98%;
                     padding: 0.5rem;
                     box-shadow: none;

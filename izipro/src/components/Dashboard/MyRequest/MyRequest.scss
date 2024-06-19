@@ -74,6 +74,10 @@
 
                 }
 
+                &.not-viewed {
+                    @include v.not-viewed
+                }
+
 
 
                 .my-request__list__detail__item__header {
@@ -285,11 +289,17 @@
 
             }
 
+
             &.selected-user {
                 border: 1px solid v.$color-primary-orange;
                 background-color: #f37b041a;
-                ;
+                
             }
+
+            &.not-viewed {
+                @include v.not-viewed
+            }
+
 
 
             .my-request__answer-list__user__header {
