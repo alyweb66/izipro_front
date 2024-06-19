@@ -20,7 +20,6 @@ type RequestProps = {
 		name: string
 	}[]
     created_at: string
-    viewed_conv: boolean
     conversation: {
         id: number
         user_1: number
@@ -56,7 +55,6 @@ type RequestSoreProps = {
         
         }[]
         created_at: string
-        viewed_conv: boolean
         conversation: {
             id: number
             user_1: number

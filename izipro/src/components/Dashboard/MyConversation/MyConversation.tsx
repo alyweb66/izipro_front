@@ -34,13 +34,16 @@ type useQueryUserConversationsProps = {
 };
 
 type ClientMessageProps = {
+	offsetRef: React.MutableRefObject<number>;
+	isHasMore: boolean;
+	setIsHasMore: (hasMore: boolean) => void;
 	conversationIdState: number;
 	setConversationIdState: (id: number) => void;
 	clientMessageSubscription?: { messageAdded: MessageProps[] };
 };
 
 
-function MyConversation({ clientMessageSubscription, conversationIdState, setConversationIdState }: ClientMessageProps) {
+function MyConversation({ clientMessageSubscription, conversationIdState, setConversationIdState, isHasMore, setIsHasMore, offsetRef }: ClientMessageProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -54,14 +57,14 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [isMessageOpen, setIsMessageOpen] = useState(false);
 	const [requestTitle, setRequestTitle] = useState(true);
-	const [isHasMore, setIsHasMore] = useState(true);
+	//const [isHasMore, setIsHasMore] = useState(true);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 
 	const limit = 4;
 
 	//useRef
-	const offsetRef = useRef(0);
+	//const offsetRef = useRef(0);
 	const conversationIdRef = useRef(0);
 	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 
@@ -84,7 +87,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
 	
 	//query
-	const { loading: convLoading, data: requestConv, fetchMore } = useQueryUserConversations(0, limit) as unknown as useQueryUserConversationsProps;
+	const { loading: convLoading, fetchMore } = useQueryUserConversations(0, limit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
 	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
 
 	// file upload
@@ -139,7 +142,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	}, [selectedRequest]);
 	console.log('messageStore', messageStore);
 
-	// useEffect to update the request to the requests store
+	/* // useEffect to update the request to the requests store
 	useEffect(() => {
 		if (requestConv && requestConv.user) {
 
@@ -159,7 +162,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		if (requestConv?.user.requestsConversations.length < limit) {
 			setIsHasMore(false);
 		}
-	}, [requestConv]);
+	}, [requestConv]); */
 
 	// useEffect to sort the requests by date
 	useEffect(() => {
@@ -709,6 +712,8 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 					{isHasMore ? (<button
 						className="Btn"
 						onClick={(event) => {
+							console.log('coucou');
+							
 							event.preventDefault();
 							event.stopPropagation();
 							addRequest();

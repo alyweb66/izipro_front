@@ -25,27 +25,30 @@ type ExpandedState = {
 };
 
 type clientRequestProps = {
+	offsetRef: React.MutableRefObject<number>;
+	isHasMore: boolean;
+	setIsHasMore: (value: boolean) => void;
 	onDetailsClick: () => void;
 	//clientRequestSubscription?: { requestAdded: RequestProps[] };
 	RangeFilter: (requests: RequestProps[], fromSubscribeToMore?: boolean) => void;
 };
 
-function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
+function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, offsetRef}: clientRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
 
 	// State
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
-	const [isHasMore, setIsHasMore] = useState(true);
+	//const [isHasMore, setIsHasMore] = useState(true);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
 	/* 	const [isLoading, setIsLoading] = useState(false); */
 	// Create a ref for the scroll position
-	const offsetRef = useRef(0);
+	//const offsetRef = useRef(0);
 	const idRef = useRef<number>(0);
 
-	const limit = 4;
+	const limit = 5;
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -55,7 +58,7 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 	const first_name = userDataStore((state) => state.first_name);
 	const last_name = userDataStore((state) => state.last_name);
 	const postal_code = userDataStore((state) => state.postal_code);
-	const settings = userDataStore((state) => state.settings);
+	//const settings = userDataStore((state) => state.settings);
 	const setRequest = requestDataStore((state) => state.setRequest);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
@@ -68,7 +71,7 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 	const [deleteNotViewedRequest, {error: deleteNotViewedRequestError}] = useMutation(DELETE_NOT_VIEWED_REQUEST_MUTATION);
 
 	// get requests by job
-	const { loading: requestJobLoading, getRequestsByJob, fetchMore } = useQueryRequestByJob(jobs, 0, limit);
+	const { loading: requestJobLoading,  fetchMore } = useQueryRequestByJob(jobs, 0, limit, clientRequestStore.length > 0);
 
 	/* // Function to filter the requests by the user's location and the request's location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
@@ -148,8 +151,11 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 	} */
 
 
-	// Function to load more requests with infinite scroll
+	// Function to load more requests 
 	function addRequest() {
+		console.log('offsetRef', offsetRef.current);
+		console.log('addRequest');
+		
 		fetchMore({
 			variables: {
 				offset: offsetRef.current, // Next offset
@@ -157,6 +163,9 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		}).then(fetchMoreResult => {
 			const data = fetchMoreResult.data.requestsByJob;
+			console.log('clientRequestsStore', clientRequestsStore);
+			
+			console.log('data', data);
 
 			//get all request who are not in the store
 			const newRequests = data.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
@@ -167,7 +176,7 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 
 			}
 
-			// If there are no more requests, stop the infinite scroll
+			// If there are no more requests, stop fetchmore
 			if (fetchMoreResult.data.requestsByJob.length < limit) {
 				setIsHasMore(false);
 			}
@@ -247,7 +256,7 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 
 	}, [jobs]);
 
-	// useEffect to filter the requests by the user's location and the request's location
+	/* // useEffect to filter the requests by the user's location and the request's location
 	useEffect(() => {
 		if (getRequestsByJob) {
 			const requestByJob = getRequestsByJob.requestsByJob;
@@ -268,7 +277,7 @@ function ClientRequest({ onDetailsClick, RangeFilter }: clientRequestProps) {
 		}
 
 	}, [getRequestsByJob, settings]);
-
+ */
 
 	// Function to hide a request
 	const handleHideRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {

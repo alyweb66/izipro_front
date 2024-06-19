@@ -46,7 +46,6 @@ export const GET_USER_REQUESTS = gql`
                     name
                 }
                 created_at
-                viewed_conv
                 conversation {
                 id
                 user_1
@@ -84,7 +83,6 @@ export const GET_REQUEST_BY_JOB = gql`
                 name
             }
             created_at
-            viewed_conv
             conversation {
                 id
                 user_1

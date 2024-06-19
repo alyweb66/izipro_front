@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Account from './Account/Account';
 import Request from './Request/Request';
@@ -6,7 +6,7 @@ import MyRequest from './MyRequest/MyRequest';
 import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import { userConversation, userDataStore } from '../../store/UserData';
-import { useQueryNotViewedRequests, useQueryUserData, useQueryUserRequests, useQueryUserSubscriptions } from '../Hook/Query';
+import { useQueryNotViewedRequests, useQueryRequestByJob, useQueryUserConversations, useQueryUserData, useQueryUserRequests, useQueryUserSubscriptions } from '../Hook/Query';
 import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
 import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
@@ -30,6 +30,12 @@ import { messageDataStore, myMessageDataStore } from '../../store/message';
 import {NOT_VIEWED_REQUEST_MUTATION } from '../GraphQL/NotViewedRequestMutation';
 import { UPDATE_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
 
+type useQueryUserConversationsProps = {
+	loading: boolean;
+	data: { user: { requestsConversations: RequestProps[] } };
+	refetch: () => void;
+	fetchMore: (options: { variables: { offset: number } }) => void;
+};
 
 function Dashboard() {
 	const navigate = useNavigate();
@@ -46,9 +52,14 @@ function Dashboard() {
 
 	//state for myRequest
 	const [conversationIdState, setConversationIdState] = useState<number>(0);
+	const [isMyRequestHasMore, setIsMyRequestHasMore] = useState<boolean>(true);
 
 	//state for myConversation
 	const [myConversationIdState, setMyConversationIdState] = useState<number>(0);
+	const [isMyConversationHasMore, setIsMyConversationHasMore] = useState<boolean>(true);
+
+	//state for clientRequest
+	const [isCLientRequestHasMore, setIsClientRequestHasMore] = useState<boolean>(true);
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -58,8 +69,13 @@ function Dashboard() {
 	const lng = userDataStore((state) => state.lng);
 	const lat = userDataStore((state) => state.lat);
 	const settings = userDataStore((state) => state.settings);
+	const jobs = userDataStore((state) => state.jobs);
 	//messageDataStore((state) => [state.messages, state.setMessageStore]);
 
+	const myRequestLimit = 5;
+	const clientRequestLimit = 5;
+	const myconversationLimit = 5;
+	
 	// MyRequest store
 	const [userConvStore] = userConversation((state) => [state.users, state.setUsers]);
 	myMessageDataStore((state) => [state.messages, state.setMessageStore]);
@@ -73,9 +89,10 @@ function Dashboard() {
 
 	//ClientRequest store
 	const [notViewedRequestStore, setNotViewedRequestStore] = notViewedRequest((state) => [state.notViewed, state.setNotViewedStore]);
-	//	const [setNotViewedRequestRefStore] = notViewedRequestRef((state) => [state.setNotViewedStore]);
-
+	
 	//useRef
+	const clientRequestOffset = useRef<number>(0);
+	const myConversationOffsetRef = useRef<number>(0);
 	//const notViewedRequestRef = useRef<number[]>([]);
 
 	// Query to get the user data
@@ -84,8 +101,14 @@ function Dashboard() {
 	const notViewedRequestQuery = useQueryNotViewedRequests();
 	
 	// Query for MyRequest
-	const { getUserRequestsData } = useQueryUserRequests(id, 0, 4);
-console.log('getUserRequestsData', getUserRequestsData);
+	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, requestStore.length > 0 );
+console.log('id', id);
+
+	//Query for ClientRequest
+	const { getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, clientRequestsStore.length > 0);
+
+	//Query for MyConversation
+	const { data: requestMyConversation} = useQueryUserConversations(0, myconversationLimit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
 
 	//mutation
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
@@ -106,7 +129,7 @@ console.log('getUserRequestsData', getUserRequestsData);
 	} else {
 		isLogged = JSON.parse(localStorage.getItem('ayl') || '{}');
 	}
-console.log('notViewedRequestStore', notViewedRequestStore);
+
 
 	// set the notViewedRequestStore
 	useEffect(() => {
@@ -132,7 +155,6 @@ console.log('notViewedRequestStore', notViewedRequestStore);
 
 	}, [notViewedRequestQuery]);
 
-
 	// set user subscription to the store
 	useEffect(() => {
 		if (getUserSubscription) {
@@ -153,10 +175,33 @@ console.log('notViewedRequestStore', notViewedRequestStore);
 		}
 
 	}, [role]);
+console.log('offset in dashboard', clientRequestOffset.current);
 
 	useEffect(() => {
+
+		if (getRequestsByJob) {
+			const requestByJob = getRequestsByJob.requestsByJob;
+
+			//get all request who are not in the store
+			const newRequests = requestByJob.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
+
+			// Filter the requests
+			if (newRequests.length > 0) {
+				RangeFilter(requestByJob);
+				clientRequestOffset.current = clientRequestOffset.current + requestByJob?.length;
+			}
+		}
+
+		// If there are no more requests, stop the fetchmore
+		if (getRequestsByJob?.requestsByJob.length < clientRequestLimit) {
+			setIsClientRequestHasMore(false);
+		}
+	}, [getRequestsByJob, settings]);
+
+	// set the request to myrequestStore at starting
+	useEffect(() => {
 		//console.log('getUserRequestsData', getUserRequestsData.user.requests);
-		if (getUserRequestsData && getUserRequestsData.user.requests && role === 'pro') {
+		if (getUserRequestsData && getUserRequestsData.user.requests) {
 					
 			// If offset is 0, it's the first query, so just replace the queries
 			if (requestStore.length === 0) {
@@ -170,7 +215,37 @@ console.log('notViewedRequestStore', notViewedRequestStore);
 				}
 			}
 		}
+
+		if (getUserRequestsData?.user.requests?.length < myRequestLimit) {
+			setIsMyRequestHasMore(false);
+		}
 	}, [getUserRequestsData]);
+
+	// set the request to myConversationStore at starting
+	useEffect(() => {
+		if (requestMyConversation && requestMyConversation.user) {
+			console.log('requestMyConversation', requestMyConversation);
+			
+			const requestsConversations: RequestProps[] = requestMyConversation.user.requestsConversations;
+
+			if (!requestsConversations) {
+				setIsMyConversationHasMore(false);
+			}
+			//get all request who are not in the store
+			const newRequests = requestsConversations.filter((request: RequestProps) => requestsConversationStore?.every(prevRequest => prevRequest.id !== request.id));
+
+			// add the new request to the requestsConversationStore
+			if (newRequests.length > 0) {
+				requestConversationStore.setState(prevState => ({ ...prevState, requests: [...requestsConversationStore, ...newRequests] }));
+			}
+
+			myConversationOffsetRef.current = requestsConversations?.length;
+		}
+
+		if (requestMyConversation?.user.requestsConversations.length < myconversationLimit) {
+			setIsMyConversationHasMore(false);
+		}
+	}, [requestMyConversation]);
 
 	// function to check if user is logged in
 	useEffect(() => {
@@ -327,23 +402,6 @@ console.log('notViewedRequestStore', notViewedRequestStore);
 				if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
 					RangeFilter([requestAdded], true);
 
-					/* // add request.id to the viewedRequestStore
-					setNotViewedRequestStore([...notViewedRequestStore, requestAdded.id]);
-
-					if(addNotViewedRequest.length > 0) {
-						notViewedClientRequest({
-							variables: {
-								input: {
-									user_id: id,
-									request_id: addNotViewedRequest
-								}
-							}
-						});
-	
-						if (notViewedClientRequestError) {
-							throw new Error('Error while updating viewed Clientrequests');
-						}
-					} */
 				}
 			}
 
@@ -649,21 +707,7 @@ console.log('notViewedRequestStore', notViewedRequestStore);
 					console.log('passed');
 
 					setNotViewedRequestStore([...notViewedRequestStore, newRequests[0].id]);
-					/* //add id to the dabase
-					if (newRequests[0].id) {
-						notViewedClientRequest({
-							variables: {
-								input: {
-									user_id: id,
-									request_id: [newRequests[0].id]
-								}
-							}
-						});
-
-						if (notViewedClientRequestError) {
-							throw new Error('Error while updating viewed Clientrequests');
-						}
-					} */
+					
 				}
 
 			}
@@ -794,6 +838,8 @@ console.log('newId2', newId);
 
 				{selectedTab === 'Request' && <Request />}
 				{selectedTab === 'My requests' && <MyRequest
+					setIsHasMore={setIsMyRequestHasMore}
+					isHasMore={isMyRequestHasMore}
 					conversationIdState={conversationIdState}
 					setConversationIdState={setConversationIdState}
 					selectedRequest={selectedRequest}
@@ -802,12 +848,18 @@ console.log('newId2', newId);
 					setNewUserId={setNewUserId}
 				/>}
 				{selectedTab === 'My conversations' && <MyConversation
+					isHasMore={isMyConversationHasMore}
+					setIsHasMore={setIsMyConversationHasMore}
+					offsetRef={myConversationOffsetRef}
 					conversationIdState={myConversationIdState}
 					setConversationIdState={setMyConversationIdState}
 					clientMessageSubscription={clientMessageSubscription}
 				/>}
 				{selectedTab === 'My profile' && <Account />}
 				{selectedTab === 'Client request' && <ClientRequest
+					offsetRef={clientRequestOffset}
+					setIsHasMore={setIsClientRequestHasMore}
+					isHasMore={isCLientRequestHasMore}
 					onDetailsClick={handleMyConvesationNavigate}
 					RangeFilter={RangeFilter}
 				/>}

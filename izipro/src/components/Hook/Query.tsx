@@ -68,7 +68,7 @@ export const useQueryJobData = (jobId:{job_id: number}[] ) => {
 };
 
 // fetch user requests
-export const  useQueryUserRequests = (id: number, offset: number, limit: number) => {
+export const  useQueryUserRequests = (id: number, offset: number, limit: number, skip: boolean) => {
 	
 	const { loading, error: getUserRequestsError, data: getUserRequestsData, fetchMore } = useQuery(GET_USER_REQUESTS, {
 		fetchPolicy: 'network-only',
@@ -77,6 +77,7 @@ export const  useQueryUserRequests = (id: number, offset: number, limit: number)
 			offset: offset,
 			limit: limit 
 		},
+		skip
 	
 	});
 
@@ -88,7 +89,7 @@ export const  useQueryUserRequests = (id: number, offset: number, limit: number)
 };
 
 // fetch requests by job
-export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, limit: number) => {
+export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, limit: number, skip: boolean) => {
 	
 	const jobIdArray = jobId.map((job) => job.job_id);
 
@@ -100,7 +101,7 @@ export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, l
 			offset: offset,
 			limit: limit
 		},
-		skip: !jobIdArray
+		skip: skip || !jobIdArray
 	});
 
 	if (requestError) {
@@ -110,7 +111,7 @@ export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, l
 };
 
 // fetch user conversations
-export const useQueryUserConversations = (offset: number, limit: number) => {
+export const useQueryUserConversations = (offset: number, limit: number, skip: boolean) => {
 
 
 	const {loading, error: conversationError, data, fetchMore} = useQuery(GET_USER_REQUEST_BY_CONVERSATIONS, {
@@ -119,14 +120,17 @@ export const useQueryUserConversations = (offset: number, limit: number) => {
 			offset: offset,
 			limit: limit
 		},
+		skip
 	});
 
 	if (conversationError) {
 		throw new Error('Error while fetching user conversations');
 	}
+	console.log('data', data);
+	/* 
 	if (!data) {
-		return [];
-	}
+		return fetchMore;
+	} */
 	return {loading, data, fetchMore};
 };
 

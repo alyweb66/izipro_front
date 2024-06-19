@@ -37,6 +37,8 @@ type ExpandedState = {
 
 
 type MyRequestProps = {
+	setIsHasMore: (hasMore: boolean) => void;
+	isHasMore: boolean;
 	conversationIdState: number;
 	setConversationIdState: (id: number) => void;
 	selectedRequest: RequestProps | null;
@@ -45,7 +47,7 @@ type MyRequestProps = {
 	setNewUserId: (id: number[]) => void;
 };
 
-function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserId, conversationIdState, setConversationIdState }: MyRequestProps) {
+function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserId, conversationIdState, setConversationIdState, setIsHasMore, isHasMore }: MyRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -68,7 +70,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
-	const [isHasMore, setIsHasMore] = useState(true);
+	//const [isHasMore, setIsHasMore] = useState(true);
 	const [isUserMessageOpen, setIsUserMessageOpen] = useState(false);
 	const [viewedIds, setViewedI] = useState<number>(0);
 
@@ -106,31 +108,10 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
 
 	// Query to get the user requests
-	const { loading: requestLoading, getUserRequestsData, fetchMore } = useQueryUserRequests(id, 0, limit);
+	const { loading: requestLoading, fetchMore } = useQueryUserRequests(id, 0, limit, myRequestStore.length > 0 );
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 100);
 
-
-	// useEffect to update the requests store
-	useEffect(() => {
-		if (getUserRequestsData && getUserRequestsData.user.requests) {
-			// If offset is 0, it's the first query, so just replace the queries
-			if (offsetRef.current === 0) {
-				// check if requests are already in the store
-				const requestsIds = myRequestsStore.map(request => request.id);
-				const newRequests = getUserRequestsData.user.requests?.filter((request: RequestProps) => !requestsIds.includes(request.id));
-				if (newRequests.length > 0) {
-					myRequestStore.setState(prevRequests => {
-						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
-					});
-				}
-			}
-		}
-
-		if (getUserRequestsData?.user.requests?.length < limit) {
-			setIsHasMore(false);
-		}
-	}, [getUserRequestsData]);
 
 	// useEffect to sort the requests by date and update the subscription
 	useEffect(() => {
@@ -373,7 +354,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	}, [usersConversationData]);
 
-
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {
 		// change viewed status of the conversation
@@ -445,23 +425,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			endOfMessagesRef.current?.scrollIntoView(/* { behavior: 'smooth' } */);
 		}, 200);
 	}, [messageStore]);
-
-	/* // useEffect to update the request viewed status
-	useEffect(() => {
-		// check if all converation are viewed to update the request viewed status
-		myRequestStore.setState(prevState => {
-			const updatedRequests = prevState.requests.map(request => {
-				if (request.id === selectedRequest?.id && request.conversation) {
-					return { ...request, viewed_conv: request.conversation.every(conversation => conversation.viewed_message) };
-				}
-				return request;
-			});
-			return {
-				...prevState,
-				requests: [...updatedRequests]
-			};
-		});
-	}, [selectedRequest]); */
 
 	//  set selected request at null when the component is unmounted
 	useEffect(() => {
@@ -672,10 +635,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					setMessageValue('');
 					setFile([]);
 					setUrlFile([]);
-					/* const textarea = document.querySelector('.my-request__message-list__form__label__input') as HTMLTextAreaElement;
-					if (textarea) {
-						textarea.style.height = 'auto';
-					} */
 				});
 			}
 		}
