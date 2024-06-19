@@ -7,11 +7,13 @@ import { RequestProps } from '../../Type/Request';
 export const useClientRequestSubscriptions = () => {
 	// store
 	const jobs = userDataStore((state) => state.jobs);
+	const id = userDataStore((state) => state.id);
 
 	// Subscription to get new message
 	const { data: clientRequestSubscription, error: errorClientRequestSubscription } = useSubscription<{requestAdded: RequestProps[]}>(REQUEST_SUBSCRIPTION, {
 		variables: {
-			ids: jobs.map(job => job.job_id).filter(id => id != null),
+			job_ids: jobs.map(job => job.job_id).filter(id => id != null),
+			user_id: id
 		}
 	});
     

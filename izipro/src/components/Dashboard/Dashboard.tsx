@@ -6,7 +6,7 @@ import MyRequest from './MyRequest/MyRequest';
 import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import { userConversation, userDataStore } from '../../store/UserData';
-import { useQueryNotViewedRequests, useQueryUserData, useQueryUserSubscriptions } from '../Hook/Query';
+import { useQueryNotViewedRequests, useQueryUserData, useQueryUserRequests, useQueryUserSubscriptions } from '../Hook/Query';
 import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
 import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
@@ -58,18 +58,21 @@ function Dashboard() {
 	const lng = userDataStore((state) => state.lng);
 	const lat = userDataStore((state) => state.lat);
 	const settings = userDataStore((state) => state.settings);
-	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
-	messageDataStore((state) => [state.messages, state.setMessageStore]);
-	const [requestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
+	//messageDataStore((state) => [state.messages, state.setMessageStore]);
+
+	// MyRequest store
+	const [userConvStore] = userConversation((state) => [state.users, state.setUsers]);
 	myMessageDataStore((state) => [state.messages, state.setMessageStore]);
 	const [requestStore] = myRequestStore((state) => [state.requests, state.setMyRequestStore]);
-	const [userConvStore] = userConversation((state) => [state.users, state.setUsers]);
-	const [notViewedRequestStore, setNotViewedRequestStore] = notViewedRequest((state) => [state.notViewed, state.setNotViewedStore]);
-	// MyRequest store
 	myMessageDataStore((state) => [state.messages, state.setMessageStore]);
+
 	//MyConversation store
+	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
+	const [requestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 	messageDataStore((state) => [state.messages, state.setMessageStore]);
+
 	//ClientRequest store
+	const [notViewedRequestStore, setNotViewedRequestStore] = notViewedRequest((state) => [state.notViewed, state.setNotViewedStore]);
 	//	const [setNotViewedRequestRefStore] = notViewedRequestRef((state) => [state.setNotViewedStore]);
 
 	//useRef
@@ -79,10 +82,14 @@ function Dashboard() {
 	const { loading: userDataLoading, getUserData } = useQueryUserData();
 	const getUserSubscription = useQueryUserSubscriptions();
 	const notViewedRequestQuery = useQueryNotViewedRequests();
+	
+	// Query for MyRequest
+	const { getUserRequestsData } = useQueryUserRequests(id, 0, 4);
+console.log('getUserRequestsData', getUserRequestsData);
 
 	//mutation
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
-	const [notViewedClientRequest, { error: notViewedClientRequestError }] = useMutation(NOT_VIEWED_REQUEST_MUTATION);
+	//const [notViewedClientRequest, { error: notViewedClientRequestError }] = useMutation(NOT_VIEWED_REQUEST_MUTATION);
 	//const [deleteNotViewedRequest, { error: deleteNotViewedRequestError }] = useMutation(DELETE_NOT_VIEWED_REQUEST_MUTATION);
 	const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
 
@@ -99,6 +106,7 @@ function Dashboard() {
 	} else {
 		isLogged = JSON.parse(localStorage.getItem('ayl') || '{}');
 	}
+console.log('notViewedRequestStore', notViewedRequestStore);
 
 	// set the notViewedRequestStore
 	useEffect(() => {
@@ -124,6 +132,7 @@ function Dashboard() {
 
 	}, [notViewedRequestQuery]);
 
+
 	// set user subscription to the store
 	useEffect(() => {
 		if (getUserSubscription) {
@@ -142,7 +151,26 @@ function Dashboard() {
 			}
 
 		}
+
 	}, [role]);
+
+	useEffect(() => {
+		//console.log('getUserRequestsData', getUserRequestsData.user.requests);
+		if (getUserRequestsData && getUserRequestsData.user.requests && role === 'pro') {
+					
+			// If offset is 0, it's the first query, so just replace the queries
+			if (requestStore.length === 0) {
+				// check if requests are already in the store
+				const requestsIds = requestStore.map(request => request.id);
+				const newRequests = getUserRequestsData.user.requests?.filter((request: RequestProps) => !requestsIds.includes(request.id));
+				if (newRequests.length > 0) {
+					myRequestStore.setState(prevRequests => {
+						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
+					});
+				}
+			}
+		}
+	}, [getUserRequestsData]);
 
 	// function to check if user is logged in
 	useEffect(() => {
@@ -621,7 +649,7 @@ function Dashboard() {
 					console.log('passed');
 
 					setNotViewedRequestStore([...notViewedRequestStore, newRequests[0].id]);
-					//add id to the dabase
+					/* //add id to the dabase
 					if (newRequests[0].id) {
 						notViewedClientRequest({
 							variables: {
@@ -635,7 +663,7 @@ function Dashboard() {
 						if (notViewedClientRequestError) {
 							throw new Error('Error while updating viewed Clientrequests');
 						}
-					}
+					} */
 				}
 
 			}
