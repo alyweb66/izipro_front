@@ -37,13 +37,15 @@ type ExpandedState = {
 
 
 type MyRequestProps = {
+	conversationIdState: number;
+	setConversationIdState: (id: number) => void;
 	selectedRequest: RequestProps | null;
 	setSelectedRequest: (request: RequestProps | null) => void;
 	newUserId: number[];
 	setNewUserId: (id: number[]) => void;
 };
 
-function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserId }: MyRequestProps) {
+function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserId, conversationIdState, setConversationIdState }: MyRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -53,7 +55,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	//const [loading, setLoading] = useState(false);
 	//
 	const [userIds, setUserIds] = useState<number[]>([]);
-	const [conversationIdState, setConversationIdState] = useState<number>(0);
+	//const [conversationIdState, setConversationIdState] = useState<number>(0);
 	const [messageValue, setMessageValue] = useState('');
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
 	//const [newUserId, setNewUserId] = useState<number[]>([]);

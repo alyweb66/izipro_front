@@ -3,7 +3,7 @@ import { FaTrashAlt } from 'react-icons/fa';
 import pdfLogo from '/logo/pdf-icon.svg';
 import { RequestProps } from '../../Type/Request';
 import React, { useRef } from 'react';
-import { MessageProps } from '../../Type/message';
+//import { MessageProps } from '../../Type/message';
 import { userDataStore } from '../../store/UserData';
 
 type ExpandedState = {
@@ -12,8 +12,7 @@ type ExpandedState = {
 
 const RequestItem = ({ 
 	index,
-	/* isListOpen, */
-	messageStore,
+	//messageStore,
 	requestByDate,
 	handleViewedMessage,
 	setIsMessageOpen,
@@ -29,9 +28,8 @@ const RequestItem = ({
 	openModal 
 }: {
 	index?: number,
-    /* isListOpen?: boolean, */
 	requestByDate?: RequestProps,
-	messageStore?: MessageProps[],
+	//messageStore?: MessageProps[],
 	handleViewedMessage: Function,
 	setIsMessageOpen?: Function,
     request?: RequestProps,
@@ -57,7 +55,7 @@ const RequestItem = ({
 			${request ? 'new' : ''} 
 			${selectedRequest?.id === (request || requestByDate)?.id ? 'selected' : ''}
 			${requestByDate?.deleted_at ? 'deleted' : ''}
-			${(request || requestByDate)?.conversation.some(conv => conv.sender !== id && conv.sender !== 0 && (conv.user_1 === id || conv.user_2 === id)) ? 'not-viewed' : ''}
+			${(request || requestByDate)?.conversation?.some(conv => conv.sender !== id && conv.sender !== 0 && (conv.user_1 === id || conv.user_2 === id)) ? 'not-viewed' : ''}
 			` }
 			key={((request || requestByDate)?.id)?.toString()} 
 			onClick={() => {

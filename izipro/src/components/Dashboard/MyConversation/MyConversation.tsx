@@ -23,7 +23,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import logoProfile from '/logo/logo profile.jpeg';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
-import { VIEWED_MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
+//import { VIEWED_MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 
 
 type useQueryUserConversationsProps = {
@@ -34,11 +34,13 @@ type useQueryUserConversationsProps = {
 };
 
 type ClientMessageProps = {
+	conversationIdState: number;
+	setConversationIdState: (id: number) => void;
 	clientMessageSubscription?: { messageAdded: MessageProps[] };
 };
 
 
-function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
+function MyConversation({ clientMessageSubscription, conversationIdState, setConversationIdState }: ClientMessageProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -46,7 +48,7 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 	//state
 	const [messageValue, setMessageValue] = useState('');
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
-	const [conversationIdState, setConversationIdState] = useState<number>(0);
+	//const [conversationIdState, setConversationIdState] = useState<number>(0);
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
 	const [isListOpen, setIsListOpen] = useState(true);
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
@@ -78,7 +80,7 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 	const [message, { loading: messageMutLoading, error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
-	const [viewedMessage, { error: viewedMessageError }] = useMutation(VIEWED_MESSAGE_MUTATION);
+	//const [viewedMessage, { error: viewedMessageError }] = useMutation(VIEWED_MESSAGE_MUTATION);
 	const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
 	
 	//query
@@ -241,10 +243,8 @@ function MyConversation({ clientMessageSubscription }: ClientMessageProps) {
 
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {
-console.log('before if');
 
 		if (selectedRequest?.conversation.some(conv => conv.sender !== id && conv.sender !== 0 && (conv.user_1 === id || conv.user_2 === id))) {
-			console.log('update conversation');
 			
 			updateConversation({
 				variables: {
@@ -671,7 +671,7 @@ console.log('before if');
 							<RequestItem
 								request={request}
 								handleViewedMessage={handleViewedMessage}
-								messageStore={messageStore}
+								//messageStore={messageStore}
 								setIsMessageOpen={setIsMessageOpen}
 								resetRequest={resetRequest}
 								selectedRequest={selectedRequest!} 
@@ -690,7 +690,7 @@ console.log('before if');
 								index={index}
 								requestByDate={requestByDate}
 								handleViewedMessage={handleViewedMessage}
-								messageStore={messageStore}
+								//messageStore={messageStore}
 								setIsMessageOpen={setIsMessageOpen}
 								selectedRequest={selectedRequest!} 
 								setSelectedRequest={setSelectedRequest}

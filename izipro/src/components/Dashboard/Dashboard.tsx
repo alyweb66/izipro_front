@@ -28,6 +28,7 @@ import { clientRequestStore, myRequestStore, requestConversationStore } from '..
 import { MessageProps } from '../../Type/message';
 import { messageDataStore, myMessageDataStore } from '../../store/message';
 import {NOT_VIEWED_REQUEST_MUTATION } from '../GraphQL/NotViewedRequestMutation';
+import { UPDATE_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
 
 
 function Dashboard() {
@@ -42,6 +43,12 @@ function Dashboard() {
 	const [viewedMessageState, setViewedMessageState] = useState<number[]>([]);
 	const [viewedMyConversationState, setViewedMyConversationState] = useState<number[]>([]);
 	const [hasQueryRun, setHasQueryRun] = useState<boolean>(false);
+
+	//state for myRequest
+	const [conversationIdState, setConversationIdState] = useState<number>(0);
+
+	//state for myConversation
+	const [myConversationIdState, setMyConversationIdState] = useState<number>(0);
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -61,7 +68,7 @@ function Dashboard() {
 	// MyRequest store
 	myMessageDataStore((state) => [state.messages, state.setMessageStore]);
 	//MyConversation store
-	const [myConversationMessageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
+	messageDataStore((state) => [state.messages, state.setMessageStore]);
 	//ClientRequest store
 	//	const [setNotViewedRequestRefStore] = notViewedRequestRef((state) => [state.setNotViewedStore]);
 
@@ -77,6 +84,7 @@ function Dashboard() {
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
 	const [notViewedClientRequest, { error: notViewedClientRequestError }] = useMutation(NOT_VIEWED_REQUEST_MUTATION);
 	//const [deleteNotViewedRequest, { error: deleteNotViewedRequestError }] = useMutation(DELETE_NOT_VIEWED_REQUEST_MUTATION);
+	const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
 
 
 	// Subscription to get new message
@@ -213,20 +221,69 @@ function Dashboard() {
 			});
 
 			// add updated_at to the request.conversation
-			requestConversationStore.setState(prevState => {
-				const updatedRequest = prevState.requests.map((request: RequestProps) => {
-					const updatedConversation = request.conversation?.map((conversation) => {
-						if (conversation.id === messageAdded[0].conversation_id) {
-							return { ...conversation, updated_at: newDate, sender: messageAdded[0].user_id };
-						}
-						return conversation;
-					});
+			if (myConversationIdState !== messageAdded[0].conversation_id) {
+				requestConversationStore.setState(prevState => {
+					const updatedRequest = prevState.requests.map((request: RequestProps) => {
+						const updatedConversation = request.conversation?.map((conversation) => {
+							if (conversation.id === messageAdded[0].conversation_id) {
+								return { ...conversation, updated_at: newDate, sender: messageAdded[0].user_id };
+							}
+							return conversation;
+						});
 
-					return { ...request, conversation: updatedConversation };
+						return { ...request, conversation: updatedConversation };
+					});
+					return { requests: updatedRequest };
 				});
-				return { requests: updatedRequest };
-			});
-			//setClientMessageViewedStore([...messageAdded.map(message => message.conversation_id), ...(clientMessageViewedStore || [])]);
+			}
+
+			if (myConversationIdState === messageAdded[0].conversation_id && messageAdded[0].user_id !== id) {
+				updateConversation({
+					variables: {
+						input: {
+							id: messageAdded[0].conversation_id,
+						}
+					}
+				}).then(() => {
+					//update conversation viewed status in the store
+					// update request.conversation of the store
+					requestConversationStore.setState(prevState => {
+						const updatedRequests = prevState.requests.map(request => {
+							const updatedConversation = request.conversation?.map(conversation => {
+								if (conversation.id === conversationIdState) {
+									return { ...conversation, sender: 0 };
+								}
+								return conversation;
+							});
+							return { ...request, conversation: updatedConversation };
+						});
+						return { requests: updatedRequests };
+					});
+				
+					/* // update the message store
+					myMessageDataStore.setState(prevState => {
+						console.log('before map', prevState);
+
+						const updatedMessages = prevState.messages.map(message => {
+							console.log('before if', messageIds, message.id);
+
+							if (messageIds.includes(message.id)) {
+								console.log('message to true');
+
+								return { ...message, sender: 0 };
+							}
+							return message;
+						});
+						return {
+							...prevState,
+							messages: [...updatedMessages]
+						};
+					}); */
+				});
+				if (updateConversationError) {
+					throw new Error('Error while updating conversation');
+				}
+			}
 
 		}
 
@@ -345,7 +402,7 @@ function Dashboard() {
 			});
 
 			// check if the selectedRequest is the same as the messageAdded and update the conversation
-			if (selectedRequest?.id === messageAdded[0].request_id) {
+			if (selectedRequest?.id === messageAdded[0].request_id && conversationIdState !== messageAdded[0].conversation_id) {
 				setSelectedRequest((prevState: RequestProps | null) => {
 					// if a conversation is already in selectedRequest
 					if (prevState && prevState.conversation && prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
@@ -410,6 +467,67 @@ function Dashboard() {
 
 				});
 			}
+			if (selectedRequest?.id === messageAdded[0].request_id && conversationIdState === messageAdded[0].conversation_id) {
+				if (selectedRequest && selectedRequest.conversation && messageAdded[0].user_id !== id) {
+					/* const messageIds = messageStore
+							.filter(message => message.conversation_id === viewedIds 
+							&& message.viewed === false
+							&& message.user_id !== id)
+							.map(message => message.id); */
+					//console.log('messageIds', messageIds);
+						
+					updateConversation({
+						variables: {
+							input: {
+								id: messageAdded[0].conversation_id,
+							}
+						}
+					}).then(() => {
+						//update conversation viewed status in the store
+						myRequestStore.setState(prevState => {
+							const updatedRequests = prevState.requests.map(request => {
+								if (request.id === selectedRequest?.id) {
+									return {
+										...request, conversation: selectedRequest.conversation.map(conversation =>
+											conversation.id === messageAdded[0].conversation_id ? { ...conversation, sender: 0 } : conversation
+										)
+									};
+								}
+								return request;
+							});
+							return {
+								...prevState,
+								requests: [...updatedRequests]
+							};
+						});
+			
+						/* // update the message store
+								myMessageDataStore.setState(prevState => {
+									console.log('before map', prevState);
+				
+									const updatedMessages = prevState.messages.map(message => {
+										console.log('before if', messageIds, message.id);
+				
+										if (messageIds.includes(message.id)) {
+											console.log('message to true');
+				
+											return { ...message, sender: 0 };
+										}
+										return message;
+									});
+									return {
+										...prevState,
+										messages: [...updatedMessages]
+									};
+								}); */
+					});
+						
+					if (updateConversationError) {
+						throw new Error('Error while updating conversation');
+					}
+				}
+			}
+			
 
 			// send id to the mutation to find user
 			setNewUserId([]);
@@ -648,12 +766,16 @@ console.log('newId2', newId);
 
 				{selectedTab === 'Request' && <Request />}
 				{selectedTab === 'My requests' && <MyRequest
+					conversationIdState={conversationIdState}
+					setConversationIdState={setConversationIdState}
 					selectedRequest={selectedRequest}
 					setSelectedRequest={setSelectedRequest}
 					newUserId={newUserId}
 					setNewUserId={setNewUserId}
 				/>}
 				{selectedTab === 'My conversations' && <MyConversation
+					conversationIdState={myConversationIdState}
+					setConversationIdState={setMyConversationIdState}
 					clientMessageSubscription={clientMessageSubscription}
 				/>}
 				{selectedTab === 'My profile' && <Account />}
