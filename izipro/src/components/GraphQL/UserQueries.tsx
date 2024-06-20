@@ -52,7 +52,6 @@ export const GET_USER_REQUEST_BY_CONVERSATIONS = gql`
           name
         }
         created_at
-        viewed_conv
         conversation {
           id
           user_1
