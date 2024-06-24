@@ -43,7 +43,6 @@ export const MESSAGE_SUBSCRIPTION = gql`
             conversation_id
             request_id
             created_at
-            viewed
             media {
                 id
                 url

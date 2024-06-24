@@ -14,6 +14,7 @@ const RequestItem = ({
 	index,
 	//messageStore,
 	requestByDate,
+	notViewedConversationStore,
 	handleViewedMessage,
 	setIsMessageOpen,
 	request,
@@ -31,6 +32,7 @@ const RequestItem = ({
 	requestByDate?: RequestProps,
 	//messageStore?: MessageProps[],
 	handleViewedMessage: Function,
+	notViewedConversationStore?: number[],
 	setIsMessageOpen?: Function,
     request?: RequestProps,
 	resetRequest?: Function, // replace YourRequestType with the actual type of your request object
@@ -55,14 +57,15 @@ const RequestItem = ({
 			${request ? 'new' : ''} 
 			${selectedRequest?.id === (request || requestByDate)?.id ? 'selected' : ''}
 			${requestByDate?.deleted_at ? 'deleted' : ''}
-			${(request || requestByDate)?.conversation?.some(conv => conv.sender !== id && conv.sender !== 0 && (conv.user_1 === id || conv.user_2 === id)) ? 'not-viewed' : ''}
+			${(request || requestByDate)?.conversation?.some(conv => notViewedConversationStore?.some(id => id === conv.id)) ? 'not-viewed' : ''}
 			` }
 			key={((request || requestByDate)?.id)?.toString()} 
 			onClick={() => {
 				if ((request || requestByDate) && setSelectedRequest) {
 					setSelectedRequest && setSelectedRequest(request || requestByDate);
 				}
-				handleViewedMessage();
+				const convId = (request || requestByDate)?.conversation?.find(conv => conv.user_1 === id || conv.user_2 === id)?.id;
+				handleViewedMessage(convId);
 				setIsListOpen && setIsListOpen(false);
 				setIsMessageOpen && setIsMessageOpen(true);
 			}}

@@ -2,7 +2,7 @@ import { useQuery } from '@apollo/client';
 import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
 import { GET_JOB_DATA } from '../GraphQL/Job';
 import { GET_USERS_CONVERSATION, GET_USER_DATA, GET_USER_NOT_VIEWED_REQUESTS, GET_USER_REQUEST_BY_CONVERSATIONS, GET_USER_SUBSCRIPTION } from '../GraphQL/UserQueries';
-import { GET_CONVERSATION } from '../GraphQL/ConversationQueries';
+import { GET_CONVERSATION, GET_CONVERSATION_ID, NOT_VIEWED_CONVERSATIONS } from '../GraphQL/ConversationQueries';
 import { GET_MESSAGES_BY_CONVERSATION, GET_MY_MESSAGES_BY_CONVERSATION } from '../GraphQL/MessageQueries';
 
 import '../../styles/spinner.scss';
@@ -219,4 +219,24 @@ export const useQueryNotViewedRequests = () => {
 		throw new Error('Error while fetching viewed requests');
 	}
 	return {loading, viewedData};
+};
+
+export const useQueryNotViewedConversations = () => {
+	const { loading, error: viewedError, data: notViewedConversationQuery } = useQuery(NOT_VIEWED_CONVERSATIONS);
+
+	if (viewedError) {
+		throw new Error('Error while fetching viewed requests');
+	}
+	return {loading, notViewedConversationQuery};
+};
+
+export const useQueryUserConversationIds = (skip: boolean) => {
+	const { loading, error: myConversationIdsError, data: myConversationIds } = useQuery(GET_CONVERSATION_ID, {
+		skip
+	});
+
+	if (myConversationIdsError) {
+		throw new Error('Error while fetching viewed requests');
+	}
+	return {loading, myConversationIds};
 };
