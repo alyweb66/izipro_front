@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import './MyConversation.scss';
 import { requestDataStore, requestConversationStore, clientRequestStore } from '../../../store/Request';
 import { RequestProps } from '../../../Type/Request';
-import { CONVERSATION_MUTATION, MESSAGE_MUTATION, UPDATE_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
+import { CONVERSATION_MUTATION, DELETE_NOT_VIEWED_CONVERSATION_MUTATION, UPDATE_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
 import { useMutation } from '@apollo/client';
 import { userDataStore } from '../../../store/UserData';
 import { useQueryMessagesByConversation, useQueryUserConversations } from '../../Hook/Query';
@@ -23,6 +23,8 @@ import TextareaAutosize from 'react-textarea-autosize';
 import logoProfile from '/logo/logo profile.jpeg';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+import { MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
+import { notViewedConversation } from '../../../store/Viewed';
 //import { VIEWED_MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 
 
@@ -77,6 +79,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const role = userDataStore((state) => state.role);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
+	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 
 	//mutation
 	const [conversation, { loading: convMutLoading, error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
@@ -85,6 +88,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 	//const [viewedMessage, { error: viewedMessageError }] = useMutation(VIEWED_MESSAGE_MUTATION);
 	const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
+	const [deleteNotViewedConversation, {error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 	
 	//query
 	const { loading: convLoading, fetchMore } = useQueryUserConversations(0, limit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
@@ -92,16 +96,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	// file upload
 	const { file, urlFile, setUrlFile, setFile, handleFileChange } = useFileHandler();
-
-	//useEffect to set request in starting
-	/* useEffect(() => {
-		if (requestByDate && selectedRequest?.id === 0 && (requestByDate?.length ?? 0) > 0) {
-			setSelectedRequest(requestByDate[0]);
-			setTimeout(() => {
-				document.getElementById('first-user')?.click();
-			}, 200);
-		}
-	}, [requestByDate]); */
 
 	// useEffect to set the new selected request
 	useEffect(() => {
@@ -140,29 +134,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		}
 
 	}, [selectedRequest]);
-	console.log('messageStore', messageStore);
-
-	/* // useEffect to update the request to the requests store
-	useEffect(() => {
-		if (requestConv && requestConv.user) {
-
-			const requestsConversations: RequestProps[] = requestConv.user.requestsConversations;
-
-			//get all request who are not in the store
-			const newRequests = requestsConversations.filter((request: RequestProps) => requestsConversationStore?.every(prevRequest => prevRequest.id !== request.id));
-
-			// add the new request to the requestsConversationStore
-			if (newRequests.length > 0) {
-				requestConversationStore.setState(prevState => ({ ...prevState, requests: [...requestsConversationStore, ...newRequests] }));
-			}
-
-			offsetRef.current = requestsConversations?.length;
-		}
-
-		if (requestConv?.user.requestsConversations.length < limit) {
-			setIsHasMore(false);
-		}
-	}, [requestConv]); */
 
 	// useEffect to sort the requests by date
 	useEffect(() => {
@@ -564,6 +535,23 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 					}));
 
 				}
+
+				// delete the conversation from the notViewedConversationStore and database
+				deleteNotViewedConversation({
+					variables: {
+						input: {
+							user_id: id,
+							conversation_id: conversationId
+						}
+					}
+				}).then(() => {
+					// remove the conversation id from the notViewedConversationStore
+					setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
+				});
+				
+				if (deleteNotViewedConversationError) {
+					throw new Error('Error updating conversation');
+				}
 			});
 
 			if (subscriptionError) {
@@ -588,80 +576,33 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		setUrlFile(newUrlFileList);
 	};
 
-	const handleViewedMessage = () => {
-	/* 	// change viewed status of the message
-		if (selectedRequest && selectedRequest.conversation) {
+	// Function to remove viewed conversation
+	const handleViewedMessage = (convId: number) => {
+		
+		if (selectedRequest && notViewedConversationStore?.some(id => id === convId)) {
+			console.log('selectedRequest', selectedRequest);
 			
-			const messageIds = messageStore
-				.filter(
-					message => message.conversation_id === conversationIdState 
-				&& message.viewed === false 
-				&& message.user_id !== id)
-				.map(message => message.id);
-
-			if (messageIds.length > 0) {
-				viewedMessage({
-					variables: {
-						input: {
-							id: messageIds,
-						}
-					}
-				}).then(() => { */
-		/* 	const messageIds = messageStore
-			.filter(
-				message => message.conversation_id === conversationIdState 
-				&& message.user_id !== id)
-			.map(message => message.id); */
-
-		if (selectedRequest?.conversation.some(conv => conv.sender !== id && conv.sender !== 0 && (conv.user_1 === id || conv.user_2 === id))) {
-			updateConversation({
+			deleteNotViewedConversation({
 				variables: {
 					input: {
-						id: conversationIdState,
+						user_id: id,
+						conversation_id: [convId]
 					}
 				}
-			}).then(() => {
-				// update viewed message in the store
-				/* messageDataStore.setState(prevState => {
-					const updatedMessages = prevState.messages.map(message => {
-						if (messageIds.includes(message.id)) {
-							return { ...message, viewed: true };
-						}
-						return message;
-					});
-					return {
-						...prevState,
-						messages: [...updatedMessages]
-					};
-				}); */
+			}).then((response) => {
+				console.log('deleteNotViewedConversation', response);
 
-				// update request.conversation of the store
-				requestConversationStore.setState(prevState => {
-					const updatedRequests = prevState.requests.map(request => {
-						const updatedConversation = request.conversation?.map(conversation => {
-							if (conversation.id === conversationIdState) {
-								return { ...conversation, sender: 0 };
-							}
-							return conversation;
-						});
-						return { ...request, conversation: updatedConversation };
-					});
-					return { requests: updatedRequests };
-				});
-				
-		
-				if (updateConversationError) {
+				// remove the conversation id from the notViewedConversationStore
+				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== convId));
+
+				if (deleteNotViewedConversationError) {
 					throw new Error('Error updating conversation');
 				}
 			});
 		}
-
-
-		/* if (viewedMessageError) {
-			throw new Error('Error while updating message');
-		} */
 		
 	};
+	console.log('selectedRequest', selectedRequest);
 
 	return (
 		<div className="my-conversation">
@@ -673,6 +614,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 						{request && request.id > 0 &&
 							<RequestItem
 								request={request}
+								notViewedConversationStore={notViewedConversationStore}
 								handleViewedMessage={handleViewedMessage}
 								//messageStore={messageStore}
 								setIsMessageOpen={setIsMessageOpen}
@@ -691,6 +633,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 							<RequestItem 
 								key={requestByDate.id}
 								index={index}
+								notViewedConversationStore={notViewedConversationStore}
 								requestByDate={requestByDate}
 								handleViewedMessage={handleViewedMessage}
 								//messageStore={messageStore}
@@ -755,7 +698,17 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 									className="my-conversation__message-list__user__header__detail img"
 									src={selectedRequest.image ? selectedRequest.image : logoProfile}
 									alt="" />
-								<p className="my-conversation__message-list__user__header__detail name">{selectedRequest.first_name} {selectedRequest.last_name}</p>
+								{selectedRequest.denomination ? (
+									<p className="my-conversation__message-list__user__header__detail name" >
+										<span className="my-conversation__message-list__user__header__detail name-span">
+										</span>&nbsp;{selectedRequest.denomination}
+									</p>
+								) : (
+									<p className="my-conversation__message-list__user__header__detail name" >
+										<span className="my-conversation__message-list__user__header__detail name-span">
+										</span>&nbsp;{selectedRequest.first_name} {selectedRequest.last_name}
+									</p>
+								)}
 
 							</div>
 							{requestTitle && <div>

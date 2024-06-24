@@ -9,7 +9,6 @@ export const GET_MY_MESSAGES_BY_CONVERSATION = gql`
           conversation_id
           request_id
           created_at
-          viewed
           media {
             id
             url
@@ -29,7 +28,6 @@ export const GET_MESSAGES_BY_CONVERSATION = gql`
           conversation_id
           request_id
           created_at
-          viewed
           media {
             id
             url

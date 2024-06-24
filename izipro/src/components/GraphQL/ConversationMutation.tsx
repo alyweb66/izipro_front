@@ -12,15 +12,21 @@ export const CONVERSATION_MUTATION = gql`
 }
 `;
 
-export const MESSAGE_MUTATION = gql`
+/* export const MESSAGE_MUTATION = gql`
     mutation Message($id: Int!, $input: NewMessageInput!) {
       createMessage(id: $id, input: $input) 
   
 }
-`;
+`; */
 
 export const UPDATE_CONVERSATION_MUTATION = gql`
   mutation UpdateConversationMutation($input: UpdateConversationInput!) {
     updateConversation(input: $input)
+  }
+`;
+
+export const DELETE_NOT_VIEWED_CONVERSATION_MUTATION = gql`
+  mutation DeleteNotViewedConversation($input: UserHasNotViewedConversationInput!) {
+    deleteNotViewedConversation(input: $input)
   }
 `;

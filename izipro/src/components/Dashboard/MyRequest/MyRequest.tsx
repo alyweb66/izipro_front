@@ -11,7 +11,7 @@ import { myMessageDataStore } from '../../../store/message';
 import { MessageProps } from '../../../Type/message';
 import { useFileHandler } from '../../Hook/useFileHandler';
 import { subscriptionDataStore, SubscriptionStore } from '../../../store/subscription';
-import { MESSAGE_MUTATION, UPDATE_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
+import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
 import { SubscriptionProps } from '../../../Type/Subscription';
 //import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
@@ -27,6 +27,8 @@ import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import Spinner from '../../Hook/Spinner';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
+import { MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
+import { notViewedConversation } from '../../../store/Viewed';
 //import { VIEWED_MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 ReactModal.setAppElement('#root');
 
@@ -72,7 +74,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
 	//const [isHasMore, setIsHasMore] = useState(true);
 	const [isUserMessageOpen, setIsUserMessageOpen] = useState(false);
-	const [viewedIds, setViewedI] = useState<number>(0);
+	//const [viewedIds, setViewedIds] = useState<number>(0);
 
 
 	// Create a state for the scroll position
@@ -85,6 +87,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [messageStore] = myMessageDataStore((state) => [state.messages, state.setMessageStore]);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	//const [myRequestMessageViewedStore, setMyRequestMessageViewedStore] = viewedMyRequestMessageStore((state) => [state.viewed, state.setViewedStore]);
+	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 
 	//useRef
 	//const updateSubscriptionRef = useRef<SubscriptionProps[]>([]);
@@ -94,7 +97,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const idRef = useRef<number>(0);
 	const selectedRequestRef = useRef<RequestProps | null>(null);
 
-	const limit = 4;
+	const limit = 5;
 
 
 	// file upload
@@ -105,7 +108,8 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	//const [viewedMessage, { error: viewedMessageError }] = useMutation(VIEWED_MESSAGE_MUTATION);
-	const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
+	//const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
+	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
 	// Query to get the user requests
 	const { loading: requestLoading, fetchMore } = useQueryUserRequests(id, 0, limit, myRequestStore.length > 0 );
@@ -356,14 +360,13 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {
-		// change viewed status of the conversation
-		console.log('viewedIds', viewedIds);
-		if (selectedRequest && selectedRequest.conversation) {
-			/* const messageIds = messageStore
+		 // change viewed status of the conversation
+		/* if (selectedRequest && selectedRequest.conversation) {
+			const messageIds = messageStore
 				.filter(message => message.conversation_id === viewedIds 
 				&& message.viewed === false
 				&& message.user_id !== id)
-				.map(message => message.id); */
+				.map(message => message.id);
 			//console.log('messageIds', messageIds);
 			
 			if (viewedIds > 0 && viewedIds !== id) {
@@ -392,7 +395,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						};
 					});
 
-					/* // update the message store
+					// update the message store
 					myMessageDataStore.setState(prevState => {
 						console.log('before map', prevState);
 	
@@ -410,15 +413,15 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							...prevState,
 							messages: [...updatedMessages]
 						};
-					}); */
+					});
 				});
 			}
 
 			if (updateConversationError) {
 				throw new Error('Error while updating conversation');
 			}
-			setViewedI(0);
-		}
+			setViewedIds(0);
+		}  */
 
 
 		setTimeout(() => {
@@ -449,7 +452,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			}
 
 		}).then((response) => {
-			// Get the conversation viewedIds for the request
+			// Get the conversation ids of the request
 			const conversationIds = myRequestStore.getState().requests.find(request => request.id === requestId)?.conversation?.map(conversation => conversation.id);
 
 			if (response.data.deleteRequest) {
@@ -476,7 +479,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
 
-
+				// replace the old subscription with the new one
 				subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
 					...prevState,
 					subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
@@ -485,8 +488,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				}));
 
 				if (conversationIds) {
-
-
 					// remove subscription for this conversation
 					const conversationSubscription = subscriptionStore.find(subscription => subscription.subscriber === 'conversation');
 					const updatedConversationSubscription = Array.isArray(conversationSubscription?.subscriber_id) ? conversationSubscription?.subscriber_id.filter(id => !conversationIds.includes(id)) : [];
@@ -504,7 +505,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
 
-
+						// replace the old subscription with the new one
 						subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
 							...prevState,
 							subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
@@ -522,6 +523,23 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								messages: [...newMessages]
 							};
 						});
+
+						// remove the conversation id from the notViewedConversationStore and database
+						deleteNotViewedConversation({
+							variables: {
+								input: {
+									user_id: id,
+									conversation_id: conversationIds
+								}
+							}
+						}).then(() => {
+							// remove the conversation id from the notViewedConversationStore
+							setNotViewedConversationStore(notViewedConversationStore.filter(id => !conversationIds.includes(id)));
+						});
+
+						if (deleteNotViewedConversationError) {
+							throw new Error('Error updating conversation');
+						}
 
 					});
 
@@ -568,18 +586,44 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		event?.preventDefault();
 
 		// find the conversation id for the message
-		const conversationId = selectedRequest?.conversation?.find(conversation =>
+		const conversation = selectedRequest?.conversation?.find(conversation =>
 			(conversation.user_1 === id || conversation.user_2 === id) &&
 			(conversation.user_1 === userId || conversation.user_2 === userId)
 		);
 
-		if (conversationId?.id !== conversationIdState) {
-			setConversationIdState(conversationId?.id || 0);
-			setViewedI(conversationId?.id || 0);
+		const conversationId = conversation?.id;
+
+		if (conversationId !== conversationIdState) {
+			setConversationIdState(conversationId || 0);
+			//setViewedIds(conversationId || 0);
+		}
+
+		// remove the conversation id from the notViewedConversationStore and database
+		if (conversationId && notViewedConversationStore?.some(id => id === conversationId)) {
+			console.log('deleteconv', conversationId);
+			
+			deleteNotViewedConversation({
+				variables: {
+					input: {
+						user_id: id,
+						conversation_id: [conversationId]
+					}
+				}
+			}).then((response) => {
+				console.log('deleteNotViewedConversation', response);
+
+				// remove the conversation id from the notViewedConversationStore
+				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
+
+			});
+			
+			if (deleteNotViewedConversationError) {
+				throw new Error('Error updating conversation');
+			}
 		}
 		
 		//update conversation viewed status in the store
-		myRequestStore.setState(prevState => {
+		/* 	myRequestStore.setState(prevState => {
 			const updatedRequests = prevState.requests.map(request => {
 				if (request.id === selectedRequest?.id) {
 					return {
@@ -594,9 +638,9 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				...prevState,
 				requests: [...updatedRequests]
 			};
-		});
+		}); */
 
-		// Create a new updated object
+		/* // Create a new updated object
 		if (selectedRequest) {
 			const updatedRequest: RequestProps = {
 				...selectedRequest,
@@ -605,7 +649,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				)
 			};
 			setSelectedRequest(updatedRequest);
-		}
+		} */
 	
 	};
 
@@ -685,9 +729,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	};
 
-	console.log('requestByDate', requestByDate);
 	
-
 	return (
 		<div className="my-request">
 			<div id="scrollableRequest" className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}>
@@ -701,7 +743,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								className={`my-request__list__detail__item 
 									${request.urgent}
 									${selectedRequest?.id === request?.id ? 'selected' : ''} 
-									${request.conversation?.some(conv => conv.sender !== id && conv.sender !== 0 ) ? 'not-viewed' : ''} `}
+									${request.conversation?.some(conv => notViewedConversationStore?.some(id => id === conv.id) ) ? 'not-viewed' : ''} `}
 
 								key={request.id}
 								onClick={(event) => {
@@ -857,8 +899,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							${selectedUser?.id === user.id ? 'selected-user' : ''} 
 							${user.deleted_at ? 'deleted' : ''}
 							${(selectedRequest?.conversation
-						.some(conv => conv.sender !== id 
-									&& conv.sender !== 0 
+						.some(conv => notViewedConversationStore?.some(id => id === conv.id)
 									&& conv.user_1 === user.id || conv.user_2 === user.id)) ? 'not-viewed' : ''}`
 
 						}

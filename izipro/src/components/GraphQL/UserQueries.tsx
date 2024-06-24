@@ -44,6 +44,7 @@ export const GET_USER_REQUEST_BY_CONVERSATIONS = gql`
         job_id
         first_name
         last_name
+        denomination
         image
         job
         media {

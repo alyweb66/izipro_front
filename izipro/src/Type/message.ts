@@ -5,7 +5,6 @@ type MessageProps = {
         conversation_id: number
         created_at: string
         request_id: number
-        viewed: boolean
         media: {
             id: number
             url: string
@@ -20,7 +19,6 @@ type MessageStoreProps = {
         user_id: number
         conversation_id: number
         created_at: string
-        viewed: boolean
         media: {
             id: number
             url: string

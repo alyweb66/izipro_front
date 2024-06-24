@@ -12,3 +12,24 @@ export const GET_CONVERSATION = gql`
         }
     }
 `;
+
+export const NOT_VIEWED_CONVERSATIONS = gql`
+    query NotViewedConversation {
+    user {
+        userHasNotViewedConversation {
+        id
+        conversation_id
+        user_id
+        created_at
+        }
+    }
+}
+`;
+
+export const GET_CONVERSATION_ID = gql`
+    query UserConversationId {
+        user {
+            conversationRequestIds
+        }
+    }
+`;
