@@ -104,6 +104,7 @@ function Dashboard() {
 	const getUserSubscription = useQueryUserSubscriptions();
 	const notViewedRequestQuery = useQueryNotViewedRequests();
 	const { loading: notViewedConversationLoading, notViewedConversationQuery } = useQueryNotViewedConversations();
+	// this query is only ids of all conversation used to compare with the notViewedConversationStore to get the number of not viewed conversation
 	const { loading: myConversationIdsLoading, myConversationIds } = useQueryUserConversationIds(requestConversationIdStore.length > 0);
 
 	// Query for MyRequest
@@ -119,7 +120,7 @@ function Dashboard() {
 
 	//mutation
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
-	const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
+	//const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
 
@@ -377,6 +378,11 @@ function Dashboard() {
 				});
 			}
 
+			// add the conversation if not exist in requestConversationsIdStore
+			if (!requestConversationIdStore.includes(messageAdded[0].conversation_id)) {
+				setRequestConversationsIdStore([messageAdded[0].conversation_id, ...(requestConversationIdStore || [])]);
+			}
+
 			// check if the selected conversation is the same as the messageAdded and update the conversation
 			if (myConversationIdState === messageAdded[0].conversation_id && messageAdded[0].user_id !== id) {
 				deleteNotViewedConversation({
@@ -497,6 +503,11 @@ function Dashboard() {
 				});
 				return { ...prevState, requests: updatedRequest };
 			});
+
+			// add the conversation if not exist in requestConversationsIdStore
+			if (!requestConversationIdStore.includes(messageAdded[0].conversation_id)) {
+				setRequestConversationsIdStore([messageAdded[0].conversation_id, ...(requestConversationIdStore || [])]);
+			}
 
 			// check if the selectedRequest is the same as the messageAdded and update the conversation
 			if (selectedRequest?.id === messageAdded[0].request_id && conversationIdState !== messageAdded[0].conversation_id) {
@@ -776,7 +787,7 @@ console.log('newId2', newId);
 
 	return (
 		<div className='dashboard'>
-			{userDataLoading && notViewedConversationLoading && <Spinner />}
+			{userDataLoading && notViewedConversationLoading && myConversationIdsLoading && <Spinner />}
 			<nav className="dashboard__nav">
 				<button className="dashboard__nav__burger-menu" onClick={toggleMenu}>
 					<div className='burger-icon'>

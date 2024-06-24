@@ -729,41 +729,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	};
 
-	/* // Function to remove viewed conversation
-	const handleViewedMessage = (convId: number) => {
-
-		// find the conversation id for the message
-		const conversationId = selectedRequest?.conversation?.find(conversation =>
-			(conversation.user_1 === id || conversation.user_2 === id) &&
-			(conversation.user_1 === userId || conversation.user_2 === userId)
-		);
-
-		if (selectedRequest && notViewedConversationStore?.some(id => id === convId)) {
-			console.log('selectedRequest', selectedRequest);
-			
-			deleteNotViewedConversation({
-				variables: {
-					input: {
-						user_id: id,
-						conversation_id: [convId]
-					}
-				}
-			}).then((response) => {
-				console.log('deleteNotViewedConversation', response);
-
-				// remove the conversation id from the notViewedConversationStore
-				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== convId));
-
-				if (deleteNotViewedConversationError) {
-					throw new Error('Error updating conversation');
-				}
-			});
-		}
-		
-	}; */
-	console.log('requestByDate', requestByDate);
 	
-
 	return (
 		<div className="my-request">
 			<div id="scrollableRequest" className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}>
