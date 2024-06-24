@@ -73,116 +73,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	// get requests by job
 	const { loading: requestJobLoading,  fetchMore } = useQueryRequestByJob(jobs, 0, limit, clientRequestStore.length > 0);
 
-	/* // Function to filter the requests by the user's location and the request's location
-	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
-		// If the function is called from the subscription, we need to add the new request to the top of list
-		if (fromSubscribeToMore) {
 
-			const filteredRequests = requests.filter((request: RequestProps) => {
-				// Define the two points
-				const requestPoint = turf.point([request.lng, request.lat]);
-				const userPoint = turf.point([lng, lat]);
-				// Calculate the distance in kilometers (default)
-				const distance = turf.distance(requestPoint, userPoint);
-
-				return (
-					// Check if the request is in the user's range
-					(distance < request.range / 1000 || request.range === 0) &&
-					// Check if the request is in the user's settings range
-					(distance < settings[0].range / 1000 || settings[0].range === 0) &&
-					// Check if the user is already in conversation with the request
-					(request.conversation === null || request.conversation === undefined ||
-						!request.conversation.some(conversation =>
-							(conversation.user_1 !== null && conversation.user_2 !== null) &&
-							(conversation.user_1 === id || conversation.user_2 === id)
-						)
-					)
-				);
-			});
-
-			//get all request who are not in the store
-			const newRequests = filteredRequests.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
-
-			// Add the new requests to the top of the list
-			if (newRequests) {
-				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
-
-				// add the request.id to the viewedClientRequestStore
-				setClientRequestViewedStore([...newRequests.map(request => request.id), ...(clientRequestViewedStore || [])]);
-
-			}
-
-			offsetRef.current = offsetRef.current + filteredRequests.length;
-
-		} else {
-			// If the function is called from the query, we need to add the new requests to the bottom of the list
-			requests.filter((request: RequestProps) => {
-				// Define the two points
-				const requestPoint = turf.point([request.lng, request.lat]);
-				const userPoint = turf.point([lng, lat]);
-				// Calculate the distance in kilometers (default)
-				const distance = turf.distance(requestPoint, userPoint);
-
-				return (
-					(distance < request.range / 1000 || request.range === 0) &&
-					(distance < settings[0].range / 1000 || settings[0].range === 0) &&
-					// Check if the user is already in conversation with the request
-					(request.conversation === null || request.conversation === undefined ||
-						!request.conversation.some(conversation =>
-							(conversation.user_1 !== null && conversation.user_2 !== null) &&
-							(conversation.user_1 === id || conversation.user_2 === id)
-						)
-					)
-				);
-			});
-
-			//get all request who are not in the store
-			const newRequests = requests.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
-
-			// Add the new requests to the bottom of the list
-			if (newRequests) {
-				setClientRequestsStore([...newRequests, ...(clientRequestsStore || []),]);
-
-				// add the request.id to the viewedClientRequestStore
-				setClientRequestViewedStore([...newRequests.map(request => request.id), ...(clientRequestViewedStore || [])]);
-			}
-
-		}
-	} */
-
-
-	// Function to load more requests 
-	function addRequest() {
-		console.log('offsetRef', offsetRef.current);
-		console.log('addRequest');
-		
-		fetchMore({
-			variables: {
-				offset: offsetRef.current, // Next offset
-			},
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		}).then(fetchMoreResult => {
-			const data = fetchMoreResult.data.requestsByJob;
-			console.log('clientRequestsStore', clientRequestsStore);
-			
-			console.log('data', data);
-
-			//get all request who are not in the store
-			const newRequests = data.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
-
-			if (newRequests.length > 0) {
-				RangeFilter(newRequests);
-				offsetRef.current = offsetRef.current + data.length;
-
-			}
-
-			// If there are no more requests, stop fetchmore
-			if (fetchMoreResult.data.requestsByJob.length < limit) {
-				setIsHasMore(false);
-			}
-		});
-
-	}
 
 
 	// add jobs to setSubscriptionJob if there are not already in, or have the same id
@@ -256,28 +147,81 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 
 	}, [jobs]);
 
-	/* // useEffect to filter the requests by the user's location and the request's location
+	// useEffect to see if the request is viewed
 	useEffect(() => {
-		if (getRequestsByJob) {
-			const requestByJob = getRequestsByJob.requestsByJob;
-
-			//get all request who are not in the store
-			const newRequests = requestByJob.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
-
-			// Filter the requests
-			if (newRequests.length > 0) {
-				RangeFilter(requestByJob);
-				offsetRef.current = offsetRef.current + requestByJob?.length;
+		// Create an IntersectionObserver
+			
+		const observer = new IntersectionObserver((entries) => {
+			console.log('coucou');
+			const requestIdsInView = entries
+				.filter(entry => entry.isIntersecting)
+				.map(entry => {
+					const requestIdString = entry.target.getAttribute('data-request-id');
+					return requestIdString !== null ? parseInt(requestIdString) : null;
+				})
+				.filter(requestId => requestId !== null && notViewedRequestStore.includes(requestId));
+	
+			if (requestIdsInView.length > 0) {
+				// check if the id is in the notViewedRequestStore
+				const isAnyIdInViewInStore = requestIdsInView.some(id => notViewedRequestStore.includes(id as number));
+	
+				setTimeout(() => {
+					// remove all requestIdsInView from the viewedClientRequestStore at once
+					if (isAnyIdInViewInStore) {
+						console.log('addNotViewedRequest', isAnyIdInViewInStore);
+							
+						notViewedRequest.setState(prevState => ({ notViewed: prevState.notViewed.filter(value => !requestIdsInView.includes(value)) }));
+						//setNotViewedRequestStore(notViewedRequestStore.filter(value => !requestIdsInView.includes(value)));
+					}
+					//notViewedRequest.setState({ notViewed: notViewedRequestStore.filter(value => !requestIdsInView.includes(value)) });
+	
+					// remove not viewed request from the database
+					if (requestIdsInView.length > 0) {
+						console.log('deleteNotViewedRequest');
+						console.log('notViewedRequestStore ', notViewedRequestStore);
+						
+						deleteNotViewedRequest({
+							variables: {
+								input: {
+									user_id: id,
+									request_id: requestIdsInView
+								}
+							}
+						});
+		
+						if (deleteNotViewedRequestError) {
+							throw new Error('Error while deleting viewed Clientrequests');
+						}
+					}
+				}, 3000);
+	
 			}
-		}
-
-		// If there are no more requests, stop the infinite scroll
-		if (getRequestsByJob?.requestsByJob.length < limit) {
-			setIsHasMore(false);
-		}
-
-	}, [getRequestsByJob, settings]);
- */
+		});
+	
+	
+		// Observe all elements with a data-request-id attribute
+		const elements = document.querySelectorAll('[data-request-id]');
+		elements.forEach(element => observer.observe(element));
+	
+		// Function to handle visibility change
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === 'visible') {
+				elements.forEach(element => observer.observe(element));
+			} else {
+				elements.forEach(element => observer.unobserve(element));
+			}
+		};
+		
+		// Listen for visibility change events
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+	
+		// Clean up
+		return () => {
+			elements.forEach(element => observer.unobserve(element));
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+		};
+	
+	});
 
 	// Function to hide a request
 	const handleHideRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
@@ -308,100 +252,34 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 		}
 	};
 
-	// useEffect to see if the request is viewed
-	useEffect(() => {
-		// Create an IntersectionObserver
-		
-		const observer = new IntersectionObserver((entries) => {
-			console.log('coucou');
-			const requestIdsInView = entries
-				.filter(entry => entry.isIntersecting)
-				.map(entry => {
-					const requestIdString = entry.target.getAttribute('data-request-id');
-					return requestIdString !== null ? parseInt(requestIdString) : null;
-				})
-				.filter(requestId => requestId !== null && notViewedRequestStore.includes(requestId));
+	// Function to load more requests 
+	function addRequest() {
+			
+		fetchMore({
+			variables: {
+				offset: offsetRef.current, // Next offset
+			},
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		}).then(fetchMoreResult => {
+			const data = fetchMoreResult.data.requestsByJob;
 
-			if (requestIdsInView.length > 0) {
-				// check if the id is in the notViewedRequestStore
-				const isAnyIdInViewInStore = requestIdsInView.some(id => notViewedRequestStore.includes(id as number));
-
-				setTimeout(() => {
-				// remove all requestIdsInView from the viewedClientRequestStore at once
-					if (isAnyIdInViewInStore) {
-						console.log('addNotViewedRequest', isAnyIdInViewInStore);
-						
-						notViewedRequest.setState(prevState => ({ notViewed: prevState.notViewed.filter(value => !requestIdsInView.includes(value)) }));
-					//setNotViewedRequestStore(notViewedRequestStore.filter(value => !requestIdsInView.includes(value)));
-					}
-					//notViewedRequest.setState({ notViewed: notViewedRequestStore.filter(value => !requestIdsInView.includes(value)) });
-
-					// remove not viewed request from the database
-					if (requestIdsInView.length > 0) {
-						console.log('deleteNotViewedRequest');
-						console.log('notViewedRequestStore ', notViewedRequestStore);
-					
-						deleteNotViewedRequest({
-							variables: {
-								input: {
-									user_id: id,
-									request_id: requestIdsInView
-								}
-							}
-						});
+			//get all request who are not in the store
+			const newRequests = data.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
 	
-						if (deleteNotViewedRequestError) {
-							throw new Error('Error while deleting viewed Clientrequests');
-						}
-					}
-				}, 3000);
-				
-
+			if (newRequests.length > 0) {
+				RangeFilter(newRequests);
+				offsetRef.current = offsetRef.current + data.length;
 	
-				/* if(addNotViewedRequest.length > 0) {
-					notViewedClientRequest({
-						variables: {
-							input: {
-								user_id: id,
-								request_id: addNotViewedRequest
-							}
-						}
-					});
+			}
 	
-					if (notViewedClientRequestError) {
-						throw new Error('Error while updating viewed Clientrequests');
-					}
-				} */
-	
-
-
+			// If there are no more requests, stop fetchmore
+			if (fetchMoreResult.data.requestsByJob.length < limit) {
+				setIsHasMore(false);
 			}
 		});
-
-
-		// Observe all elements with a data-request-id attribute
-		const elements = document.querySelectorAll('[data-request-id]');
-		elements.forEach(element => observer.observe(element));
-
-		// Function to handle visibility change
-		const handleVisibilityChange = () => {
-			if (document.visibilityState === 'visible') {
-				elements.forEach(element => observer.observe(element));
-			} else {
-				elements.forEach(element => observer.unobserve(element));
-			}
-		};
 	
-		// Listen for visibility change events
-		document.addEventListener('visibilitychange', handleVisibilityChange);
+	}
 
-		// Clean up
-		return () => {
-			elements.forEach(element => observer.unobserve(element));
-			document.removeEventListener('visibilitychange', handleVisibilityChange);
-		};
-
-	});
 
 
 	return (

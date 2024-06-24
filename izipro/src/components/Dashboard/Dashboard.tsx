@@ -744,35 +744,7 @@ function Dashboard() {
 
 			// Add the new requests to the bottom of the list
 			if (newRequests) {
-				setClientRequestsStore([...newRequests, ...(clientRequestsStore || []),]);
-
-
-				// add request.id to the viewedRequestStore
-				/* if (notViewedRequestStore.length === 0 || notViewedRequestStore.some(id => newRequests.some(request => request.id !== id))) {
-					console.log('passed2', newRequests[0].id, notViewedRequestStore);
-					// select only the id who are not in the store
-					const newId = newRequests.filter((request: RequestProps) => !notViewedRequestStore.includes(request.id)).map(request => request.id);
-console.log('newId2', newId);
-
-					if (newId.length > 0) {
-						setNotViewedRequestStore([...notViewedRequestStore, ...newId]);
-						// add request.id to the database
-						if (newRequests[0].id) {
-							notViewedClientRequest({
-								variables: {
-									input: {
-										user_id: id,
-										request_id: [newRequests[0].id]
-									}
-								}
-							});
-
-							if (notViewedClientRequestError) {
-								throw new Error('Error while updating viewed Clientrequests');
-							}
-						}
-					}
-				} */
+				setClientRequestsStore([...(clientRequestsStore || []), ...newRequests,]);
 
 			}
 
