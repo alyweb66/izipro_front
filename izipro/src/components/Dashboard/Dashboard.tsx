@@ -6,7 +6,7 @@ import MyRequest from './MyRequest/MyRequest';
 import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import { userConversation, userDataStore } from '../../store/UserData';
-import { useQueryNotViewedConversations, useQueryNotViewedRequests, useQueryRequestByJob, useQueryUserConversationIds, useQueryUserConversations, useQueryUserData, useQueryUserRequests, useQueryUserSubscriptions } from '../Hook/Query';
+import { useQueryGetRequestById, useQueryNotViewedConversations, useQueryNotViewedRequests, useQueryRequestByJob, useQueryUserConversationIds, useQueryUserConversations, useQueryUserData, useQueryUserRequests, useQueryUserSubscriptions } from '../Hook/Query';
 import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
 import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
@@ -28,7 +28,7 @@ import { clientRequestStore, myRequestStore, requestConversationStore } from '..
 import { MessageProps } from '../../Type/message';
 import { messageDataStore, myMessageDataStore } from '../../store/message';
 //import {NOT_VIEWED_REQUEST_MUTATION } from '../GraphQL/NotViewedRequestMutation';
-import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION, UPDATE_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
+import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
 
 type useQueryUserConversationsProps = {
 	loading: boolean;
@@ -50,6 +50,7 @@ function Dashboard() {
 	const [viewedMyConversationState, setViewedMyConversationState] = useState<number[]>([]);
 	const [hasQueryRun, setHasQueryRun] = useState<boolean>(false);
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
+	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 
 	//state for myRequest
 	const [conversationIdState, setConversationIdState] = useState<number>(0);
@@ -58,6 +59,7 @@ function Dashboard() {
 	//state for myConversation
 	const [myConversationIdState, setMyConversationIdState] = useState<number>(0);
 	const [isMyConversationHasMore, setIsMyConversationHasMore] = useState<boolean>(true);
+	const [isForMyConversation, setIsForMyConversation] = useState<boolean>(false);
 
 	//state for clientRequest
 	const [isCLientRequestHasMore, setIsClientRequestHasMore] = useState<boolean>(true);
@@ -109,6 +111,7 @@ function Dashboard() {
 
 	// Query for MyRequest
 	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, requestStore.length > 0);
+	const { loading: requestByIdLoading, requestById } = useQueryGetRequestById(requestByIdState);
 	console.log('id', id);
 
 	//Query for ClientRequest
@@ -137,14 +140,59 @@ function Dashboard() {
 		isLogged = JSON.parse(localStorage.getItem('ayl') || '{}');
 	}
 
+	// set the requestById to myRequestStore 
+	useEffect(() => {
+		console.log('requestById', requestById);
+		
+		if (requestById) {
+			if (!isForMyConversation) {
+				const request = requestById?.user.request;
+				if (requestStore.some(requestStore => requestStore.id !== request.id)) {
+					
+					// add request to the store
+					myRequestStore.setState(prevRequests => {
+						return { ...prevRequests, requests: [request, ...prevRequests.requests] };
+					});
 
+					//add conversation id to the requestConversationsIdStore
+					const conversationIds = request.conversation?.map((conversation: RequestProps) => conversation.id);
+					// check if conversation are not already in the store
+					if (conversationIds.some((id: number) => !requestConversationIdStore?.includes(id))) {
+						setRequestConversationsIdStore([...conversationIds, ...(requestConversationIdStore || [])]);
+					}
+					setRequestByIdState(0);
+				}
+			} else {
+				const request = requestById?.user.request;
+				if (requestsConversationStore.some(requestStore => requestStore.id !== request.id)) {
+					
+					// add request to the store
+					requestConversationStore.setState(prevRequests => {
+						return { ...prevRequests, requests: [request, ...prevRequests.requests] };
+					});
+
+					//add conversation id to the requestConversationsIdStore
+					const conversationIds = request.conversation?.map((conversation: RequestProps) => conversation.id);
+					// check if conversation are not already in the store
+					if (conversationIds.some((id: number) => !requestConversationIdStore?.includes(id))) {
+						setRequestConversationsIdStore([...conversationIds, ...(requestConversationIdStore || [])]);
+					}
+
+					setRequestByIdState(0);
+					setIsForMyConversation(false);
+				}
+
+			}
+		}
+	},[requestById]);
+
+	// set the conversationIdS to the store for compare with notViewedConversationStore
 	useEffect(() => {
 		if (myConversationIds && myConversationIds.user) {
 			
 			setRequestConversationsIdStore(myConversationIds.user?.conversationRequestIds);
 		}
 	}, [myConversationIds]);
-
 
 	// set the notViewedRequestStore
 	useEffect(() => {
@@ -192,7 +240,6 @@ function Dashboard() {
 			}
 		}
 	}, [notViewedConversationQuery]);
-	console.log('notViewedConversationStore', notViewedConversationStore);
 
 	// set user subscription to the store
 	useEffect(() => {
@@ -214,7 +261,6 @@ function Dashboard() {
 		}
 
 	}, [role]);
-	console.log('offset in dashboard', clientRequestOffset.current);
 
 	// set the request to clientRequestStore at starting
 	useEffect(() => {
@@ -342,7 +388,6 @@ function Dashboard() {
 	// useEffect subscribe to new client message in MyConversation
 	useEffect(() => {
 
-		// check if the message is already in the store
 		if (clientMessageSubscription?.messageAdded) {
 			const messageAdded: MessageProps[] = clientMessageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
@@ -361,50 +406,66 @@ function Dashboard() {
 
 			});
 
-			// add updated_at to the request.conversation
-			if (myConversationIdState !== messageAdded[0].conversation_id) {
-				requestConversationStore.setState(prevState => {
-					const updatedRequest = prevState.requests.map((request: RequestProps) => {
-						const updatedConversation = request.conversation?.map((conversation) => {
-							if (conversation.id === messageAdded[0].conversation_id) {
-								return { ...conversation, updated_at: newDate };
-							}
-							return conversation;
-						});
+			//fetch request if the request is not in the store
+			if (messageAdded[0].request_id 
+				&& !requestsConversationStore.some(request => request.id === messageAdded[0].request_id) 
+				&& messageAdded[0].user_id !== id) {	
 
-						return { ...request, conversation: updatedConversation };
-					});
-					return { requests: updatedRequest };
-				});
-			}
+				setRequestByIdState(messageAdded[0].request_id);
+				setIsForMyConversation(true);
 
-			// add the conversation if not exist in requestConversationsIdStore
-			if (!requestConversationIdStore.includes(messageAdded[0].conversation_id)) {
-				setRequestConversationsIdStore([messageAdded[0].conversation_id, ...(requestConversationIdStore || [])]);
-			}
-
-			// check if the selected conversation is the same as the messageAdded and update the conversation
-			if (myConversationIdState === messageAdded[0].conversation_id && messageAdded[0].user_id !== id) {
-				deleteNotViewedConversation({
-					variables: {
-						input: {
-							conversation_id: [messageAdded[0].conversation_id],
-							user_id: id
-						}
-					}
-				}).then(() => {
-					
-					setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== messageAdded[0].conversation_id));
-
-				});
-				if (deleteNotViewedConversationError) {
-					throw new Error('Error while updating conversation');
-				}
-			} else {
 				// add the conversation_id to the notViewedConversationStore
 				if (!notViewedConversationStore.includes(messageAdded[0].conversation_id) && messageAdded[0].user_id !== id) {
 					setNotViewedConversationStore([messageAdded[0].conversation_id, ...(notViewedConversationStore || [])]);
 				}
+
+			} else {
+				// add updated_at to the request.conversation
+				if (myConversationIdState !== messageAdded[0].conversation_id) {
+					requestConversationStore.setState(prevState => {
+						const updatedRequest = prevState.requests.map((request: RequestProps) => {
+							const updatedConversation = request.conversation?.map((conversation) => {
+								if (conversation.id === messageAdded[0].conversation_id) {
+									return { ...conversation, updated_at: newDate };
+								}
+								return conversation;
+							});
+
+							return { ...request, conversation: updatedConversation };
+						});
+						return { requests: updatedRequest };
+					});
+				}
+
+				// add the conversation if not exist in requestConversationsIdStore
+				if (!requestConversationIdStore.includes(messageAdded[0].conversation_id)) {
+					setRequestConversationsIdStore([messageAdded[0].conversation_id, ...(requestConversationIdStore || [])]);
+				}
+
+				// check if the selected conversation is the same as the messageAdded and update the conversation
+				if (myConversationIdState === messageAdded[0].conversation_id && messageAdded[0].user_id !== id) {
+					deleteNotViewedConversation({
+						variables: {
+							input: {
+								conversation_id: [messageAdded[0].conversation_id],
+								user_id: id
+							}
+						}
+					}).then(() => {
+					
+						setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== messageAdded[0].conversation_id));
+
+					});
+					if (deleteNotViewedConversationError) {
+						throw new Error('Error while updating conversation');
+					}
+				} else {
+				// add the conversation_id to the notViewedConversationStore
+					if (!notViewedConversationStore.includes(messageAdded[0].conversation_id) && messageAdded[0].user_id !== id) {
+						setNotViewedConversationStore([messageAdded[0].conversation_id, ...(notViewedConversationStore || [])]);
+					}
+				}
+
 			}
 
 		}
@@ -436,6 +497,13 @@ function Dashboard() {
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
 
+
+			console.log('messageAdded', messageAdded[0].request_id);
+			//fetch request if the request is not in the store
+			if (messageAdded[0].request_id && !requestStore.some(request => request.id === messageAdded[0].request_id)) {	
+				setRequestByIdState(messageAdded[0].request_id);
+			}
+
 			// add the new message to the message store
 			myMessageDataStore.setState(prevState => {
 				const newMessages = messageAdded.filter(
@@ -450,41 +518,26 @@ function Dashboard() {
 			});
 
 			// add the conversation to the request
-			myRequestStore.setState(prevState => {
-				const updatedRequest = prevState.requests.map((request: RequestProps) => {
+			if (!requestByIdLoading) {
+				myRequestStore.setState(prevState => {
+					const updatedRequest = prevState.requests.map((request: RequestProps) => {
 					// if the conversation id is in the request
-					if (request.conversation && request.conversation.some((conversation) => conversation.id === messageAdded[0].conversation_id)) {
+						if (request.conversation && request.conversation.some((conversation) => conversation.id === messageAdded[0].conversation_id)) {
 
-						const updatedConversation = request.conversation.map((conversation) => {
-							if (conversation.id === messageAdded[0].conversation_id) {
-								return { ...conversation, updated_at: newDate };
-							}
-							return conversation;
-						});
-						return { ...request, conversation: updatedConversation };
+							const updatedConversation = request.conversation.map((conversation) => {
+								if (conversation.id === messageAdded[0].conversation_id) {
+									return { ...conversation, updated_at: newDate };
+								}
+								return conversation;
+							});
+							return { ...request, conversation: updatedConversation };
 
 						// if there is a conversation in the request but the conversation id is not in the request
-					} else if (request.id === messageAdded[0].request_id && request.conversation?.some(
-						conversation => conversation.id !== messageAdded[0].conversation_id)) {
-
-						const conversation = [
-							...request.conversation,
-							{
-								id: messageAdded[0].conversation_id,
-								user_1: messageAdded[0].user_id,
-								user_2: id,
-								request_id: messageAdded[0].request_id,
-								updated_at: newDate,
-							}
-						];
-						return { ...request, conversation };
-
-					} else {
-						// if the request hasn't a conversation
-						if (request.id === messageAdded[0].request_id && !request.conversation) {
-
+						} else if (request.id === messageAdded[0].request_id && request.conversation?.some(
+							conversation => conversation.id !== messageAdded[0].conversation_id)) {
 
 							const conversation = [
+								...request.conversation,
 								{
 									id: messageAdded[0].conversation_id,
 									user_1: messageAdded[0].user_id,
@@ -493,16 +546,33 @@ function Dashboard() {
 									updated_at: newDate,
 								}
 							];
-
 							return { ...request, conversation };
 
-						}
-					}
-					return request;
+						} else {
+						// if the request hasn't a conversation
+							if (request.id === messageAdded[0].request_id && !request.conversation) {
 
+
+								const conversation = [
+									{
+										id: messageAdded[0].conversation_id,
+										user_1: messageAdded[0].user_id,
+										user_2: id,
+										request_id: messageAdded[0].request_id,
+										updated_at: newDate,
+									}
+								];
+
+								return { ...request, conversation };
+
+							}
+						}
+						return request;
+
+					});
+					return { ...prevState, requests: updatedRequest };
 				});
-				return { ...prevState, requests: updatedRequest };
-			});
+			}
 
 			// add the conversation if not exist in requestConversationsIdStore
 			if (!requestConversationIdStore.includes(messageAdded[0].conversation_id)) {
@@ -663,8 +733,6 @@ function Dashboard() {
 		
 		
 	},[notViewedConversationStore, hasQueryConversationRun]);
-	console.log('viewedMyConversationState', viewedMyConversationState);
-
 
 	// function to handle navigation to my conversation
 	const handleMyConvesationNavigate = () => {

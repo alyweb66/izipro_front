@@ -360,73 +360,11 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {
-		 // change viewed status of the conversation
-		/* if (selectedRequest && selectedRequest.conversation) {
-			const messageIds = messageStore
-				.filter(message => message.conversation_id === viewedIds 
-				&& message.viewed === false
-				&& message.user_id !== id)
-				.map(message => message.id);
-			//console.log('messageIds', messageIds);
-			
-			if (viewedIds > 0 && viewedIds !== id) {
-				updateConversation({
-					variables: {
-						input: {
-							id: viewedIds,
-						}
-					}
-				}).then(() => {
-					//update conversation viewed status in the store
-					myRequestStore.setState(prevState => {
-						const updatedRequests = prevState.requests.map(request => {
-							if (request.id === selectedRequest?.id) {
-								return {
-									...request, conversation: selectedRequest.conversation.map(conversation =>
-										conversation.id === viewedIds ? { ...conversation, sender: 0 } : conversation
-									)
-								};
-							}
-							return request;
-						});
-						return {
-							...prevState,
-							requests: [...updatedRequests]
-						};
-					});
-
-					// update the message store
-					myMessageDataStore.setState(prevState => {
-						console.log('before map', prevState);
-	
-						const updatedMessages = prevState.messages.map(message => {
-							console.log('before if', messageIds, message.id);
-	
-							if (messageIds.includes(message.id)) {
-								console.log('message to true');
-	
-								return { ...message, sender: 0 };
-							}
-							return message;
-						});
-						return {
-							...prevState,
-							messages: [...updatedMessages]
-						};
-					});
-				});
-			}
-
-			if (updateConversationError) {
-				throw new Error('Error while updating conversation');
-			}
-			setViewedIds(0);
-		}  */
-
 
 		setTimeout(() => {
 			endOfMessagesRef.current?.scrollIntoView(/* { behavior: 'smooth' } */);
 		}, 200);
+		
 	}, [messageStore]);
 
 	//  set selected request at null when the component is unmounted

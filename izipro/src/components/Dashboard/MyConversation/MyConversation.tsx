@@ -87,7 +87,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 	//const [viewedMessage, { error: viewedMessageError }] = useMutation(VIEWED_MESSAGE_MUTATION);
-	const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
 	const [deleteNotViewedConversation, {error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 	
 	//query
@@ -217,50 +216,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {
-
-		if (selectedRequest?.conversation.some(conv => conv.sender !== id && conv.sender !== 0 && (conv.user_1 === id || conv.user_2 === id))) {
-			
-			updateConversation({
-				variables: {
-					input: {
-						id: conversationIdState,
-					}
-				}
-			}).then(() => {
-				// update viewed message in the store
-				/* messageDataStore.setState(prevState => {
-					const updatedMessages = prevState.messages.map(message => {
-						if (messageIds.includes(message.id)) {
-							return { ...message, viewed: true };
-						}
-						return message;
-					});
-					return {
-						...prevState,
-						messages: [...updatedMessages]
-					};
-				}); */
-
-				// update request.conversation of the store
-				requestConversationStore.setState(prevState => {
-					const updatedRequests = prevState.requests.map(request => {
-						const updatedConversation = request.conversation?.map(conversation => {
-							if (conversation.id === conversationIdState) {
-								return { ...conversation, sender: 0 };
-							}
-							return conversation;
-						});
-						return { ...request, conversation: updatedConversation };
-					});
-					return { requests: updatedRequests };
-				});
-				
-		
-				if (updateConversationError) {
-					throw new Error('Error updating conversation');
-				}
-			});
-		}
 
 		setTimeout(() => {
 			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
