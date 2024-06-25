@@ -7,8 +7,6 @@ type NotViewedStore = {
 	resetBotViewed: () => void;
 }
 
-
-
 // Create store for viewed messages
 export const notViewedRequest = create<NotViewedStore>((set) => ({
 	notViewed: [],
@@ -36,17 +34,3 @@ export const requestConversationIds = create<NotViewedStore>((set) => ({
 	resetBotViewed: () => set({ notViewed: [] }),
 }));
 
-/* // Create store for viewed messages
-export const viewedMyRequestMessageStore = create<ViewedStore>((set) => ({
-	viewed: [],
-	setViewedStore: (data) => set({ viewed: data }),
-	resetViewed: () => set({ viewed: [] }),
-}));
-
-
-// Create store for viewed requests
-export const viewedClientRequestStore = create<ViewedStore>((set) => ({
-	viewed: [],
-	setViewedStore: (data) => set({ viewed: data }),
-	resetViewed: () => set({ viewed: [] }),
-})); */

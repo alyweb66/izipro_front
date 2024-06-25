@@ -6,7 +6,15 @@ import MyRequest from './MyRequest/MyRequest';
 import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import { userConversation, userDataStore } from '../../store/UserData';
-import { useQueryGetRequestById, useQueryNotViewedConversations, useQueryNotViewedRequests, useQueryRequestByJob, useQueryUserConversationIds, useQueryUserConversations, useQueryUserData, useQueryUserRequests, useQueryUserSubscriptions } from '../Hook/Query';
+import { useQueryGetRequestById, 
+	useQueryNotViewedConversations, 
+	useQueryNotViewedRequests, 
+	useQueryRequestByJob, 
+	useQueryUserConversationIds, 
+	useQueryUserConversations, 
+	useQueryUserData, 
+	useQueryUserRequests, 
+	useQueryUserSubscriptions } from '../Hook/Query';
 import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
 import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
@@ -27,7 +35,6 @@ import * as turf from '@turf/turf';
 import { clientRequestStore, myRequestStore, requestConversationStore } from '../../store/Request';
 import { MessageProps } from '../../Type/message';
 import { messageDataStore, myMessageDataStore } from '../../store/message';
-//import {NOT_VIEWED_REQUEST_MUTATION } from '../GraphQL/NotViewedRequestMutation';
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
 
 type useQueryUserConversationsProps = {
@@ -394,7 +401,6 @@ function Dashboard() {
 
 			});
 
-
 			//fetch request if the request is not in the store
 			if (messageAdded[0].request_id 
 				&& !requestsConversationStore.some(request => request.id === messageAdded[0].request_id) 
@@ -425,12 +431,6 @@ function Dashboard() {
 						return { requests: updatedRequest };
 					});
 				}
-console.log('updated at ok');
-
-	/* 			// add the conversation if not exist in requestConversationsIdStore
-				if (!requestConversationIdStore.includes(messageAdded[0].conversation_id)) {
-					setRequestConversationsIdStore([messageAdded[0].conversation_id, ...(requestConversationIdStore || [])]);
-				} */
 
 				// check if the selected conversation is the same as the messageAdded and update the conversation
 				if (myConversationIdState === messageAdded[0].conversation_id && messageAdded[0].user_id !== id) {
@@ -452,8 +452,6 @@ console.log('updated at ok');
 				} else {
 				// add the conversation_id to the notViewedConversationStore
 					if (!notViewedConversationStore.includes(messageAdded[0].conversation_id) && messageAdded[0].user_id !== id) {
-						console.log('set not viewed conversation');
-						
 						setNotViewedConversationStore([messageAdded[0].conversation_id, ...(notViewedConversationStore || [])]);
 					}
 				}

@@ -13,7 +13,6 @@ import { useFileHandler } from '../../Hook/useFileHandler';
 import { subscriptionDataStore, SubscriptionStore } from '../../../store/subscription';
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
 import { SubscriptionProps } from '../../../Type/Subscription';
-//import { MESSAGE_SUBSCRIPTION } from '../../GraphQL/Subscription';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 import { FaTrashAlt, FaCamera } from 'react-icons/fa';
 import { MdSend, MdAttachFile } from 'react-icons/md';
@@ -22,14 +21,12 @@ import pdfLogo from '/logo/pdf-icon.svg';
 import logoProfile from '/logo/logo profile.jpeg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import TextareaAutosize from 'react-textarea-autosize';
-//import { useQueryConversation } from '../../Hook/Query';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import Spinner from '../../Hook/Spinner';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
 import { MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 import { notViewedConversation } from '../../../store/Viewed';
-//import { VIEWED_MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 ReactModal.setAppElement('#root');
 
 
@@ -55,14 +52,9 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
 
 	//state
-	//const [requests, setRequests] = useState<RequestProps[]>([]);
-	//const [loading, setLoading] = useState(false);
-	//
 	const [userIds, setUserIds] = useState<number[]>([]);
-	//const [conversationIdState, setConversationIdState] = useState<number>(0);
 	const [messageValue, setMessageValue] = useState('');
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
-	//const [newUserId, setNewUserId] = useState<number[]>([]);
 	const [userConvState, setUserConvState] = useState<UserDataProps[]>([]);
 	const [selectedUser, setSelectedUser] = useState<UserDataProps | null>(null);
 	const [userDescription, setUserDescription] = useState<boolean>(false);
@@ -72,10 +64,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
-	//const [isHasMore, setIsHasMore] = useState(true);
 	const [isUserMessageOpen, setIsUserMessageOpen] = useState(false);
-	//const [viewedIds, setViewedIds] = useState<number>(0);
-
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
@@ -86,19 +75,14 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [userConvStore, setUserConvStore] = userConversation((state) => [state.users, state.setUsers]);
 	const [messageStore] = myMessageDataStore((state) => [state.messages, state.setMessageStore]);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
-	//const [myRequestMessageViewedStore, setMyRequestMessageViewedStore] = viewedMyRequestMessageStore((state) => [state.viewed, state.setViewedStore]);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 
 	//useRef
-	//const updateSubscriptionRef = useRef<SubscriptionProps[]>([]);
-	//const userOffsetRef = useRef(0);
-	//const conversationIdRef = useRef(0);
 	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 	const idRef = useRef<number>(0);
 	const selectedRequestRef = useRef<RequestProps | null>(null);
 
 	const limit = 5;
-
 
 	// file upload
 	const { urlFile, setUrlFile, file, setFile, handleFileChange } = useFileHandler();
@@ -107,8 +91,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [deleteRequest, { error: deleteRequestError }] = useMutation(DELETE_REQUEST_MUTATION);
 	const [message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
-	//const [viewedMessage, { error: viewedMessageError }] = useMutation(VIEWED_MESSAGE_MUTATION);
-	//const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
 	// Query to get the user requests
@@ -279,11 +261,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			const uniqueUsers = Array.from(new Set(filteredSortedUsers.map(user => JSON.stringify(user)))).map(user => JSON.parse(user));
 			setUserConvState(uniqueUsers);
 
-			/* const firstUserElement = document.getElementById('first-user');
-			if (firstUserElement) {
-				firstUserElement.click();
-			} */
-
 			if (selectedRequest.id !== selectedRequestRef.current?.id) {
 				setSelectedUser(null);
 				setConversationIdState(0);
@@ -319,15 +296,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				}
 			});
 
-			/* //check if the conversation is already in the clientMessageViewedStore
-			if (!myRequestMessageViewedStore.some(id => newMessages.filter(message => message.conversation_id === id))) {
-
-				//select only message with viewed is false
-				const messageAdded = newMessages.filter(message => message.viewed === false);
-				// add the conversation_id to the clientMessageViewedStore
-				setMyRequestMessageViewedStore([...messageAdded.map(message => message.conversation_id), ...(myRequestMessageViewedStore || [])]);
-			} */
-
 		}
 	}, [messageData]);
 
@@ -336,7 +304,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		if (usersConversationData) {
 			// If offset is 0, it's the first query, so just replace the queries
 			if (userConvStore.length === 0) {
-
 
 				setUserConvStore(usersConversationData.users);
 
@@ -508,7 +475,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				return conversation.user_1 !== id ? conversation.user_1 : conversation.user_2;
 			});
 
-
 			// Filter out the user viewedIds that are already in the userConvStore
 			const idStore = userConvStore.map(user => user.id);
 			const newIds = viewedIds.filter(id => !idStore.includes(id));
@@ -533,12 +499,10 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		if (conversationId !== conversationIdState) {
 			setConversationIdState(conversationId || 0);
-			//setViewedIds(conversationId || 0);
 		}
 
 		// remove the conversation id from the notViewedConversationStore and database
 		if (conversationId && notViewedConversationStore?.some(id => id === conversationId)) {
-			console.log('deleteconv', conversationId);
 			
 			deleteNotViewedConversation({
 				variables: {
@@ -547,9 +511,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						conversation_id: [conversationId]
 					}
 				}
-			}).then((response) => {
-				console.log('deleteNotViewedConversation', response);
-
+			}).then(() => {
 				// remove the conversation id from the notViewedConversationStore
 				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
 
@@ -559,36 +521,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				throw new Error('Error updating conversation');
 			}
 		}
-		
-		//update conversation viewed status in the store
-		/* 	myRequestStore.setState(prevState => {
-			const updatedRequests = prevState.requests.map(request => {
-				if (request.id === selectedRequest?.id) {
-					return {
-						...request, conversation: selectedRequest.conversation.map(conversation =>
-							conversation.id === conversationId?.id ? { ...conversation, sender: 0 } : conversation
-						)
-					};
-				}
-				return request;
-			});
-			return {
-				...prevState,
-				requests: [...updatedRequests]
-			};
-		}); */
-
-		/* // Create a new updated object
-		if (selectedRequest) {
-			const updatedRequest: RequestProps = {
-				...selectedRequest,
-				conversation: (selectedRequest?.conversation || []).map(conversation =>
-					conversation.id === (conversationId?.id || 0) ? { ...conversation, sender: 0 } : conversation
-				)
-			};
-			setSelectedRequest(updatedRequest);
-		} */
-	
 	};
 
 	// Function to send message and create conversation

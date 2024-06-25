@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import './MyConversation.scss';
 import { requestDataStore, requestConversationStore, clientRequestStore } from '../../../store/Request';
 import { RequestProps } from '../../../Type/Request';
-import { CONVERSATION_MUTATION, DELETE_NOT_VIEWED_CONVERSATION_MUTATION, UPDATE_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
+import { CONVERSATION_MUTATION, DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
 import { useMutation } from '@apollo/client';
 import { userDataStore } from '../../../store/UserData';
 import { useQueryMessagesByConversation, useQueryUserConversations } from '../../Hook/Query';
@@ -25,7 +25,6 @@ import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import { MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 import { notViewedConversation } from '../../../store/Viewed';
-//import { VIEWED_MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 
 
 type useQueryUserConversationsProps = {
@@ -64,7 +63,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const limit = 4;
 
 	//useRef
-	//const offsetRef = useRef(0);
 	const conversationIdRef = useRef(0);
 	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 
@@ -84,7 +82,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [message, { loading: messageMutLoading, error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
-	//const [viewedMessage, { error: viewedMessageError }] = useMutation(VIEWED_MESSAGE_MUTATION);
 	const [deleteNotViewedConversation, {error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 	
 	//query

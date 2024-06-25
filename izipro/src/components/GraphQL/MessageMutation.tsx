@@ -7,8 +7,3 @@ export const MESSAGE_MUTATION = gql`
   
 }
 `;
-/* export const VIEWED_MESSAGE_MUTATION = gql`
-    mutation ViewedMessage($input: UpdateViewedMessage!) {
-    updateViewedMessage(input: $input)
-    }
-`; */
