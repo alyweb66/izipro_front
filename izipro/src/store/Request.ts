@@ -54,7 +54,6 @@ export const requestDataStore = create<RequestStore>((set: (state: Partial<Reque
 			user_1: 0,
 			user_2: 0,
 			request_id: 0,
-			sender: 0,
 			updated_at: '',
 		}],
 		deleted_at: '',
@@ -85,7 +84,6 @@ export const requestDataStore = create<RequestStore>((set: (state: Partial<Reque
 				user_1: 0,
 				user_2: 0,
 				request_id: 0,
-				sender: 0,
 				updated_at: ''
 			}],
 			deleted_at: ''

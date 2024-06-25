@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client';
-import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
+import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY, GET_REQUEST_BY_ID, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
 import { GET_JOB_DATA } from '../GraphQL/Job';
 import { GET_USERS_CONVERSATION, GET_USER_DATA, GET_USER_NOT_VIEWED_REQUESTS, GET_USER_REQUEST_BY_CONVERSATIONS, GET_USER_SUBSCRIPTION } from '../GraphQL/UserQueries';
 import { GET_CONVERSATION, GET_CONVERSATION_ID, NOT_VIEWED_CONVERSATIONS } from '../GraphQL/ConversationQueries';
@@ -126,7 +126,6 @@ export const useQueryUserConversations = (offset: number, limit: number, skip: b
 	if (conversationError) {
 		throw new Error('Error while fetching user conversations');
 	}
-	console.log('data', data);
 	/* 
 	if (!data) {
 		return fetchMore;
@@ -239,4 +238,26 @@ export const useQueryUserConversationIds = (skip: boolean) => {
 		throw new Error('Error while fetching viewed requests');
 	}
 	return {loading, myConversationIds};
+};
+
+export const useQueryGetRequestById = (requestId: number) => {
+
+	let skip;
+	if (requestId === 0) {
+		skip = true;
+	} else {
+		skip = false;
+	}
+
+	const { loading, error: requestByIdError, data: requestById } = useQuery(GET_REQUEST_BY_ID, {
+		variables: {
+			requestId: requestId,
+		},
+		skip
+	});
+
+	if (requestByIdError) {
+		throw new Error('Error while fetching request');
+	}
+	return {loading, requestById};
 };

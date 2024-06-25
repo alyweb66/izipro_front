@@ -28,7 +28,6 @@ export const REQUEST_SUBSCRIPTION = gql`
                 user_2
                 request_id
                 updated_at
-                sender
             }
         }
     }

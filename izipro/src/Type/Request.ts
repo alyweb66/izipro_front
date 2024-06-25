@@ -25,7 +25,6 @@ type RequestProps = {
         user_1: number
         user_2: number
         request_id: number
-        sender: number
         updated_at: string
     }[]
     deleted_at: string
@@ -60,7 +59,6 @@ type RequestSoreProps = {
             user_1: number
             user_2: number
             request_id: number
-            sender: number
             updated_at: string
         }[]
         deleted_at: string

@@ -7,7 +7,6 @@ export const GET_CONVERSATION = gql`
             user_1
             user_2
             request_id
-            sender
             updated_at
         }
     }

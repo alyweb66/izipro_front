@@ -51,7 +51,6 @@ export const GET_USER_REQUESTS = gql`
                 user_1
                 user_2
                 request_id
-                sender
                 updated_at
                 }
                 deleted_at
@@ -88,7 +87,6 @@ export const GET_REQUEST_BY_JOB = gql`
                 user_1
                 user_2
                 request_id
-                sender
                 updated_at
             }
             deleted_at
@@ -97,3 +95,39 @@ export const GET_REQUEST_BY_JOB = gql`
 
 `;
 
+export const GET_REQUEST_BY_ID = gql`
+    query GetRequestById($requestId: Int!) {
+        user {
+            request(requestId: $requestId) {
+                id
+                urgent
+                title
+                message
+                first_name
+                last_name
+                denomination
+                lng
+                lat
+                city
+                range
+                user_id
+                job_id
+                job 
+                media {
+                    id
+                    url
+                    name
+                }
+                created_at
+                conversation {
+                id
+                user_1
+                user_2
+                request_id
+                updated_at
+                }
+                deleted_at
+            }
+        }
+    }
+`;

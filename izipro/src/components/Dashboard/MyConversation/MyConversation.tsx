@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import './MyConversation.scss';
 import { requestDataStore, requestConversationStore, clientRequestStore } from '../../../store/Request';
 import { RequestProps } from '../../../Type/Request';
-import { CONVERSATION_MUTATION, DELETE_NOT_VIEWED_CONVERSATION_MUTATION, UPDATE_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
+import { CONVERSATION_MUTATION, DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
 import { useMutation } from '@apollo/client';
 import { userDataStore } from '../../../store/UserData';
 import { useQueryMessagesByConversation, useQueryUserConversations } from '../../Hook/Query';
@@ -25,7 +25,6 @@ import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import { MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 import { notViewedConversation } from '../../../store/Viewed';
-//import { VIEWED_MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 
 
 type useQueryUserConversationsProps = {
@@ -53,20 +52,17 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	//state
 	const [messageValue, setMessageValue] = useState('');
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
-	//const [conversationIdState, setConversationIdState] = useState<number>(0);
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
 	const [isListOpen, setIsListOpen] = useState(true);
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [isMessageOpen, setIsMessageOpen] = useState(false);
 	const [requestTitle, setRequestTitle] = useState(true);
-	//const [isHasMore, setIsHasMore] = useState(true);
 	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 
 	const limit = 4;
 
 	//useRef
-	//const offsetRef = useRef(0);
 	const conversationIdRef = useRef(0);
 	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 
@@ -86,8 +82,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [message, { loading: messageMutLoading, error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
-	//const [viewedMessage, { error: viewedMessageError }] = useMutation(VIEWED_MESSAGE_MUTATION);
-	const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
 	const [deleteNotViewedConversation, {error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 	
 	//query
@@ -207,60 +201,17 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	useEffect(() => {
 		return () => {
 			// remove request.id in requestsConversationStore
-
 			const removedRequest = requestConversationStore.getState().requests?.filter((requestConv: RequestProps) => request.id !== requestConv.id);
 			requestConversationStore.setState({ requests: removedRequest });
 			setRequestsConversationStore(removedRequest);
 			resetRequest();
+			setConversationIdState(0);
+
 		};
 	}, []);
 
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {
-
-		if (selectedRequest?.conversation.some(conv => conv.sender !== id && conv.sender !== 0 && (conv.user_1 === id || conv.user_2 === id))) {
-			
-			updateConversation({
-				variables: {
-					input: {
-						id: conversationIdState,
-					}
-				}
-			}).then(() => {
-				// update viewed message in the store
-				/* messageDataStore.setState(prevState => {
-					const updatedMessages = prevState.messages.map(message => {
-						if (messageIds.includes(message.id)) {
-							return { ...message, viewed: true };
-						}
-						return message;
-					});
-					return {
-						...prevState,
-						messages: [...updatedMessages]
-					};
-				}); */
-
-				// update request.conversation of the store
-				requestConversationStore.setState(prevState => {
-					const updatedRequests = prevState.requests.map(request => {
-						const updatedConversation = request.conversation?.map(conversation => {
-							if (conversation.id === conversationIdState) {
-								return { ...conversation, sender: 0 };
-							}
-							return conversation;
-						});
-						return { ...request, conversation: updatedConversation };
-					});
-					return { requests: updatedRequests };
-				});
-				
-		
-				if (updateConversationError) {
-					throw new Error('Error updating conversation');
-				}
-			});
-		}
 
 		setTimeout(() => {
 			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -325,10 +276,9 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	// Function to send message and create conversation
 	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>, requestId: number) => {
-
 		event.preventDefault();
-		// create conversation 
 
+		// create conversation 
 		if (request.id === requestId && role === 'pro') {
 
 			conversation({
@@ -360,7 +310,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 				}
 
-
 				// update the subscription store
 				// replace the old subscription with the new one
 				if (!subscriptionStore.some(subscription => subscription.subscriber === 'clientConversation')) {
@@ -386,8 +335,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 							const currentSubscriptions = subscriptionDataStore.getState().subscription;
 							const newSubscriptions = [...currentSubscriptions, subscriptionWithoutTimestamps];
 							subscriptionDataStore.getState().setSubscription(newSubscriptions);
-
-
 
 						} else {
 							// replace the old subscription with the new one
@@ -452,7 +399,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	// Function to load more requests with infinite scroll
 	function addRequest() {
 		if (fetchMore) {
-			console.log('coucou fetchmore');
 
 			fetchMore({
 				variables: {
@@ -580,7 +526,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const handleViewedMessage = (convId: number) => {
 		
 		if (selectedRequest && notViewedConversationStore?.some(id => id === convId)) {
-			console.log('selectedRequest', selectedRequest);
 			
 			deleteNotViewedConversation({
 				variables: {
@@ -589,8 +534,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 						conversation_id: [convId]
 					}
 				}
-			}).then((response) => {
-				console.log('deleteNotViewedConversation', response);
+			}).then(() => {
 
 				// remove the conversation id from the notViewedConversationStore
 				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== convId));
@@ -602,7 +546,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		}
 		
 	};
-	console.log('selectedRequest', selectedRequest);
 
 	return (
 		<div className="my-conversation">
@@ -616,7 +559,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 								request={request}
 								notViewedConversationStore={notViewedConversationStore}
 								handleViewedMessage={handleViewedMessage}
-								//messageStore={messageStore}
 								setIsMessageOpen={setIsMessageOpen}
 								resetRequest={resetRequest}
 								selectedRequest={selectedRequest!} 
@@ -636,7 +578,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 								notViewedConversationStore={notViewedConversationStore}
 								requestByDate={requestByDate}
 								handleViewedMessage={handleViewedMessage}
-								//messageStore={messageStore}
 								setIsMessageOpen={setIsMessageOpen}
 								selectedRequest={selectedRequest!} 
 								setSelectedRequest={setSelectedRequest}
@@ -654,9 +595,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 				<div className="my-conversation__list__fetch-button">
 					{isHasMore ? (<button
 						className="Btn"
-						onClick={(event) => {
-							console.log('coucou');
-							
+						onClick={(event) => {	
 							event.preventDefault();
 							event.stopPropagation();
 							addRequest();
