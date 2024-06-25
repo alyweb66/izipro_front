@@ -43,16 +43,15 @@ function Dashboard() {
 	// State
 	const [isOpen, setIsOpen] = useState(false);
 	const [selectedTab, setSelectedTab] = useState('');
-	//selectedRequest for myRequest
-	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [newUserId, setNewUserId] = useState<number[]>([]);
 	const [viewedMessageState, setViewedMessageState] = useState<number[]>([]);
 	const [viewedMyConversationState, setViewedMyConversationState] = useState<number[]>([]);
 	const [hasQueryRun, setHasQueryRun] = useState<boolean>(false);
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
-
+	
 	//state for myRequest
+	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [conversationIdState, setConversationIdState] = useState<number>(0);
 	const [isMyRequestHasMore, setIsMyRequestHasMore] = useState<boolean>(true);
 
@@ -73,7 +72,6 @@ function Dashboard() {
 	const lat = userDataStore((state) => state.lat);
 	const settings = userDataStore((state) => state.settings);
 	const jobs = userDataStore((state) => state.jobs);
-	//messageDataStore((state) => [state.messages, state.setMessageStore]);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 	const [requestConversationIdStore, setRequestConversationsIdStore] = requestConversationIds((state) => [state.notViewed, state.setNotViewedStore]);
 
@@ -92,14 +90,12 @@ function Dashboard() {
 	const [requestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 	messageDataStore((state) => [state.messages, state.setMessageStore]);
 
-
 	//ClientRequest store
 	const [notViewedRequestStore, setNotViewedRequestStore] = notViewedRequest((state) => [state.notViewed, state.setNotViewedStore]);
 
 	//useRef
 	const clientRequestOffset = useRef<number>(0);
 	const myConversationOffsetRef = useRef<number>(0);
-	//const notViewedRequestRef = useRef<number[]>([]);
 
 	// Query 
 	const { loading: userDataLoading, getUserData } = useQueryUserData();
@@ -120,12 +116,9 @@ function Dashboard() {
 	//Query for MyConversation
 	const { data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
 
-
 	//mutation
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
-	//const [updateConversation, { error: updateConversationError }] = useMutation(UPDATE_CONVERSATION_MUTATION);
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
-
 
 	// Subscription to get new message
 	const { messageSubscription } = useMyRequestMessageSubscriptions();
@@ -140,9 +133,8 @@ function Dashboard() {
 		isLogged = JSON.parse(localStorage.getItem('ayl') || '{}');
 	}
 
-	// set the requestById to myRequestStore 
+	// set the new request from requestById to myRequestStore 
 	useEffect(() => {
-		console.log('requestById', requestById);
 		
 		if (requestById) {
 			if (!isForMyConversation) {
@@ -171,12 +163,12 @@ function Dashboard() {
 						return { ...prevRequests, requests: [request, ...prevRequests.requests] };
 					});
 
-					//add conversation id to the requestConversationsIdStore
+					/* //add conversation id to the requestConversationsIdStore
 					const conversationIds = request.conversation?.map((conversation: RequestProps) => conversation.id);
 					// check if conversation are not already in the store
 					if (conversationIds.some((id: number) => !requestConversationIdStore?.includes(id))) {
 						setRequestConversationsIdStore([...conversationIds, ...(requestConversationIdStore || [])]);
-					}
+					} */
 
 					setRequestByIdState(0);
 					setIsForMyConversation(false);
@@ -206,7 +198,6 @@ function Dashboard() {
 				if (notViewedRequestQuery && viewedRequestArray.some((id: number) => !notViewedRequestStore.includes(id))) {
 					// get the request id that are not in the store
 					const newId = viewedRequestArray.filter((id: number) => !notViewedRequestStore.includes(id));
-					console.log('newId', newId);
 
 					setNotViewedRequestStore(newId);
 					//setNotViewedRequestRefStore(viewedRequestArray);
@@ -220,7 +211,6 @@ function Dashboard() {
 
 	// set the notViewedConversationStore
 	useEffect(() => {
-		console.log('notViewedConversationQuery', notViewedConversationQuery);
 		
 		if (notViewedConversationQuery && !hasQueryConversationRun) {
 
@@ -232,7 +222,6 @@ function Dashboard() {
 				if (notViewedConversationQuery && viewedConversationArray.some((id: number) => !notViewedConversationStore.includes(id))) {
 					// get the conversation id that are not in the store
 					const newId = viewedConversationArray.filter((id: number) => !notViewedRequestStore.includes(id));
-					console.log('newId', newId);
 
 					setNotViewedConversationStore(newId);
 					setHasQueryConversationRun(true);
@@ -286,7 +275,7 @@ function Dashboard() {
 
 	// set the request to myrequestStore at starting
 	useEffect(() => {
-		//console.log('getUserRequestsData', getUserRequestsData.user.requests);
+	
 		if (getUserRequestsData && getUserRequestsData.user.requests) {
 
 			// If offset is 0, it's the first query, so just replace the queries
@@ -310,7 +299,6 @@ function Dashboard() {
 	// set the request to myConversationStore at starting
 	useEffect(() => {
 		if (requestMyConversation && requestMyConversation.user) {
-			console.log('requestMyConversation', requestMyConversation);
 
 			const requestsConversations: RequestProps[] = requestMyConversation.user.requestsConversations;
 
@@ -406,6 +394,7 @@ function Dashboard() {
 
 			});
 
+
 			//fetch request if the request is not in the store
 			if (messageAdded[0].request_id 
 				&& !requestsConversationStore.some(request => request.id === messageAdded[0].request_id) 
@@ -436,11 +425,12 @@ function Dashboard() {
 						return { requests: updatedRequest };
 					});
 				}
+console.log('updated at ok');
 
-				// add the conversation if not exist in requestConversationsIdStore
+	/* 			// add the conversation if not exist in requestConversationsIdStore
 				if (!requestConversationIdStore.includes(messageAdded[0].conversation_id)) {
 					setRequestConversationsIdStore([messageAdded[0].conversation_id, ...(requestConversationIdStore || [])]);
-				}
+				} */
 
 				// check if the selected conversation is the same as the messageAdded and update the conversation
 				if (myConversationIdState === messageAdded[0].conversation_id && messageAdded[0].user_id !== id) {
@@ -462,6 +452,8 @@ function Dashboard() {
 				} else {
 				// add the conversation_id to the notViewedConversationStore
 					if (!notViewedConversationStore.includes(messageAdded[0].conversation_id) && messageAdded[0].user_id !== id) {
+						console.log('set not viewed conversation');
+						
 						setNotViewedConversationStore([messageAdded[0].conversation_id, ...(notViewedConversationStore || [])]);
 					}
 				}
@@ -497,8 +489,6 @@ function Dashboard() {
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
 
-
-			console.log('messageAdded', messageAdded[0].request_id);
 			//fetch request if the request is not in the store
 			if (messageAdded[0].request_id && !requestStore.some(request => request.id === messageAdded[0].request_id)) {	
 				setRequestByIdState(messageAdded[0].request_id);
@@ -655,9 +645,7 @@ function Dashboard() {
 								conversation_id: [ messageAdded[0].conversation_id]
 							}
 						}
-					}).then((response) => {
-						console.log('deleteNotViewedConversation', response);
-		
+					}).then(() => {
 						// remove the conversation id from the notViewedConversationStore
 						setNotViewedConversationStore(notViewedConversationStore.filter(id => id !==  messageAdded[0].conversation_id));
 		
@@ -701,7 +689,6 @@ function Dashboard() {
 
 		// count the number of conversation that are not viewed message
 		const unviewedConversationIds = notViewedConversationStore.filter(id => requestConversationIdStore && requestConversationIdStore.includes(id));
-		console.log('unviewedConversationIds', unviewedConversationIds);
 
 		if (unviewedConversationIds.length > 0) {
 			
@@ -716,21 +703,15 @@ function Dashboard() {
 
 	// useEffect to count the number of conversation that are not viewed message in MyConversation
 	useEffect(() => {
-		//if (notViewedConversationStore.length > 0) {
 
-			
 		// count the number of conversation who is not viewed
 		const notViewedConversation = notViewedConversationStore.filter(id => requestConversationIdStore && !requestConversationIdStore.includes(id));
 	
-		console.log('notViewedConversation', notViewedConversation);
 		if (notViewedConversation.length > 0) {
 			setViewedMyConversationState(notViewedConversation);
 		} else {
 			setViewedMyConversationState([]);
 		}
-			
-		//} 
-		
 		
 	},[notViewedConversationStore, hasQueryConversationRun]);
 
@@ -739,6 +720,7 @@ function Dashboard() {
 		setSelectedTab('My conversations');
 	};
 
+	// function to range request by request location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
 		// If the function is called from the subscription, we need to add the new request to the top of list
 		if (fromSubscribeToMore) {
@@ -771,11 +753,9 @@ function Dashboard() {
 			// Add the new requests to the top of the list
 			if (newRequests) {
 				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
-				console.log('newRequests', newRequests);
 
 				// add request.id to the viewedRequestStore
 				if (notViewedRequestStore.length === 0 || notViewedRequestStore.some(id => id !== newRequests[0].id)) {
-					console.log('passed');
 
 					setNotViewedRequestStore([...notViewedRequestStore, newRequests[0].id]);
 
@@ -823,7 +803,6 @@ function Dashboard() {
 	const toggleMenu = () => {
 		setIsOpen(!isOpen);
 	};
-
 
 	return (
 		<div className='dashboard'>

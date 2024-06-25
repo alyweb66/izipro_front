@@ -126,7 +126,6 @@ export const useQueryUserConversations = (offset: number, limit: number, skip: b
 	if (conversationError) {
 		throw new Error('Error while fetching user conversations');
 	}
-	console.log('data', data);
 	/* 
 	if (!data) {
 		return fetchMore;
