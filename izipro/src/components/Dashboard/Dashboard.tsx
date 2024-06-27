@@ -36,6 +36,7 @@ import { clientRequestStore, myRequestStore, requestConversationStore } from '..
 import { MessageProps } from '../../Type/message';
 import { messageDataStore, myMessageDataStore } from '../../store/message';
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
+import { useLogoutSubscription } from '../Hook/LogoutSubscription';
 
 type useQueryUserConversationsProps = {
 	loading: boolean;
@@ -127,10 +128,12 @@ function Dashboard() {
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
-	// Subscription to get new message
+	// Subscription
 	const { messageSubscription } = useMyRequestMessageSubscriptions();
 	const { clientRequestSubscription } = useClientRequestSubscriptions();
 	const { clientMessageSubscription } = useMyConversationSubscriptions();
+	const { logoutSubscription } = useLogoutSubscription();
+console.log('logoutSubscription', logoutSubscription);
 
 	// condition if user not logged in
 	let isLogged;
@@ -265,17 +268,17 @@ function Dashboard() {
 			const requestByJob = getRequestsByJob.requestsByJob;
 
 			//get all request who are not in the store
-			const newRequests = requestByJob.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
+			const newRequests = requestByJob?.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
 
 			// Filter the requests
-			if (newRequests.length > 0) {
+			if (newRequests && newRequests.length > 0) {
 				RangeFilter(requestByJob);
 				clientRequestOffset.current = clientRequestOffset.current + requestByJob?.length;
 			}
 		}
 
 		// If there are no more requests, stop the fetchmore
-		if (getRequestsByJob?.requestsByJob.length < clientRequestLimit) {
+		if (getRequestsByJob?.requestsByJob?.length < clientRequestLimit) {
 			setIsClientRequestHasMore(false);
 		}
 	}, [getRequestsByJob, settings]);
@@ -328,6 +331,17 @@ function Dashboard() {
 		}
 	}, [requestMyConversation]);
 
+	// useEffect to check if user is logged out by serveur
+	useEffect(() => {
+		console.log('logoutSubscription', logoutSubscription);
+		
+		if (logoutSubscription && logoutSubscription.logout.value === true) {
+			sessionStorage.clear();
+			localStorage.clear();
+			navigate('/');
+		}
+	}, [logoutSubscription]);
+
 	// function to check if user is logged in
 	useEffect(() => {
 		// clear local storage and session storage when user leaves the page if local storage is set to session
@@ -364,11 +378,10 @@ function Dashboard() {
 			}
 		} else {
 
-
 			if (window.location.pathname !== '/') {
 				navigate('/');
 			}
-			// if user logged in, set the user data to the store
+	
 		}
 
 	}, []);

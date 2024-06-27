@@ -51,6 +51,14 @@ export const MESSAGE_SUBSCRIPTION = gql`
     }
 `;
 
+export const LOGOUT = gql`
+    subscription Logout($user_id: Int!) {
+    logout(user_id: $user_id) {
+        id
+        value
+    }
+    }
+`;
 
 
 
