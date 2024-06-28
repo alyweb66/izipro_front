@@ -37,6 +37,7 @@ import { MessageProps } from '../../Type/message';
 import { messageDataStore, myMessageDataStore } from '../../store/message';
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
 import { useLogoutSubscription } from '../Hook/LogoutSubscription';
+import { ExpiredSession } from '../Hook/ExpiredSession';
 
 type useQueryUserConversationsProps = {
 	loading: boolean;
@@ -57,6 +58,7 @@ function Dashboard() {
 	const [hasQueryRun, setHasQueryRun] = useState<boolean>(false);
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
+	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
 	
 	//state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
@@ -133,7 +135,6 @@ function Dashboard() {
 	const { clientRequestSubscription } = useClientRequestSubscriptions();
 	const { clientMessageSubscription } = useMyConversationSubscriptions();
 	const { logoutSubscription } = useLogoutSubscription();
-console.log('logoutSubscription', logoutSubscription);
 
 	// condition if user not logged in
 	let isLogged;
@@ -272,8 +273,9 @@ console.log('logoutSubscription', logoutSubscription);
 
 			// Filter the requests
 			if (newRequests && newRequests.length > 0) {
-				RangeFilter(requestByJob);
+				
 				clientRequestOffset.current = clientRequestOffset.current + requestByJob?.length;
+				RangeFilter(requestByJob);
 			}
 		}
 
@@ -333,12 +335,8 @@ console.log('logoutSubscription', logoutSubscription);
 
 	// useEffect to check if user is logged out by serveur
 	useEffect(() => {
-		console.log('logoutSubscription', logoutSubscription);
-		
 		if (logoutSubscription && logoutSubscription.logout.value === true) {
-			sessionStorage.clear();
-			localStorage.clear();
-			navigate('/');
+			setIsExpiredSession(true);
 		}
 	}, [logoutSubscription]);
 
@@ -777,6 +775,8 @@ console.log('logoutSubscription', logoutSubscription);
 			//offsetRef.current = offsetRef.current + filteredRequests.length;
 
 		} else {
+			console.log('requests', requests);
+			
 			// If the function is called from the query, we need to add the new requests to the bottom of the list
 			requests.filter((request: RequestProps) => {
 				// Define the two points
@@ -813,6 +813,13 @@ console.log('logoutSubscription', logoutSubscription);
 	// burger menu
 	const toggleMenu = () => {
 		setIsOpen(!isOpen);
+	};
+
+	const RedirectExpiredSession = () => {
+		setIsExpiredSession(false);
+		sessionStorage.clear();
+		localStorage.clear();
+		navigate('/');
 	};
 
 	return (
@@ -899,7 +906,14 @@ console.log('logoutSubscription', logoutSubscription);
 
 			</div>
 			<Footer />
+			{/* modal */}		
+			<ExpiredSession
+				isExpiredSession={isExpiredSession}
+				setIsExpiredSession={setIsExpiredSession}
+				RedirectExpiredSession={RedirectExpiredSession}
+			/>
 		</div>
+
 
 	);
 }

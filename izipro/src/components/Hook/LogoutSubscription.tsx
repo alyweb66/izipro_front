@@ -14,7 +14,6 @@ export const useLogoutSubscription = () => {
 	});
 
 	if (errorLogoutSubscription) {
-        console.log('Error while subscribing to logout', errorLogoutSubscription);
 		throw new Error('Error while subscribing to logout', );
 	}
 
