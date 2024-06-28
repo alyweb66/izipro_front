@@ -9,7 +9,7 @@ type DeleteItemModalProps = {
     RedirectExpiredSession: () => void;
 }
 
-export const ExpiredSession: React.FC<DeleteItemModalProps> = ({ 
+export const ExpiredSessionModal: React.FC<DeleteItemModalProps> = ({ 
 	isExpiredSession,
 	setIsExpiredSession,
 	RedirectExpiredSession

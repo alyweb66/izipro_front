@@ -37,7 +37,7 @@ import { MessageProps } from '../../Type/message';
 import { messageDataStore, myMessageDataStore } from '../../store/message';
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
 import { useLogoutSubscription } from '../Hook/LogoutSubscription';
-import { ExpiredSession } from '../Hook/ExpiredSession';
+import { ExpiredSessionModal } from '../Hook/ExpiredSession';
 
 type useQueryUserConversationsProps = {
 	loading: boolean;
@@ -906,8 +906,8 @@ function Dashboard() {
 
 			</div>
 			<Footer />
-			{/* modal */}		
-			<ExpiredSession
+					
+			<ExpiredSessionModal
 				isExpiredSession={isExpiredSession}
 				setIsExpiredSession={setIsExpiredSession}
 				RedirectExpiredSession={RedirectExpiredSession}
