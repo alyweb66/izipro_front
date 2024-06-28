@@ -74,8 +74,6 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	const { loading: requestJobLoading,  fetchMore } = useQueryRequestByJob(jobs, 0, limit, clientRequestStore.length > 0);
 
 
-
-
 	// add jobs to setSubscriptionJob if there are not already in, or have the same id
 	useEffect(() => {
 
@@ -267,6 +265,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 			const newRequests = data.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
 	
 			if (newRequests.length > 0) {
+				
 				RangeFilter(newRequests);
 				offsetRef.current = offsetRef.current + data.length;
 	
@@ -279,8 +278,6 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 		});
 	
 	}
-
-
 
 	return (
 		<div className="client-request">
@@ -418,6 +415,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 						onClick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
+							
 							addRequest();
 						}
 						}>

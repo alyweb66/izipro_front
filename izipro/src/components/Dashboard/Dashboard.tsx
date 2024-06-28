@@ -36,6 +36,8 @@ import { clientRequestStore, myRequestStore, requestConversationStore } from '..
 import { MessageProps } from '../../Type/message';
 import { messageDataStore, myMessageDataStore } from '../../store/message';
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
+import { useLogoutSubscription } from '../Hook/LogoutSubscription';
+import { ExpiredSession } from '../Hook/ExpiredSession';
 
 type useQueryUserConversationsProps = {
 	loading: boolean;
@@ -56,6 +58,7 @@ function Dashboard() {
 	const [hasQueryRun, setHasQueryRun] = useState<boolean>(false);
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
+	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
 	
 	//state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
@@ -127,10 +130,11 @@ function Dashboard() {
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
-	// Subscription to get new message
+	// Subscription
 	const { messageSubscription } = useMyRequestMessageSubscriptions();
 	const { clientRequestSubscription } = useClientRequestSubscriptions();
 	const { clientMessageSubscription } = useMyConversationSubscriptions();
+	const { logoutSubscription } = useLogoutSubscription();
 
 	// condition if user not logged in
 	let isLogged;
@@ -265,17 +269,18 @@ function Dashboard() {
 			const requestByJob = getRequestsByJob.requestsByJob;
 
 			//get all request who are not in the store
-			const newRequests = requestByJob.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
+			const newRequests = requestByJob?.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
 
 			// Filter the requests
-			if (newRequests.length > 0) {
-				RangeFilter(requestByJob);
+			if (newRequests && newRequests.length > 0) {
+				
 				clientRequestOffset.current = clientRequestOffset.current + requestByJob?.length;
+				RangeFilter(requestByJob);
 			}
 		}
 
 		// If there are no more requests, stop the fetchmore
-		if (getRequestsByJob?.requestsByJob.length < clientRequestLimit) {
+		if (getRequestsByJob?.requestsByJob?.length < clientRequestLimit) {
 			setIsClientRequestHasMore(false);
 		}
 	}, [getRequestsByJob, settings]);
@@ -328,6 +333,13 @@ function Dashboard() {
 		}
 	}, [requestMyConversation]);
 
+	// useEffect to check if user is logged out by serveur
+	useEffect(() => {
+		if (logoutSubscription && logoutSubscription.logout.value === true) {
+			setIsExpiredSession(true);
+		}
+	}, [logoutSubscription]);
+
 	// function to check if user is logged in
 	useEffect(() => {
 		// clear local storage and session storage when user leaves the page if local storage is set to session
@@ -364,11 +376,10 @@ function Dashboard() {
 			}
 		} else {
 
-
 			if (window.location.pathname !== '/') {
 				navigate('/');
 			}
-			// if user logged in, set the user data to the store
+	
 		}
 
 	}, []);
@@ -764,6 +775,8 @@ function Dashboard() {
 			//offsetRef.current = offsetRef.current + filteredRequests.length;
 
 		} else {
+			console.log('requests', requests);
+			
 			// If the function is called from the query, we need to add the new requests to the bottom of the list
 			requests.filter((request: RequestProps) => {
 				// Define the two points
@@ -800,6 +813,13 @@ function Dashboard() {
 	// burger menu
 	const toggleMenu = () => {
 		setIsOpen(!isOpen);
+	};
+
+	const RedirectExpiredSession = () => {
+		setIsExpiredSession(false);
+		sessionStorage.clear();
+		localStorage.clear();
+		navigate('/');
 	};
 
 	return (
@@ -886,7 +906,14 @@ function Dashboard() {
 
 			</div>
 			<Footer />
+			{/* modal */}		
+			<ExpiredSession
+				isExpiredSession={isExpiredSession}
+				setIsExpiredSession={setIsExpiredSession}
+				RedirectExpiredSession={RedirectExpiredSession}
+			/>
 		</div>
+
 
 	);
 }
