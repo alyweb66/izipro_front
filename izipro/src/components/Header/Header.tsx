@@ -14,13 +14,15 @@ function Header() {
 	// Check if user is logged in
 	useEffect(() => {
 		// condition if user not logged in
+		const getItem = localStorage.getItem('chekayl');
+		const decodeData = atob(getItem || '');
 		let isLoggedValue;
-		if (localStorage.getItem('ayl') === 'session') {
+		if (decodeData === 'session') {
 
 			isLoggedValue = {value: 'true'};
 		} else {
 
-			isLoggedValue = JSON.parse(localStorage.getItem('ayl') || '{}');
+			isLoggedValue = JSON.parse(decodeData || '{}');
 		}
 
 		if (location.pathname === '/dashboard' && isLoggedValue) {

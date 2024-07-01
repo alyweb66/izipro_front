@@ -142,10 +142,17 @@ function Dashboard() {
 
 	// condition if user not logged in
 	let isLogged;
-	if (localStorage.getItem('ayl') === 'session') {
+	const getItem = localStorage.getItem('chekayl');
+	console.log('getItem', getItem);
+	
+
+	const decodeData = atob(getItem || '');
+	console.log(decodeData); // Log the decoded data to ensure it's correct
+	
+	if (decodeData === 'session') {
 		isLogged = { value: true };
 	} else {
-		isLogged = JSON.parse(localStorage.getItem('ayl') || '{}');
+		isLogged = JSON.parse(decodeData || '{}');
 	}
 
 	// set the new request from requestById to myRequestStore 
@@ -347,7 +354,7 @@ function Dashboard() {
 	useEffect(() => {
 		// clear local storage and session storage when user leaves the page if local storage is set to session
 		const handleBeforeUnload = () => {
-			if (localStorage.getItem('ayl') === 'session') {
+			if (decodeData === 'session') {
 				// clear local storage,session storage and cookie
 				logout({
 					variables: {
@@ -370,8 +377,7 @@ function Dashboard() {
 		if (isLogged !== null && Object.keys(isLogged).length !== 0) {
 			if (new Date().getTime() > isLogged.expiry) {
 				// The data has expired
-				localStorage.removeItem('ayl');
-
+				localStorage.clear();
 
 				if (window.location.pathname !== '/') {
 					navigate('/');
