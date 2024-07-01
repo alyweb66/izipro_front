@@ -42,7 +42,7 @@ const splitLink = split(
 		const definition = getMainDefinition(query);
 		return (
 			definition.kind === 'OperationDefinition' &&
-		definition.operation === 'subscription'
+			definition.operation === 'subscription'
 		);
 	},
 	wsLink,
@@ -52,7 +52,37 @@ const splitLink = split(
 let client;
 if (!client) {
 	client = new ApolloClient({
-		cache: new InMemoryCache(),
+		// configure cache to merge objects for no duplicates 
+		cache: new InMemoryCache({
+			typePolicies: {
+				Query: {
+					fields: {
+						user: {
+							merge(existing = {}, incoming, { mergeObjects }) {
+								return mergeObjects(existing, incoming);
+							},
+						},
+					},
+				},
+				User: {
+					fields: {
+						subscription: {
+							merge(existing = [], incoming) {
+								return [...existing, ...incoming];
+							},
+						},
+						conversationRequestIds: {
+							merge(existing = [], incoming) {
+								return [...new Set([...existing, ...incoming])];
+							},
+						},
+					},
+				},
+				UserSubscription: {
+					keyFields: ['id'],
+				},
+			},
+		}),
 		link: splitLink,
 		defaultOptions: defaultOptions,
 	});
@@ -60,7 +90,7 @@ if (!client) {
 
 // create a root
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+	document.getElementById('root') as HTMLElement
 );
 
 
