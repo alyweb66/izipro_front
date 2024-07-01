@@ -731,82 +731,45 @@ function Dashboard() {
 
 	// function to range request by request location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
-		// If the function is called from the subscription, we need to add the new request to the top of list
-		if (fromSubscribeToMore) {
-
-			const filteredRequests = requests.filter((request: RequestProps) => {
-				// Define the two points
-				const requestPoint = turf.point([request.lng, request.lat]);
-				const userPoint = turf.point([lng, lat]);
-				// Calculate the distance in kilometers (default)
-				const distance = turf.distance(requestPoint, userPoint);
-
-				return (
-					// Check if the request is in the user's range
-					(distance < request.range / 1000 || request.range === 0) &&
-					// Check if the request is in the user's settings range
-					(distance < settings[0].range / 1000 || settings[0].range === 0) &&
-					// Check if the user is already in conversation with the request
-					(request.conversation === null || request.conversation === undefined ||
-						!request.conversation.some(conversation =>
-							(conversation.user_1 !== null && conversation.user_2 !== null) &&
-							(conversation.user_1 === id || conversation.user_2 === id)
-						)
+		// Define the two points for each request and filter them
+		const filteredRequests = requests.filter((request: RequestProps) => {
+			const requestPoint = turf.point([request.lng, request.lat]);
+			const userPoint = turf.point([lng, lat]);
+			const distance = turf.distance(requestPoint, userPoint);
+	
+			return (
+				(distance < request.range / 1000 || request.range === 0) &&
+				(distance < settings[0].range / 1000 || settings[0].range === 0) &&
+				(request.conversation === null || request.conversation === undefined ||
+					!request.conversation.some(conversation =>
+						(conversation.user_1 !== null && conversation.user_2 !== null) &&
+						(conversation.user_1 === id || conversation.user_2 === id)
 					)
-				);
-			});
+				)
+			);
+		});
+	
+		// Get all requests that are not in the store
+		const newRequests = filteredRequests.filter((request: RequestProps) => 
+			clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id)
+		);
+	
+		// Add the new requests to the appropriate place in the list
+		if (newRequests && newRequests.length > 0) {
+			if (fromSubscribeToMore) {
 
-			//get all request who are not in the store
-			const newRequests = filteredRequests.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
-
-			// Add the new requests to the top of the list
-			if (newRequests) {
 				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
-
-				// add request.id to the viewedRequestStore
-				if (notViewedRequestStore.length === 0 || notViewedRequestStore.some(id => id !== newRequests[0].id)) {
-
+	
+				// Add request.id to the viewedRequestStore
+				if (notViewedRequestStore.length === 0 || notViewedRequestStore.some(id => id !== newRequests[0].id)) {		
 					setNotViewedRequestStore([...notViewedRequestStore, newRequests[0].id]);
-
 				}
+			} else {
+
+				
+				setClientRequestsStore([...(clientRequestsStore || []), ...newRequests]);
 
 			}
-
-			//offsetRef.current = offsetRef.current + filteredRequests.length;
-
-		} else {
-			console.log('requests', requests);
-			
-			// If the function is called from the query, we need to add the new requests to the bottom of the list
-			requests.filter((request: RequestProps) => {
-				// Define the two points
-				const requestPoint = turf.point([request.lng, request.lat]);
-				const userPoint = turf.point([lng, lat]);
-				// Calculate the distance in kilometers (default)
-				const distance = turf.distance(requestPoint, userPoint);
-
-				return (
-					(distance < request.range / 1000 || request.range === 0) &&
-					(distance < settings[0].range / 1000 || settings[0].range === 0) &&
-					// Check if the user is already in conversation with the request
-					(request.conversation === null || request.conversation === undefined ||
-						!request.conversation.some(conversation =>
-							(conversation.user_1 !== null && conversation.user_2 !== null) &&
-							(conversation.user_1 === id || conversation.user_2 === id)
-						)
-					)
-				);
-			});
-
-			//get all request who are not in the store
-			const newRequests = requests.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
-
-			// Add the new requests to the bottom of the list
-			if (newRequests) {
-				setClientRequestsStore([...(clientRequestsStore || []), ...newRequests,]);
-
-			}
-
 		}
 	}
 
@@ -815,6 +778,7 @@ function Dashboard() {
 		setIsOpen(!isOpen);
 	};
 
+	// function to redirect to home page when session is expired by serveur
 	const RedirectExpiredSession = () => {
 		setIsExpiredSession(false);
 		sessionStorage.clear();
