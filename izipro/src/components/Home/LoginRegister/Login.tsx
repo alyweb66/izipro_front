@@ -59,16 +59,17 @@ function Login() {
 		}).then((response) => {
 			// if login is successful, redirect to dashboard
 			if (response.data?.login === true) {
-	
 				// if user wants to keep the session active, store the hash in local storage
 				if (activeSession) {
 					const data = {
 						value: 'true',
 						expiry: new Date().getTime() + 1*24*60*60*1000, // 24 hours from now
 					};
-					localStorage.setItem('ayl', JSON.stringify(data));
+					const encodeData = btoa(JSON.stringify(data));
+					localStorage.setItem('chekayl', encodeData);
 				} else {
-					localStorage.setItem('ayl', 'session');
+					const value = btoa('session');
+					localStorage.setItem('chekayl', value);
 				}
 				setIsChangePassword(false);
 				setIsEmailConfirmed(false);
