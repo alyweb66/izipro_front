@@ -191,8 +191,7 @@ function Dashboard() {
 
 	// set the conversationIdS to the store for compare with notViewedConversationStore
 	useEffect(() => {
-		if (myConversationIds && myConversationIds.user) {
-			
+		if (myConversationIds && myConversationIds.user) {	
 			setRequestConversationsIdStore(myConversationIds.user?.conversationRequestIds);
 		}
 	}, [myConversationIds]);
@@ -722,7 +721,7 @@ function Dashboard() {
 			setViewedMyConversationState([]);
 		}
 		
-	},[notViewedConversationStore, hasQueryConversationRun]);
+	},[notViewedConversationStore, requestConversationIdStore]);
 
 	// function to handle navigation to my conversation
 	const handleMyConvesationNavigate = () => {
