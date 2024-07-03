@@ -17,6 +17,7 @@ export const GET_USER_DATA = gql`
       image
       description
       role
+      CGU
       jobs{
         job_id
       }
@@ -26,6 +27,30 @@ export const GET_USER_DATA = gql`
       deleted_at
     }
   }
+`;
+
+export const GET_COOKIE_CONSENTS = gql`
+  query CookieConsents {
+    user {
+      cookieConsents {
+        id
+        user_id
+        cookies_analytics
+        cookies_marketing
+        cookies_necessary
+      }
+    }
+  }
+`;
+
+export const RULES = gql`
+query Rules {
+  rules {
+    id
+    CGU
+    cookies
+  }
+}
 `;
 
 export const GET_USER_REQUEST_BY_CONVERSATIONS = gql`

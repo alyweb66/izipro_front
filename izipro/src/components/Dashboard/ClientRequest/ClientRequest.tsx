@@ -150,7 +150,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 		// Create an IntersectionObserver
 			
 		const observer = new IntersectionObserver((entries) => {
-			console.log('coucou');
+
 			const requestIdsInView = entries
 				.filter(entry => entry.isIntersecting)
 				.map(entry => {
@@ -166,7 +166,6 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 				setTimeout(() => {
 					// remove all requestIdsInView from the viewedClientRequestStore at once
 					if (isAnyIdInViewInStore) {
-						console.log('addNotViewedRequest', isAnyIdInViewInStore);
 							
 						notViewedRequest.setState(prevState => ({ notViewed: prevState.notViewed.filter(value => !requestIdsInView.includes(value)) }));
 						//setNotViewedRequestStore(notViewedRequestStore.filter(value => !requestIdsInView.includes(value)));
@@ -175,8 +174,6 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	
 					// remove not viewed request from the database
 					if (requestIdsInView.length > 0) {
-						console.log('deleteNotViewedRequest');
-						console.log('notViewedRequestStore ', notViewedRequestStore);
 						
 						deleteNotViewedRequest({
 							variables: {
@@ -333,7 +330,6 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 									onClick={(event: React.MouseEvent) => {
 										//to open the message when the user clicks on it just for the selected request 
 										idRef.current = request?.id ?? 0; // check if request or requestByDate is not undefined
-										console.log('id', idRef.current);
 
 										if (idRef.current !== undefined && setIsMessageExpanded) {
 											setIsMessageExpanded((prevState: ExpandedState) => ({
@@ -399,7 +395,6 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 								<FaTrashAlt
 									className="client-request__list__detail__item__delete-FaTrashAlt"
 									onClick={(event) => {
-										console.log('delete-request', request.id);
 
 										document.getElementById(`delete-request-${request.id}`)?.click(),
 										event.stopPropagation();

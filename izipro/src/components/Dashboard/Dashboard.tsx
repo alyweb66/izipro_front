@@ -6,18 +6,19 @@ import MyRequest from './MyRequest/MyRequest';
 import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import { userConversation, userDataStore } from '../../store/UserData';
-import { useQueryGetRequestById, 
-	useQueryNotViewedConversations, 
-	useQueryNotViewedRequests, 
-	useQueryRequestByJob, 
-	useQueryUserConversationIds, 
-	useQueryUserConversations, 
-	useQueryUserData, 
-	useQueryUserRequests, 
-	useQueryUserSubscriptions } from '../Hook/Query';
+import {
+	useQueryGetRequestById,
+	useQueryNotViewedConversations,
+	useQueryNotViewedRequests,
+	useQueryRequestByJob,
+	useQueryUserConversationIds,
+	useQueryUserConversations,
+	useQueryUserData,
+	useQueryUserRequests,
+	useQueryUserSubscriptions
+} from '../Hook/Query';
 import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
-import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
 import { useMutation } from '@apollo/client';
 import Footer from '../Footer/Footer';
 
@@ -38,6 +39,8 @@ import { messageDataStore, myMessageDataStore } from '../../store/message';
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
 import { useLogoutSubscription } from '../Hook/LogoutSubscription';
 import { ExpiredSessionModal } from '../Hook/ExpiredSession';
+//import { RulesModal } from '../Hook/RulesModal';
+import useHandleLogout from '../Hook/HandleLogout';
 
 type useQueryUserConversationsProps = {
 	loading: boolean;
@@ -48,6 +51,7 @@ type useQueryUserConversationsProps = {
 
 function Dashboard() {
 	const navigate = useNavigate();
+	const handleLogout = useHandleLogout();
 
 	// State
 	const [isOpen, setIsOpen] = useState(false);
@@ -59,7 +63,7 @@ function Dashboard() {
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
-	
+
 	//state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [conversationIdState, setConversationIdState] = useState<number>(0);
@@ -74,17 +78,12 @@ function Dashboard() {
 	const [isCLientRequestHasMore, setIsClientRequestHasMore] = useState<boolean>(true);
 
 	//store
-	const id = userDataStore((state) => state.id);
-	const role = userDataStore((state) => state.role);
-	const setAll = userDataStore((state) => state.setAll);
+	const [id, role, lng, lat, settings, jobs, setAll] = userDataStore((state) => [state.id, state.role, state.lng, state.lat, state.settings, state.jobs, state.setAll]);
 	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
-	const lng = userDataStore((state) => state.lng);
-	const lat = userDataStore((state) => state.lat);
-	const settings = userDataStore((state) => state.settings);
-	const jobs = userDataStore((state) => state.jobs);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 	const [requestConversationIdStore, setRequestConversationsIdStore] = requestConversationIds((state) => [state.notViewed, state.setNotViewedStore]);
 
+	// Limit
 	const myRequestLimit = 5;
 	const clientRequestLimit = 5;
 	const myconversationLimit = 5;
@@ -109,9 +108,11 @@ function Dashboard() {
 
 	// Query 
 	const { loading: userDataLoading, getUserData } = useQueryUserData();
+	//const { loading: getCookieConsentsLoading, cookieData} = useQueryCookieConsents(isGetCookieConsents);
 	const getUserSubscription = useQueryUserSubscriptions();
 	const notViewedRequestQuery = useQueryNotViewedRequests();
 	const { loading: notViewedConversationLoading, notViewedConversationQuery } = useQueryNotViewedConversations();
+	//const { loading: rulesLoading, rulesData } = useQueryRules(isGetRules);
 	// this query is only ids of all conversation used to compare with the notViewedConversationStore to get the number of not viewed conversation
 	const { loading: myConversationIdsLoading, myConversationIds } = useQueryUserConversationIds(requestConversationIdStore.length > 0);
 
@@ -127,8 +128,8 @@ function Dashboard() {
 	const { data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
 
 	//mutation
-	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
+
 
 	// Subscription
 	const { messageSubscription } = useMyRequestMessageSubscriptions();
@@ -136,33 +137,57 @@ function Dashboard() {
 	const { clientMessageSubscription } = useMyConversationSubscriptions();
 	const { logoutSubscription } = useLogoutSubscription();
 
-
-
-
-
 	// condition if user not logged in
 	let isLogged;
 	const getItem = localStorage.getItem('chekayl');
-	console.log('getItem', getItem);
-	
 
 	const decodeData = atob(getItem || '');
-	console.log(decodeData); // Log the decoded data to ensure it's correct
-	
+
 	if (decodeData === 'session') {
 		isLogged = { value: true };
 	} else {
 		isLogged = JSON.parse(decodeData || '{}');
 	}
 
+	// function to check if user is logged in
+	useEffect(() => {
+		// clear local storage and session storage when user leaves the page if local storage is set to session
+		const handleBeforeUnload = () => {
+			if (decodeData === 'session') {
+				// clear local storage,session storage and cookie
+				handleLogout(id);
+			}
+		};
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
+		// check if user is logged in
+		if (isLogged !== null && Object.keys(isLogged).length !== 0) {
+			if (new Date().getTime() > isLogged.expiry) {
+				// The data has expired
+				localStorage.clear();
+
+				if (window.location.pathname !== '/') {
+					navigate('/');
+				}
+			}
+		} else {
+
+			if (window.location.pathname !== '/') {
+				navigate('/');
+			}
+
+		}
+
+	}, []);
+
 	// set the new request from requestById to myRequestStore 
 	useEffect(() => {
-		
+
 		if (requestById) {
 			if (!isForMyConversation) {
 				const request = requestById?.user.request;
 				if (requestStore.some(requestStore => requestStore.id !== request.id)) {
-					
+
 					// add request to the store
 					myRequestStore.setState(prevRequests => {
 						return { ...prevRequests, requests: [request, ...prevRequests.requests] };
@@ -179,7 +204,7 @@ function Dashboard() {
 			} else {
 				const request = requestById?.user.request;
 				if (requestsConversationStore.some(requestStore => requestStore.id !== request.id)) {
-					
+
 					// add request to the store
 					requestConversationStore.setState(prevRequests => {
 						return { ...prevRequests, requests: [request, ...prevRequests.requests] };
@@ -198,11 +223,11 @@ function Dashboard() {
 
 			}
 		}
-	},[requestById]);
+	}, [requestById]);
 
 	// set the conversationIdS to the store for compare with notViewedConversationStore
 	useEffect(() => {
-		if (myConversationIds && myConversationIds.user) {	
+		if (myConversationIds && myConversationIds.user) {
 			setRequestConversationsIdStore(myConversationIds.user?.conversationRequestIds);
 		}
 	}, [myConversationIds]);
@@ -232,7 +257,7 @@ function Dashboard() {
 
 	// set the notViewedConversationStore
 	useEffect(() => {
-		
+
 		if (notViewedConversationQuery && !hasQueryConversationRun) {
 
 			const viewedConversationResult = notViewedConversationQuery?.user.userHasNotViewedConversation;
@@ -283,7 +308,7 @@ function Dashboard() {
 
 			// Filter the requests
 			if (newRequests && newRequests.length > 0) {
-				
+
 				clientRequestOffset.current = clientRequestOffset.current + requestByJob?.length;
 				RangeFilter(requestByJob);
 			}
@@ -297,7 +322,7 @@ function Dashboard() {
 
 	// set the request to myrequestStore at starting
 	useEffect(() => {
-	
+
 		if (getUserRequestsData && getUserRequestsData.user.requests) {
 
 			// If offset is 0, it's the first query, so just replace the queries
@@ -350,52 +375,10 @@ function Dashboard() {
 		}
 	}, [logoutSubscription]);
 
-	// function to check if user is logged in
-	useEffect(() => {
-		// clear local storage and session storage when user leaves the page if local storage is set to session
-		const handleBeforeUnload = () => {
-			if (decodeData === 'session') {
-				// clear local storage,session storage and cookie
-				logout({
-					variables: {
-						logoutId: id
-					}
-				}).then(() => {
-
-					sessionStorage.clear();
-					localStorage.clear();
-				});
-
-				if (logoutError) {
-					throw new Error('Error while logging out');
-				}
-			}
-		};
-		window.addEventListener('beforeunload', handleBeforeUnload);
-
-		// check if user is logged in
-		if (isLogged !== null && Object.keys(isLogged).length !== 0) {
-			if (new Date().getTime() > isLogged.expiry) {
-				// The data has expired
-				localStorage.clear();
-
-				if (window.location.pathname !== '/') {
-					navigate('/');
-				}
-			}
-		} else {
-
-			if (window.location.pathname !== '/') {
-				navigate('/');
-			}
-	
-		}
-
-	}, []);
-
 	// set user data to the store
 	useEffect(() => {
 		if (getUserData) {
+
 			setAll(getUserData?.user);
 		}
 	}, [getUserData]);
@@ -422,9 +405,9 @@ function Dashboard() {
 			});
 
 			//fetch request if the request is not in the store
-			if (messageAdded[0].request_id 
-				&& !requestsConversationStore.some(request => request.id === messageAdded[0].request_id) 
-				&& messageAdded[0].user_id !== id) {	
+			if (messageAdded[0].request_id
+				&& !requestsConversationStore.some(request => request.id === messageAdded[0].request_id)
+				&& messageAdded[0].user_id !== id) {
 
 				setRequestByIdState(messageAdded[0].request_id);
 				setIsForMyConversation(true);
@@ -462,7 +445,7 @@ function Dashboard() {
 							}
 						}
 					}).then(() => {
-					
+
 						setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== messageAdded[0].conversation_id));
 
 					});
@@ -470,7 +453,7 @@ function Dashboard() {
 						throw new Error('Error while updating conversation');
 					}
 				} else {
-				// add the conversation_id to the notViewedConversationStore
+					// add the conversation_id to the notViewedConversationStore
 					if (!notViewedConversationStore.includes(messageAdded[0].conversation_id) && messageAdded[0].user_id !== id) {
 						setNotViewedConversationStore([messageAdded[0].conversation_id, ...(notViewedConversationStore || [])]);
 					}
@@ -508,7 +491,7 @@ function Dashboard() {
 			const newDate = date.toISOString();
 
 			//fetch request if the request is not in the store
-			if (messageAdded[0].request_id && !requestStore.some(request => request.id === messageAdded[0].request_id)) {	
+			if (messageAdded[0].request_id && !requestStore.some(request => request.id === messageAdded[0].request_id)) {
 				setRequestByIdState(messageAdded[0].request_id);
 			}
 
@@ -529,7 +512,7 @@ function Dashboard() {
 			if (!requestByIdLoading) {
 				myRequestStore.setState(prevState => {
 					const updatedRequest = prevState.requests.map((request: RequestProps) => {
-					// if the conversation id is in the request
+						// if the conversation id is in the request
 						if (request.conversation && request.conversation.some((conversation) => conversation.id === messageAdded[0].conversation_id)) {
 
 							const updatedConversation = request.conversation.map((conversation) => {
@@ -540,7 +523,7 @@ function Dashboard() {
 							});
 							return { ...request, conversation: updatedConversation };
 
-						// if there is a conversation in the request but the conversation id is not in the request
+							// if there is a conversation in the request but the conversation id is not in the request
 						} else if (request.id === messageAdded[0].request_id && request.conversation?.some(
 							conversation => conversation.id !== messageAdded[0].conversation_id)) {
 
@@ -557,7 +540,7 @@ function Dashboard() {
 							return { ...request, conversation };
 
 						} else {
-						// if the request hasn't a conversation
+							// if the request hasn't a conversation
 							if (request.id === messageAdded[0].request_id && !request.conversation) {
 
 
@@ -660,19 +643,19 @@ function Dashboard() {
 						variables: {
 							input: {
 								user_id: id,
-								conversation_id: [ messageAdded[0].conversation_id]
+								conversation_id: [messageAdded[0].conversation_id]
 							}
 						}
 					}).then(() => {
 						// remove the conversation id from the notViewedConversationStore
-						setNotViewedConversationStore(notViewedConversationStore.filter(id => id !==  messageAdded[0].conversation_id));
-		
+						setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== messageAdded[0].conversation_id));
+
 					});
-					
+
 					if (deleteNotViewedConversationError) {
 						throw new Error('Error updating conversation');
 					}
-					
+
 				}
 
 			} else {
@@ -709,7 +692,7 @@ function Dashboard() {
 		const unviewedConversationIds = notViewedConversationStore.filter(id => requestConversationIdStore && requestConversationIdStore.includes(id));
 
 		if (unviewedConversationIds.length > 0) {
-			
+
 			setViewedMessageState(unviewedConversationIds);
 		} else {
 			setViewedMessageState([]);
@@ -724,14 +707,14 @@ function Dashboard() {
 
 		// count the number of conversation who is not viewed
 		const notViewedConversation = notViewedConversationStore.filter(id => requestConversationIdStore && !requestConversationIdStore.includes(id));
-	
+
 		if (notViewedConversation.length > 0) {
 			setViewedMyConversationState(notViewedConversation);
 		} else {
 			setViewedMyConversationState([]);
 		}
-		
-	},[notViewedConversationStore, requestConversationIdStore]);
+
+	}, [notViewedConversationStore, requestConversationIdStore]);
 
 	// function to handle navigation to my conversation
 	const handleMyConvesationNavigate = () => {
@@ -745,7 +728,7 @@ function Dashboard() {
 			const requestPoint = turf.point([request.lng, request.lat]);
 			const userPoint = turf.point([lng, lat]);
 			const distance = turf.distance(requestPoint, userPoint);
-	
+
 			return (
 				(distance < request.range / 1000 || request.range === 0) &&
 				(distance < settings[0].range / 1000 || settings[0].range === 0) &&
@@ -757,25 +740,25 @@ function Dashboard() {
 				)
 			);
 		});
-	
+
 		// Get all requests that are not in the store
-		const newRequests = filteredRequests.filter((request: RequestProps) => 
+		const newRequests = filteredRequests.filter((request: RequestProps) =>
 			clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id)
 		);
-	
+
 		// Add the new requests to the appropriate place in the list
 		if (newRequests && newRequests.length > 0) {
 			if (fromSubscribeToMore) {
 
 				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
-	
+
 				// Add request.id to the viewedRequestStore
-				if (notViewedRequestStore.length === 0 || notViewedRequestStore.some(id => id !== newRequests[0].id)) {		
+				if (notViewedRequestStore.length === 0 || notViewedRequestStore.some(id => id !== newRequests[0].id)) {
 					setNotViewedRequestStore([...notViewedRequestStore, newRequests[0].id]);
 				}
 			} else {
 
-				
+
 				setClientRequestsStore([...(clientRequestsStore || []), ...newRequests]);
 
 			}
@@ -791,13 +774,17 @@ function Dashboard() {
 	const RedirectExpiredSession = () => {
 		setIsExpiredSession(false);
 		sessionStorage.clear();
-		localStorage.clear();
+		localStorage.removeItem('chekayl');
 		navigate('/');
 	};
 
 	return (
 		<div className='dashboard'>
-			{userDataLoading && notViewedConversationLoading && myConversationIdsLoading && <Spinner />}
+			{userDataLoading
+				|| notViewedConversationLoading
+				|| myConversationIdsLoading
+
+				&& <Spinner />}
 			<nav className="dashboard__nav">
 				<button className="dashboard__nav__burger-menu" onClick={toggleMenu}>
 					<div className='burger-icon'>
@@ -879,7 +866,7 @@ function Dashboard() {
 
 			</div>
 			<Footer />
-					
+
 			<ExpiredSessionModal
 				isExpiredSession={isExpiredSession}
 				setIsExpiredSession={setIsExpiredSession}

@@ -35,9 +35,6 @@ function Account() {
 	// Get the user data
 	const { loading, error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
 
-	console.log('getUserData', getUserData);
-
-
 	//state
 	const [first_name, setFirstName] = useState(getUserData?.user.first_name || '');
 	const [last_name, setLastName] = useState(getUserData?.user.last_name || '');

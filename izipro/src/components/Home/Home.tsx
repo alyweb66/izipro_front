@@ -6,17 +6,31 @@ import { useNavigate } from 'react-router-dom';
 import './Home.scss';
 import { useEffect } from 'react';
 
+
 function Home() {
 	const navigate = useNavigate();
 
-	// condition if user not logged in
-	const isLogged = localStorage.getItem('ayl') || sessionStorage.getItem('ayl');
-	
+	// check if user is logged in and if cookie consents are accepted
 	useEffect(() => {
+		// condition if user not logged in
+		const getItem = localStorage.getItem('chekayl');
+		if (!getItem) {	
+			return;
+		}
+		const decodeData = atob(getItem || '');
+		let isLogged;
+		console.log('isLogged', isLogged);
+		
+		if (decodeData === 'session') {
+			isLogged = { value: true };
+		} else {
+			isLogged = JSON.parse(decodeData || '{}');
+		}
 		if (isLogged) {
 			navigate('/dashboard');
 		}
-	}, [navigate]);
+		
+	},[]);
 
 	return (
 		<div className="home">

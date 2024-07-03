@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { UserDataProps } from '../Type/User';
-
+import { CookieConsentsProps } from '../Type/CookieConsents';
 
 
 type UserDataStore = UserDataProps & {
@@ -26,6 +26,11 @@ type UserDataStore = UserDataProps & {
 	setSettings: (settings: Array<{ range: number}>) => void;
 	resetUserData: () => void;
 
+}
+
+type Rules = {
+	CGU: string;
+	cookies: string;
 }
 
 type ChangeForgotPasswordProps = {
@@ -61,6 +66,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	image: '',
 	description: '',
 	role: '',
+	CGU: null,
 	jobs: [],
 	settings: [{range: 0}],
 	deleted_at: '',
@@ -80,6 +86,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 		image: '',
 		description: '',
 		role: '',
+		CGU: null ,
 		jobs: [],
 		settings: [{range: 0}],
 		deleted_at: '',
@@ -122,7 +129,8 @@ export const userDataStore = create<UserDataStore>((set) => ({
 				description: data.description,
 				role: data.role,
 				jobs: data.jobs,
-				settings: data.settings
+				settings: data.settings,
+				CGU: data.CGU,
 
 			}));
 		}
@@ -168,6 +176,19 @@ export const userConversation = create<UserConversationProps>((set) => ({
 	setUsers: (users) => set({ users }),
 	resetUsers: () => set({ users: [] })
 
+}));
+
+export const rulesStore = create<Rules>(() => ({
+	CGU: '',
+	cookies: '',
+}));
+
+export const cookieConsents = create<CookieConsentsProps>(() => ({
+	id: 0,
+	user_id: 0,
+	cookies_analytics: null,
+	cookies_marketing: null,
+	cookies_necessary: null,
 }));
   
 

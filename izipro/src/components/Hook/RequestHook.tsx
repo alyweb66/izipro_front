@@ -105,7 +105,6 @@ const RequestItem = ({
 				onClick={(event) => {
 					//to open the message when the user clicks on it just for the selected request 
 					idRef.current = (request?.id ?? requestByDate?.id) ?? 0; // check if request or requestByDate is not undefined
-					console.log('id', idRef.current);
 					
 					if (idRef.current !== undefined && setIsMessageExpanded) {
 						setIsMessageExpanded((prevState: ExpandedState) => ({
@@ -166,9 +165,7 @@ const RequestItem = ({
 						setDeleteItemModalIsOpen(true);
 						/* handleHideRequest && handleHideRequest(event, requestByDate?.id); */
 						if (requestByDate) {
-							setModalArgs({ event, requestId: requestByDate.id });
-							console.log('requestByDateID', requestByDate.id);
-							
+							setModalArgs({ event, requestId: requestByDate.id });				
 						}
 					}
 					event.stopPropagation();
