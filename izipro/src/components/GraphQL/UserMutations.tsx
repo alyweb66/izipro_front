@@ -58,8 +58,33 @@ export const UPDATE_USER_MUTATION = gql`
             denomination
             image
             description
+            CGU
     }
 }
+`;
+
+export const COOKIE_CONSENTS_MUTATION = gql`
+    mutation Mutation($input: CookieConsentInput!, $createCookieConsentsId: Int!) {
+    createCookieConsents(input: $input, id: $createCookieConsentsId) {
+        id
+        user_id
+        cookies_analytics
+        cookies_marketing
+        cookies_necessary
+    }
+    }
+`;
+
+export const UPDATE_COOKIE_CONSENTS_MUTATION = gql`
+    mutation Mutation($input: CookieConsentInput!, $createCookieConsentsId: Int!) {
+    updateCookieConsents(input: $input, id: $createCookieConsentsId) {
+        id
+        user_id
+        cookies_analytics
+        cookies_marketing
+        cookies_necessary
+    }
+    }
 `;
 
 export const CONFIRM_EMAIL_MUTATION = gql`

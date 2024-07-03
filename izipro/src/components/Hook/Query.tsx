@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/client';
 import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY, GET_REQUEST_BY_ID, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
 import { GET_JOB_DATA } from '../GraphQL/Job';
-import { GET_USERS_CONVERSATION, GET_USER_DATA, GET_USER_NOT_VIEWED_REQUESTS, GET_USER_REQUEST_BY_CONVERSATIONS, GET_USER_SUBSCRIPTION } from '../GraphQL/UserQueries';
+import { GET_COOKIE_CONSENTS, GET_USERS_CONVERSATION, GET_USER_DATA, GET_USER_NOT_VIEWED_REQUESTS, GET_USER_REQUEST_BY_CONVERSATIONS, GET_USER_SUBSCRIPTION, RULES } from '../GraphQL/UserQueries';
 import { GET_CONVERSATION, GET_CONVERSATION_ID, NOT_VIEWED_CONVERSATIONS } from '../GraphQL/ConversationQueries';
 import { GET_MESSAGES_BY_CONVERSATION, GET_MY_MESSAGES_BY_CONVERSATION } from '../GraphQL/MessageQueries';
 
@@ -17,7 +17,33 @@ export const useQueryUserData = () => {
 	}
 
 	return { loading, getUserData};
-};		
+};
+
+export const useQueryRules = (getData: boolean) => {
+	const { loading, error: rulesError, data: rulesData } = useQuery(RULES, {
+		skip: !getData
+	
+	});
+	
+	if (rulesError) {
+		console.log('rulesError', rulesError);
+		
+		throw new Error('Error while fetching rules data');
+	}
+	return {loading, rulesData};
+};
+
+export const useQueryCookieConsents = (getCookie: boolean) => {
+	const { loading, error: cookieError, data: cookieData } = useQuery(GET_COOKIE_CONSENTS, {
+		skip: !getCookie
+	
+	});
+
+	if (cookieError) {
+		throw new Error('Error while fetching cookie consents data');
+	}
+	return {loading, cookieData};
+};
 
 // fetch categories 
 export const useQueryCategory = () => {

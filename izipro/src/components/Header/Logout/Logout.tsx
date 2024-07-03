@@ -28,7 +28,13 @@ function Logout() {
 		// clear user data store
 		resetUserData();
 		// clear local storage and session storage
-		localStorage.clear();
+		const getItem = localStorage.getItem('chekayl');
+		const decodeData = atob(getItem || '');
+		if (decodeData === 'session') {
+			localStorage.clear();
+		} else {
+			localStorage.removeItem('chekayl');
+		}
 		sessionStorage.clear();
 	
 		// clear the cookie

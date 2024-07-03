@@ -14,6 +14,7 @@ type UserDataProps = {
 	description: string | null;
 	image: string | null;
 	role: string;
+	CGU: boolean | null;
 	jobs: Array<{ job_id: number}>;
 	settings: Array<{ range: number}>;
 	deleted_at: string | null;
