@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cookieConsents, rulesStore, userDataStore } from '../../store/UserData';
 import { RulesModal } from '../Hook/RulesModal';
 import './Footer.scss';
 import { FetchResult, useMutation } from '@apollo/client';
-import { COOKIE_CONSENTS_MUTATION, UPDATE_COOKIE_CONSENTS_MUTATION } from '../GraphQL/UserMutations';
+import { COOKIE_CONSENTS_MUTATION, UPDATE_COOKIE_CONSENTS_MUTATION, UPDATE_USER_MUTATION } from '../GraphQL/UserMutations';
 import { useQueryCookieConsents, useQueryRules } from '../Hook/Query';
 import { CookieConsentsProps } from '../../Type/CookieConsents';
+import useHandleLogout from '../Hook/HandleLogout';
 
 type ResponseCookieConsents = {
 	data: {
@@ -15,23 +16,32 @@ type ResponseCookieConsents = {
 }
 
 function Footer() {
+	
 	//state
 	const [cookiesModal, setCookiesModal] = useState<boolean>(false);
-	const [isGetRules, setIsGetRules] = useState<boolean>(true);
 	const [isGetCookieConsents, setIsGetCookieConsents] = useState<boolean>(true);
 	const [clickCookie, setClickCookie] = useState<boolean>(false);
+	const [CGUModal, setCGUModal] = useState<boolean>(false);
+	
+	//useRef
+	const isGetRulesRef = useRef<boolean>(false);
 
 	//store
-	const id = userDataStore((state) => state.id);
-	const [cookieStore] = rulesStore((state) => [state.CGU, state.cookies]);
+	const [id, CGU] = userDataStore((state) => [state.id, state.CGU]);
+	//const CGU = userDataStore((state) => state.CGU);
+	const [CGUStore, cookieStore] = rulesStore((state) => [state.CGU, state.cookies]);
 	const [cookieConsentsId, cookiesNecessaryStore] = cookieConsents((state) => [state.id, state.cookies_necessary]);
-	const [createCookieConsents, { loading: createCookieConsentsLoading, error: createCookieConsentsError }] = useMutation(COOKIE_CONSENTS_MUTATION);
-	const [updateCookieConsents, { loading: updateCookieConsentsLoading, error: updateCookieConsentsError }] = useMutation(UPDATE_COOKIE_CONSENTS_MUTATION);
-	//console.log('isGetCookieConsents', isGetCookieConsents);
+
+	const handleLogout = useHandleLogout();
 
 	//Query
-	const { loading: rulesLoading, rulesData } = useQueryRules(isGetRules);
+	const { loading: rulesLoading, rulesData } = useQueryRules(isGetRulesRef.current);
 	const { loading: getCookieConsentsLoading, cookieData } = useQueryCookieConsents(isGetCookieConsents);
+
+	//Mutation
+	const [createCookieConsents, { loading: createCookieConsentsLoading, error: createCookieConsentsError }] = useMutation(COOKIE_CONSENTS_MUTATION);
+	const [updateCookieConsents, { loading: updateCookieConsentsLoading, error: updateCookieConsentsError }] = useMutation(UPDATE_COOKIE_CONSENTS_MUTATION);
+	const [updateUser, { loading: updateUserLoading, error: updateUserError }] = useMutation(UPDATE_USER_MUTATION);
 
 	// function to transform the result to match ResponseCookieConsents structure of response data
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,7 +65,6 @@ function Footer() {
 
 		if (id !== 0) {
 			if (cookieConsentsId === 0 && !clickCookie) {
-				console.log('createCookieConsents is doing', cookieConsentsId, clickCookie);
 				
 				createCookieConsents({
 					variables: {
@@ -105,12 +114,30 @@ function Footer() {
 			cookies_necessary: cookieConsent?.cookies_necessary,
 		});
 	}
-	//console.log('cookieData', cookieData);
-	//console.log('cookieConsentsId', cookieConsentsId);
+
+	// function to set true CGU userData
+	const handleAcceptCGU = () => {
+
+		updateUser({
+			variables: {
+				updateUserId: id,
+				input: {
+					CGU: true
+				},
+			}
+		}).then(() => {
+			setCGUModal(false);
+			userDataStore.setState({ CGU: true });
+		});
+
+		if (updateUserError) {
+			throw new Error('Error while updating user');
+		}
+	};
 
 	// set the cookie consents to the store and database
 	useEffect(() => {
-		if (!getCookieConsentsLoading) {
+		if (!getCookieConsentsLoading && !rulesLoading && !isGetRulesRef) {
 			if (cookieData && cookieData.user.cookieConsents && cookieData.user.cookieConsents.user_id === id) {
 			// set cookie consents to the store
 				const { id, cookies_analytics, cookies_marketing, cookies_necessary } = cookieData.user.cookieConsents;
@@ -121,8 +148,7 @@ function Footer() {
 					cookies_marketing,
 					cookies_necessary
 				});
-				//	console.log('passe a false 1');
-			
+
 				setIsGetCookieConsents(false);
 			} else {
 			// set cookie consents to the database and store
@@ -130,8 +156,7 @@ function Footer() {
 
 				if (id !== 0 && (localConsents === 'all' || localConsents === 'necessary') && !cookiesNecessaryStore && isGetCookieConsents) {
 					handleAcceptCookies(localConsents);
-					//	console.log('passe a false 2');
-				
+
 					setIsGetCookieConsents(false);
 				}
 			}
@@ -144,28 +169,41 @@ function Footer() {
 		if (rulesData && rulesData.rules) {
 			// set rules to the store
 			rulesStore.setState({ CGU: rulesData.rules.CGU, cookies: rulesData.rules.cookies });
-			setIsGetRules(false);
+			isGetRulesRef.current = false;
 		}
-
 	}, [rulesData]);
 
 	// check if cookie consents are accepted
 	useEffect(() => {
 		if (!localStorage.getItem('cookieConsents')) {
+			if(!CGUStore) {
+				isGetRulesRef.current = true;
+			}
 			setCookiesModal(true);
 		}
-	
-	}, []);
+	},[]);
 
-
+	// check if user accept CGU if not show the modal
+	useEffect(() => {
+		if (!rulesLoading) {
+			if (id !== 0 && CGU === false) {
+				if (!CGUStore) {
+					isGetRulesRef.current = true;
+				}
+				if (CGUModal === false) {
+					setCGUModal(true);
+				}
+			}
+		}
+	}, [CGU, CGUStore, id]);
 
 	return (
 
 		<div>
 			<footer>
-				<a href="#">CGU</a>
-				<a href="#">Contact</a>
-				<a href="#" onClick={() =>{setCookiesModal(true), setClickCookie(true);}}>Cookies</a>
+				<a href="#" onClick={() => {setCGUModal(true), isGetRulesRef.current = true;}}>CGU</a>
+				<a href="#" >Contact</a>
+				<a href="#" onClick={() => {setCookiesModal(true), setClickCookie(true);}}>Cookies</a>
 			</footer>
 
 			<RulesModal
@@ -175,6 +213,14 @@ function Footer() {
 				isOpenModal={cookiesModal}
 				handleAccept={handleAcceptCookies}
 				loading={createCookieConsentsLoading || updateCookieConsentsLoading || rulesLoading || getCookieConsentsLoading}
+			/>
+			<RulesModal
+				content={CGUStore}
+				setIsOpenModal={setCGUModal}
+				isOpenModal={CGUModal}
+				handleAccept={handleAcceptCGU}
+				handleLogout={handleLogout}
+				loading={rulesLoading || updateUserLoading}
 			/>
 		</div>
 	);

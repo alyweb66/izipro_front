@@ -5,13 +5,12 @@ import Request from './Request/Request';
 import MyRequest from './MyRequest/MyRequest';
 import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
-import { cookieConsents, rulesStore, userConversation, userDataStore } from '../../store/UserData';
+import { userConversation, userDataStore } from '../../store/UserData';
 import {
-	useQueryCookieConsents, useQueryGetRequestById,
+	useQueryGetRequestById,
 	useQueryNotViewedConversations,
 	useQueryNotViewedRequests,
 	useQueryRequestByJob,
-	useQueryRules,
 	useQueryUserConversationIds,
 	useQueryUserConversations,
 	useQueryUserData,
@@ -20,7 +19,6 @@ import {
 } from '../Hook/Query';
 import './Dashboard.scss';
 import { subscriptionDataStore } from '../../store/subscription';
-import { COOKIE_CONSENTS_MUTATION, LOGOUT_USER_MUTATION, UPDATE_USER_MUTATION } from '../GraphQL/UserMutations';
 import { useMutation } from '@apollo/client';
 import Footer from '../Footer/Footer';
 
@@ -41,7 +39,8 @@ import { messageDataStore, myMessageDataStore } from '../../store/message';
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
 import { useLogoutSubscription } from '../Hook/LogoutSubscription';
 import { ExpiredSessionModal } from '../Hook/ExpiredSession';
-import { RulesModal } from '../Hook/RulesModal';
+//import { RulesModal } from '../Hook/RulesModal';
+import useHandleLogout from '../Hook/HandleLogout';
 
 type useQueryUserConversationsProps = {
 	loading: boolean;
@@ -52,6 +51,7 @@ type useQueryUserConversationsProps = {
 
 function Dashboard() {
 	const navigate = useNavigate();
+	const handleLogout = useHandleLogout();
 
 	// State
 	const [isOpen, setIsOpen] = useState(false);
@@ -63,10 +63,6 @@ function Dashboard() {
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
-	const [isGetRules, setIsGetRules] = useState<boolean>(false);
-	const [CGUModal, setCGUModal] = useState<boolean>(false);
-	//const [cookiesModal, setCookiesModal] = useState<boolean>(false);
-	//const [isGetCookieConsents, setIsGetCookieConsents] = useState<boolean>(true);
 
 	//state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
@@ -82,20 +78,10 @@ function Dashboard() {
 	const [isCLientRequestHasMore, setIsClientRequestHasMore] = useState<boolean>(true);
 
 	//store
-	const id = userDataStore((state) => state.id);
-	const role = userDataStore((state) => state.role);
-	const setAll = userDataStore((state) => state.setAll);
+	const [id, role, lng, lat, settings, jobs, setAll] = userDataStore((state) => [state.id, state.role, state.lng, state.lat, state.settings, state.jobs, state.setAll]);
 	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
-	const lng = userDataStore((state) => state.lng);
-	const lat = userDataStore((state) => state.lat);
-	const settings = userDataStore((state) => state.settings);
-	const jobs = userDataStore((state) => state.jobs);
-	const CGU = userDataStore((state) => state.CGU);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 	const [requestConversationIdStore, setRequestConversationsIdStore] = requestConversationIds((state) => [state.notViewed, state.setNotViewedStore]);
-	const [CGUStore] = rulesStore((state) => [state.CGU, state.cookies]);
-	const resetUserData = userDataStore((state) => state.resetUserData);
-	//const [cookiesAnalyticsStore, cookiesMarketingStore, cookiesNecessaryStore] = cookieConsents((state) => [state.cookies_analytics, state.cookies_marketing, state.cookies_necessary]);
 
 	// Limit
 	const myRequestLimit = 5;
@@ -120,7 +106,6 @@ function Dashboard() {
 	const clientRequestOffset = useRef<number>(0);
 	const myConversationOffsetRef = useRef<number>(0);
 
-
 	// Query 
 	const { loading: userDataLoading, getUserData } = useQueryUserData();
 	//const { loading: getCookieConsentsLoading, cookieData} = useQueryCookieConsents(isGetCookieConsents);
@@ -143,10 +128,8 @@ function Dashboard() {
 	const { data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
 
 	//mutation
-	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
-	const [updateUser, { loading: updateUserLoading, error: updateUserError }] = useMutation(UPDATE_USER_MUTATION);
-	//const [createCookieConsents, { loading: createCookieConsentsLoading, error: createCookieConsentsError }] = useMutation(COOKIE_CONSENTS_MUTATION);
+
 
 	// Subscription
 	const { messageSubscription } = useMyRequestMessageSubscriptions();
@@ -166,42 +149,13 @@ function Dashboard() {
 		isLogged = JSON.parse(decodeData || '{}');
 	}
 
-	// function to handle logout
-	const handleLogout = () => {
-		logout({
-			variables: {
-				logoutId: id
-			}
-		});
-
-		// reset the user data
-		resetUserData();
-
-		// clear local storage and session storage
-		localStorage.removeItem('chekayl');
-		sessionStorage.clear();
-
-		// clear the cookie
-		if (document.cookie) {
-			document.cookie = 'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-			document.cookie = 'refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-		}
-		//redirect to home page
-		navigate('/');
-
-
-		if (logoutError) {
-			throw new Error('Error while logging out');
-		}
-	};
-
 	// function to check if user is logged in
 	useEffect(() => {
 		// clear local storage and session storage when user leaves the page if local storage is set to session
 		const handleBeforeUnload = () => {
 			if (decodeData === 'session') {
 				// clear local storage,session storage and cookie
-				handleLogout();
+				handleLogout(id);
 			}
 		};
 		window.addEventListener('beforeunload', handleBeforeUnload);
@@ -420,20 +374,6 @@ function Dashboard() {
 			setIsExpiredSession(true);
 		}
 	}, [logoutSubscription]);
-
-	useEffect(() => {
-
-		if (CGU === false) {
-			console.log('CGU', CGU);
-			if (!CGUStore) {
-				setIsGetRules(true);
-			}
-			if (CGUModal === false) {
-				setCGUModal(true);
-			}
-		}
-
-	}, [CGU, CGUStore]);
 
 	// set user data to the store
 	useEffect(() => {
@@ -834,36 +774,15 @@ function Dashboard() {
 	const RedirectExpiredSession = () => {
 		setIsExpiredSession(false);
 		sessionStorage.clear();
-		localStorage.clear();
+		localStorage.removeItem('chekayl');
 		navigate('/');
 	};
 
-	// function to set true CGU userData
-	const handleAcceptCGU = () => {
-
-		updateUser({
-			variables: {
-				updateUserId: id,
-				input: {
-					CGU: true
-				},
-			}
-		}).then(() => {
-			setCGUModal(false);
-			userDataStore.setState({ CGU: true });
-		});
-
-		if (updateUserError) {
-			throw new Error('Error while updating user');
-		}
-
-	};
 
 	return (
 		<div className='dashboard'>
 			{userDataLoading
 				|| notViewedConversationLoading
-				|| updateUserLoading
 				|| myConversationIdsLoading
 
 				&& <Spinner />}
@@ -954,13 +873,13 @@ function Dashboard() {
 				setIsExpiredSession={setIsExpiredSession}
 				RedirectExpiredSession={RedirectExpiredSession}
 			/>
-			<RulesModal
+			{/* <RulesModal
 				content={CGUStore}
 				setIsOpenModal={setCGUModal}
 				isOpenModal={CGUModal}
 				handleAccept={handleAcceptCGU}
 				handleLogout={handleLogout}
-			/>
+			/> */}
 			{/* <RulesModal
 				isCookie={true}
 				content={cookieStore}
