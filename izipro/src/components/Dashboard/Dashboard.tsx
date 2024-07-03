@@ -778,7 +778,6 @@ function Dashboard() {
 		navigate('/');
 	};
 
-
 	return (
 		<div className='dashboard'>
 			{userDataLoading
@@ -873,20 +872,6 @@ function Dashboard() {
 				setIsExpiredSession={setIsExpiredSession}
 				RedirectExpiredSession={RedirectExpiredSession}
 			/>
-			{/* <RulesModal
-				content={CGUStore}
-				setIsOpenModal={setCGUModal}
-				isOpenModal={CGUModal}
-				handleAccept={handleAcceptCGU}
-				handleLogout={handleLogout}
-			/> */}
-			{/* <RulesModal
-				isCookie={true}
-				content={cookieStore}
-				setIsOpenModal={setCookiesModal}
-				isOpenModal={cookiesModal}
-				handleAccept={handleAcceptCookies}
-			/> */}
 		</div>
 
 

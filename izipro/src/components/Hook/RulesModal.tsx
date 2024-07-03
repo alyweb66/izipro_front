@@ -6,11 +6,6 @@ import { userDataStore } from '../../store/UserData';
 //import Spinner from './Spinner';
 ReactModal.setAppElement('#root');
 
-/* interface ModalArgs {
-	event: React.MouseEvent;
-	requestId: number;
-} */
-
 interface DeleteItemModalProps {
 	loading?: boolean;
 	isCookie?: boolean;
@@ -31,8 +26,7 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 	handleLogout,
 }) => {
 	const [id, CGU] = userDataStore((state) => [state.id, state.CGU]);
-	console.log('id in modal', id);
-	
+
 	return (
 		<ReactModal
 			className="modal"
