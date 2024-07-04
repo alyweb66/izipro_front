@@ -1,11 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+
+// Modules without types
+// @ts-expect-error turf is not typed
+import * as turf from '@turf/turf';
+
+// components 
 import Account from './Account/Account';
 import Request from './Request/Request';
 import MyRequest from './MyRequest/MyRequest';
 import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
-import { userConversation, userDataStore } from '../../store/UserData';
+import Footer from '../Footer/Footer';
+import Spinner from '../Hook/Spinner';
+import { ExpiredSessionModal } from '../Hook/ExpiredSession';
+import { ClientRequestBadge } from '../Hook/Badge';
+
+// Hook personal
 import {
 	useQueryGetRequestById,
 	useQueryNotViewedConversations,
@@ -17,30 +29,29 @@ import {
 	useQueryUserRequests,
 	useQueryUserSubscriptions
 } from '../Hook/Query';
-import './Dashboard.scss';
-import { subscriptionDataStore } from '../../store/subscription';
-import { useMutation } from '@apollo/client';
-import Footer from '../Footer/Footer';
-
-import Spinner from '../Hook/Spinner';
 import { useMyRequestMessageSubscriptions } from '../Hook/MyRequestSubscription';
 import { useClientRequestSubscriptions } from '../Hook/ClientRequestSubscription';
 import { useMyConversationSubscriptions } from '../Hook/MyConversationSubscription';
-import { notViewedRequest, notViewedConversation, requestConversationIds } from '../../store/Viewed';
-import { ClientRequestBadge } from '../Hook/Badge';
-
-import { RequestProps } from '../../Type/Request';
-// @ts-expect-error turf is not typed
-import * as turf from '@turf/turf';
-
-import { clientRequestStore, myRequestStore, requestConversationStore } from '../../store/Request';
-import { MessageProps } from '../../Type/message';
-import { messageDataStore, myMessageDataStore } from '../../store/message';
-import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
 import { useLogoutSubscription } from '../Hook/LogoutSubscription';
-import { ExpiredSessionModal } from '../Hook/ExpiredSession';
-//import { RulesModal } from '../Hook/RulesModal';
 import useHandleLogout from '../Hook/HandleLogout';
+
+// Mutation
+import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
+
+// Types
+import { RequestProps } from '../../Type/Request';
+import { MessageProps } from '../../Type/message';
+
+// Store
+import { userConversation, userDataStore } from '../../store/UserData';
+import { subscriptionDataStore } from '../../store/subscription';
+import { notViewedRequest, notViewedConversation, requestConversationIds } from '../../store/Viewed';
+import { clientRequestStore, myRequestStore, requestConversationStore } from '../../store/Request';
+import { messageDataStore, myMessageDataStore } from '../../store/message';
+
+// Style
+import './Dashboard.scss';
+
 
 type useQueryUserConversationsProps = {
 	loading: boolean;
@@ -64,17 +75,17 @@ function Dashboard() {
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
 
-	//state for myRequest
+	//*state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [conversationIdState, setConversationIdState] = useState<number>(0);
 	const [isMyRequestHasMore, setIsMyRequestHasMore] = useState<boolean>(true);
 
-	//state for myConversation
+	//*state for myConversation
 	const [myConversationIdState, setMyConversationIdState] = useState<number>(0);
 	const [isMyConversationHasMore, setIsMyConversationHasMore] = useState<boolean>(true);
 	const [isForMyConversation, setIsForMyConversation] = useState<boolean>(false);
 
-	//state for clientRequest
+	//*state for clientRequest
 	const [isCLientRequestHasMore, setIsClientRequestHasMore] = useState<boolean>(true);
 
 	//store
@@ -88,18 +99,18 @@ function Dashboard() {
 	const clientRequestLimit = 5;
 	const myconversationLimit = 5;
 
-	// MyRequest store
+	//* MyRequest store
 	const [userConvStore] = userConversation((state) => [state.users, state.setUsers]);
 	myMessageDataStore((state) => [state.messages, state.setMessageStore]);
 	const [requestStore] = myRequestStore((state) => [state.requests, state.setMyRequestStore]);
 	myMessageDataStore((state) => [state.messages, state.setMessageStore]);
 
-	//MyConversation store
+	//* MyConversation store
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 	const [requestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 	messageDataStore((state) => [state.messages, state.setMessageStore]);
 
-	//ClientRequest store
+	//* ClientRequest store
 	const [notViewedRequestStore, setNotViewedRequestStore] = notViewedRequest((state) => [state.notViewed, state.setNotViewedStore]);
 
 	//useRef
@@ -108,28 +119,25 @@ function Dashboard() {
 
 	// Query 
 	const { loading: userDataLoading, getUserData } = useQueryUserData();
-	//const { loading: getCookieConsentsLoading, cookieData} = useQueryCookieConsents(isGetCookieConsents);
 	const getUserSubscription = useQueryUserSubscriptions();
 	const notViewedRequestQuery = useQueryNotViewedRequests();
 	const { loading: notViewedConversationLoading, notViewedConversationQuery } = useQueryNotViewedConversations();
-	//const { loading: rulesLoading, rulesData } = useQueryRules(isGetRules);
 	// this query is only ids of all conversation used to compare with the notViewedConversationStore to get the number of not viewed conversation
 	const { loading: myConversationIdsLoading, myConversationIds } = useQueryUserConversationIds(requestConversationIdStore.length > 0);
 
-	// Query for MyRequest
+	//* Query for MyRequest
 	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, requestStore.length > 0);
 	const { loading: requestByIdLoading, requestById } = useQueryGetRequestById(requestByIdState);
 	console.log('id', id);
 
-	//Query for ClientRequest
+	//*Query for ClientRequest
 	const { getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, clientRequestsStore.length > 0);
 
-	//Query for MyConversation
+	//*Query for MyConversation
 	const { data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
 
 	//mutation
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
-
 
 	// Subscription
 	const { messageSubscription } = useMyRequestMessageSubscriptions();
@@ -244,15 +252,11 @@ function Dashboard() {
 				if (notViewedRequestQuery && viewedRequestArray.some((id: number) => !notViewedRequestStore.includes(id))) {
 					// get the request id that are not in the store
 					const newId = viewedRequestArray.filter((id: number) => !notViewedRequestStore.includes(id));
-
 					setNotViewedRequestStore(newId);
-					//setNotViewedRequestRefStore(viewedRequestArray);
-					//notViewedRequestRef.current = viewedRequestArray;
 					setHasQueryRun(true);
 				}
 			}
 		}
-
 	}, [notViewedRequestQuery]);
 
 	// set the notViewedConversationStore
@@ -474,11 +478,8 @@ function Dashboard() {
 
 				if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
 					RangeFilter([requestAdded], true);
-
 				}
 			}
-
-
 		}
 	}, [clientRequestSubscription]);
 

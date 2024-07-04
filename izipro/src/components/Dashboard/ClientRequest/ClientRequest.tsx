@@ -17,9 +17,6 @@ import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import { notViewedRequest } from '../../../store/Viewed';
 import { DELETE_NOT_VIEWED_REQUEST_MUTATION } from '../../GraphQL/NotViewedRequestMutation';
 
-
-
-
 type ExpandedState = {
 	[key: number]: boolean;
 };
@@ -29,11 +26,10 @@ type clientRequestProps = {
 	isHasMore: boolean;
 	setIsHasMore: (value: boolean) => void;
 	onDetailsClick: () => void;
-	//clientRequestSubscription?: { requestAdded: RequestProps[] };
 	RangeFilter: (requests: RequestProps[], fromSubscribeToMore?: boolean) => void;
 };
 
-function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, offsetRef}: clientRequestProps) {
+function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, offsetRef }: clientRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -51,28 +47,33 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	const limit = 5;
 
 	//store
-	const id = userDataStore((state) => state.id);
-	const jobs = userDataStore((state) => state.jobs);
-	const address = userDataStore((state) => state.address);
-	const city = userDataStore((state) => state.city);
-	const first_name = userDataStore((state) => state.first_name);
-	const last_name = userDataStore((state) => state.last_name);
-	const postal_code = userDataStore((state) => state.postal_code);
-	//const settings = userDataStore((state) => state.settings);
+	const [
+		id,
+		jobs,
+		address,
+		city,
+		first_name,
+		last_name,
+		postal_code] = userDataStore((state) => [
+		state.id,
+		state.jobs,
+		state.address, 
+		state.city, 
+		state.first_name, 
+		state.last_name, 
+		state.postal_code]);
 	const setRequest = requestDataStore((state) => state.setRequest);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 	const [notViewedRequestStore] = notViewedRequest((state) => [state.notViewed]);
-	//const [notViewedRequestRefStore, setNotViewedRequestRefStore] = notViewedRequestRef((state) => [state.notViewed, state.setNotViewedStore]);
 
 	// mutation
 	const [hideRequest, { loading: hiddenLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 	const [subscriptionMutation, { loading: subscribeLoading, error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
-	const [deleteNotViewedRequest, {error: deleteNotViewedRequestError}] = useMutation(DELETE_NOT_VIEWED_REQUEST_MUTATION);
+	const [deleteNotViewedRequest, { error: deleteNotViewedRequestError }] = useMutation(DELETE_NOT_VIEWED_REQUEST_MUTATION);
 
 	// get requests by job
-	const { loading: requestJobLoading,  fetchMore } = useQueryRequestByJob(jobs, 0, limit, clientRequestStore.length > 0);
-
+	const { loading: requestJobLoading, fetchMore } = useQueryRequestByJob(jobs, 0, limit, clientRequestStore.length > 0);
 
 	// add jobs to setSubscriptionJob if there are not already in, or have the same id
 	useEffect(() => {
@@ -148,7 +149,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	// useEffect to see if the request is viewed
 	useEffect(() => {
 		// Create an IntersectionObserver
-			
+
 		const observer = new IntersectionObserver((entries) => {
 
 			const requestIdsInView = entries
@@ -158,23 +159,23 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 					return requestIdString !== null ? parseInt(requestIdString) : null;
 				})
 				.filter(requestId => requestId !== null && notViewedRequestStore.includes(requestId));
-	
+
 			if (requestIdsInView.length > 0) {
 				// check if the id is in the notViewedRequestStore
 				const isAnyIdInViewInStore = requestIdsInView.some(id => notViewedRequestStore.includes(id as number));
-	
+
 				setTimeout(() => {
 					// remove all requestIdsInView from the viewedClientRequestStore at once
 					if (isAnyIdInViewInStore) {
-							
+
 						notViewedRequest.setState(prevState => ({ notViewed: prevState.notViewed.filter(value => !requestIdsInView.includes(value)) }));
 						//setNotViewedRequestStore(notViewedRequestStore.filter(value => !requestIdsInView.includes(value)));
 					}
 					//notViewedRequest.setState({ notViewed: notViewedRequestStore.filter(value => !requestIdsInView.includes(value)) });
-	
+
 					// remove not viewed request from the database
 					if (requestIdsInView.length > 0) {
-						
+
 						deleteNotViewedRequest({
 							variables: {
 								input: {
@@ -183,21 +184,21 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 								}
 							}
 						});
-		
+
 						if (deleteNotViewedRequestError) {
 							throw new Error('Error while deleting viewed Clientrequests');
 						}
 					}
 				}, 3000);
-	
+
 			}
 		});
-	
-	
+
+
 		// Observe all elements with a data-request-id attribute
 		const elements = document.querySelectorAll('[data-request-id]');
 		elements.forEach(element => observer.observe(element));
-	
+
 		// Function to handle visibility change
 		const handleVisibilityChange = () => {
 			if (document.visibilityState === 'visible') {
@@ -206,16 +207,16 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 				elements.forEach(element => observer.unobserve(element));
 			}
 		};
-		
+
 		// Listen for visibility change events
 		document.addEventListener('visibilitychange', handleVisibilityChange);
-	
+
 		// Clean up
 		return () => {
 			elements.forEach(element => observer.unobserve(element));
 			document.removeEventListener('visibilitychange', handleVisibilityChange);
 		};
-	
+
 	});
 
 	// Function to hide a request
@@ -249,7 +250,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 
 	// Function to load more requests 
 	function addRequest() {
-			
+
 		fetchMore({
 			variables: {
 				offset: offsetRef.current, // Next offset
@@ -260,20 +261,20 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 
 			//get all request who are not in the store
 			const newRequests = data.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
-	
+
 			if (newRequests.length > 0) {
-				
+
 				RangeFilter(newRequests);
 				offsetRef.current = offsetRef.current + data.length;
-	
+
 			}
-	
+
 			// If there are no more requests, stop fetchmore
 			if (fetchMoreResult.data.requestsByJob.length < limit) {
 				setIsHasMore(false);
 			}
 		});
-	
+
 	}
 
 	return (
@@ -395,7 +396,6 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 								<FaTrashAlt
 									className="client-request__list__detail__item__delete-FaTrashAlt"
 									onClick={(event) => {
-
 										document.getElementById(`delete-request-${request.id}`)?.click(),
 										event.stopPropagation();
 									}}
@@ -410,7 +410,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 						onClick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
-							
+
 							addRequest();
 						}
 						}>
