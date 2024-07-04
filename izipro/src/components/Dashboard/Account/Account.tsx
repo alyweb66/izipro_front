@@ -1,26 +1,39 @@
+// React and React Router imports
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// State management and GraphQL imports
 import { userDataStore } from '../../../store/UserData';
-import { GET_USER_DATA } from '../../GraphQL/UserQueries';
 import { useMutation, useQuery } from '@apollo/client';
-import SettingAccount from './SettingAccount/SettingAccount';
+import { GET_USER_DATA } from '../../GraphQL/UserQueries';
 import {
 	CHANGE_PASSWORD_MUTATION,
 	DELETE_ACCOUNT_MUTATION,
 	DELETE_PROFILE_PICTURE_MUTATION,
 	UPDATE_USER_MUTATION
 } from '../../GraphQL/UserMutations';
+
+// Third-party libraries
 import DOMPurify from 'dompurify';
 import validator from 'validator';
-import { UserDataProps } from '../../../Type/User';
-import { Localization } from '../../Hook/Localization';
-//@ts-expect-error react-modal is not compatible with typescript
+// @ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
 
+// Local component imports
+import SettingAccount from './SettingAccount/SettingAccount';
+import { Localization } from '../../Hook/Localization';
+import Spinner from '../../Hook/Spinner';
+
+// Type definitions
+import { UserDataProps } from '../../../Type/User';
+
+// Asset imports
+import profileLogo from '/logo/logo profile.jpeg';
+
+// Styling imports
 import './Account.scss';
 //import '../../../styles/spinner.scss';
-import profileLogo from '/logo/logo profile.jpeg';
-import Spinner from '../../Hook/Spinner';
+
 
 ReactModal.setAppElement('#root');
 
@@ -410,6 +423,7 @@ function Account() {
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)}
 							aria-label="Prénom"
 							maxLength={50}
+							autoComplete='first_name'
 						/>
 					</label>
 					<label className="account__profile__form__label">
@@ -423,6 +437,7 @@ function Account() {
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
 							aria-label="Nom"
 							maxLength={50}
+							autoComplete='last_name'
 						/>
 					</label>
 					<label className="account__profile__form__label">
@@ -436,6 +451,7 @@ function Account() {
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
 							aria-label="Email"
 							maxLength={50}
+							autoComplete='email'
 						/>
 					</label>
 					<label className="account__profile__form__label">
@@ -449,6 +465,7 @@ function Account() {
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddress(event.target.value)}
 							aria-label="Adresse"
 							maxLength={100}
+							autoComplete='address'
 							required
 						/>
 					</label>
@@ -462,6 +479,7 @@ function Account() {
 							placeholder={postal_code || ''}
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCode(event.target.value)}
 							aria-label="Code postal"
+							autoComplete='postal_code'
 							maxLength={10}
 							required
 						/>
@@ -476,6 +494,7 @@ function Account() {
 							placeholder={city || ''}
 							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCity(event.target.value)}
 							aria-label="Ville"
+							autoComplete='city'
 							maxLength={20}
 							required
 						/>
@@ -492,6 +511,7 @@ function Account() {
 									placeholder={siret || ''}
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
 									aria-label="Siret"
+									autoComplete='siret'
 									maxLength={14}
 								/>
 							</label>
@@ -505,6 +525,7 @@ function Account() {
 									placeholder={denomination || ''}
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenomination(event.target.value)}
 									aria-label="Dénomination"
+									autoComplete='denomination'
 									maxLength={50}
 								/>
 							</label>

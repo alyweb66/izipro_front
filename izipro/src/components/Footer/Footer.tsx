@@ -1,13 +1,32 @@
 import { useEffect, useRef, useState } from 'react';
+
+// State management and stores
 import { cookieConsents, rulesStore, userDataStore } from '../../store/UserData';
+
+// Custom hooks and components
 import { RulesModal } from '../Hook/RulesModal';
-import './Footer.scss';
-import { FetchResult, useMutation } from '@apollo/client';
-import { COOKIE_CONSENTS_MUTATION, UPDATE_COOKIE_CONSENTS_MUTATION, UPDATE_USER_MUTATION } from '../GraphQL/UserMutations';
-import { useQueryCookieConsents, useQueryRules } from '../Hook/Query';
-import { CookieConsentsProps } from '../../Type/CookieConsents';
-import useHandleLogout from '../Hook/HandleLogout';
 import { ContactModal } from '../Hook/ContactModal';
+
+// Apollo Client
+import { useMutation, FetchResult } from '@apollo/client';
+import {
+	COOKIE_CONSENTS_MUTATION,
+	UPDATE_COOKIE_CONSENTS_MUTATION,
+	UPDATE_USER_MUTATION
+} from '../GraphQL/UserMutations';
+
+// Custom hooks and queries
+import { useQueryCookieConsents, useQueryRules } from '../Hook/Query';
+
+// Types
+import { CookieConsentsProps } from '../../Type/CookieConsents';
+
+// Utility hook
+import useHandleLogout from '../Hook/HandleLogout';
+
+// Styles
+import './Footer.scss';
+
 
 type ResponseCookieConsents = {
 	data: {

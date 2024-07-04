@@ -1,11 +1,20 @@
-import { useNavigate } from 'react-router-dom';
 import { FormEvent, useEffect, useState } from 'react';
+
+// React Router
+import { useNavigate } from 'react-router-dom';
+
+// Apollo Client
 import { useMutation } from '@apollo/client';
 import { FORGOT_PASSWORD_MUTATION, LOGIN_USER_MUTATION } from '../../GraphQL/UserMutations';
+
+// External libraries
 import DOMPurify from 'dompurify';
 import validator from 'validator';
+
+// State management and stores
 import { confirmEmailStore } from '../../../store/LoginRegister';
 import { changeForgotPasswordStore } from '../../../store/UserData';
+
 
 
 import './Login.scss';

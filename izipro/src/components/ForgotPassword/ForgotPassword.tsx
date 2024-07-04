@@ -1,11 +1,17 @@
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+// Apollo Client
 import { useMutation } from '@apollo/client';
 import { VALIDATE_FORGOT_PASSWORD_MUTATION } from '../GraphQL/UserMutations';
-import { useState } from 'react';
+
+// External libraries
 import validator from 'validator';
 import DOMPurify from 'dompurify';
-import { useLocation } from 'react-router-dom';
+
+// State management and stores
 import { changeForgotPasswordStore } from '../../store/UserData';
-import { useNavigate } from 'react-router-dom';
+
 
 import './ForgotPassword.scss';
 

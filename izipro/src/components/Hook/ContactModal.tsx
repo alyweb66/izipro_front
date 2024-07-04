@@ -1,12 +1,19 @@
-
+// Bibliothèques et composants externes
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
 import Spinner from './Spinner';
+
+// Hooks React
 import { useState } from 'react';
+
+// Apollo Client
 import { useMutation } from '@apollo/client';
 import { CONTACT_MUTATION } from '../GraphQL/MessageMutation';
+
+// Bibliothèques externes
 import DOMPurify from 'dompurify';
 import validator from 'validator';
+
 
 ReactModal.setAppElement('#root');
 

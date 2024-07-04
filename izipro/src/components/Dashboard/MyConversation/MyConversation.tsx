@@ -1,30 +1,55 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
+// React hooks and components
 import { useEffect, useRef, useState } from 'react';
-import './MyConversation.scss';
-import { requestDataStore, requestConversationStore, clientRequestStore } from '../../../store/Request';
-import { RequestProps } from '../../../Type/Request';
-import { CONVERSATION_MUTATION, DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
+import TextareaAutosize from 'react-textarea-autosize';
+
+// Apollo Client mutations
 import { useMutation } from '@apollo/client';
-import { userDataStore } from '../../../store/UserData';
-import { useQueryMessagesByConversation, useQueryUserConversations } from '../../Hook/Query';
-import { useFileHandler } from '../../Hook/useFileHandler';
-import { messageDataStore } from '../../../store/message';
-import { MessageProps, MessageStoreProps } from '../../../Type/message';
-import { SubscriptionStore, subscriptionDataStore } from '../../../store/subscription';
-import { SubscriptionProps } from '../../../Type/Subscription';
-import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
+import {
+	CONVERSATION_MUTATION,
+	DELETE_NOT_VIEWED_CONVERSATION_MUTATION,
+} from '../../GraphQL/ConversationMutation'; // Assuming these mutations are from ConversationMutation
+import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations'; // Vérifiez le chemin correct
 import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
-import RequestItem from '../../Hook/RequestHook';
+import { MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
+
+// Custom hooks and queries
+import {
+	useQueryMessagesByConversation,
+	useQueryUserConversations,
+
+} from '../../Hook/Query';
+import { useFileHandler } from '../../Hook/useFileHandler';
+
+// State management and stores
+import {
+	requestDataStore,
+	requestConversationStore,
+	clientRequestStore
+} from '../../../store/Request';
+import { userDataStore } from '../../../store/UserData';
+import { messageDataStore } from '../../../store/message';
+import { SubscriptionStore, subscriptionDataStore } from '../../../store/subscription';
+import { notViewedConversation } from '../../../store/Viewed';
+
+// Types and assets
+import { RequestProps } from '../../../Type/Request';
+import { MessageProps, MessageStoreProps } from '../../../Type/message';
+import { SubscriptionProps } from '../../../Type/Subscription';
 import pdfLogo from '/logo/pdf-icon.svg';
+import logoProfile from '/logo/logo profile.jpeg';
+
+// Components and utilities
+import './MyConversation.scss';
+import RequestItem from '../../Hook/RequestHook'; // Assuming RequestItem is imported correctly
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaCamera } from 'react-icons/fa';
 import { MdAttachFile, MdKeyboardArrowLeft, MdSend } from 'react-icons/md';
-import TextareaAutosize from 'react-textarea-autosize';
-import logoProfile from '/logo/logo profile.jpeg';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
-import { MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
-import { notViewedConversation } from '../../../store/Viewed';
+
+
+
 
 
 type useQueryUserConversationsProps = {
@@ -466,6 +491,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 			}).then((response) => {
 				if (response.data.createSubscription) {
 					// update the subscription store
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
 					const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
 
 					subscriptionDataStore.setState((prevState: SubscriptionStore) => ({

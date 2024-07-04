@@ -1,12 +1,24 @@
-
-import { useQueryCategory, useQueryJobData, useQueryJobs } from '../../../Hook/Query';
-import { CategoryPros, JobProps } from '../../../../Type/Request';
-import { DELETE_USER_HAS_JOB_MUTATION, USER_HAS_JOB_MUTATION, USER_SETTING_MUTATION } from '../../../GraphQL/UserMutations';
-import './SettingAccount.scss';
+// React and React hooks
 import { useEffect, useState } from 'react';
+
+// Apollo Client and GraphQL mutations
 import { useMutation } from '@apollo/client';
+import { DELETE_USER_HAS_JOB_MUTATION, USER_HAS_JOB_MUTATION, USER_SETTING_MUTATION } from '../../../GraphQL/UserMutations';
+
+// Custom hooks for queries
+import { useQueryCategory, useQueryJobData, useQueryJobs } from '../../../Hook/Query';
+
+// State management
 import { userDataStore } from '../../../../store/UserData';
+
+// Type definitions
+import { CategoryPros, JobProps } from '../../../../Type/Request';
+
+// Local components and assets
 import Spinner from '../../../Hook/Spinner';
+
+// Styling imports
+import './SettingAccount.scss';
 
 
 function SettingAccount() {

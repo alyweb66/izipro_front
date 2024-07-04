@@ -4,6 +4,7 @@ import { useMutation } from '@apollo/client';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { confirmEmailStore } from '../../store/LoginRegister';
+import Spinner from '../Hook/Spinner';
 
 function ConfirmEmail() {
 	const navigate = useNavigate();
@@ -12,8 +13,9 @@ function ConfirmEmail() {
 	//store
 	const setIsEmailConfirmed = confirmEmailStore((state) => state.setIsEmailConfirmed);
 	// Mutation
-	const [confirmRegisterEmail, {error: confirmMailError}] = useMutation(CONFIRM_EMAIL_MUTATION);
+	const [confirmRegisterEmail, {loading: confirmEmailLoading, error: confirmMailError}] = useMutation(CONFIRM_EMAIL_MUTATION);
 
+	// send token to confirm email
 	useEffect(() =>{
 		confirmRegisterEmail({
 			variables:{
@@ -36,7 +38,8 @@ function ConfirmEmail() {
 
 	return (
 		<div>
-			<h1>Confirm Email</h1>
+			{confirmEmailLoading && <Spinner />}
+			{/* <h1>Confirm Email</h1> */}
 		</div>
 	);
 }
