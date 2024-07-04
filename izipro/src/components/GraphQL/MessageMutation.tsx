@@ -7,3 +7,9 @@ export const MESSAGE_MUTATION = gql`
   
 }
 `;
+
+export const CONTACT_MUTATION = gql`
+  mutation Mutation($input: ContactInput!) {
+    contactEmail(input: $input)
+  }
+`;
