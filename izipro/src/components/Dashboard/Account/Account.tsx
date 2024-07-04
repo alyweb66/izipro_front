@@ -192,11 +192,19 @@ function Account() {
 		}
 
 		if (changedFields.email) {
+			if (!validator.isEmail(changedFields.email)) {
+				setErrorAccount('Email invalide');
+				setTimeout(() => {
+					setErrorAccount('');
+
+				}, 5000);
+				return;
+			}
 			setMessageAccount('Un email de confirmation a été envoyé, le nouvel email sera effectif après confirmation');
 			setTimeout(() => {
 				setMessageAccount('');
 
-			}, 5000);
+			}, 10000);
 			return;
 		}
 

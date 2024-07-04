@@ -5,7 +5,9 @@ import Spinner from './Spinner';
 import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { CONTACT_MUTATION } from '../GraphQL/MessageMutation';
-//import Spinner from './Spinner';
+import DOMPurify from 'dompurify';
+import validator from 'validator';
+
 ReactModal.setAppElement('#root');
 
 interface DeleteItemModalProps {
@@ -32,16 +34,23 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 
 	const handleAccept = (description: string, email: string, first_name?: string, last_name?: string, enterprise?: string) => {
 		if ((first_name && last_name || enterprise) && description && email) {
-			console.log('send');
+
+			if (!validator.isEmail(email)) {
+				setErrorMessage('Email invalide');
+				setTimeout(() => {
+					setErrorMessage('');
+				}, 5000);
+				return;
+			}
             
 			contactEmail({
 				variables: {
 					input: {
-						first_name: first_name,
-						last_name: last_name,
-						email: email,
-						enterprise: enterprise,
-						description: description
+						...(first_name ? { first_name: DOMPurify.sanitize(first_name) } : {}),
+						...(last_name ? { last_name: DOMPurify.sanitize(last_name) } : {}),
+						...(enterprise ? { enterprise: DOMPurify.sanitize(enterprise) } : {}),
+						email: DOMPurify.sanitize(email),
+						description: DOMPurify.sanitize(description)
 					}
 				}
 			}).then(() => {
