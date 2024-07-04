@@ -1,22 +1,32 @@
 import { useEffect, useState } from 'react';
-import { useQueryCategory, useQueryJobs } from '../../Hook/Query';
+import Map from 'react-map-gl';
+// @ts-expect-error no types for mapbox-gl
+import mapboxgl from 'mapbox-gl'; 
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+// Apollo Client
 import { useMutation } from '@apollo/client';
 import { REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
-import { userDataStore } from '../../../store/UserData';
-import { CategoryPros, JobProps } from '../../../Type/Request';
-import DOMPurify from 'dompurify';
-import Map from 'react-map-gl';
-//@ts-expect-error no types for mapbox-gl
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+
+// Custom hooks and queries
+import { useQueryCategory, useQueryJobs } from '../../Hook/Query';
 import { useFileHandler } from '../../Hook/useFileHandler';
+
+// State management and stores
+import { userDataStore } from '../../../store/UserData';
+import { myRequestStore } from '../../../store/Request';
+
+// Types and icons
+import { CategoryPros, JobProps } from '../../../Type/Request';
+import pdfLogo from '/logo/pdf-icon.svg';
 import { TbUrgent } from 'react-icons/tb';
 import { FaCamera } from 'react-icons/fa';
 
+// Utilities and styles
+import DOMPurify from 'dompurify';
 import './Request.scss';
 import Spinner from '../../Hook/Spinner';
-import pdfLogo from '/logo/pdf-icon.svg';
-import { myRequestStore } from '../../../store/Request';
+
 
 
 function Request() {

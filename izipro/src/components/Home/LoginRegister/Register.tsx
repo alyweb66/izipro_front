@@ -1,9 +1,16 @@
 import { useState } from 'react';
+
+// Apollo Client
 import { useMutation } from '@apollo/client';
 import { REGISTER_USER_MUTATION, REGISTER_PRO_USER_MUTATION } from '../../GraphQL/UserMutations';
+
+// External libraries
 import validator from 'validator';
 import DOMPurify from 'dompurify';
+
+// Styles
 import './Register.scss';
+
 
 
 function Register() {

@@ -11,6 +11,8 @@ import { router } from './routes';
 
 import './styles/index.scss';
 
+
+
 const defaultOptions: DefaultOptions = {
 	watchQuery: {
 		fetchPolicy: 'network-only',

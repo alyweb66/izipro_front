@@ -1,21 +1,33 @@
+// React
 import React, { useEffect, useRef, useState } from 'react';
+
+// Apollo Client mutations
+import { useMutation } from '@apollo/client';
+import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
+import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
+import { DELETE_NOT_VIEWED_REQUEST_MUTATION } from '../../GraphQL/NotViewedRequestMutation';
+
+// Custom hooks and queries
+import { useQueryRequestByJob } from '../../Hook/Query';
+
+// State management
 import { userDataStore } from '../../../store/UserData';
 import { requestDataStore, clientRequestStore } from '../../../store/Request';
 import { subscriptionDataStore } from '../../../store/subscription';
-import './clientRequest.scss';
-import { useQueryRequestByJob } from '../../Hook/Query';
+import { notViewedRequest } from '../../../store/Viewed';
+
+// Types and assets
 import { RequestProps } from '../../../Type/Request';
-import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
-import { useMutation } from '@apollo/client';
-import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import pdfLogo from '/logo/pdf-icon.svg';
+
+// Components and utilities
+import './clientRequest.scss';
+import Spinner from '../../Hook/Spinner';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt } from 'react-icons/fa';
-import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
-import { notViewedRequest } from '../../../store/Viewed';
-import { DELETE_NOT_VIEWED_REQUEST_MUTATION } from '../../GraphQL/NotViewedRequestMutation';
+
 
 type ExpandedState = {
 	[key: number]: boolean;

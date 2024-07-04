@@ -1,33 +1,52 @@
 import { useEffect, useRef, useState } from 'react';
-import { userConversation, userDataStore } from '../../../store/UserData';
+
+// Apollo Client mutations
 import { useMutation } from '@apollo/client';
-import { RequestProps } from '../../../Type/Request';
-import './MyRequest.scss';
-import { DELETE_REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
-import { useQueryMyMessagesByConversation, useQueryUserRequests, useQueryUsersConversation } from '../../Hook/Query';
-import { myRequestStore } from '../../../store/Request';
-import { UserDataProps } from '../../../Type/User';
-import { myMessageDataStore } from '../../../store/message';
-import { MessageProps } from '../../../Type/message';
-import { useFileHandler } from '../../Hook/useFileHandler';
-import { subscriptionDataStore, SubscriptionStore } from '../../../store/subscription';
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
-import { SubscriptionProps } from '../../../Type/Subscription';
+import { DELETE_REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
+import { MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
-import { FaTrashAlt, FaCamera } from 'react-icons/fa';
-import { MdSend, MdAttachFile } from 'react-icons/md';
-import { MdKeyboardArrowLeft } from 'react-icons/md';
+// Custom hooks and queries
+import {
+	useQueryMyMessagesByConversation,
+	useQueryUserRequests,
+	useQueryUsersConversation,
+} from '../../Hook/Query';
+import { useFileHandler } from '../../Hook/useFileHandler';
+// State management and stores
+import {
+	userDataStore,
+	userConversation
+} from '../../../store/UserData';
+import { myRequestStore } from '../../../store/Request';
+import { subscriptionDataStore, SubscriptionStore } from '../../../store/subscription';
+import { notViewedConversation } from '../../../store/Viewed';
+import { myMessageDataStore } from '../../../store/message';
+
+// Types
+import { RequestProps } from '../../../Type/Request';
+import { UserDataProps } from '../../../Type/User';
+import { MessageProps } from '../../../Type/message';
+import { SubscriptionProps } from '../../../Type/Subscription';
+
+// Components and utilities
+import './MyRequest.scss';
 import pdfLogo from '/logo/pdf-icon.svg';
 import logoProfile from '/logo/logo profile.jpeg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
-import TextareaAutosize from 'react-textarea-autosize';
-import { DeleteItemModal } from '../../Hook/DeleteItemModal';
-import Spinner from '../../Hook/Spinner';
+import { FaTrashAlt, FaCamera } from 'react-icons/fa';
+import { MdSend, MdAttachFile, MdKeyboardArrowLeft } from 'react-icons/md';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
-import { MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
-import { notViewedConversation } from '../../../store/Viewed';
+import TextareaAutosize from 'react-textarea-autosize';
+import Spinner from '../../Hook/Spinner';
+import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+
+
+
+// Configuration for React Modal
 ReactModal.setAppElement('#root');
+
 
 
 type ExpandedState = {
