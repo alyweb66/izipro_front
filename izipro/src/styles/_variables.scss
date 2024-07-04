@@ -37,6 +37,27 @@ $gutter: 1.5rem;
   }
 }
 
+@mixin orange-button {
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+ // margin: auto;
+ // max-width: 20%;
+  //margin-top: 0rem;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  background-color: $color-primary-orange;
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    background: $color-primary-blue;
+  }
+}
+
 @mixin fetch-button {
   .Btn {
     width: 50px;
