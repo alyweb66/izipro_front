@@ -238,7 +238,7 @@ function Account() {
 			});
 
 			if (updateUserError) {
-				setMessageAccount('Erreur lors de la modification');
+				setErrorAccount('Erreur lors de la modification');
 				throw new Error('Error while updating user data');
 			}
 		}
