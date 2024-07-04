@@ -14,6 +14,7 @@ function ConfirmEmail() {
 	// Mutation
 	const [confirmRegisterEmail, {error: confirmMailError}] = useMutation(CONFIRM_EMAIL_MUTATION);
 
+	// send token to confirm email
 	useEffect(() =>{
 		confirmRegisterEmail({
 			variables:{

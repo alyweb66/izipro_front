@@ -113,7 +113,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
 	// Query to get the user requests
-	const { loading: requestLoading, fetchMore } = useQueryUserRequests(id, 0, limit, myRequestStore.length > 0 );
+	const { loading: requestLoading, fetchMore } = useQueryUserRequests(id, 0, limit, myRequestStore.length > 0);
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 100);
 
@@ -350,7 +350,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		setTimeout(() => {
 			endOfMessagesRef.current?.scrollIntoView(/* { behavior: 'smooth' } */);
 		}, 200);
-		
+
 	}, [messageStore]);
 
 	//  set selected request at null when the component is unmounted
@@ -522,7 +522,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		// remove the conversation id from the notViewedConversationStore and database
 		if (conversationId && notViewedConversationStore?.some(id => id === conversationId)) {
-			
+
 			deleteNotViewedConversation({
 				variables: {
 					input: {
@@ -535,7 +535,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
 
 			});
-			
+
 			if (deleteNotViewedConversationError) {
 				throw new Error('Error updating conversation');
 			}
@@ -618,10 +618,13 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	};
 
-	
+
 	return (
 		<div className="my-request">
-			<div id="scrollableRequest" className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}>
+			<div 
+				id="scrollableRequest" 
+				className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`} 
+				aria-label="Liste des demandes">
 				{requestLoading && <Spinner />}
 				{!requestByDate && <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p>}
 				{requestByDate && (
@@ -632,7 +635,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								className={`my-request__list__detail__item 
 									${request.urgent}
 									${selectedRequest?.id === request?.id ? 'selected' : ''} 
-									${request.conversation?.some(conv => notViewedConversationStore?.some(id => id === conv.id) ) ? 'not-viewed' : ''} `}
+									${request.conversation?.some(conv => notViewedConversationStore?.some(id => id === conv.id)) ? 'not-viewed' : ''} `}
 
 								key={request.id}
 								onClick={(event) => {
@@ -645,6 +648,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 									setIsAnswerOpen(true);
 									setIsMessageOpen(false);
 								}}
+								aria-label={`Détails de la demande ${request.title}`}
 							>
 								{request.urgent && <p className="my-request__list__detail__item urgent">URGENT</p>}
 								<div className="my-request__list__detail__item__header">
@@ -704,12 +708,14 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 														download={media.name}
 														target="_blank"
 														rel="noopener noreferrer"
-														onClick={(event) => { event.stopPropagation(); }} >
+														onClick={(event) => { event.stopPropagation(); }}
+														aria-label={`PDF associé à la demande ${request.title}`}
+													>
 														<img
 															className="my-request__list__detail__item__picture img"
 															//key={media.id} 
 															src={pdfLogo}
-															alt={media.name}
+															alt={`PDF associé à la demande ${request.title}`}
 														/>
 													</a>
 												) : (
@@ -721,7 +727,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 															openModal(imageUrls, index),
 															event.stopPropagation();
 														}}
-														alt={media.name}
+														alt={`Image associée à la demande ${request.title}`}
 													/>
 												)
 											) : null
@@ -733,11 +739,13 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 									id={`delete-request-${request.id}`}
 									className="my-request__list__detail__item__delete"
 									type='button'
+									aria-label={`Supprimer la demande ${request.title}`}
 									onClick={(event) => {
 										setDeleteItemModalIsOpen(true);
 										setModalArgs({ event, requestId: request.id }),
 										event.stopPropagation();
-									}}>
+									}}
+								>
 								</button>
 								<FaTrashAlt
 									className="my-request__list__detail__item__delete-FaTrashAlt"
@@ -768,7 +776,9 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					)}
 				</div>
 			</div>
-			<div id="scrollableAnswer" className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''} ${conversationLoading ? 'loading' : ''}`}>
+			<div id="scrollableAnswer"
+				className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''} ${conversationLoading ? 'loading' : ''}`}
+				aria-label="Liste des réponses">
 				{conversationLoading && <Spinner />}
 				<MdKeyboardArrowLeft
 					className="my-request__answer-list return"
@@ -778,6 +788,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						setIsAnswerOpen(false),
 						setIsMessageOpen(false);
 					}}
+					aria-label="Retour à la liste des demandes"
 				/>
 				{selectedRequest && <h2 className="my-request__answer-list title">{selectedRequest?.title}</h2>}
 				{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
@@ -801,10 +812,15 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							setIsMessageOpen(true);
 							setIsAnswerOpen(false);
 							setIsListOpen(false);
-						}}>
+						}}
+						aria-label={`Détails de ${user.first_name} ${user.last_name}`}
+					>
 
 						<div className="my-request__answer-list__user__header">
-							<img className="my-request__answer-list__user__header img" src={user.image ? user.image : logoProfile} alt="" />
+							<img 
+								className="my-request__answer-list__user__header img" 
+								src={user.image ? user.image : logoProfile} 
+								alt={`Image de profil de ${user.first_name} ${user.last_name}`} />
 							{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
 							{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
 							{user.denomination ? (
@@ -812,14 +828,15 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							) : (
 								<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
 							)}
-							{user.deleted_at && <p className="my-request__answer-list__user__header deleted">Utilisateur supprimé</p>}
+							{user.deleted_at && <p className="my-request__answer-list__user__header deleted" aria-label="Utilisateur supprimé">
+								Utilisateur supprimé</p>}
 						</div>
 					</div>
 				))}
 			</div>
-			<div className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`}>
+			<div className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`} aria-label='Liste des messages'>
 				{messageLoading && <Spinner />}
-				<div className="my-request__message-list__user">
+				<div className="my-request__message-list__user" aria-label="Détails de l'utilisateur" >
 					{/* {selectedUser && ( */}
 					<div
 						className="my-request__message-list__user__header"
@@ -841,18 +858,24 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 									setIsListOpen(false);
 									event.stopPropagation();
 								}}
+								aria-label="Retour à la liste des utilisateurs"
 							/>
-							<img className="my-request__message-list__user__header__detail img" src={selectedUser?.image ? selectedUser.image : logoProfile} alt="" />
+							<img
+								className="my-request__message-list__user__header__detail img"
+								src={selectedUser?.image ? selectedUser.image : logoProfile}
+								alt={selectedUser?.denomination ? selectedUser.denomination : `${selectedUser?.first_name} ${selectedUser?.last_name}`} />
 							{selectedUser?.denomination ? (
 								<p className="my-request__message-list__user__header__detail denomination">{selectedUser?.denomination}</p>
 							) : (
 								<p className="my-request__message-list__user__header__detail name">{selectedUser?.first_name} {selectedUser?.last_name}</p>
 							)}
-							{selectedUser?.deleted_at && <p className="my-request__message-list__user__header__detail deleted">Utilisateur supprimé</p>}
+							{selectedUser?.deleted_at && <p className="my-request__message-list__user__header__detail deleted" aria-label="Utilisateur supprimé">Utilisateur supprimé</p>}
 						</div>
 
 						{userDescription && <div>
-							<p className="my-request__message-list__user__header description">{selectedUser?.description ? selectedUser?.description : 'Pas de déscription'}</p>
+							<p className="my-request__message-list__user__header description" aria-label="Description de l'utilisateur">
+								{selectedUser?.description ? selectedUser.description : 'Pas de description'}
+							</p>
 						</div>
 						}
 					</div>
@@ -860,7 +883,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 				</div>
 
-				<div id="scrollableMessage" className="my-request__message-list__message">
+				<div id="scrollableMessage" className="my-request__message-list__message" aria-label='Message de la conversation'>
 
 					{Array.isArray(messageStore) && isUserMessageOpen &&
 						messageStore
@@ -868,7 +891,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
 							.map((message, index, array) => (
 								<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
-									{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
+									{index === array.length - 1 ? <div ref={endOfMessagesRef} aria-label="Dernier message visible" /> : null}
 									<div className={`content ${message.user_id === id ? 'me' : ''}`}>
 										{message.media[0].url && (
 											<div className="my-request__message-list__message__detail__image-container">
@@ -936,6 +959,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								<div
 									className="my-request__message-list__form__preview__container__remove"
 									onClick={() => handleRemove(index)}
+									aria-label='Supprimer le fichier'
 								>
 									X
 								</div>
@@ -946,22 +970,28 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						<MdAttachFile
 							className="my-request__message-list__form__label__attach"
 							onClick={() => document.getElementById('send-file')?.click()}
+							aria-label='Joindre un fichier'
 						/>
 						<FaCamera
 							className="my-request__message-list__form__label__camera"
 							onClick={() => document.getElementById('file-camera')?.click()}
+							aria-label='Prendre une photo'
+
 						/>
 						<TextareaAutosize
 							//key={messageValue || 'empty'}
+							id='messageInput'
 							className="my-request__message-list__form__label__input"
 							value={messageValue}
 							onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}
 							placeholder="Tapez votre message ici..."
+							aria-label='Tapez votre message'
 							maxLength={500}
 						/>
 						<MdSend
 							className="my-request__message-list__form__label__send"
 							onClick={() => document.getElementById('send-message')?.click()}
+							aria-label='Envoyer le message'
 						/>
 					</label>
 					<input
