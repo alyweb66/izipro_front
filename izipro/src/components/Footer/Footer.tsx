@@ -7,6 +7,7 @@ import { COOKIE_CONSENTS_MUTATION, UPDATE_COOKIE_CONSENTS_MUTATION, UPDATE_USER_
 import { useQueryCookieConsents, useQueryRules } from '../Hook/Query';
 import { CookieConsentsProps } from '../../Type/CookieConsents';
 import useHandleLogout from '../Hook/HandleLogout';
+import { ContactModal } from '../Hook/ContactModal';
 
 type ResponseCookieConsents = {
 	data: {
@@ -22,6 +23,7 @@ function Footer() {
 	const [isGetCookieConsents, setIsGetCookieConsents] = useState<boolean>(true);
 	const [clickCookie, setClickCookie] = useState<boolean>(false);
 	const [CGUModal, setCGUModal] = useState<boolean>(false);
+	const [contactModal, setContactModal] = useState<boolean>(false);
 	
 	//useRef
 	const isGetRulesRef = useRef<boolean>(false);
@@ -202,7 +204,7 @@ function Footer() {
 		<div>
 			<footer>
 				<a href="#" onClick={() => {setCGUModal(true), isGetRulesRef.current = true;}}>CGU</a>
-				<a href="#" >Contact</a>
+				<a href="#" onClick={() => setContactModal(true)} >Contact</a>
 				<a href="#" onClick={() => {setCookiesModal(true), setClickCookie(true);}}>Cookies</a>
 			</footer>
 
@@ -221,6 +223,10 @@ function Footer() {
 				handleAccept={handleAcceptCGU}
 				handleLogout={handleLogout}
 				loading={rulesLoading || updateUserLoading}
+			/>
+			<ContactModal
+				setIsOpenModal={setContactModal}
+				isOpenModal={contactModal}
 			/>
 		</div>
 	);
