@@ -3,22 +3,25 @@
 .my-conversation {
     // position for spinner
     position: relative;
-    width: 100%;
+   // width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: stretch;
     height: 81.31vh;
-    position: relative;
+   // position: relative;
+    background-color: transparent;
+
+  
 
     .my-conversation__list {
         overflow-y: auto;
-        scrollbar-width: thin;
+        scrollbar-width: none;
         width: 100%;
-        max-width: 30%;
+        max-width: 40%;
         margin: 1rem 0.1rem;
-        box-shadow: -5px 0 10px #6666661c,
+    /*     box-shadow: -5px 0 10px #6666661c,
             -5px 0 10px #ffffff17,
-            5px 0 10px #6666661c;
+            5px 0 10px #6666661c; */
 
         /* Pour WebKit/Blink (Chrome, Safari, etc.) */
         *::-webkit-scrollbar {
@@ -60,8 +63,26 @@
                     5px 0 10px #6666661c;
 
                 &.true {
-                    background-color: rgba(255, 0, 0, 0.068);
+                    
                     border: 1px solid red;
+
+                    background-color: #FFFFFF;
+                //background-color: #028cef1f;
+                border: 1px solid red;
+                border-radius: 0.5rem;
+                position: relative;
+
+                &::before {
+                    content: ""; 
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(255, 0, 0, 0.068); 
+                    border-radius: inherit; 
+                    z-index: 0; 
+                }
                 }
 
                 &.urgent {
@@ -245,15 +266,41 @@
             }
 
             .my-conversation__list__detail__item.false.selected {
-                background-color: #028cef1f;
+                background-color: #FFFFFF;
                 border: 2px solid v.$color-primary-blue;
                 border-radius: 0.5rem;
+                position: relative;
+
+                &::before {
+                    content: ""; 
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: #028cef1f; 
+                    border-radius: inherit; 
+                    z-index: 0; 
+                }
             }
 
             .my-conversation__list__detail__item.true.selected {
-                background-color: #028cef1f;
+                background-color: #FFFFFF;
                 border: 2px solid v.$color-primary-blue;
                 border-radius: 0.5rem;
+                position: relative;
+
+                &::before {
+                    content: ""; 
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: #028cef1f; 
+                    border-radius: inherit; 
+                    z-index: 0; 
+                }
             }
         }
 
@@ -266,9 +313,9 @@
         flex-direction: column;
         width: 100%;
         margin: 1rem 0.1rem;
-        box-shadow: -5px 0 10px #6666661c,
+       /*  box-shadow: -5px 0 10px #6666661c,
             -5px 0 10px #ffffff17,
-            5px 0 10px #6666661c;
+            5px 0 10px #6666661c; */
         max-width: 45%;
 
         &.loading {
@@ -276,8 +323,6 @@
         }
 
         .my-conversation__message-list__user {
-
-
 
             .my-conversation__message-list__user__header {
                 width: 100%;
@@ -289,6 +334,8 @@
                 .my-conversation__message-list__user__header__detail {
                     display: flex;
                     align-items: center;
+                    background-color: white;
+                    border-radius: 8px 8px 0 0;
 
                     &.return {
                         display: none;
@@ -299,9 +346,8 @@
                         border-radius: 0.5rem;
                         width: 50px;
                         height: 50px;
-                        box-shadow: -5px 0 10px #66666642,
-                            -5px 0 10px #ffffff23,
-                            5px 0 10px #66666657;
+                        box-shadow:  5px 5px 10px #ebebeb,
+             -5px -5px 10px #ffffff;
                     }
 
                     &.name {
@@ -314,12 +360,14 @@
 
                     &.title {
                         box-shadow: none;
-                        margin: auto 0.3rem auto 0.5rem;
+                        margin: auto 0rem auto 0rem;
                         background-color: transparent;
                         font-size: 1.3rem;
                         color: v.$color-primary-blue;
                         font-weight: 500;
-
+                        background-color: white;
+                        padding-left: 1rem;
+                        border-radius: 0 ;
                     }
                 }
 
@@ -342,10 +390,19 @@
         .my-conversation__message-list__message {
             display: flex;
             flex-direction: column;
-            margin: 0rem 1rem;
+            margin: 0rem;
+            padding: 0 1rem;
             overflow-y: auto;
             scrollbar-width: none;
             flex-grow: 1;
+            position: relative;
+           z-index: 1;
+            
+            /* .root.no-background-image::before {
+              background: none !important;
+              z-index: -1;
+            }  */
+            
 
             .my-conversation__message-list__message::-webkit-scrollbar {
                 display: none;
@@ -468,6 +525,22 @@
                 }
             }
         }
+        .my-conversation__message-list__message::before {
+
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-attachment: fixed;
+            background: url('/izipro-logo.svg') no-repeat center;
+            //background-size: contain; 
+            opacity: 0.04; 
+            z-index: -1;
+            pointer-events: none;
+        
+        }
 
         .my-conversation__message-list__form {
             display: flex;
@@ -538,6 +611,7 @@
             font-size: 1rem;
             font-weight: 500;
             color: v.$color-primary-orange;
+            border-radius: 0 0 10px 10px;;
 
             .my-conversation__message-list__form__label__attach {
                 font-size: 2rem;
@@ -590,7 +664,13 @@
     }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
+    .my-conversation {
+    justify-content: center;
+    }
+}
+
+@media (max-width: 700px) {
     .my-conversation {
         width: 100%;
         max-height: 100%;
@@ -692,110 +772,10 @@
 }
 
 
-
 @include v.picture-modal;
 
-
-/* .react-modal {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    position: relative;
-    margin: 0;
-
-    .react-modal__button {
-        display: none;
-    }
-
-    .react-modal__button-close {
-        position: absolute;
-        top: 0;
-        right: 0;
-        z-index: 1;
-        margin: 1rem 5rem 0.5rem auto;
-        font-size: 4rem;
-        color: v.$color-primary-orange;
-        cursor: pointer;
-    }
-
-    .react-modal__picture {
-        display: flex;
-        justify-content: center;
-        object-fit: contain;
-        margin: auto;
-        border-radius: 0.5rem;
-        max-width: 100%;
-        max-height: 100%;
-
-
-        &.button {
-            display: none;
-        }
-
-        &.back {
-            color: v.$color-primary-orange;
-        }
-
-        &.forward {
-            color: v.$color-primary-blue;
-        }
-
-        &.back,
-        &.forward {
-            font-size: 7rem;
-            cursor: pointer;
-        }
-
-        &.img {
-            margin: 1rem 0;
-            width: 100%;
-        }
-
-
-    }
-
-
-
-} */
 
 @media (max-width: 1200px) {
     @include v.picture-modal-querie;
 }
 
-/* .react-modal {
-
-        .react-modal__button-close {
-            margin: 0;
-            position: absolute;
-            top: 10px;
-            right: 0px;
-        }
-
-        .react-modal__picture {
-            position: relative;
-            display: inline-block;
-
-            &.back {
-                left: 0px;
-            }
-
-            &.forward {
-                right: 0px;
-            }
-
-            &.back,
-            &.forward {
-                position: absolute;
-                top: 50%;
-                transform: translateY(-50%);
-                cursor: pointer;
-                z-index: 10;
-                font-size: 5rem;
-            }
-
-            &.img {
-                display: block;
-            }
-
-        }
-    } */

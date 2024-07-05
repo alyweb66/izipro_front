@@ -117,7 +117,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 100);
 
-
 	// useEffect to sort the requests by date and update the subscription
 	useEffect(() => {
 		if (myRequestsStore) {

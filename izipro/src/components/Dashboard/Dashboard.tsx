@@ -74,6 +74,7 @@ function Dashboard() {
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
+	console.log('isOpened', isOpen);
 
 	//*state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
@@ -768,7 +769,10 @@ function Dashboard() {
 
 	// burger menu
 	const toggleMenu = () => {
-		setIsOpen(!isOpen);
+		// only if screen is less than 480px
+		if (window.innerWidth < 480) {
+			setIsOpen(!isOpen);
+		}
 	};
 
 	// function to redirect to home page when session is expired by serveur
@@ -795,45 +799,42 @@ function Dashboard() {
 					</div>
 				</button>
 				<ul className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}>
-					<div className="dashboard__nav__menu__content">
-						<li
-							className={`dashboard__nav__menu__content__tab ${selectedTab === 'Request' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('Request'), setIsOpen(!isOpen); }}>Demande
-						</li>
-					</div>
-					<div className="dashboard__nav__menu__content">
-						<li
-							className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My requests'), setIsOpen(!isOpen); }}>Mes demandes
-						</li>
-						{viewedMessageState.length > 0 && <ClientRequestBadge count={viewedMessageState.length} />}
-					</div>
+					<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Request' ? 'active' : ''}`}
+						onClick={() => { setSelectedTab('Request'); setIsOpen(!isOpen); }}>DEMANDE
+						<div className="indicator"></div>
+					</li>
+					<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
+						onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); }}>
+						<div className="tab-content">
+							<span>MES DEMANDES</span>
+							{viewedMessageState.length > 0 && <ClientRequestBadge count={viewedMessageState.length} />}
+						</div>
+						<div className="indicator"></div>
+					</li>
 					{role === 'pro' &&
-						<div className="dashboard__nav__menu__content">
-							<li
-								className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
-								onClick={() => { setSelectedTab('Client request'), setIsOpen(!isOpen); }}>Client
-							</li>
+						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
+							onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); }}>CLIENT
 							{notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />}
-						</div>
+							<div className="indicator"></div>
+						</li>
 					}
 					{role === 'pro' &&
-						<div className="dashboard__nav__menu__content">
-							<li
-								className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
-								onClick={() => { setSelectedTab('My conversations'), setIsOpen(!isOpen); }}>Mes échanges
-							</li>
-							{viewedMyConversationState.length > 0 && <ClientRequestBadge count={viewedMyConversationState.length} />}
-						</div>
-					}
-					<div className="dashboard__nav__menu__content">
-						<li
-							className={`dashboard__nav__menu__content__tab ${selectedTab === 'My profile' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My profile'), setIsOpen(!isOpen); }}>Mon compte
+						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
+							onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }}>
+							<div className="tab-content">
+								<span>MES CONVERSATIONS</span>
+								{viewedMyConversationState.length > 0 && <ClientRequestBadge count={viewedMyConversationState.length} />}
+							</div>
+							<div className="indicator"></div>
 						</li>
-					</div>
+					}
+					<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My profile' ? 'active' : ''}`}
+						onClick={() => { setSelectedTab('My profile'); setIsOpen(!isOpen); }}>MON COMPTE
+						<div className="indicator"></div>
+					</li>
 				</ul>
 			</nav>
+
 
 			<div className="dashboard__content">
 

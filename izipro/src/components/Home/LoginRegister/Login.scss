@@ -81,6 +81,7 @@
 
       &.button {
         max-width: 50%;
+        width: 50%;
         margin-bottom: 1rem;
 
       }
@@ -180,7 +181,10 @@
 
       &.button {
         @include v.orange-button;
+        margin: auto;
         margin-top: 1rem;
+
+        width: 50%;
       }
 
       @media (max-width: 800px) {

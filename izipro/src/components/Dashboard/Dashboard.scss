@@ -8,52 +8,137 @@
     font-family: v.$font;
     // height: 92vh;
 
-    .dashboard__nav {
+    .indicator {
+        display: none;
+        position: absolute;
+        bottom: -3px;
 
         width: 100%;
-        background-color: white;
+
+        height: 3px;
+        background: linear-gradient(130deg, v.$color-primary-blue, v.$color-primary-orange);
+        border-radius: 5px;
+        transition: 0.2s ease;
+
+    }
+
+
+    .dashboard__nav {
+        width: 100%;
+        max-width: 100%;
+        margin: auto;
 
         .dashboard__nav__burger-menu {
-            display: none
+            display: none;
         }
 
         .dashboard__nav__menu {
-            width: 100%;
-            padding: 0;
-            color: v.$color-primary-blue;
             display: flex;
             justify-content: space-around;
-            font-size: 1.5rem;
-            font-weight: 500;
-            cursor: pointer;
-            flex-wrap: wrap;
+            padding: 0;
+            position: relative;
 
-            .dashboard__nav__menu__content {
-                list-style-type: none;
-                display: flex;
+            .dashboard__nav__menu__content__tab {
+                position: relative;
+                //width: 50%;
+                //max-width: 80%;
+                display: table-cell;
+                text-align: center;
+                margin-bottom: 0.5rem;
+                color: v.$color-primary-blue;
+                text-decoration: none;
+                font-family: v.$font;
+                font-weight: 500;
+                font-size: 1.3rem;
+                padding: 10px 10px 0 10px;
+                transition: 0.2s ease color;
 
-                .dashboard__nav__menu__content__tab {
-                    margin: 0;
-                    padding: 0.5rem 0.2rem;
-                    border-radius: 0.5rem 0.5rem 0 0;
-                    transition: 0.1s;
-                    transition: transform 0.1s ease;
+                .tab-content {
+                    display: flex;
+                    align-items: center;
+                    align-items: flex-start;
+                }
 
-                    &:hover {
-                        transform: scale(1.2);
-                        font-size: 1.5rem;
-                        color: v.$color-primary-orange;
-                    }
+                .notification-badge {
+                    margin-top: 0;
+                    padding-bottom: 1rem;
+                }
 
-                    &.active {
-                        font-size: 1.8rem;
-                        color: v.$color-primary-orange;
+                &:hover {
+                    color: v.$color-primary-orange;
+                    cursor: pointer;
 
-                        &:hover {
-                            transform: none;
-                        }
+                    .indicator {
+                        display: block;
                     }
                 }
+
+                &.active {
+                    color: v.$color-primary-orange;
+
+                    .indicator {
+                        display: block;
+                    }
+
+                    /*  &:before,
+                    &:after {
+                        content: "";
+                        position: absolute;
+                        border-radius: 50%;
+                        transform: scale(1);
+                        transition: 0.2s ease transform;
+                    }
+
+                    &:before {
+                        top: 0;
+                        left: 10px;
+                        width: 6px;
+                        height: 6px;
+                        background-color: v.$color-primary-orange;
+                    }
+
+                    &:after {
+                        top: 5px;
+                        left: 18px;
+                        width: 4px;
+                        height: 4px;
+                        background-color: v.$color-primary-blue;
+                    } */
+
+                }
+            }
+
+
+
+            .dashboard__nav__menu__content__tab:before,
+            .dashboard__nav__menu__content__tab:after {
+                content: "";
+                position: absolute;
+                border-radius: 50%;
+                transform: scale(0);
+                transition: 0.2s ease transform;
+            }
+
+            .dashboard__nav__menu__content__tab:before {
+                top: 0;
+                left: 10px;
+                width: 6px;
+                height: 6px;
+                background-color: v.$color-primary-orange;
+            }
+
+            .dashboard__nav__menu__content__tab:after {
+                top: 5px;
+                left: 18px;
+                width: 4px;
+                height: 4px;
+                background-color: v.$color-primary-blue;
+            }
+
+
+            .dashboard__nav__menu__content__tab:hover:before,
+            .dashboard__nav__menu__content__tab:hover:after {
+                transform: scale(1);
             }
 
         }
@@ -61,7 +146,22 @@
 
     .dashboard__content {
         // position: relative;
-        background-color: white;
+        background-color: transparent;
+
+    }
+}
+
+@media (max-width: 780px) {
+    .dashboard {
+        .dashboard__nav {
+            .dashboard__nav__menu {
+
+
+                .dashboard__nav__menu__content__tab {
+                    font-size: 0.9rem;
+                }
+            }
+        }
 
     }
 }
@@ -120,28 +220,32 @@
                     left: 0;
                     border-radius: 0 0 0.5rem 0.5rem;
                     box-shadow: 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.1);
-                    padding: 0.5rem;
-                    font-size: 1.5rem;
+                    padding: 1rem 0.5rem;
                     font-weight: 500;
                     cursor: pointer;
                     flex-wrap: wrap;
-
-                    .dashboard__nav__menu__tab {
+                    
+                    .dashboard__nav__menu__content__tab {
                         margin: 0;
-                        padding: 0.5rem 1rem;
+                        font-size: 1.3rem;
+                        padding: 0.5rem 1rem 0 1rem;
                         border-radius: 0.5rem 0.5rem 0 0;
                         transition: 0.1s;
                         list-style-type: none;
                         transition: transform 0.1s ease;
 
                         &:hover {
-                            transform: scale(1.2);
+                            .indicator {
+                                display: none;
+                            }
+
+                            /* transform: scale(1.2);
                             font-size: 1.5rem;
-                            color: v.$color-primary-orange;
+                            color: v.$color-primary-orange; */
                         }
 
                         &.active {
-                            font-size: 1.8rem;
+                            font-size: 1.3rem;
                             color: v.$color-primary-orange;
 
                             &:hover {
