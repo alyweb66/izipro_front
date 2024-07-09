@@ -1,4 +1,5 @@
 @use '../../../styles/variables' as v;
+@use '../../../styles/mixins' as m;
 
 @keyframes blink {
     0% {
@@ -265,7 +266,7 @@
         }
 
         .request__form__button {
-            @include v.blue-button;
+            @include m.blue-button;
             margin: 1rem auto;
         }
 

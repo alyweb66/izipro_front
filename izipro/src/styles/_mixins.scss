@@ -1,39 +1,20 @@
-$color: #666;
-$color-primary-blue: #028eef;
-$color-secondary-blue: #3da4ec;
-$color-chat-blue: #7bbbe9;
-$color-chat-orange: #f5bd86;
-$color-primary-orange: #f37c04;
-$color-secondary-orange: #ffb263;
-$color-light-blue: #3da3ec2a;
-$color-darkest: #101010;
-$color-lightest: #fff;
-$color-validation: green;
-$color-error: red;
-$color-deleted-grey: rgba(128, 128, 128, 0.267);
+@use './variables' as v;
 
-$font: 'fredoka', sans-serif;
-$font-weight: 300;
-
-$font-title-weight: 500;
-
-$gutter: 1.5rem;
-
-/* @mixin blue-button {
+@mixin blue-button {
   margin: auto;
   max-width: 50%;
   margin-top: 1rem;
   padding: 0.5rem 1.5rem;
   border-radius: 0.5rem;
   border: none;
-  background-color: $color-primary-blue;
+  background-color: v.$color-primary-blue;
   color: white;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
 
   &:hover {
-    background: $color-primary-orange;
+    background: v.$color-primary-orange;
   }
 }
 
@@ -47,14 +28,14 @@ $gutter: 1.5rem;
   padding: 0.5rem 1.5rem;
   border-radius: 0.5rem;
   border: none;
-  background-color: $color-primary-orange;
+  background-color: v.$color-primary-orange;
   color: white;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
 
   &:hover {
-    background: $color-primary-blue;
+    background: v.$color-primary-blue;
   }
 }
 
@@ -64,7 +45,7 @@ $gutter: 1.5rem;
     height: 50px;
     border: none;
     border-radius: 50%;
-    background-color: rgb(27, 27, 27);
+    background-color: v.$color-primary-blue;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -72,19 +53,20 @@ $gutter: 1.5rem;
     cursor: pointer;
     position: relative;
     transition-duration: .3s;
-    box-shadow: 2px 2px 10px ;
+    margin-bottom: 0.5rem;
+    //box-shadow: 2px 2px 10px ;
   }
 
   .svgIcon {
-    fill: rgb(214, 178, 255);
+    fill: white;
   }
 
   .icon2 {
     width: 18px;
     height: 5px;
-    border-bottom: 2px solid rgb(182, 143, 255);
-    border-left: 2px solid rgb(182, 143, 255);
-    border-right: 2px solid rgb(182, 143, 255);
+    border-bottom: 2px solid white;
+    border-left: 2px solid white;
+    border-right: 2px solid white;
   }
 
   .tooltip {
@@ -116,20 +98,20 @@ $gutter: 1.5rem;
     transition-duration: .3s;
   }
 
-  .Btn:hover .tooltip {
-    opacity: 1;
-    transition-duration: .3s;
-  }
+  /* .Btn:hover .tooltip {
+      opacity: 1;
+      transition-duration: .3s;
+    } */
 
   .Btn:hover {
-    background-color: rgb(150, 94, 255);
+    background-color: v.$color-primary-orange;
     transition-duration: .3s;
   }
 
   .Btn:hover .icon2 {
-    border-bottom: 2px solid rgb(235, 235, 235);
-    border-left: 2px solid rgb(235, 235, 235);
-    border-right: 2px solid rgb(235, 235, 235);
+    border-bottom: 2px solid white;
+    border-left: 2px solid white;
+    border-right: 2px solid white;
   }
 
   .Btn:hover .svgIcon {
@@ -172,7 +154,7 @@ $gutter: 1.5rem;
       z-index: 1;
       margin: 1rem 5rem 0.5rem auto;
       font-size: 4rem;
-      color: #f37c04;
+      color: v.$color-primary-orange;
       cursor: pointer;
     }
 
@@ -191,11 +173,11 @@ $gutter: 1.5rem;
       }
 
       &.back {
-        color: #f37c04;
+        color: v.$color-primary-orange;
       }
 
       &.forward {
-        color: #028eef;
+        color: v.$color-primary-blue;
       }
 
       &.back,
@@ -275,4 +257,4 @@ $gutter: 1.5rem;
     border-radius: inherit;
     z-index: 0;
   }
-} */
+}

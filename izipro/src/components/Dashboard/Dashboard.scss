@@ -1,4 +1,5 @@
 @use '../../styles/variables' as v;
+@use '../../styles/mixins' as m;
 
 .dashboard {
     position: relative;
@@ -6,7 +7,16 @@
     display: flex;
     flex-direction: column;
     font-family: v.$font;
-    // height: 92vh;
+    height: 92vh;
+
+    .dashboard__content {
+        flex: 1;
+        // position: relative;
+        background-color: transparent;
+        //height: 100%;
+        overflow: auto;
+
+    }
 
     .indicator {
         display: none;
@@ -23,13 +33,28 @@
     }
 
 
-    .dashboard__nav {
+    .__nav {
         width: 100%;
         max-width: 100%;
-        margin: auto;
+        margin: 1rem auto;
 
-        .dashboard__nav__burger-menu {
+        .dashboard__nav__burgerSelected {
             display: none;
+        }
+
+        .__burger {
+
+            .__container {
+                display: none;
+
+                .logo {
+                    display: none;
+                }
+
+                .__menu {
+                    display: none;
+                }
+            }
         }
 
         .dashboard__nav__menu {
@@ -40,8 +65,6 @@
 
             .dashboard__nav__menu__content__tab {
                 position: relative;
-                //width: 50%;
-                //max-width: 80%;
                 display: table-cell;
                 text-align: center;
                 margin-bottom: 0.5rem;
@@ -144,62 +167,110 @@
         }
     }
 
-    .dashboard__content {
-        // position: relative;
-        background-color: transparent;
 
-    }
 }
 
 @media (max-width: 780px) {
     .dashboard {
-        .dashboard__nav {
+       /*  .dashboard__content {
+            height: 100%;
+        } */
+        .__nav {
             .dashboard__nav__menu {
-
-
                 .dashboard__nav__menu__content__tab {
                     font-size: 0.9rem;
+                
                 }
             }
         }
-
     }
 }
 
+/* @media (max-height: 700px) {
+    .dashboard {
+        .dashboard__content {
+            height: 100vh;
+
+        }
+    }
+} */
+
+
 @media (max-width: 480px) {
     .dashboard {
-        .dashboard__nav {
+        height: 100vh;
+     
+        .__nav {
             display: flex;
             justify-content: center;
+            width: 100%;
+            margin: 0;
+            z-index: 11;
 
-            .dashboard__nav__burger-menu {
+
+            .dashboard__nav__burgerSelected {
+                display: block;
+                color: v.$color-primary-orange;
+                font-size: 1rem;
+                font-family: v.$font;
+                font-weight: 500;
+                text-align: center;
+
+            }
+
+            .__burger {
                 width: 100%;
                 display: flex;
-                border: none;
-                background-color: transparent;
-                cursor: pointer;
+                flex-direction: column;
 
-                .burger-icon {
-                    width: 100%;
-                    font-size: 2rem;
-                    margin: 1rem;
+
+                .__container {
                     display: flex;
-                    flex-direction: column;
-                    align-items: center;
+                    flex-direction: row;
+                    width: 100%;
+                    // justify-content: space-between;
 
+                    .__logo {
 
-                    .burger-icon__line {
-                        width: 40%;
-                        height: 0.2rem;
-                        margin: 0.2rem;
-                        background-color: v.$color-primary-orange;
+                        margin: 0.5rem 0 0 1rem;
+                        display: inline-block;
+                        width: 50px;
+                        height: 50px;
                     }
 
-                    .burger-icon__middle {
-                        width: 30%;
-                        height: 0.2rem;
-                        margin: 0.2rem;
-                        background-color: v.$color-primary-blue;
+                    .__menu {
+                        width: 100%;
+                        display: flex;
+                        border: none;
+                        background-color: transparent;
+                        cursor: pointer;
+
+                        .burger-icon {
+                            width: 100%;
+                            font-size: 2rem;
+                            margin: 1rem;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+
+
+                            .burger-icon__line {
+                                width: 40%;
+                                height: 0.2rem;
+                                margin: 0.2rem;
+                                background-color: v.$color-primary-orange;
+                                border-radius: 1rem;
+                            }
+
+                            .burger-icon__middle {
+                                width: 30%;
+                                height: 0.2rem;
+                                margin: 0.2rem;
+                                background-color: v.$color-primary-blue;
+                                border-radius: 1rem;
+                            }
+
+                        }
                     }
 
                 }
@@ -224,7 +295,7 @@
                     font-weight: 500;
                     cursor: pointer;
                     flex-wrap: wrap;
-                    
+
                     .dashboard__nav__menu__content__tab {
                         margin: 0;
                         font-size: 1.3rem;

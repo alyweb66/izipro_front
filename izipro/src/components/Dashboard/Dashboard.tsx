@@ -6,10 +6,12 @@ import { useMutation } from '@apollo/client';
 // @ts-expect-error turf is not typed
 import * as turf from '@turf/turf';
 
+
 // components 
 import Account from './Account/Account';
 import Request from './Request/Request';
 import MyRequest from './MyRequest/MyRequest';
+import Logout from '../Header/Logout/Logout';
 import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import Footer from '../Footer/Footer';
@@ -35,6 +37,7 @@ import { useMyConversationSubscriptions } from '../Hook/MyConversationSubscripti
 import { useLogoutSubscription } from '../Hook/LogoutSubscription';
 import useHandleLogout from '../Hook/HandleLogout';
 
+
 // Mutation
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
 
@@ -53,6 +56,7 @@ import { messageDataStore, myMessageDataStore } from '../../store/message';
 import './Dashboard.scss';
 
 
+
 type useQueryUserConversationsProps = {
 	loading: boolean;
 	data: { user: { requestsConversations: RequestProps[] } };
@@ -66,6 +70,7 @@ function Dashboard() {
 
 	// State
 	const [isOpen, setIsOpen] = useState(false);
+	const [isFooter, setIsFooter] = useState(true);
 	const [selectedTab, setSelectedTab] = useState('');
 	const [newUserId, setNewUserId] = useState<number[]>([]);
 	const [viewedMessageState, setViewedMessageState] = useState<number[]>([]);
@@ -157,6 +162,26 @@ function Dashboard() {
 	} else {
 		isLogged = JSON.parse(decodeData || '{}');
 	}
+
+	// useEffect to check the size of the window
+	useEffect(() => {
+		const handleResize = () => {
+			if (window.innerWidth < 480) {
+				setIsFooter(false);
+			} else {
+				setIsFooter(true);
+			}
+		};
+
+		// add event listener to check the size of the window
+		window.addEventListener('resize', handleResize);
+
+		// 	call the function to check the size of the window
+		handleResize();
+
+		// remove the event listener when the component unmount
+		return () => window.removeEventListener('resize', handleResize);
+	}, []); // Le tableau vide assu
 
 	// function to check if user is logged in
 	useEffect(() => {
@@ -784,98 +809,113 @@ function Dashboard() {
 	};
 
 	return (
-		<div className='dashboard'>
-			{userDataLoading
-				|| notViewedConversationLoading
-				|| myConversationIdsLoading
+		<>
+			<div className='dashboard'>
+				{userDataLoading
+					|| notViewedConversationLoading
+					|| myConversationIdsLoading
 
-				&& <Spinner />}
-			<nav className="dashboard__nav">
-				<button className="dashboard__nav__burger-menu" onClick={toggleMenu}>
-					<div className='burger-icon'>
-						<div className="burger-icon__line"></div>
-						<div className="burger-icon__middle"></div>
-						<div className="burger-icon__line"></div>
-					</div>
-				</button>
-				<ul className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}>
-					<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Request' ? 'active' : ''}`}
-						onClick={() => { setSelectedTab('Request'); setIsOpen(!isOpen); }}>DEMANDE
-						<div className="indicator"></div>
-					</li>
-					<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
-						onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); }}>
-						<div className="tab-content">
-							<span>MES DEMANDES</span>
-							{viewedMessageState.length > 0 && <ClientRequestBadge count={viewedMessageState.length} />}
+					&& <Spinner />}
+				<nav className="__nav">
+					<div className="__burger" >
+						<div className="__container">
+							<img className="__logo" src="/izipro-logo.svg" alt="Izipro logo" />
+							<button className="__menu" onClick={toggleMenu}>
+								<div className='burger-icon'>
+									<div className="burger-icon__line"></div>
+									<div className="burger-icon__middle"></div>
+									<div className="burger-icon__line"></div>
+								</div>
+							</button>
+							{isLogged && <Logout />}
 						</div>
-						<div className="indicator"></div>
-					</li>
-					{role === 'pro' &&
-						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); }}>CLIENT
-							{notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />}
+						<span className="dashboard__nav__burgerSelected">{
+							selectedTab === 'Request' ? 'DEMANDE' : ''
+								|| selectedTab === 'My requests' ? 'MES DEMANDES' : ''
+									|| selectedTab === 'Client request' ? 'CLIENT' : ''
+										|| selectedTab === 'My conversations' ? 'MES CONVERSATIONS' : ''
+											|| selectedTab === 'My profile' ? 'MON COMPTE' : ''
+						}</span>
+					</div>
+					<ul className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}>
+						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Request' ? 'active' : ''}`}
+							onClick={() => { setSelectedTab('Request'); setIsOpen(!isOpen); }}>DEMANDE
 							<div className="indicator"></div>
 						</li>
-					}
-					{role === 'pro' &&
-						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }}>
+						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
+							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); }}>
 							<div className="tab-content">
-								<span>MES CONVERSATIONS</span>
-								{viewedMyConversationState.length > 0 && <ClientRequestBadge count={viewedMyConversationState.length} />}
+								<span>MES DEMANDES</span>
+								{viewedMessageState.length > 0 && <ClientRequestBadge count={viewedMessageState.length} />}
 							</div>
 							<div className="indicator"></div>
 						</li>
-					}
-					<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My profile' ? 'active' : ''}`}
-						onClick={() => { setSelectedTab('My profile'); setIsOpen(!isOpen); }}>MON COMPTE
-						<div className="indicator"></div>
-					</li>
-				</ul>
-			</nav>
+						{role === 'pro' &&
+							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
+								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); }}>CLIENT
+								{notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />}
+								<div className="indicator"></div>
+							</li>
+						}
+						{role === 'pro' &&
+							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
+								onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }}>
+								<div className="tab-content">
+									<span>MES CONVERSATIONS</span>
+									{viewedMyConversationState.length > 0 && <ClientRequestBadge count={viewedMyConversationState.length} />}
+								</div>
+								<div className="indicator"></div>
+							</li>
+						}
+						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My profile' ? 'active' : ''}`}
+							onClick={() => { setSelectedTab('My profile'); setIsOpen(!isOpen); }}>MON COMPTE
+							<div className="indicator"></div>
+						</li>
+						{!isFooter && <Footer />}
+					</ul>
+				</nav>
 
 
-			<div className="dashboard__content">
+				<div className="dashboard__content">
 
-				{selectedTab === 'Request' && <Request />}
-				{selectedTab === 'My requests' && <MyRequest
-					setIsHasMore={setIsMyRequestHasMore}
-					isHasMore={isMyRequestHasMore}
-					conversationIdState={conversationIdState}
-					setConversationIdState={setConversationIdState}
-					selectedRequest={selectedRequest}
-					setSelectedRequest={setSelectedRequest}
-					newUserId={newUserId}
-					setNewUserId={setNewUserId}
-				/>}
-				{selectedTab === 'My conversations' && <MyConversation
-					isHasMore={isMyConversationHasMore}
-					setIsHasMore={setIsMyConversationHasMore}
-					offsetRef={myConversationOffsetRef}
-					conversationIdState={myConversationIdState}
-					setConversationIdState={setMyConversationIdState}
-					clientMessageSubscription={clientMessageSubscription}
-				/>}
-				{selectedTab === 'My profile' && <Account />}
-				{selectedTab === 'Client request' && <ClientRequest
-					offsetRef={clientRequestOffset}
-					setIsHasMore={setIsClientRequestHasMore}
-					isHasMore={isCLientRequestHasMore}
-					onDetailsClick={handleMyConvesationNavigate}
-					RangeFilter={RangeFilter}
-				/>}
+					{selectedTab === 'Request' && <Request />}
+					{selectedTab === 'My requests' && <MyRequest
+						setIsHasMore={setIsMyRequestHasMore}
+						isHasMore={isMyRequestHasMore}
+						conversationIdState={conversationIdState}
+						setConversationIdState={setConversationIdState}
+						selectedRequest={selectedRequest}
+						setSelectedRequest={setSelectedRequest}
+						newUserId={newUserId}
+						setNewUserId={setNewUserId}
+					/>}
+					{selectedTab === 'My conversations' && <MyConversation
+						isHasMore={isMyConversationHasMore}
+						setIsHasMore={setIsMyConversationHasMore}
+						offsetRef={myConversationOffsetRef}
+						conversationIdState={myConversationIdState}
+						setConversationIdState={setMyConversationIdState}
+						clientMessageSubscription={clientMessageSubscription}
+					/>}
+					{selectedTab === 'My profile' && <Account />}
+					{selectedTab === 'Client request' && <ClientRequest
+						offsetRef={clientRequestOffset}
+						setIsHasMore={setIsClientRequestHasMore}
+						isHasMore={isCLientRequestHasMore}
+						onDetailsClick={handleMyConvesationNavigate}
+						RangeFilter={RangeFilter}
+					/>}
 
+				</div>
+
+				<ExpiredSessionModal
+					isExpiredSession={isExpiredSession}
+					setIsExpiredSession={setIsExpiredSession}
+					RedirectExpiredSession={RedirectExpiredSession}
+				/>
+				{isFooter && <Footer />}
 			</div>
-			<Footer />
-
-			<ExpiredSessionModal
-				isExpiredSession={isExpiredSession}
-				setIsExpiredSession={setIsExpiredSession}
-				RedirectExpiredSession={RedirectExpiredSession}
-			/>
-		</div>
-
+		</>
 
 	);
 }

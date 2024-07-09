@@ -44,7 +44,7 @@ import './MyConversation.scss';
 import RequestItem from '../../Hook/RequestHook'; // Assuming RequestItem is imported correctly
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaCamera } from 'react-icons/fa';
-import { MdAttachFile, MdKeyboardArrowLeft, MdSend } from 'react-icons/md';
+import { MdAttachFile, MdKeyboardArrowLeft, MdSend, MdKeyboardArrowRight, MdKeyboardArrowDown  } from 'react-icons/md';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 
@@ -107,8 +107,8 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [message, { loading: messageMutLoading, error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
-	const [deleteNotViewedConversation, {error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
-	
+	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
+
 	//query
 	const { loading: convLoading, fetchMore } = useQueryUserConversations(0, limit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
 	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
@@ -520,7 +520,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 					// remove the conversation id from the notViewedConversationStore
 					setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
 				});
-				
+
 				if (deleteNotViewedConversationError) {
 					throw new Error('Error updating conversation');
 				}
@@ -550,9 +550,9 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	// Function to remove viewed conversation
 	const handleViewedMessage = (convId: number) => {
-		
+
 		if (selectedRequest && notViewedConversationStore?.some(id => id === convId)) {
-			
+
 			deleteNotViewedConversation({
 				variables: {
 					input: {
@@ -570,8 +570,9 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 				}
 			});
 		}
-		
+
 	};
+console.log('selectedRequest', selectedRequest);
 
 	return (
 		<div className="my-conversation">
@@ -579,7 +580,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
 				{requestByDate && (
 					<div className="my-conversation__list__detail" >
-					
+
 						{request && request.id > 0 &&
 							<RequestItem
 								request={request}
@@ -587,7 +588,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 								handleViewedMessage={handleViewedMessage}
 								setIsMessageOpen={setIsMessageOpen}
 								resetRequest={resetRequest}
-								selectedRequest={selectedRequest!} 
+								selectedRequest={selectedRequest!}
 								setSelectedRequest={setSelectedRequest}
 								setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
 								isMessageExpanded={isMessageExpanded}
@@ -598,14 +599,14 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 							/>
 						}
 						{requestByDate.map((requestByDate, index) => (
-							<RequestItem 
+							<RequestItem
 								key={requestByDate.id}
 								index={index}
 								notViewedConversationStore={notViewedConversationStore}
 								requestByDate={requestByDate}
 								handleViewedMessage={handleViewedMessage}
 								setIsMessageOpen={setIsMessageOpen}
-								selectedRequest={selectedRequest!} 
+								selectedRequest={selectedRequest!}
 								setSelectedRequest={setSelectedRequest}
 								setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
 								isMessageExpanded={isMessageExpanded}
@@ -621,7 +622,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 				<div className="my-conversation__list__fetch-button">
 					{isHasMore ? (<button
 						className="Btn"
-						onClick={(event) => {	
+						onClick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
 							addRequest();
@@ -675,6 +676,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 									</p>
 								)}
 
+								{selectedRequest.id > 0 && <span className="my-conversation__message-list__user__header__detail deployArrow">{requestTitle ? <MdKeyboardArrowDown />  : <MdKeyboardArrowRight /> }</span>}
 							</div>
 							{requestTitle && <div>
 								<p className="my-conversation__message-list__user__header__detail title">{selectedRequest.title}</p>
@@ -684,9 +686,10 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 				</div>
 				{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
-				<div id="scrollableMessageList" className="my-conversation__message-list__message">
-					
-					{Array.isArray(messageStore) &&
+				<div className="my-conversation__container">
+					<div className="my-conversation__background">
+						<div id="scrollableMessageList" className="my-conversation__message-list__message">
+							{Array.isArray(messageStore) &&
 							messageStore
 								.filter((message) => message.conversation_id === conversationIdState)
 								.map((message, index, array) => (
@@ -739,8 +742,9 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 									</div>
 								))
 
-					}
-
+							}
+						</div>
+					</div>
 				</div>
 
 				<form className="my-conversation__message-list__form" onSubmit={(event) => {

@@ -1,4 +1,5 @@
 @use '../../../styles/variables' as v;
+@use '../../../styles/mixins' as m;
 
 .client-request {
   width: 100%;
@@ -38,7 +39,7 @@
     .client-request__list__fetch-button {
       display: flex;
       justify-content: center;
-      @include v.fetch-button;
+      @include m.fetch-button;
     }
 
 
@@ -69,7 +70,7 @@
       }
 
       &.not-viewed {
-        @include v.not-viewed
+        @include m.not-viewed
       }
 
 
