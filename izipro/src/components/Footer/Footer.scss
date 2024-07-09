@@ -1,20 +1,32 @@
 @use '../../styles/variables' as v;
 
-footer {
-  display: flex;
-  justify-content: space-around;
-    background-color: v.$backgroud-color; 
-    padding: 10px; 
-    text-align: center; 
-    font-size: 14px; 
-    bottom: 0; 
-    width: 100%; 
+.footer {
+width: 100%;
+background-color: v.$backgroud-color;
 
-    .footer-link {
-      color: v.$color-secondary-blue; 
+  .footer-container {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+    bottom: 0;
+    width: 100%;
+
+    .footer-container__link {
+      color: v.$color-secondary-blue;
       font-size: 1rem;
 
     }
   }
-  
- 
+}
+
+@media (max-width: 480px) {
+  .footer {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    background-color: white;
+
+  }
+}

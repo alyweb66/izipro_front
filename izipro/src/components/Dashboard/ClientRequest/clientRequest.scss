@@ -7,19 +7,19 @@
   .client-request__list {
     position: relative;
     overflow-y: auto;
-    scrollbar-width: thin;
+    scrollbar-width: none;
     max-width: 80%;
     height: 88vh;
-    margin: 1rem auto;
-    box-shadow: -5px 0 10px #6666661c,
+    margin: 0rem auto;
+    /*   box-shadow: -5px 0 10px #6666661c,
       -5px 0 10px #ffffff17,
-      5px 0 10px #6666661c;
+      5px 0 10px #6666661c; */
 
     /* for WebKit browser */
-    .client-request__list::-webkit-scrollbar {
+    /*  .client-request__list::-webkit-scrollbar {
       width: 2px;
 
-    }
+    } */
 
 
     &.no-req {
@@ -231,23 +231,28 @@
 @media (max-width: 800px) {
   .client-request {
     .client-request__list {
+      max-width: 95%;
+      .client-request__list__detail {
+        
 
-      .client-request__list__detail__item {
 
-        &.message {
-          cursor: pointer;
-          display: block;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          background-color: v.$color-light-blue;
+        .client-request__list__detail__item {
+
+          &.message {
+            cursor: pointer;
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background-color: v.$color-light-blue;
+          }
+
+          &.expanded {
+            white-space: normal;
+            max-width: none;
+          }
+
         }
-
-        &.expanded {
-          white-space: normal;
-          max-width: none;
-        }
-
       }
     }
   }
