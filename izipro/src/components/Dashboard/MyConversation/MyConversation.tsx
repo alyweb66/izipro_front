@@ -52,6 +52,7 @@ import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 
 
 
+
 type useQueryUserConversationsProps = {
 	loading: boolean;
 	data: { user: { requestsConversations: RequestProps[] } };
@@ -572,7 +573,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		}
 
 	};
-console.log('selectedRequest', selectedRequest);
 
 	return (
 		<div className="my-conversation">

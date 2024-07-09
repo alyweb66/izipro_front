@@ -20,15 +20,6 @@
         // height: 95%;
         max-width: 40%;
         margin: 1rem 0.1rem;
-        /*     box-shadow: -5px 0 10px #6666661c,
-            -5px 0 10px #ffffff17,
-            5px 0 10px #6666661c; */
-
-        /* Pour WebKit/Blink (Chrome, Safari, etc.) */
-        *::-webkit-scrollbar {
-            width: 12px;
-            /* Largeur de la scrollbar */
-        }
 
         &.no-req {
             display: flex;

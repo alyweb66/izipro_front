@@ -915,6 +915,7 @@ function Dashboard() {
 				/>
 				{isFooter && <Footer />}
 			</div>
+			{/* {selectedTab === 'My profile' && <Footer />} */}
 		</>
 
 	);

@@ -7,9 +7,9 @@
     border-radius: 0.5rem;
     display: flex;
     flex-direction: column;
-    box-shadow: -5px 0 10px #6666661c,
+    /* box-shadow: -5px 0 10px #6666661c,
         -5px 0 10px #ffffff17,
-        5px 0 10px #6666661c;
+        5px 0 10px #6666661c; */
 
     .setting-account__subtitle {
         margin: 0.5rem 0.5rem;
@@ -67,9 +67,11 @@
             color: black;
 
             &.job {
-                box-shadow: -5px 0 10px #6666661c,
-                    -5px 0 10px #ffffff17,
-                    5px 0 10px #6666661c;
+                box-shadow: -5px 0 10px #66666610,
+                -5px 0 10px #ffffff05,
+                5px 0 10px #6666660e;
+                    background-color: white;
+                    border-radius: 0.5rem;
             }
 
             &.loading {
@@ -86,6 +88,10 @@
                 align-items: center;
                 justify-content: flex-end;
 
+            }
+
+            &.noJobs {
+                margin-left: 0.5rem;
             }
 
             .setting-account__form__list__delete__button {
@@ -161,4 +167,11 @@
             }
         }
     }
+}
+
+@media (max-width: 480px) {
+    .setting-account {
+        margin-top: 2rem;
+    }
+
 }
