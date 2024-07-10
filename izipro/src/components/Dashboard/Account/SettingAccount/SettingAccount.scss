@@ -30,7 +30,7 @@
             position: relative;
         }
 
-
+@include m.select;
 
         .setting-account__form__title {
             margin: 0 0 1rem 0;

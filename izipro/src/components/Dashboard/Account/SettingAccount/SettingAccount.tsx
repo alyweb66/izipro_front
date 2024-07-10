@@ -20,6 +20,7 @@ import Spinner from '../../../Hook/Spinner';
 // Styling imports
 import './SettingAccount.scss';
 import { motion, AnimatePresence } from 'framer-motion';
+import SelectBox from '../../../Hook/SelectBox';
 
 
 function SettingAccount() {
@@ -31,12 +32,15 @@ function SettingAccount() {
 	const role = userDataStore((state) => state.role);
 
 	// State
-	const [selectedCategory, setSelectedCategory] = useState('');
+	const [selectedCategory, setSelectedCategory] = useState(0);
 	const [wishListJob, setWishListJob] = useState<JobProps[]>([]);
 	const [selectedJob, setSelectedJob] = useState<JobProps[]>([]);
 	const [radius, setRadius] = useState(settings[0]?.range || 0);
 	const [message, setMessage] = useState('');
 	const [skip, setSkip] = useState(false);
+	const [categoriesState, setCategoriesState] = useState<CategoryPros[]>([]);
+	const [jobsState, setJobsState] = useState<JobProps[]>([]);
+	
 
 
 	// query
@@ -52,6 +56,28 @@ function SettingAccount() {
 		}
 		
 	}, [jobDataName, jobDataLoading]);
+
+	// Update jobs when category changes
+	useEffect(() => {
+		if (jobData) {
+			console.log('jobData', jobData.category.jobs);
+			
+			setJobsState(jobData.category.jobs);
+		}
+	}, [jobData]);
+
+	// Update categories when data is fetched
+	useEffect(() => {
+		if (categoriesData) {
+			setCategoriesState(categoriesData.categories);
+		}
+	}, [categoriesData]);
+
+	useEffect(() => {
+		if (selectedCategory) {
+			//setSelectedJob(0);
+		}
+	}, [selectedCategory]);
 
 	// mutation
 	const [createUserJob, { loading: userJobLoading, error: errorCreateUserJob }] = useMutation(USER_HAS_JOB_MUTATION);
@@ -173,9 +199,29 @@ function SettingAccount() {
 				<div className="setting-account">
 					<>
 						<form className={`setting-account__form ${jobLoading ? 'loading' : ''}`} onSubmit={handleSubmitJob}>
-							{jobLoading && <Spinner />}
+							{/* {jobLoading && <Spinner />} */}
 							<h1 className="setting-account__form__title">Vos métiers:</h1>
-							<select
+							<SelectBox
+								isSetting={true}
+								data={categoriesState}
+								selected={selectedCategory}
+								isCategory={true}
+								loading={categoryLoading}
+								setSelected={setSelectedCategory}
+							/>
+				
+							<SelectBox
+								isSetting={true}
+								isWishList={true}
+								wishListJob={wishListJob}
+								data={jobsState}
+								isCategory={false}
+								setWishListJob={setWishListJob}
+								loading={jobLoading}
+								
+							/>
+							
+							{/* 	<select
 								className="setting-account__form__select"
 								name="job"
 								id="job"
@@ -190,6 +236,7 @@ function SettingAccount() {
 
 								))}
 							</select>
+					
 							<select
 								className="setting-account__form__select"
 								name="job"
@@ -209,7 +256,7 @@ function SettingAccount() {
 									</option>
 								))}
 
-							</select>
+							</select> */}
 							<ul className="setting-account__form__list" >
 								<h2 className="setting-account__subtitle">Métiers séléctionné:</h2>
 								<AnimatePresence>

@@ -19,6 +19,7 @@
     position: relative;
     font-family: v.$font;
     height: 81vh;
+ 
 
     &.no-req {
         display: flex;
@@ -34,15 +35,19 @@
     }
 
     .request__form {
+        @include m.select;
         width: 80%;
         margin: auto;
         margin-top: 1rem;
         border-radius: 0.5rem;
         display: flex;
         flex-direction: column;
+        justify-content: center;
        /*  box-shadow: -5px 0 10px #6666661c,
             -5px 0 10px #ffffff17,
             5px 0 10px #6666661c; */
+
+          
 
         &.error {
             width: 100%;
@@ -108,6 +113,8 @@
                 margin-top: 0;
             }
         }
+
+       
 
         .request__form__select {
             width: 50%;

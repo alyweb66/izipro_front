@@ -56,7 +56,7 @@ export const useQueryCategory = () => {
 };
 
 // fetch jobs
-export const useQueryJobs = (selectedCategory: string) => {
+export const useQueryJobs = (selectedCategory: number) => {
 	
 	const { loading, error: jobError, data: jobData } = useQuery(GET_JOBS_BY_CATEGORY,
 		{

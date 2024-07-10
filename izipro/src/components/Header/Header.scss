@@ -14,12 +14,10 @@
         justify-content: center;
         align-items: center;
     
-
-
         &.image {
-            margin-top: 0.5rem;
-            width: 40px;
-            height: 40px;
+        
+            width: 60px;
+            height: 60px;
         }
 
         &.title {
@@ -27,7 +25,6 @@
             font-family: v.$font;
             font-weight: v.$font-title-weight;
             font-size: 2.3rem;
-
         }
     }
 }
