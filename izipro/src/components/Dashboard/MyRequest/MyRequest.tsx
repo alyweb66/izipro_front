@@ -35,7 +35,7 @@ import pdfLogo from '/logo/pdf-icon.svg';
 import logoProfile from '/logo/logo profile.jpeg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt, FaCamera } from 'react-icons/fa';
-import { MdSend, MdAttachFile, MdKeyboardArrowLeft } from 'react-icons/md';
+import { MdSend, MdAttachFile, MdKeyboardArrowLeft, MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
 import TextareaAutosize from 'react-textarea-autosize';
@@ -775,21 +775,24 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					)}
 				</div>
 			</div>
-			<div id="scrollableAnswer"
+			<div /* id="scrollableAnswer" */
 				className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''} ${conversationLoading ? 'loading' : ''}`}
-				aria-label="Liste des réponses">
+				aria-label="Liste des réponses"
+			>
 				{conversationLoading && <Spinner />}
-				<MdKeyboardArrowLeft
-					className="my-request__answer-list return"
-					onClick={() => {
-						setSelectedRequest(null),
-						setIsListOpen(true),
-						setIsAnswerOpen(false),
-						setIsMessageOpen(false);
-					}}
-					aria-label="Retour à la liste des demandes"
-				/>
-				{selectedRequest && <h2 className="my-request__answer-list title">{selectedRequest?.title}</h2>}
+				<div className="my-request__answer-list__header">
+					<MdKeyboardArrowLeft
+						className="my-request__answer-list__header return"
+						onClick={() => {
+							setSelectedRequest(null),
+							setIsListOpen(true),
+							setIsAnswerOpen(false),
+							setIsMessageOpen(false);
+						}}
+						aria-label="Retour à la liste des demandes"
+					/>
+					{selectedRequest && <h2 className="my-request__answer-list__header title">{selectedRequest?.title}</h2>}
+				</div>
 				{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
 				{userConvState && userConvState?.map((user: UserDataProps, index) => (
 					<div
@@ -869,6 +872,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								<p className="my-request__message-list__user__header__detail name">{selectedUser?.first_name} {selectedUser?.last_name}</p>
 							)}
 							{selectedUser?.deleted_at && <p className="my-request__message-list__user__header__detail deleted" aria-label="Utilisateur supprimé">Utilisateur supprimé</p>}
+							{selectedUser && selectedUser?.id > 0 && <span className="my-request__message-list__user__header__detail deployArrow">{userDescription ? <MdKeyboardArrowDown />  : <MdKeyboardArrowRight /> }</span>}
 						</div>
 
 						{userDescription && <div>
@@ -881,10 +885,10 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					{/* 	)} */}
 
 				</div>
-
-				<div id="scrollableMessage" className="my-request__message-list__message" aria-label='Message de la conversation'>
-
-					{Array.isArray(messageStore) && isUserMessageOpen &&
+				<div className="my-request__container">
+					<div className="my-request__background">
+						<div /* id="scrollableMessage" */ className="my-request__message-list__message" aria-label='Message de la conversation'>
+							{Array.isArray(messageStore) && isUserMessageOpen &&
 						messageStore
 							.filter((message) => message.conversation_id === conversationIdState)
 							.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
@@ -936,7 +940,9 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								</div>
 							))
 
-					}
+							}
+						</div>
+					</div>
 				</div>
 
 				<form className="my-request__message-list__form" onSubmit={(event) => {

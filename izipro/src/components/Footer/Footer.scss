@@ -2,7 +2,8 @@
 
 .footer {
 width: 100%;
-background-color: v.$backgroud-color;
+//background-color: rgba(224, 132, 11, 0.192);
+background-image: linear-gradient(to right, transparent 0%, rgba(224, 132, 11, 0.26) 10%, rgba(224, 132, 11, 0.26) 90%, transparent 100%);
 
   .footer-container {
     display: flex;
@@ -16,6 +17,7 @@ background-color: v.$backgroud-color;
     .footer-container__link {
       color: v.$color-secondary-blue;
       font-size: 1rem;
+      font-weight: 600;
 
     }
   }

@@ -678,8 +678,8 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 								{selectedRequest.id > 0 && <span className="my-conversation__message-list__user__header__detail deployArrow">{requestTitle ? <MdKeyboardArrowDown />  : <MdKeyboardArrowRight /> }</span>}
 							</div>
-							{requestTitle && <div>
-								<p className="my-conversation__message-list__user__header__detail title">{selectedRequest.title}</p>
+							{requestTitle && <div className="my-conversation__message-list__user__header__request">
+								<p className="my-conversation__message-list__user__header__request title">{selectedRequest.title}</p>
 							</div>}
 						</div>
 					)}
@@ -688,7 +688,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 				{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
 				<div className="my-conversation__container">
 					<div className="my-conversation__background">
-						<div id="scrollableMessageList" className="my-conversation__message-list__message">
+						<div /* id="scrollableMessageList" */ className="my-conversation__message-list__message">
 							{Array.isArray(messageStore) &&
 							messageStore
 								.filter((message) => message.conversation_id === conversationIdState)

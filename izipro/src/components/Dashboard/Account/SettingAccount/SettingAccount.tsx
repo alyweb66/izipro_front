@@ -1,5 +1,5 @@
 // React and React hooks
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Apollo Client and GraphQL mutations
 import { useMutation } from '@apollo/client';

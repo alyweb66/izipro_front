@@ -24,6 +24,7 @@ import { FaCamera } from 'react-icons/fa';
 
 // Utilities and styles
 import DOMPurify from 'dompurify';
+import TextareaAutosize from 'react-textarea-autosize';
 import './Request.scss';
 import Spinner from '../../Hook/Spinner';
 
@@ -396,7 +397,7 @@ function Request() {
 					</label>
 					<h2 className="request__form__title">Décrivez votre demande:</h2>
 					<label className="request__form__label">
-						<textarea
+						<TextareaAutosize
 							className="request__form__label__input textarea"
 							name="description"
 							id="description"
@@ -406,8 +407,8 @@ function Request() {
 							aria-label="Description de la demande 500 caractères maximum"
 							onChange={(event) => setDescriptionRequest(event.target.value)}
 						>
-						</textarea>
-						<p>{descriptionRequest?.length}/500</p>
+						</TextareaAutosize>
+						<p className="request__form__label__input length">{descriptionRequest?.length}/500</p>
 					</label>
 					<div className="request__form__input-media">
 						{urlFile.map((file, index) => (

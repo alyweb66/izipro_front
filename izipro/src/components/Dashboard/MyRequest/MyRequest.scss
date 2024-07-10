@@ -5,21 +5,21 @@
     width: 100%;
     display: flex;
     align-items: stretch;
-    height: 80vh;
+    height: 100%;
 
     .my-request__list {
         overflow-y: auto;
-        scrollbar-width: thin;
+        scrollbar-width: none;
         width: 100%;
         max-width: 30%;
-        margin: 1rem 0.1rem;
-        box-shadow: -5px 0 10px #6666661c,
+        margin: 1rem 0.1rem 0 0.1rem;
+        /*  box-shadow: -5px 0 10px #6666661c,
             -5px 0 10px #ffffff17,
-            5px 0 10px #6666661c;
+            5px 0 10px #6666661c; */
 
         /* for WebKit browser */
         .my-request__list::-webkit-scrollbar {
-            width: 12px;
+            display: none;
 
         }
 
@@ -234,22 +234,32 @@
     }
 
     .my-request__answer-list {
-        margin: 1rem 0;
-        width: 33%;
-        max-width: 33%;
-        box-shadow: -5px 0 10px #6666661c,
+        margin: 0.5rem 0;
+        width: 30%;
+        max-width: 30%;
+        //max-width: 33%;
+        /* box-shadow: -5px 0 10px #6666661c,
             -5px 0 10px #ffffff17,
-            5px 0 10px #6666661c;
+            5px 0 10px #6666661c; */
 
-        &.title {
-            margin: 0.5rem 0 1rem 0;
-            width: 100%;
-            box-shadow: none;
-            padding: 0 0.8rem 0 0.8rem;
-            color: v.$color-secondary-blue;
-            font-size: 1.2rem;
-            font-weight: 500;
-            ;
+        .my-request__answer-list__header {
+
+
+
+            &.title {
+                margin: 0.5rem 0 1rem 0;
+                width: 100%;
+                box-shadow: none;
+                padding: 0 0.8rem 0 0.8rem;
+                color: v.$color-secondary-blue;
+                font-size: 1.2rem;
+                font-weight: 500;
+                ;
+            }
+
+            &.return {
+                display: none;
+            }
         }
 
         &.loading {
@@ -268,9 +278,7 @@
             text-align: center;
         }
 
-        &.return {
-            display: none;
-        }
+
 
 
         .my-request__answer-list__user {
@@ -278,6 +286,7 @@
             flex-direction: column;
             margin: 0.5rem;
             border-radius: 0.5rem;
+            background-color: white;
             box-shadow: -5px 0 10px #6666661c,
                 -5px 0 10px #ffffff17,
                 5px 0 10px #6666661c;
@@ -294,7 +303,7 @@
             &.selected-user {
                 border: 1px solid v.$color-primary-orange;
                 background-color: #f37b041a;
-                
+
             }
 
             &.not-viewed {
@@ -306,6 +315,8 @@
             .my-request__answer-list__user__header {
                 display: flex;
                 //flex-direction: wrap;
+                // background-color: white;
+                // border-radius: 0.5rem;
 
 
                 &.img {
@@ -354,17 +365,11 @@
     .my-request__message-list {
         display: flex;
         flex-direction: column;
-        width: 100%;
-        margin: 1rem 0.1rem;
-        box-shadow: -5px 0 10px #6666661c,
-            -5px 0 10px #ffffff17,
-            5px 0 10px #6666661c;
-        max-width: 45%;
+        margin: 0.5rem 1rem;
+        width: 40%;
 
         &.loading {
             position: relative;
-
-
         }
 
         .my-request__message-list__user {
@@ -375,10 +380,15 @@
                 flex-direction: column;
                 box-shadow: 0 1px 6px -2px rgba(0, 0, 0, 0.2);
                 cursor: pointer;
+                position: relative;
+                background-color: white;
+                border-radius: 8px 8px 0 0;
 
                 .my-request__message-list__user__header__detail {
                     display: flex;
                     align-items: center;
+                    background-color: white;
+                    border-radius: 8px 8px 0 0;
 
                     &.return {
                         display: none;
@@ -389,14 +399,14 @@
                         border-radius: 0.5rem;
                         width: 50px;
                         height: 50px;
-                        box-shadow: -5px 0 10px #66666642,
-                            -5px 0 10px #ffffff23,
-                            5px 0 10px #66666657;
+                        box-shadow: 5px 5px 10px #ebebeb,
+                            -5px -5px 10px #ffffff;
                     }
 
                     &.name {
                         box-shadow: none;
-                        margin: auto 0.3rem auto 0;
+                        //margin: auto 0.3rem auto 0;
+                        margin: 0.5rem 0.3rem;
                         font-size: 1rem;
                         font-weight: 500;
                     }
@@ -408,6 +418,14 @@
                         font-size: 1rem;
                         font-weight: 500;
 
+                    }
+
+                    &.deployArrow {
+                        color: v.$color-primary-blue;
+                        font-size: 2.5rem;
+                        font-weight: 600;
+                        margin-left: 0.5rem;
+                        margin-right: 0.5rem;
                     }
 
                     &.deleted {
@@ -423,7 +441,7 @@
                     padding: 0.5rem;
                     box-shadow: none;
                     margin: 0.5rem;
-                    background-color: transparent;
+                    background-color: white;
                     color: v.$color-primary-blue;
                     font-size: 1rem;
                     font-weight: 500;
@@ -434,127 +452,175 @@
 
         }
 
-        .my-request__message-list__message {
-            display: flex;
-            flex-direction: column;
-            margin: 0rem 1rem;
-            overflow-y: auto;
-            scrollbar-width: none;
-            flex-grow: 1;
 
-            .my-request__message-list__message::-webkit-scrollbar {
-                display: none;
-                /* For Chrome, Safari and Opera */
+        .my-request__container {
+
+            position: relative;
+            width: 100%;
+            flex-grow: 1;
+            overflow: auto;
+            // height: 100%;
+
+            .my-request__background {
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 0;
+
             }
 
-            .my-request__message-list__message__detail {
+            .my-request__background::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: url('/izipro-logo.svg') no-repeat center center;
+                background-size: contain;
+                opacity: 0.1;
+                z-index: -1;
+            }
+
+            .my-request__message-list__message {
+                /* display: flex;
+                flex-direction: column;
+                margin: 0rem 1rem;
+                overflow-y: auto;
+                scrollbar-width: none;
+                flex-grow: 1; */
                 display: flex;
                 flex-direction: column;
-                margin: 0.5rem 0;
+                margin: 0rem;
+                padding: 0 1rem;
+                overflow-y: auto;
+                scrollbar-width: none;
+                flex-grow: 1;
+                position: relative;
+                z-index: 1;
+                background: transparent;
+                height: 100%;
 
-                &.me {
-                    justify-content: flex-end;
+                .my-request__message-list__message::-webkit-scrollbar {
+                    display: none;
+                    /* For Chrome, Safari and Opera */
+                }
+
+                .my-request__message-list__message__detail {
+                    display: flex;
+                    flex-direction: column;
+                    margin: 0.5rem 0;
+                    background: transparent;
+
+                    &.me {
+                        justify-content: flex-end;
+
+                        .my-request__message-list__message__detail__date {
+                            display: flex;
+                            justify-content: flex-end;
+                            margin-right: 0.5rem;
+                            font-size: 0.8rem;
+                            font-weight: 500;
+                            color: v.$color-primary-orange;
+                        }
+                    }
+
+
 
                     .my-request__message-list__message__detail__date {
                         display: flex;
-                        justify-content: flex-end;
-                        margin-right: 0.5rem;
+                        justify-content: flex-start;
+                        margin-left: 0.5rem;
                         font-size: 0.8rem;
                         font-weight: 500;
-                        color: v.$color-primary-orange;
+                        color: v.$color-primary-blue;
                     }
-                }
 
-
-
-                .my-request__message-list__message__detail__date {
-                    display: flex;
-                    justify-content: flex-start;
-                    margin-left: 0.5rem;
-                    font-size: 0.8rem;
-                    font-weight: 500;
-                    color: v.$color-primary-blue;
-                }
-
-                .content {
-                    display: flex;
-                    align-self: flex-start;
-                    flex-direction: column;
-                    background-color: v.$color-chat-blue;
-                    border-radius: 0 1rem 1rem 1rem;
-                    margin-top: 1rem;
-                    max-width: 70%;
-
-                    &.me {
-                        border-radius: 1rem 0 1rem 1rem;
-                        align-self: flex-end;
-                        background-color: v.$color-chat-orange;
+                    .content {
+                        display: flex;
+                        align-self: flex-start;
+                        flex-direction: column;
+                        background-color: v.$color-chat-blue;
+                        border-radius: 0 1rem 1rem 1rem;
                         margin-top: 1rem;
+                        max-width: 70%;
+
+                        &.me {
+                            border-radius: 1rem 1rem 0rem 1rem;
+                            align-self: flex-end;
+                            background-color: v.$color-chat-orange;
+                            margin-top: 1rem;
+
+                            .my-request__message-list__message__detail__image-container {
+
+                                .map {
+                                    display: flex;
+                                    flex-wrap: wrap;
+                                    justify-content: flex-end;
+
+                                }
+                            }
+
+                            .my-request__message-list__message__detail__texte {
+                                word-wrap: break-word;
+                                overflow-wrap: break-word;
+
+                            }
+                        }
 
                         .my-request__message-list__message__detail__image-container {
 
                             .map {
                                 display: flex;
                                 flex-wrap: wrap;
-                                justify-content: flex-end;
+                                background-color: transparent;
+                                gap: 0.3rem;
+                                margin: 0.5rem 0.5rem;
+                                justify-content: flex-start;
+
+                                .a-pdf {
+                                    display: flex;
+                                    justify-content: end;
+                                    width: auto;
+
+                                    .my-request__message-list__message__detail__image-pdf {
+                                        width: 5rem;
+                                    }
+                                }
+
+                                .my-request__message-list__message__detail__image {
+                                    border-radius: 0.5rem;
+                                    cursor: pointer;
+
+                                    &.single {
+                                        width: auto;
+
+                                    }
+
+                                    &.multiple {
+                                        width: 6rem;
+                                    }
+
+                                    &.loading {
+                                        position: relative;
+                                    }
+                                }
+
+                                &.message {
+                                    margin-bottom: 0;
+                                }
 
                             }
+
                         }
 
                         .my-request__message-list__message__detail__texte {
+                            padding: 0.2rem 0.5rem;
                             word-wrap: break-word;
                             overflow-wrap: break-word;
 
                         }
-                    }
-
-                    .my-request__message-list__message__detail__image-container {
-
-                        .map {
-                            display: flex;
-                            flex-wrap: wrap;
-                            background-color: transparent;
-                            gap: 0.3rem;
-                            margin: 0.5rem 0.5rem;
-                            justify-content: flex-start;
-
-                            .a-pdf {
-                                display: flex;
-                                justify-content: end;
-                                width: auto;
-
-                                .my-request__message-list__message__detail__image-pdf {
-                                    width: 5rem;
-                                }
-                            }
-
-                            .my-request__message-list__message__detail__image {
-                                border-radius: 0.5rem;
-                                cursor: pointer;
-
-                                &.single {
-                                    width: auto;
-
-                                }
-
-                                &.multiple {
-                                    width: 6rem;
-                                }
-                            }
-
-                            &.message {
-                                margin-bottom: 0;
-                            }
-
-                        }
-
-                    }
-
-                    .my-request__message-list__message__detail__texte {
-                        padding: 0.2rem 0.5rem;
-                        word-wrap: break-word;
-                        overflow-wrap: break-word;
-
                     }
                 }
             }
@@ -591,7 +657,7 @@
                         border-radius: 0.5rem;
                         width: 100px;
                         height: 100px;
-                        // object-fit: cover;
+                        object-fit: cover;
 
                     }
 
@@ -628,6 +694,7 @@
             font-size: 1rem;
             font-weight: 500;
             color: v.$color-primary-orange;
+            border-radius: 0 0 10px 10px;
 
             .my-request__message-list__form__label__attach {
                 font-size: 2rem;
@@ -681,7 +748,7 @@
     }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1000px) {
     .my-request {
         width: 100%;
         max-height: 100%;
@@ -692,7 +759,7 @@
             &.open {
                 display: block;
                 margin: auto;
-                max-width: 80%;
+                max-width: 90%;
             }
 
         }
@@ -700,32 +767,41 @@
         .my-request__answer-list {
             display: none;
 
-            &.title {
-                display: block;
-                margin: 0 0 1rem 0;
-                width: 100%;
-                box-shadow: none;
-                padding: 0 0.8rem 0 0.8rem;
-                color: v.$color-secondary-blue;
-                font-size: 1.2rem;
-                font-weight: 500;
-                ;
-            }
 
             &.open {
-                display: block;
-                margin: auto;
-                width: 100%;
+                display: flex;
+                flex-direction: column;
+                margin: 1rem auto;
+                width: 70%;
+                max-width: 70%;
 
-                &.my-request__answer-list .return {
-                    display: block;
-                    box-shadow: none;
-                    width: auto;
-                    font-size: 3rem;
-                    margin: 0 auto 0 0.1rem;
-                    color: v.$color-primary-orange;
-                    cursor: pointer;
+                .my-request__answer-list__header {
+                    display: flex;
+                    align-items: center;
+                    width: 100%;
 
+                    &.title {
+                        display: block;
+                        margin: 0;
+                        width: 100%;
+                        box-shadow: none;
+                        padding: 0 0.8rem 0 0.8rem;
+                        color: v.$color-secondary-blue;
+                        font-size: 1.2rem;
+                        font-weight: 500;
+                        ;
+                    }
+
+                    &.return {
+                        display: block;
+                        box-shadow: none;
+                        width: auto;
+                        font-size: 3rem;
+                        margin: 0 auto 0 0.1rem;
+                        color: v.$color-primary-orange;
+                        cursor: pointer;
+
+                    }
                 }
 
             }
@@ -735,10 +811,11 @@
             display: none;
 
             &.open {
-                display: block;
-                margin: auto;
+                display: flex;
+                margin: 1rem auto;
                 max-width: 80%;
-                max-height: 100vh;
+                width: 80%;
+                //max-height: 100vh;
 
                 .my-request__message-list__user {
 
@@ -773,6 +850,42 @@
         .my-request__message-list.open,
         .my-request__list.open {
             max-width: 100%;
+            width: 100%;
+        }
+
+        .my-request__answer-list {
+            &.open {
+                margin: 0;
+                .my-request__answer-list__header {
+
+                    &.return {
+                        font-size: 4rem;
+                       // height: 50px;
+                    }
+                }
+            }
+        }
+
+        .my-request__message-list {
+            &.open {
+                margin-top: 0.2rem;
+                margin-bottom: 0;
+
+                .my-request__message-list__user {
+                    .my-request__message-list__user__header {
+                        .my-request__message-list__user__header__detail {
+                            &.return {
+                                font-size: 4rem;
+                            }
+
+                            &.img {
+                                margin: 0.5rem 0.5rem 0.5rem 0.2rem;
+
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

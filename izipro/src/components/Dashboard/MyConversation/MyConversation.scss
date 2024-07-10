@@ -19,7 +19,7 @@
         width: 100%;
         // height: 95%;
         max-width: 40%;
-        margin: 1rem 0.1rem;
+        margin: 1rem 0.1rem 0 0.1rem;
 
         &.no-req {
             display: flex;
@@ -359,23 +359,22 @@
                         margin-right: 0.5rem;
                     }
 
+                }
+                
+                .my-conversation__message-list__user__header__request {
+                    background-color: white;
+
                     &.title {
-                        position: absolute;
-                        top: 100%;
-                        width: 100%;
+                        width: 98%;
+                        padding: 0.5rem;
                         box-shadow: none;
-                        margin: auto 0rem auto 0rem;
-                        background-color: transparent;
-                        font-size: 1.3rem;
-                        color: v.$color-primary-blue;
-                        font-weight: 500;
+                        margin: 0.5rem;
                         background-color: white;
-                        padding-left: 1rem;
-                        border-radius: 0;
-                        z-index: 10;
+                        color: v.$color-primary-blue;
+                        font-size: 1rem;
+                        font-weight: 500;
                     }
                 }
-
                 /*   &.description {
                     width: 98%;
                     padding: 0.5rem;

@@ -36,13 +36,13 @@
     .request__form {
         width: 80%;
         margin: auto;
-        margin-top: 2rem;
+        margin-top: 1rem;
         border-radius: 0.5rem;
         display: flex;
         flex-direction: column;
-        box-shadow: -5px 0 10px #6666661c,
+       /*  box-shadow: -5px 0 10px #6666661c,
             -5px 0 10px #ffffff17,
-            5px 0 10px #6666661c;
+            5px 0 10px #6666661c; */
 
         &.error {
             width: 100%;
@@ -185,6 +185,11 @@
 
                 &.textarea {
                     max-width: 100%;
+                }
+
+                &.length {
+                    color: v.$color-primary-orange;
+                    background-color: transparent;
                 }
 
                 &:focus {
