@@ -15,6 +15,10 @@ import DOMPurify from 'dompurify';
 import validator from 'validator';
 
 
+// style
+import '../../styles/contactModal.scss';
+import TextareaAutosize from 'react-textarea-autosize';
+
 ReactModal.setAppElement('#root');
 
 interface DeleteItemModalProps {
@@ -82,20 +86,20 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 
 	return (
 		<ReactModal
-			className="modal"
+			className="contact-modal"
 			isOpen={isOpenModal}
 			contentLabel="Delete Account"
 			shouldCloseOnOverlayClick={false}
 			aria-label="supprimer mon compte"
 		>
-			<div className="modal__container">
+			<div className="contact-modal__container">
 				{contactEmailLoading && <Spinner/>}
-				<h1 className="modal__container__title">CONTACT</h1>
-				<p>Veuillez remplire votre nom et prénom ou votre société</p>
-				<label className="modal__container__label">
+				<h1 className="contact-modal__container__title">CONTACT</h1>
+				<p className="contact-modal__container__subtitle">Veuillez remplire votre nom et prénom ou votre société</p>
+				<label className="contact-modal__container__label">
 								Nom:
 					<input
-						className="modal__container__label input"
+						className="contact-modal__container__label input"
 						type="text"
 						name="last_name"
 						value={last_name || ''}
@@ -105,10 +109,10 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 						maxLength={50}
 					/>
 				</label>
-				<label className="modal__container__label">
+				<label className="contact-modal__container__label">
 								Prénom:
 					<input
-						className="modal__container__label input"
+						className="contact-modal__container__label input"
 						type="text"
 						name="first_name"
 						value={first_name || ''}
@@ -118,11 +122,11 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 						maxLength={50}
 					/>
 				</label>
-				<p>Ou</p>
-				<label className="modal__container__label">
+				<p className="contact-modal__container__subtitle">Ou</p>
+				<label className="contact-modal__container__label">
 								Société:
 					<input
-						className="modal__container__label input"
+						className="contact-modal__container__label input"
 						type="text"
 						name="enterprise"
 						value={enterprise || ''}
@@ -132,10 +136,10 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 						maxLength={50}
 					/>
 				</label>
-				<label className="modal__container__label">
+				<label className="contact-modal__container__label">
 								Email:
 					<input
-						className="modal__container__label input"
+						className="contact-modal__container__label input"
 						type="text"
 						name="email"
 						value={email || ''}
@@ -146,10 +150,10 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 						required
 					/>
 				</label>
-				<label className="modal__container__label">
+				<label className="contact-modal__container__label">
 								Message:
-					<textarea
-						className="modal__container__label textarea"
+					<TextareaAutosize
+						className="contact-modal__container__label textarea"
 						name="description"
 						id="description"
 						placeholder="Exprimez-vous 1000 caractères maximum"
@@ -159,14 +163,14 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 						maxLength={1000}
 						required
 					>
-					</textarea>
+					</TextareaAutosize>
 					<p>{description?.length}/1000</p>
 				</label>
-				{errorMessage && <p className="modal__error">{errorMessage}</p>}
-				{confirmationMessage && <p className="modal__confirmation">{confirmationMessage}</p>}
-				<div className="modal__container__button">
+				{errorMessage && <p className="contact-modal__container__error">{errorMessage}</p>}
+				{confirmationMessage && <p className="contact-modal__container__confirmation">{confirmationMessage}</p>}
+				<div className="contact-modal__container__button">
 					<button
-						className="modal__delete"
+						className="contact-modal__delete"
 						onClick={() => {
 							setConfirmationMessage('');
 							setIsOpenModal(false);
@@ -175,7 +179,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 							Fermer
 					</button>
 					<button
-						className="modal__accept"
+						className="contact-modal__accept"
 						onClick={() => {
 							handleAccept(description, email, first_name, last_name, enterprise);
 						}}

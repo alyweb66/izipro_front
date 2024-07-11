@@ -2,6 +2,7 @@ import { useState } from 'react';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
 import { MdKeyboardArrowRight, MdKeyboardArrowLeft, MdClose} from 'react-icons/md';
+import '../../styles/imageModal.scss';
 
 ReactModal.setAppElement('#root');
 

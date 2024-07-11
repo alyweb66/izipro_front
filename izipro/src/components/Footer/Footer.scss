@@ -31,8 +31,8 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 2px; /* Épaisseur de la bordure */
-  background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%); /* Exemple de dégradé */
+  height: 2px; 
+  background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
 }
 
 @media (max-width: 480px) {
