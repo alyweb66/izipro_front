@@ -216,7 +216,7 @@
                 }
 
                 &.false.selected {
-                    border-radius: 1px solid v.$color-primary-blue;
+                    border: 1px solid v.$color-primary-blue;
                 }
 
                 .my-conversation__list__detail__item__footer {
@@ -344,7 +344,6 @@
                     }
 
                     &.name {
-                       // width: 30%;
                         box-shadow: none;
                         margin: 0.5rem 0.3rem;
                         font-size: 1rem;
@@ -360,7 +359,7 @@
                     }
 
                 }
-                
+
                 .my-conversation__message-list__user__header__request {
                     background-color: white;
 
@@ -375,6 +374,7 @@
                         font-weight: 500;
                     }
                 }
+
                 /*   &.description {
                     width: 98%;
                     padding: 0.5rem;
@@ -397,7 +397,7 @@
             width: 100%;
             flex-grow: 1;
             overflow: auto;
-           // height: 100%;
+            // height: 100%;
 
             .my-conversation__background {
                 top: 0;
@@ -695,7 +695,7 @@
 @media (max-width: 780px) {
     .my-conversation {
         width: 100%;
-       // height: 100%;
+        // height: 100%;
 
         .my-conversation__list {
             display: none;
@@ -704,42 +704,21 @@
                 display: block;
                 margin: 0 auto;
                 max-width: 98%;
-               // height: 97%;
+                // height: 97%;
             }
 
 
 
-        }
-
-        .my-conversation__answer-list {
-            display: none;
-
-            &.open {
-                display: block;
-                margin: auto;
-                width: 100%;
-
-                &.my-conversation__answer-list .return {
-                    display: block;
-                    box-shadow: none;
-                    width: auto;
-                    font-size: 3rem;
-                    margin: 0 auto 0 0.1rem;
-                    color: v.$color-primary-orange;
-                    cursor: pointer;
-
-                }
-
-            }
         }
 
         .my-conversation__message-list {
             display: none;
 
             &.open {
-                display: inline-flex;
+                display: flex;
                 margin: 0 auto;
-                max-width: 95%;
+                width: 80%;
+                max-width: 80%;
 
 
                 .my-conversation__message-list__user {
@@ -747,10 +726,10 @@
                     .my-conversation__message-list__user__header {
 
                         .my-conversation__message-list__user__header__detail {
-
+                         
                             &.return {
                                 display: block;
-                                font-size: 3rem;
+                                font-size: 4rem;
                                 color: v.$color-primary-orange;
                                 cursor: pointer;
                             }
@@ -771,10 +750,38 @@
 
         .my-conversation__message-list {
             &.open {
+                margin-top: 0.2rem;
+                width: 100%;
+                max-width: 100%;
+                border-radius: 0;
+
+                .my-conversation__message-list__user {
+                    border-radius: 0;
+                    .my-conversation__message-list__user__header {
+                        border-radius: 0;
+                        .my-conversation__message-list__user__header__detail {
+                            border-radius: 0;
+                            &.return {
+                                font-size: 4rem;
+                            }
+
+                            &.img {
+                                border-radius: 0.5rem;
+                                margin: 0.5rem 0.5rem 0.5rem 0.2rem;
+                            }
+                        }
+                    }
+                }
+
                 .my-conversation__container {
                     flex-grow: 1;
                     /* Prend tout l'espace restant */
                     overflow: auto;
+                }
+
+                .my-conversation__message-list__form__label {
+                    border-radius: 0;
+                
                 }
             }
         }

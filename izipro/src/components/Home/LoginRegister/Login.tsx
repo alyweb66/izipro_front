@@ -31,6 +31,8 @@ function Login() {
 	const [messageError, setMessageError] = useState('');
 	const [message, setMessage] = useState('');
 	const [emailModal, setEmailModal] = useState(false);
+	const [isLogo, setIsLogo] = useState(false);
+
 	// Store
 	const [isEmailConfirmed, setIsEmailConfirmed] = confirmEmailStore((state) => [state.isEmailConfirmed, state.setIsEmailConfirmed]);
 	const [isChangePassword, setIsChangePassword] = changeForgotPasswordStore((state) => [state.isChangePassword, state.setIsChangePassword]);
@@ -53,6 +55,26 @@ function Login() {
 			clearTimeout(timer);
 		};
 	}, [error]);
+
+	// useEffect to check the size of the window
+	useEffect(() => {
+		const handleResize = () => {
+			if (window.innerWidth < 480) {
+				setIsLogo(true);
+			} else {
+				setIsLogo(false);
+			}
+		};
+
+		// add event listener to check the size of the window
+		window.addEventListener('resize', handleResize);
+
+		// 	call the function to check the size of the window
+		handleResize();
+
+		// remove the event listener when the component unmount
+		return () => window.removeEventListener('resize', handleResize);
+	}, []); 
 	
 	// send login request
 	const handleLogin = (event: FormEvent<HTMLFormElement>) =>{
@@ -121,6 +143,10 @@ function Login() {
 
 	return (
 		<div className="login-container">
+			{isLogo && <div className="login-container__logo">
+				<img className='__image' src="/izipro-logo.svg" alt="Izipro logo" />
+				<h1 className="__title">Izipro</h1>
+			</div>}
 			<p className="login-container__title"> Se connecter</p>
 			{message && <p className="success">{message}</p>}
 			{isChangePassword && <p className="login-success">Votre mot de passe a été modifié, vous pouvez maintenant vous connecter</p>}

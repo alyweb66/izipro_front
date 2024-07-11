@@ -42,14 +42,14 @@ const SelectBox = ({ setSelected, loading, isCategory, selected, data, wishListJ
 	}, []);
 
 	return (
-		<div className={`center ${isSetting ? 'setting' : ''}` } ref={selectRef}>
+		<div className={`center ${isSetting ? 'setting' : ''}`} ref={selectRef} role="combobox" aria-haspopup="listbox" aria-expanded={isOpen}>
 			<div className="custom-select-wrapper">
-				<div className={`custom-select ${isOpen ? 'opened' : ''}`} onClick={toggleOptions}>
-					<div className={`custom-select-trigger ${(data.length === 0) ? 'no-data' : ''} `}>
+				<div className={`custom-select ${isOpen ? 'opened' : ''}`} onClick={toggleOptions} aria-labelledby="selectLabel">
+					<div className={`custom-select-trigger ${(data.length === 0) ? 'no-data' : ''}`} id="selectLabel">
 						{loading && <Spinner className="small-spinner" />}
 						{selected ? data.find(value => value.id === selected)?.name : isCategory ? 'Catégories' : 'Métiers'}
 					</div>
-					<div className="custom-options" style={{ display: isOpen ? 'block' : 'none' }}>
+					<div className="custom-options" style={{ display: isOpen ? 'block' : 'none' }} role="listbox">
 						{data?.map((option, index) => (
 							<div
 								className={`custom-option ${selected === option.id ? 'selection' : ''}`}
@@ -65,6 +65,8 @@ const SelectBox = ({ setSelected, loading, isCategory, selected, data, wishListJ
 										}
 									}
 								}
+								role="option"
+								aria-selected={selected === option.id}
 								data-option={JSON.stringify(option)}
 							>
 								{option.name}

@@ -21,18 +21,18 @@
         overflow: hidden;
         box-shadow: 0 0 0 0 transparent;
         -webkit-transition: all 0.2s ease-in;
-        -moz-transition: all 0.2s ease-in;
+       // -moz-transition: all 0.2s ease-in;
         transition: all 0.2s ease-in;
     }
 
     .logout__button:hover {
         background: v.$color-primary-blue;
         //box-shadow: 0 0 30px 5px v.$color-secondary-blue;
-        -webkit-transition: all 0.2s ease-out;
-        -moz-transition: all 0.2s ease-out;
+       -webkit-transition: all 0.2s ease-out;
+       // -moz-transition: all 0.2s ease-out;
         transition: all 0.2s ease-out;
         border: none;
-        color: w;
+        color: white;
     }
 
     .logout__button:hover::before {
@@ -53,8 +53,8 @@
         background: #fff;
         box-shadow: 0 0 50px 30px #fff;
         -webkit-transform: skewX(-20deg);
-        -moz-transform: skewX(-20deg);
-        -ms-transform: skewX(-20deg);
+       // -moz-transform: skewX(-20deg);
+       // -ms-transform: skewX(-20deg);
         -o-transform: skewX(-20deg);
         transform: skewX(-20deg);
     }
@@ -100,6 +100,6 @@
 .logout__button:active {
     box-shadow: 0 0 0 0 transparent;
     -webkit-transition: box-shadow 0.2s ease-in;
-    -moz-transition: box-shadow 0.2s ease-in;
+   // -moz-transition: box-shadow 0.2s ease-in;
     transition: box-shadow 0.2s ease-in;
 }

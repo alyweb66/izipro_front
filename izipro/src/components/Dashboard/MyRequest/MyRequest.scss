@@ -251,10 +251,10 @@
                 width: 100%;
                 box-shadow: none;
                 padding: 0 0.8rem 0 0.8rem;
-                color: v.$color-secondary-blue;
+                color: v.$color-primary-blue;
                 font-size: 1.2rem;
                 font-weight: 500;
-                ;
+                
             }
 
             &.return {
@@ -405,7 +405,6 @@
 
                     &.name {
                         box-shadow: none;
-                        //margin: auto 0.3rem auto 0;
                         margin: 0.5rem 0.3rem;
                         font-size: 1rem;
                         font-weight: 500;
@@ -484,12 +483,6 @@
             }
 
             .my-request__message-list__message {
-                /* display: flex;
-                flex-direction: column;
-                margin: 0rem 1rem;
-                overflow-y: auto;
-                scrollbar-width: none;
-                flex-grow: 1; */
                 display: flex;
                 flex-direction: column;
                 margin: 0rem;
@@ -786,7 +779,7 @@
                         width: 100%;
                         box-shadow: none;
                         padding: 0 0.8rem 0 0.8rem;
-                        color: v.$color-secondary-blue;
+                        color: v.$color-primary-blue;
                         font-size: 1.2rem;
                         font-weight: 500;
                         ;
@@ -796,7 +789,7 @@
                         display: block;
                         box-shadow: none;
                         width: auto;
-                        font-size: 3rem;
+                        font-size: 4rem;
                         margin: 0 auto 0 0.1rem;
                         color: v.$color-primary-orange;
                         cursor: pointer;
@@ -825,7 +818,7 @@
 
                             &.return {
                                 display: block;
-                                font-size: 3rem;
+                                font-size: 4rem;
                                 color: v.$color-primary-orange;
                                 cursor: pointer;
                             }
@@ -874,16 +867,21 @@
                 .my-request__message-list__user {
                     .my-request__message-list__user__header {
                         .my-request__message-list__user__header__detail {
+                            border-radius: 0;
                             &.return {
                                 font-size: 4rem;
                             }
 
                             &.img {
                                 margin: 0.5rem 0.5rem 0.5rem 0.2rem;
-
+                                border-radius: 0.5rem;
                             }
                         }
                     }
+                }
+
+                .my-request__message-list__form__label {
+                    border-radius: 0;
                 }
             }
         }

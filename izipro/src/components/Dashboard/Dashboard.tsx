@@ -79,6 +79,7 @@ function Dashboard() {
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
+	const [isLoading, setIsLoading] = useState<boolean>(true);
 	console.log('isOpened', isOpen);
 
 	//*state for myRequest
@@ -140,7 +141,7 @@ function Dashboard() {
 	const { getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, clientRequestsStore.length > 0);
 
 	//*Query for MyConversation
-	const { data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
+	const {loading: requestMyConversationLoading, data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
 
 	//mutation
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
@@ -181,10 +182,11 @@ function Dashboard() {
 
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
-	}, []); // Le tableau vide assu
+	}, []); 
 
 	// function to check if user is logged in
 	useEffect(() => {
+
 		// clear local storage and session storage when user leaves the page if local storage is set to session
 		const handleBeforeUnload = () => {
 			if (decodeData === 'session') {
@@ -814,7 +816,6 @@ function Dashboard() {
 				{userDataLoading
 					|| notViewedConversationLoading
 					|| myConversationIdsLoading
-
 					&& <Spinner />}
 				<nav className="__nav">
 					<div className="__burger" >
