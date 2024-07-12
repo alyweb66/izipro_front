@@ -48,9 +48,6 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 
 			if (!validator.isEmail(email)) {
 				setErrorMessage('Email invalide');
-				setTimeout(() => {
-					setErrorMessage('');
-				}, 5000);
 				return;
 			}
 
@@ -70,6 +67,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 				setLastName('');
 				setEnterprise('');
 				setEmail('');
+				setErrorMessage('');
 				setConfirmationMessage('Message envoyé');
 			});
 
@@ -77,10 +75,8 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 				throw new Error('Error sending message');
 			}
 		} else {
-			setErrorMessage('Veuillez remplir tous les champs (nom et prénom et/ou société, email, message)');
-			setTimeout(() => {
-				setErrorMessage('');
-			}, 5000);
+			setErrorMessage('Veuillez remplir tous les champs (nom, prénom et/ou société, email, message)');
+		
 		}
 	};
 
@@ -167,15 +163,16 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 						</TextareaAutosize>
 						<p>{description?.length}/1000</p>
 					</label>
-					{errorMessage && <p className="contact-modal__container__error">{errorMessage}</p>}
-					{confirmationMessage && <p className="contact-modal__container__confirmation">{confirmationMessage}</p>}
 				</div>
 
+				{errorMessage && <p className="error">{errorMessage}</p>}
+				{confirmationMessage && <p className="success">{confirmationMessage}</p>}
 				<div className="contact-modal__container__button">
 					<button
 						className="contact-modal__close"
 						onClick={() => {
 							setConfirmationMessage('');
+							setErrorMessage('');
 							setIsOpenModal(false);
 						}}
 					>
