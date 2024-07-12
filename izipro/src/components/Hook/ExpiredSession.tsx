@@ -1,6 +1,7 @@
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
 ReactModal.setAppElement('#root');
+import '../../styles/expiredSessionModal.scss';
 
 
 type DeleteItemModalProps = {
@@ -16,18 +17,18 @@ export const ExpiredSessionModal: React.FC<DeleteItemModalProps> = ({
 }) => {
 	return (
 		<ReactModal
-			className="modal"
+			className="expired-session-modal"
 			isOpen={isExpiredSession}
 			contentLabel="Delete Account"
 			shouldCloseOnOverlayClick={false}
 			aria-label="supprimer mon compte"
 		>
-			<div className="modal__container">
-				<h1 className="modal__title">VOTRE SESSION A EXPIRÉ</h1>
-				<p className="modal__description">Par mesure de sécurité, vous allez être redirigés vers l&apos;accueil pour vous identifier</p>
-				<div className="modal__container__button">
+			<div className="expired-session-modal__container">
+				<h1 className="expired-session-modal__container__title">VOTRE SESSION A EXPIRÉ</h1>
+				<p className="expired-session-modal__container__description">Par mesure de sécurité, vous allez être redirigés vers l&apos;accueil pour vous identifier</p>
+				<div className="expired-session-modal__container__button">
 					<button 
-						className="modal__delete" 
+						className="expired-session-modal__container__button__validate" 
 						onClick={() => {
 							RedirectExpiredSession();
 							setIsExpiredSession(false);

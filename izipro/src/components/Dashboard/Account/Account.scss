@@ -33,9 +33,10 @@
             .account__profile__picture__img {
                 margin: auto;
                 width: 8rem;
+                height: 8rem;
                 border-radius: 1rem;
                 box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+                object-fit: cover;
             }
 
             .account__profile__picture__delete {
@@ -302,8 +303,6 @@
                 }
             }
         }
-
-        
     }
 
     .delete-account-modal {
@@ -316,4 +315,12 @@
         }
     }
 
+}
+
+@media (max-height: 680px) {
+    .delete-account-modal {
+        .delete-account-modal__container {
+            height: 60%;
+        }
+    }
 }

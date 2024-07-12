@@ -794,47 +794,49 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					{selectedRequest && <h2 className="my-request__answer-list__header title">{selectedRequest?.title}</h2>}
 				</div>
 				{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
-				{userConvState && userConvState?.map((user: UserDataProps, index) => (
-					<div
-						id={index === 0 ? 'first-user' : undefined}
-						className={`my-request__answer-list__user 
+				<div className="my-request__answer-list__container">
+					{userConvState && userConvState?.map((user: UserDataProps, index) => (
+						<div
+							id={index === 0 ? 'first-user' : undefined}
+							className={`my-request__answer-list__user 
 							${selectedUser?.id === user.id ? 'selected-user' : ''} 
 							${user.deleted_at ? 'deleted' : ''}
 							${(selectedRequest?.conversation
-						.some(conv => notViewedConversationStore?.some(id => id === conv.id)
+							.some(conv => notViewedConversationStore?.some(id => id === conv.id)
 									&& conv.user_1 === user.id || conv.user_2 === user.id)) ? 'not-viewed' : ''}`
 
-						}
-						key={user.id}
-						onClick={(event) => {
-							setSelectedUser(user);
-							handleMessageConversation(user.id, event);
-							//updateViewedMessage();
-							setIsUserMessageOpen(true);
-							setIsMessageOpen(true);
-							setIsAnswerOpen(false);
-							setIsListOpen(false);
-						}}
-						aria-label={`Détails de ${user.first_name} ${user.last_name}`}
-					>
+							}
+							key={user.id}
+							onClick={(event) => {
+								setSelectedUser(user);
+								handleMessageConversation(user.id, event);
+								//updateViewedMessage();
+								setIsUserMessageOpen(true);
+								setIsMessageOpen(true);
+								setIsAnswerOpen(false);
+								setIsListOpen(false);
+							}}
+							aria-label={`Détails de ${user.first_name} ${user.last_name}`}
+						>
 
-						<div className="my-request__answer-list__user__header">
-							<img 
-								className="my-request__answer-list__user__header img" 
-								src={user.image ? user.image : logoProfile} 
-								alt={`Image de profil de ${user.first_name} ${user.last_name}`} />
-							{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
-							{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
-							{user.denomination ? (
-								<p className="my-request__answer-list__user__header denomination">{user.denomination}</p>
-							) : (
-								<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
-							)}
-							{user.deleted_at && <p className="my-request__answer-list__user__header deleted" aria-label="Utilisateur supprimé">
+							<div className="my-request__answer-list__user__header">
+								<img 
+									className="my-request__answer-list__user__header img" 
+									src={user.image ? user.image : logoProfile} 
+									alt={`Image de profil de ${user.first_name} ${user.last_name}`} />
+								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
+								{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
+								{user.denomination ? (
+									<p className="my-request__answer-list__user__header denomination">{user.denomination}</p>
+								) : (
+									<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
+								)}
+								{user.deleted_at && <p className="my-request__answer-list__user__header deleted" aria-label="Utilisateur supprimé">
 								Utilisateur supprimé</p>}
+							</div>
 						</div>
-					</div>
-				))}
+					))}
+				</div>
 			</div>
 			<div className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`} aria-label='Liste des messages'>
 				{messageLoading && <Spinner />}

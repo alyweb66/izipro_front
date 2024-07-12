@@ -140,8 +140,8 @@ function Request() {
 					setFile([]);
 					setUrlFile([]);
 					setRadius(0);
-					setSelectedCategory('');
-					setSelectedJob('');
+					setSelectedCategory(0);
+					setSelectedJob(0);
 					setUrgent(false);
 				}
 			});

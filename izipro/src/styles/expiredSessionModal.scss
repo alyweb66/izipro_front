@@ -1,8 +1,7 @@
 @use './variables' as v;
 @use './mixins' as m;
 
-
-.delete-item-modal {
+.expired-session-modal {
     height: 50%;
     display: flex;
     align-items: center;
@@ -10,32 +9,37 @@
     font-family: v.$font;
     font-weight: 500;
 
-    .delete-item-modal__container {
+    .expired-session-modal__container {
         @include m.modal-container;
         justify-content: space-around;
         width: 50vw;
         height: 30vh;
         padding: 1rem;
 
-        .delete-item-modal__container__title {
+        .expired-session-modal__container__title {
+            text-align: center;
             margin: 0 auto;
             font-size: 1.5rem;
             font-weight: 500;
             color: v.$color-primary-orange;
-
+            
             
         }
-        .delete-item-modal__container__container__button {
+        
+        .expired-session-modal__container__description {
+            text-align: center;
+            margin: 1rem auto;
+            color: red;
+        }
+
+        .expired-session-modal__container__button {
             display: flex;
             position: relative;
-
-            .delete-item-modal__container__container__button__delete,
-            .delete-item-modal__container__container__button__cancel {
+            .expired-session-modal__container__button__validate {
                 @include m.blue-button;
             }
         }
-
-        .delete-item-modal__container__container__button::before {
+        .expired-session-modal__container__button::before {
             content: "";
             position: absolute;
             top: 0;
@@ -44,20 +48,14 @@
             height: 2px;
             background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
         }
-
-        .delete-item-modal__container__description {
-            text-align: center;
-            margin: 1rem auto;
-            color: red;
-        }
     }
 }
 
 
 @media (max-width: 830px) {
 
-    .delete-item-modal {
-        .delete-item-modal__container {
+    .expired-session-modal {
+        .expired-session-modal__container {
             width: 80vw;
             height: 30vh;
         }
@@ -68,8 +66,8 @@
 @media (max-width: 480px) {
  
 
-    .delete-item-modal {
-        .delete-item-modal__container {
+    .expired-session-modal {
+        .expired-session-modal__container {
             justify-content: space-evenly;
             width: 100%;
             height: 30%;
@@ -80,9 +78,9 @@
 
 }
 
-@media (max-height: 480px) {
-    .delete-item-modal {
-        .delete-item-modal__container {
+@media (max-height: 680px) {
+    .expired-session-modal {
+        .expired-session-modal__container {
             height: 60%;
         }
     }
