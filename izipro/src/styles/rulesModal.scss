@@ -7,10 +7,61 @@
 
         .rules-modal__container__content {
             overflow: auto;
+            overflow-x: hidden;
+        
             height: 100%;
 
             .rules-modal__container__content__description {
                 padding-bottom: 1rem;
+                text-align: left;
+                .rules-title {
+                    color: v.$color-primary-orange;
+                    font-weight: 500;
+                    font-size: 2rem;
+                    text-align: left;
+                }
+
+                .rules-list {
+                    display: flex;
+                    flex-direction: column;
+                    width: 100%;
+                    max-width: 100%;
+                   // padding: 1rem;
+                   // margin: 1rem;
+                    background: white;
+                    border-radius: 0.5rem;
+                    font-size: 0.9rem;
+                    font-weight: 500;
+                    text-align: left;
+
+                    .rules-list__tag {
+                    
+                        font-weight: 350;
+                        font-size: 1.2rem;
+                       // margin-bottom: 0.5rem;
+                       // margin-top: 0.5rem;
+                        text-align: left;
+                    }
+                }
+    
+                .rules-subtitle {
+                    color: v.$color-primary-blue;
+                    font-weight: 400;
+                    font-size: 1.2rem;
+                    margin-bottom: 0.5rem;
+                    margin-top: 0.5rem;
+                    text-align: left;
+                }
+    
+                .rules-description {
+                    color: black;
+                    font-weight: 400;
+                    font-size: 1rem;
+                    margin-bottom: 0.5rem;
+                    margin-top: 0.5rem;
+                    text-align: left;
+                }
+
             }
         }
 
