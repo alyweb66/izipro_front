@@ -31,6 +31,8 @@ function Login() {
 	const [messageError, setMessageError] = useState('');
 	const [message, setMessage] = useState('');
 	const [emailModal, setEmailModal] = useState(false);
+	const [isLogo, setIsLogo] = useState(false);
+
 	// Store
 	const [isEmailConfirmed, setIsEmailConfirmed] = confirmEmailStore((state) => [state.isEmailConfirmed, state.setIsEmailConfirmed]);
 	const [isChangePassword, setIsChangePassword] = changeForgotPasswordStore((state) => [state.isChangePassword, state.setIsChangePassword]);
@@ -53,7 +55,28 @@ function Login() {
 			clearTimeout(timer);
 		};
 	}, [error]);
+
+	// useEffect to check the size of the window
+	useEffect(() => {
+		const handleResize = () => {
+			if (window.innerWidth < 480) {
+				setIsLogo(true);
+			} else {
+				setIsLogo(false);
+			}
+		};
+
+		// add event listener to check the size of the window
+		window.addEventListener('resize', handleResize);
+
+		// 	call the function to check the size of the window
+		handleResize();
+
+		// remove the event listener when the component unmount
+		return () => window.removeEventListener('resize', handleResize);
+	}, []); 
 	
+	// send login request
 	const handleLogin = (event: FormEvent<HTMLFormElement>) =>{
 		event.preventDefault();
 
@@ -88,11 +111,7 @@ function Login() {
 
 	};
 
-	const handleForgotPassword = () => {
-	
-		setEmailModal(true);
-	};
-
+	// send forgot password request
 	const handleSubmitForgotPassowd = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
@@ -112,6 +131,7 @@ function Login() {
 			if (response.data?.forgotPassword === true) {
 				setMessage('Un e-mail a été envoyé pour réinitialiser votre mot de passe');
 			}
+			setForgotPasswordEmail('');
 		});
 
 		if (forgotPasswordError) {
@@ -122,17 +142,21 @@ function Login() {
 	};
 
 	return (
-		<div className='login-container'>
-			<p className='title'> Se connecter</p>
-			{message && <p className='login-success'>{message}</p>}
-			{isChangePassword && <p className='login-success'>Votre mot de passe a été modifié, vous pouvez maintenant vous connecter</p>}
-			{isEmailConfirmed && <p className='login-success'>Votre adresse e-mail a été confirmée, vous pouvez maintenant vous connecter</p>}
-			<form className='input-container' onSubmit={handleLogin}>
+		<div className="login-container">
+			{isLogo && <div className="login-container__logo">
+				<img className='__image' src="/izipro-logo.svg" alt="Izipro logo" />
+				<h1 className="__title">Izipro</h1>
+			</div>}
+			<p className="login-container__title"> Se connecter</p>
+			{message && <p className="success">{message}</p>}
+			{isChangePassword && <p className="login-success">Votre mot de passe a été modifié, vous pouvez maintenant vous connecter</p>}
+			{isEmailConfirmed && <p className="login-success">Votre adresse e-mail a été confirmée, vous pouvez maintenant vous connecter</p>}
+			<form className="login-container__form" onSubmit={handleLogin}>
 				<input
 					type="email"
 					name="email"
 					value={email}
-					className="input"
+					className="login-container__form input"
 					placeholder="Adresse e-mail"
 					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
 					aria-label="Adresse e-mail"
@@ -143,19 +167,19 @@ function Login() {
 					type="password"
 					name="password"
 					value={password}
-					className="input"
+					className="login-container__form input"
 					placeholder="Mot de passe"
 					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
 					aria-label="Mot de passe"
 					maxLength={60}
 					required
 				/>
-				<button type="submit" className='button'>Se connecter</button>
+				<button type="submit" className='login-container__form button'>Se connecter</button>
 			</form>
-			{messageError && <p className='login-error'>{messageError}</p>}
+			{messageError && <p className="error">{messageError}</p>}
 			<label className="checkbox-session-container">
 				<input 
-					className='input-checkbox-session'
+					className="input-checkbox-session"
 					checked={activeSession} 
 					type="checkbox"
 					onChange={() => setActiveSession(!activeSession)}
@@ -164,25 +188,28 @@ function Login() {
 				<span>Garder ma session active</span>
 			</label>
 			<span 
-				className='link' 
-				onClick={handleForgotPassword}
+				className="link" 
+				onClick={() => setEmailModal(!emailModal)}
 			>
 				Mot de passe oublié?</span>
 			{emailModal && (
-				<div className='email-modal'>
-					<form className="forgot-password-form" onSubmit={handleSubmitForgotPassowd}>
-						<input
-							type="email"
-							name="email"
-							value={forgotPasswordEmail}
-							className="input"
-							placeholder="Adresse e-mail"
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setForgotPasswordEmail(event.target.value)}
-							aria-label="Adresse e-mail"
-							maxLength={50}
-							required
-						/>
-						<button type="submit" className="button">Valider</button>
+				<div className="email-modal">
+					<form className="email-modal__forgot-password-form" onSubmit={handleSubmitForgotPassowd}>
+						<label className="email-modal__forgot-password-form label"> Rentrez Votre adresse e-mail pour réinitialiser votre mot de passe
+
+							<input
+								type="email"
+								name="email"
+								value={forgotPasswordEmail}
+								className="email-modal__forgot-password-form input"
+								placeholder="Adresse e-mail"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setForgotPasswordEmail(event.target.value)}
+								aria-label="Adresse e-mail"
+								maxLength={50}
+								required
+							/>
+						</label>
+						<button type="submit" className="email-modal__forgot-password-form button">Valider</button>
 					</form>
 				</div>
 			)}

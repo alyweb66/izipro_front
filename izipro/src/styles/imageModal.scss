@@ -1,0 +1,103 @@
+@use './variables' as v;
+
+.react-modal {
+
+    display: flex;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    margin: 0;
+
+    .react-modal__button {
+        display: none;
+    }
+
+    .react-modal__button-close {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 1;
+        margin: 1rem 5rem 0.5rem auto;
+        font-size: 4rem;
+        color: v.$color-primary-orange;
+        cursor: pointer;
+    }
+
+    .react-modal__picture {
+        display: flex;
+        justify-content: center;
+        object-fit: contain;
+        margin: auto;
+        border-radius: 0.5rem;
+        max-width: 100%;
+        max-height: 100%;
+
+
+        &.button {
+            display: none;
+        }
+
+        &.back {
+            color: v.$color-primary-orange;
+        }
+
+        &.forward {
+            color: v.$color-primary-blue;
+        }
+
+        &.back,
+        &.forward {
+            font-size: 7rem;
+            cursor: pointer;
+        }
+
+        &.img {
+            margin: 1rem 0;
+            width: 100%;
+        }
+
+
+    }
+
+}
+
+@media (max-width: 1200px) {
+    .react-modal {
+
+        .react-modal__button-close {
+            margin: 0;
+            position: absolute;
+            top: 10px;
+            right: 0px;
+        }
+
+        .react-modal__picture {
+            position: relative;
+           // display: inline-block;
+
+            &.back {
+                left: 0px;
+            }
+
+            &.forward {
+                right: 0px;
+            }
+
+            &.back,
+            &.forward {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                cursor: pointer;
+                z-index: 10;
+                font-size: 5rem;
+            }
+
+            &.img {
+                display: block;
+            }
+
+        }
+    }
+
+}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Map from 'react-map-gl';
 // @ts-expect-error no types for mapbox-gl
-import mapboxgl from 'mapbox-gl'; 
+import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Apollo Client
@@ -24,8 +24,10 @@ import { FaCamera } from 'react-icons/fa';
 
 // Utilities and styles
 import DOMPurify from 'dompurify';
+import TextareaAutosize from 'react-textarea-autosize';
 import './Request.scss';
 import Spinner from '../../Hook/Spinner';
+import SelectBox from '../../Hook/SelectBox';
 
 
 
@@ -44,14 +46,16 @@ function Request() {
 
 	//state
 	const [urgent, setUrgent] = useState(false);
-	const [selectedCategory, setSelectedCategory] = useState('');
-	const [selectedJob, setSelectedJob] = useState('');
+	const [selectedCategory, setSelectedCategory] = useState(0);
+	const [selectedJob, setSelectedJob] = useState(0);
 	const [titleRequest, setTitleRequest] = useState('');
 	const [descriptionRequest, setDescriptionRequest] = useState('');
 	const [errorMessage, setErrorMessage] = useState('');
 	const [successMessage, setSuccessMessage] = useState('');
 	const [uploadFileError, setUploadFileError] = useState('');
 	//const [description, setDescription] = useState('');
+	const [categoriesState, setCategoriesState] = useState<CategoryPros[]>([]);
+	const [jobsState, setJobsState] = useState<JobProps[]>([]);
 
 	// file upload
 	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
@@ -123,7 +127,7 @@ function Request() {
 				if (response.data.createRequest) {
 
 					// Add the new request to the store
-					setMyRequestsStore([response.data.createRequest, ...myRequestsStore ]);
+					setMyRequestsStore([response.data.createRequest, ...myRequestsStore]);
 
 					setSuccessMessage('Demande envoyée avec succès');
 					timer = setTimeout(() => {
@@ -136,8 +140,8 @@ function Request() {
 					setFile([]);
 					setUrlFile([]);
 					setRadius(0);
-					setSelectedCategory('');
-					setSelectedJob('');
+					setSelectedCategory(0);
+					setSelectedJob(0);
 					setUrgent(false);
 				}
 			});
@@ -148,6 +152,22 @@ function Request() {
 			throw new Error('Error while creating request');
 		}
 	};
+
+	// Update jobs when category changes
+	useEffect(() => {
+		if (jobData) {
+			console.log('jobData', jobData.category.jobs);
+			
+			setJobsState(jobData.category.jobs);
+		}
+	}, [jobData]);
+
+	// Update categories when data is fetched
+	useEffect(() => {
+		if (categoriesData) {
+			setCategoriesState(categoriesData.categories);
+		}
+	}, [categoriesData]);
 
 	// radius on map
 	useEffect(() => {
@@ -196,7 +216,7 @@ function Request() {
 
 	// Handle file upload
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-		event.preventDefault(); 
+		event.preventDefault();
 		setUploadFileError('');
 
 		// Check if the number of files is less than 3
@@ -216,7 +236,7 @@ function Request() {
 
 	// Handle file drop
 	const handleFileDrop = (event: React.DragEvent<HTMLLabelElement>) => {
-		event.preventDefault(); 
+		event.preventDefault();
 		setUploadFileError('');
 
 		// Check if the number of files is less than 3
@@ -233,6 +253,7 @@ function Request() {
 			}
 		}
 	};
+	
 	// Update zoom level when radius changes
 	useEffect(() => {
 		const mediaQuery = window.matchMedia('(max-width: 450px)');
@@ -290,6 +311,14 @@ function Request() {
 		}
 	}, [radius]);
 
+	useEffect(() => {
+		if (selectedCategory) {
+			setSelectedJob(0);
+		}
+	}, [selectedCategory]);
+
+	console.log('selectedJob', selectedCategory);
+
 	return (
 		<div className="request">
 			{categoryLoading || JobDataLoading || createLoading && <Spinner />}
@@ -309,41 +338,22 @@ function Request() {
 					>URGENT
 						<TbUrgent className="urgent-icon" /></button>
 					<h2 className="request__form__title">Séléctionnez la catégorie et le métier concerné:</h2>
-					<select
-						className="request__form__select"
-						name="job"
-						id="job"
-						value={selectedCategory}
-						onChange={(event) => setSelectedCategory(event.target.value)}
-					>
-						<option value="">Catégorie</option>
-						{categoriesData && categoriesData.categories.map((category: CategoryPros, index: number) => (
-							<option key={index} value={category.id}>
-								{category.name}
-							</option>
+					<SelectBox
+						data={categoriesState}
+						selected={selectedCategory}
+						isCategory={true}
+						loading={categoryLoading}
+						setSelected={setSelectedCategory}
+					/>
+				
+					<SelectBox
+						data={jobsState}
+						isCategory={false}
+						selected={selectedJob}
+						loading={JobDataLoading}
+						setSelected={setSelectedJob}
+					/>
 
-						))}
-					</select>
-					<select
-						className="request__form__select"
-						name="job"
-						id="job"
-						value={selectedJob}
-						onChange={(event) => setSelectedJob(event.target.value)}
-					>
-						<option value="">Métiers</option>
-						{jobData && jobData.category.jobs.map((job: JobProps, index: number) => (
-
-							<option
-								key={index}
-								value={job.id}
-								title={job.description}
-							>
-								{job.name}
-							</option>
-						))}
-
-					</select>
 					{lng && lat && (
 						<>
 							<h2 className="request__form__title radius">Séléctionnez une distance:</h2>
@@ -396,7 +406,7 @@ function Request() {
 					</label>
 					<h2 className="request__form__title">Décrivez votre demande:</h2>
 					<label className="request__form__label">
-						<textarea
+						<TextareaAutosize
 							className="request__form__label__input textarea"
 							name="description"
 							id="description"
@@ -406,8 +416,8 @@ function Request() {
 							aria-label="Description de la demande 500 caractères maximum"
 							onChange={(event) => setDescriptionRequest(event.target.value)}
 						>
-						</textarea>
-						<p>{descriptionRequest?.length}/500</p>
+						</TextareaAutosize>
+						<p className="request__form__label__input length">{descriptionRequest?.length}/500</p>
 					</label>
 					<div className="request__form__input-media">
 						{urlFile.map((file, index) => (

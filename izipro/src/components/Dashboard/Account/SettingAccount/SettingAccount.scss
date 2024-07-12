@@ -1,4 +1,5 @@
 @use '../../../../styles/variables' as v;
+@use '../../../../styles/mixins' as m;
 
 .setting-account {
     margin: 0 2rem;
@@ -6,9 +7,9 @@
     border-radius: 0.5rem;
     display: flex;
     flex-direction: column;
-    box-shadow: -5px 0 10px #6666661c,
+    /* box-shadow: -5px 0 10px #6666661c,
         -5px 0 10px #ffffff17,
-        5px 0 10px #6666661c;
+        5px 0 10px #6666661c; */
 
     .setting-account__subtitle {
         margin: 0.5rem 0.5rem;
@@ -29,7 +30,7 @@
             position: relative;
         }
 
-
+@include m.select;
 
         .setting-account__form__title {
             margin: 0 0 1rem 0;
@@ -66,9 +67,11 @@
             color: black;
 
             &.job {
-                box-shadow: -5px 0 10px #6666661c,
-                    -5px 0 10px #ffffff17,
-                    5px 0 10px #6666661c;
+                box-shadow: -5px 0 10px #66666610,
+                -5px 0 10px #ffffff05,
+                5px 0 10px #6666660e;
+                    background-color: white;
+                    border-radius: 0.5rem;
             }
 
             &.loading {
@@ -85,6 +88,10 @@
                 align-items: center;
                 justify-content: flex-end;
 
+            }
+
+            &.noJobs {
+                margin-left: 0.5rem;
             }
 
             .setting-account__form__list__delete__button {
@@ -109,7 +116,7 @@
         }
 
         .setting-account__form__button {
-            @include v.blue-button;
+            @include m.blue-button;
         }
 
     }
@@ -126,7 +133,7 @@
         }
 
         .setting-account__radius__button {
-            @include v.blue-button;
+            @include m.blue-button;
         }
 
         .setting-account__radius__input__message {
@@ -160,4 +167,12 @@
             }
         }
     }
+}
+
+@media (max-width: 480px) {
+    .setting-account {
+        margin-top: 2rem;
+  
+    }
+
 }

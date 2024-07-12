@@ -37,10 +37,10 @@ function Header() {
 
 
 	return (
-		<header className="menu" id="header">
-			<div className="menu__center">
-				<img className='menu__image' src="/izipro-logo.svg" alt="Izipro logo" />
-				<h1 className="menu__title">Izipro</h1>
+		<header className="header" id="header">
+			<div className="header__container">
+				<img className='header__container image' src="/izipro-logo.svg" alt="Izipro logo" />
+				<h1 className="header__container title">Izipro</h1>
 			</div>
 			{isLogged && <Logout />}
 		</header>

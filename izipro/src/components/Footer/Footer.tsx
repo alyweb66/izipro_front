@@ -220,11 +220,11 @@ function Footer() {
 
 	return (
 
-		<div>
-			<footer>
-				<a href="#" onClick={() => {setCGUModal(true), isGetRulesRef.current = true;}}>CGU</a>
-				<a href="#" onClick={() => setContactModal(true)} >Contact</a>
-				<a href="#" onClick={() => {setCookiesModal(true), setClickCookie(true);}}>Cookies</a>
+		<div className="footer">
+			<footer className="footer-container">
+				<a className="footer-container__link" href="#" onClick={() => {setCGUModal(true), isGetRulesRef.current = true;}}>CGU</a>
+				<a className="footer-container__link" href="#" onClick={() => setContactModal(true)} >Contact</a>
+				<a className="footer-container__link" href="#" onClick={() => {setCookiesModal(true), setClickCookie(true);}}>Cookies</a>
 			</footer>
 
 			<RulesModal

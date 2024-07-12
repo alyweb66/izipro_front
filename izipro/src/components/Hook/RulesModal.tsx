@@ -3,7 +3,7 @@
 import ReactModal from 'react-modal';
 import Spinner from './Spinner';
 import { userDataStore } from '../../store/UserData';
-//import Spinner from './Spinner';
+import '../../styles/rulesModal.scss';
 ReactModal.setAppElement('#root');
 
 interface DeleteItemModalProps {
@@ -29,21 +29,23 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 
 	return (
 		<ReactModal
-			className="modal"
+			className="rules-modal"
 			isOpen={isOpenModal}
 			contentLabel="Delete Account"
 			shouldCloseOnOverlayClick={false}
-			aria-label="supprimer mon compte"
+			aria-label={isCookie ? 'Accepter les cookies' : 'Conditions générales d utilisation'}
 		>
-			<div className="modal__container">
+			<div className="rules-modal__container">
 				{/* <h1 className="modal__title">CGU</h1> */}
 				{loading ? <Spinner/> :
-					<p className="modal__description" dangerouslySetInnerHTML={{ __html: content }}></p>
+					<div className="rules-modal__container__content">
+						<p className="rules-modal__container__content__description" dangerouslySetInnerHTML={{ __html: content }}></p>
+					</div>
 				}
 				{isCookie ? (
-					<div className="modal__container__button">
+					<div className="rules-modal__container__button">
 						<button
-							className="modal__delete"
+							className="rules-modal__accept"
 							onClick={() => {
 								handleAccept(undefined, true);
 							}}
@@ -51,7 +53,7 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 							Tout accepter
 						</button>
 						<button
-							className="modal__cancel"
+							className="rules-modal__cancel"
 							onClick={() => {
 								handleAccept(undefined, false);
 							}}
@@ -60,7 +62,7 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 						</button>
 						{localStorage.getItem('cookieConsents') && 
 						<button
-							className="modal__cancel"
+							className="rules-modal__close"
 							onClick={() => {
 								setIsOpenModal(false);
 							}}
@@ -71,11 +73,11 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 						
 					</div>
 				) : (
-					<div className="modal__container__button">
+					<div className="rules-modal__container__button">
 						{id && !CGU ? (
 							<>
 								<button
-									className="modal__delete"
+									className="rules-modal__accept"
 									onClick={() => {
 										handleAccept();
 									}}
@@ -83,7 +85,7 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 									Accepter
 								</button>
 								<button
-									className="modal__cancel"
+									className="rules-modal__cancel"
 									onClick={() => {
 										setIsOpenModal(false);
 										if (handleLogout) handleLogout(id);
@@ -94,7 +96,7 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 							</>
 						) : (
 							<button
-								className="modal__cancel"
+								className="rules-modal__close"
 								onClick={() => {
 									setIsOpenModal(false);
 								}}

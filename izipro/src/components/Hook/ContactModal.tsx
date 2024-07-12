@@ -15,6 +15,10 @@ import DOMPurify from 'dompurify';
 import validator from 'validator';
 
 
+// style
+import '../../styles/contactModal.scss';
+import TextareaAutosize from 'react-textarea-autosize';
+
 ReactModal.setAppElement('#root');
 
 interface DeleteItemModalProps {
@@ -29,7 +33,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 }) => {
 
 	// Mutation 
-	const [contactEmail, {loading: contactEmailLoading, error: contactEmailError}] = useMutation(CONTACT_MUTATION);
+	const [contactEmail, { loading: contactEmailLoading, error: contactEmailError }] = useMutation(CONTACT_MUTATION);
 	//state
 	const [description, setDescription] = useState<string>('');
 	const [first_name, setFirstName] = useState<string>('');
@@ -44,12 +48,9 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 
 			if (!validator.isEmail(email)) {
 				setErrorMessage('Email invalide');
-				setTimeout(() => {
-					setErrorMessage('');
-				}, 5000);
 				return;
 			}
-            
+
 			contactEmail({
 				variables: {
 					input: {
@@ -66,6 +67,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 				setLastName('');
 				setEnterprise('');
 				setEmail('');
+				setErrorMessage('');
 				setConfirmationMessage('Message envoyé');
 			});
 
@@ -73,115 +75,118 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 				throw new Error('Error sending message');
 			}
 		} else {
-			setErrorMessage('Veuillez remplir tous les champs');
-			setTimeout(() => {
-				setErrorMessage('');
-			}, 5000);
+			setErrorMessage('Veuillez remplir tous les champs (nom, prénom et/ou société, email, message)');
+		
 		}
 	};
 
 	return (
 		<ReactModal
-			className="modal"
+			className="contact-modal"
 			isOpen={isOpenModal}
 			contentLabel="Delete Account"
 			shouldCloseOnOverlayClick={false}
 			aria-label="supprimer mon compte"
 		>
-			<div className="modal__container">
-				{contactEmailLoading && <Spinner/>}
-				<h1 className="modal__container__title">CONTACT</h1>
-				<p>Veuillez remplire votre nom et prénom ou votre société</p>
-				<label className="modal__container__label">
-								Nom:
-					<input
-						className="modal__container__label input"
-						type="text"
-						name="last_name"
-						value={last_name || ''}
-						placeholder={'Nom' || ''}
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
-						aria-label="Nom"
-						maxLength={50}
-					/>
-				</label>
-				<label className="modal__container__label">
-								Prénom:
-					<input
-						className="modal__container__label input"
-						type="text"
-						name="first_name"
-						value={first_name || ''}
-						placeholder={'Prénom' || ''}
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)}
-						aria-label="Prénom"
-						maxLength={50}
-					/>
-				</label>
-				<p>Ou</p>
-				<label className="modal__container__label">
-								Société:
-					<input
-						className="modal__container__label input"
-						type="text"
-						name="enterprise"
-						value={enterprise || ''}
-						placeholder={'Société' || ''}
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEnterprise(event.target.value)}
-						aria-label="Société"
-						maxLength={50}
-					/>
-				</label>
-				<label className="modal__container__label">
-								Email:
-					<input
-						className="modal__container__label input"
-						type="text"
-						name="email"
-						value={email || ''}
-						placeholder={'Email' || ''}
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
-						aria-label="email"
-						maxLength={50}
-						required
-					/>
-				</label>
-				<label className="modal__container__label">
-								Message:
-					<textarea
-						className="modal__container__label textarea"
-						name="description"
-						id="description"
-						placeholder="Exprimez-vous 1000 caractères maximum"
-						value={description || ''}
-						onChange={(event) => setDescription(event.target.value)}
-						aria-label="Exprimez-vous 1000 caractères maximum"
-						maxLength={1000}
-						required
-					>
-					</textarea>
-					<p>{description?.length}/1000</p>
-				</label>
-				{errorMessage && <p className="modal__error">{errorMessage}</p>}
-				{confirmationMessage && <p className="modal__confirmation">{confirmationMessage}</p>}
-				<div className="modal__container__button">
+			<div className="contact-modal__container">
+				{contactEmailLoading && <Spinner />}
+				<div className="contact-modal__container__content">
+					<h1 className="contact-modal__container__content__title">CONTACT</h1>
+					<p className="contact-modal__container__content__subtitle">Veuillez remplire votre nom et prénom ou votre société</p>
+					<label className="contact-modal__container__content__label">
+						Nom:
+						<input
+							className="contact-modal__container__content__label__input"
+							type="text"
+							name="last_name"
+							value={last_name || ''}
+							placeholder={'Nom' || ''}
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
+							aria-label="Nom"
+							maxLength={50}
+						/>
+					</label>
+					<label className="contact-modal__container__content__label">
+						Prénom:
+						<input
+							className="contact-modal__container__content__label__input"
+							type="text"
+							name="first_name"
+							value={first_name || ''}
+							placeholder={'Prénom' || ''}
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)}
+							aria-label="Prénom"
+							maxLength={50}
+						/>
+					</label>
+					<p className="contact-modal__container__content__subtitle">Ou</p>
+					<label className="contact-modal__container__content__label">
+						Société:
+						<input
+							className="contact-modal__container__content__label__input"
+							type="text"
+							name="enterprise"
+							value={enterprise || ''}
+							placeholder={'Société' || ''}
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEnterprise(event.target.value)}
+							aria-label="Société"
+							maxLength={50}
+						/>
+					</label>
+					<label className="contact-modal__container__content__label email">
+						Email:
+						<input
+							className="contact-modal__container__content__label__input "
+							type="text"
+							name="email"
+							value={email || ''}
+							placeholder={'Email' || ''}
+							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
+							aria-label="email"
+							maxLength={50}
+							required
+						/>
+					</label>
+					<label className="contact-modal__container__content__label textarea">
+						Message:
+						<TextareaAutosize
+							className="contact-modal__container__content__label__input textarea"
+							name="description"
+							id="description"
+							placeholder="Exprimez-vous 1000 caractères maximum"
+							value={description || ''}
+							onChange={(event) => setDescription(event.target.value)}
+							aria-label="Exprimez-vous 1000 caractères maximum"
+							maxLength={1000}
+							required
+						>
+						</TextareaAutosize>
+						<p>{description?.length}/1000</p>
+					</label>
+				</div>
+
+				{errorMessage && <p className="error">{errorMessage}</p>}
+				{confirmationMessage && <p className="success">{confirmationMessage}</p>}
+				<div className="contact-modal__container__button">
 					<button
-						className="modal__delete"
+						className="contact-modal__close"
 						onClick={() => {
 							setConfirmationMessage('');
+							setErrorMessage('');
 							setIsOpenModal(false);
 						}}
 					>
-							Fermer
+						Fermer
 					</button>
 					<button
-						className="modal__accept"
+						className="contact-modal__accept"
 						onClick={() => {
 							handleAccept(description, email, first_name, last_name, enterprise);
 						}}
 					>
-							Envoyer
+						Envoyer
 					</button>
+
 				</div>
 			</div>
 		</ReactModal>

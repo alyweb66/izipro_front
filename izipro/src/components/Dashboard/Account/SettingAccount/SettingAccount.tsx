@@ -19,6 +19,8 @@ import Spinner from '../../../Hook/Spinner';
 
 // Styling imports
 import './SettingAccount.scss';
+import { motion, AnimatePresence } from 'framer-motion';
+import SelectBox from '../../../Hook/SelectBox';
 
 
 function SettingAccount() {
@@ -30,28 +32,59 @@ function SettingAccount() {
 	const role = userDataStore((state) => state.role);
 
 	// State
-	const [selectedCategory, setSelectedCategory] = useState('');
+	const [selectedCategory, setSelectedCategory] = useState(0);
 	const [wishListJob, setWishListJob] = useState<JobProps[]>([]);
 	const [selectedJob, setSelectedJob] = useState<JobProps[]>([]);
 	const [radius, setRadius] = useState(settings[0]?.range || 0);
 	const [message, setMessage] = useState('');
+	const [skip, setSkip] = useState(false);
+	const [categoriesState, setCategoriesState] = useState<CategoryPros[]>([]);
+	const [jobsState, setJobsState] = useState<JobProps[]>([]);
+	
+
 
 	// query
 	const { loading: categoryLoading, categoriesData } = useQueryCategory();
 	const { loading: jobLoading, jobData } = useQueryJobs(selectedCategory);
-	const jobDataName = useQueryJobData(jobs);
+	const { loading: jobDataLoading, jobs: jobDataName } = useQueryJobData(jobs ? jobs : [], skip);
 
 	// set job with the value from the database
 	useEffect(() => {
-		setSelectedJob(jobDataName);
-	}, [jobDataName]);
+		if (jobDataName) {
+			setSelectedJob(jobDataName);
+			setSkip(true);
+		}
+		
+	}, [jobDataName, jobDataLoading]);
+
+	// Update jobs when category changes
+	useEffect(() => {
+		if (jobData) {
+			console.log('jobData', jobData.category.jobs);
+			
+			setJobsState(jobData.category.jobs);
+		}
+	}, [jobData]);
+
+	// Update categories when data is fetched
+	useEffect(() => {
+		if (categoriesData) {
+			setCategoriesState(categoriesData.categories);
+		}
+	}, [categoriesData]);
+
+	useEffect(() => {
+		if (selectedCategory) {
+			//setSelectedJob(0);
+		}
+	}, [selectedCategory]);
 
 	// mutation
 	const [createUserJob, { loading: userJobLoading, error: errorCreateUserJob }] = useMutation(USER_HAS_JOB_MUTATION);
 	const [deleteUserJob, { loading: deleteJobLoading, error: errorDeleteUserJob }] = useMutation(DELETE_USER_HAS_JOB_MUTATION);
 	const [userSetting, { loading: settingLoading, error: errorUserSetting }] = useMutation(USER_SETTING_MUTATION);
 
-	// function to remove list job before submit
+	// function to remove wishlist job before submit
 	const handleRemoveListJob = (id: number, event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		event.preventDefault();
 		event?.stopPropagation();
@@ -62,6 +95,11 @@ function SettingAccount() {
 	// function to delete job in the database
 	const handleDeleteJob = (jobId: number, event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		event.preventDefault();
+		event?.stopPropagation();
+
+		// update selectedJob and jobs
+		setSelectedJob(selectedJob.filter((job) => job.id !== jobId));
+		setJobs(jobs.filter((job) => job.job_id !== jobId));
 
 		deleteUserJob({
 			variables: {
@@ -69,13 +107,6 @@ function SettingAccount() {
 					user_id: id,
 					job_id: [jobId]
 				}
-			}
-		}).then((response) => {
-
-			if (response.data.deleteUserJob.length >= 0) {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const newJob = response.data.deleteUserJob.map((job: any) => ({ job_id: job.job_id }));
-				setJobs(newJob);
 			}
 		});
 
@@ -89,43 +120,44 @@ function SettingAccount() {
 	const handleSubmitJob = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
+		let submitJobId = [];
+
+		if (jobs.length === 0) {
+			submitJobId = wishListJob;
+		} else {
+			// check if the job is already in the store
+			submitJobId = wishListJob.filter((job) => jobs.some((jobStore) => jobStore.job_id !== job.id));
+		}
+		// add job to the selectedJob
+		setSelectedJob([...selectedJob || [], ...submitJobId]);
+
 		// get unique job id to submit
-		let submitJobId: number[] = [];
-		if (wishListJob !== undefined && wishListJob.length > 0) {
-			submitJobId = wishListJob.filter(job => job).map((job) => job.id);
-			submitJobId = [...new Set(submitJobId)];
+		let uniqueJobId: number[] = [];
+		if (submitJobId !== undefined && submitJobId.length > 0) {
+			uniqueJobId = submitJobId.filter(job => job).map((job) => job.id);
+			// delete duplicate job id
+			uniqueJobId = [...new Set(uniqueJobId)];
 
 		}
 
-		// Remove jobs that are already in selectedJob
-		let filteredJobId;
-		if (selectedJob) {
-			filteredJobId = submitJobId.filter(
-				jobId => !selectedJob.some(selected => selected.id === jobId)
-			);
-		}
+		// update jobs in the store
+		// check if the job is already in the store
+		const newjobs = uniqueJobId?.filter((id) => !jobs.some((job) => job.job_id === id));
+		console.log('newjobs', newjobs);
 
+
+		setJobs([...jobs, ...(newjobs || [])].map((job) => typeof job === 'number' ? { job_id: job } : job));
+
+		// add job to the database
 		createUserJob({
 			variables: {
 				input: {
 					user_id: id,
-					job_id: filteredJobId || submitJobId
+					job_id: uniqueJobId || submitJobId
 				}
 			}
-		}).then((response): void => {
+		}).then(() =>{
 
-			const { createUserJob } = response.data;
-			if (createUserJob) {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const newJob = createUserJob.map((job: any) => ({ job_id: job.job_id }));
-
-				//setNewJob(newJob);
-				if (jobs.length === 0) {
-					setJobs(newJob);
-				} else {
-					setJobs(newJob);
-				}
-			}
 			setWishListJob([]);
 
 		});
@@ -167,9 +199,29 @@ function SettingAccount() {
 				<div className="setting-account">
 					<>
 						<form className={`setting-account__form ${jobLoading ? 'loading' : ''}`} onSubmit={handleSubmitJob}>
-							{jobLoading && <Spinner />}
+							{/* {jobLoading && <Spinner />} */}
 							<h1 className="setting-account__form__title">Vos métiers:</h1>
-							<select
+							<SelectBox
+								isSetting={true}
+								data={categoriesState}
+								selected={selectedCategory}
+								isCategory={true}
+								loading={categoryLoading}
+								setSelected={setSelectedCategory}
+							/>
+				
+							<SelectBox
+								isSetting={true}
+								isWishList={true}
+								wishListJob={wishListJob}
+								data={jobsState}
+								isCategory={false}
+								setWishListJob={setWishListJob}
+								loading={jobLoading}
+								
+							/>
+							
+							{/* 	<select
 								className="setting-account__form__select"
 								name="job"
 								id="job"
@@ -184,6 +236,7 @@ function SettingAccount() {
 
 								))}
 							</select>
+					
 							<select
 								className="setting-account__form__select"
 								name="job"
@@ -203,27 +256,67 @@ function SettingAccount() {
 									</option>
 								))}
 
-							</select>
+							</select> */}
 							<ul className="setting-account__form__list" >
 								<h2 className="setting-account__subtitle">Métiers séléctionné:</h2>
-								{wishListJob && wishListJob.map((job: JobProps, index: number) => (
-									<li className="setting-account__form__list__tag" key={index}>
-										{job.name}
-										<button className="setting-account__form__list__delete__button" onClick={(event) => handleRemoveListJob(job.id, event)}>X</button>
-									</li>
-								))}
+								<AnimatePresence>
+									{wishListJob && [...wishListJob].reverse().map((job: JobProps) => (
+										<motion.li
+											key={job.id}
+											className="setting-account__form__list__tag"
+											initial={{ opacity: 0, scale: 0.5 }}
+											animate={{ opacity: 1, scale: 1 }}
+											exit={{ opacity: 0, scale: 0.2 }}
+											transition={{
+												duration: 0.2,
+												ease: [0, 0, 0.2, 0],
+												scale: {
+													type: 'tween',
+													damping: 5,
+													stiffness: 20,
+													restDelta: 0.001
+												}
+											}}
+										>
+											{job.name}
+											<button className="setting-account__form__list__delete__button" onClick={(event) => handleRemoveListJob(job.id, event)}>X</button>
+										</motion.li>
+									))}
+								</AnimatePresence>
 							</ul>
 							<button className="setting-account__form__button" type='submit'>valider</button>
 							<ul className={`setting-account__form__list job ${(userJobLoading || deleteJobLoading || categoryLoading) ? 'loading' : ''}`}>
-								{(userJobLoading || deleteJobLoading || categoryLoading) && <Spinner />}
+								{(userJobLoading || categoryLoading) && <Spinner />}
 
 								<h2 className="setting-account__subtitle">Métiers actuel:</h2>
-								{selectedJob && selectedJob.map((job: JobProps, index: number) => (
-									<li className="setting-account__form__list__tag" key={index}>
-										{job.name}
-										<button className="setting-account__form__list__delete__button" onClick={(event) => handleDeleteJob(job.id, event)}>X</button>
-									</li>
-								))}
+								<AnimatePresence>
+									{/* {jobDataLoading && <Spinner />} */}
+									{selectedJob && selectedJob.length > 0 ? selectedJob.map((job: JobProps) => (
+										<motion.li
+											key={job.id}
+											className="setting-account__form__list__tag"
+											initial={{ opacity: 0, scale: 0.5 }}
+											animate={{ opacity: 1, scale: 1 }}
+											exit={{ opacity: 0, scale: 0.2 }}
+											transition={{
+												duration: 0.2,
+												ease: [0, 0, 0.2, 0],
+												scale: {
+													type: 'tween',
+													damping: 5,
+													stiffness: 20,
+													restDelta: 0.001
+												}
+											}}
+										>
+											{job.name}
+											<button className="setting-account__form__list__delete__button" onClick={(event) => handleDeleteJob(job.id, event)}>X</button>
+										</motion.li>
+									))
+										:
+										<p className="setting-account__form__list noJobs">Vous n&apos;avez pas de métier séléctionné</p>
+									}
+								</AnimatePresence>
 							</ul>
 
 
@@ -251,8 +344,9 @@ function SettingAccount() {
 							<button className="setting-account__radius__button" onClick={handleValidateRange}>Valider</button>
 						</div>
 					</>
-				</div>
-			)}
+				</div >
+			)
+			}
 		</>
 	);
 }

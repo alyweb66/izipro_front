@@ -56,7 +56,7 @@ export const useQueryCategory = () => {
 };
 
 // fetch jobs
-export const useQueryJobs = (selectedCategory: string) => {
+export const useQueryJobs = (selectedCategory: number) => {
 	
 	const { loading, error: jobError, data: jobData } = useQuery(GET_JOBS_BY_CATEGORY,
 		{
@@ -73,24 +73,25 @@ export const useQueryJobs = (selectedCategory: string) => {
 };
 
 // fetch job data
-export const useQueryJobData = (jobId:{job_id: number}[] ) => {
-
+export const useQueryJobData = (jobId:{job_id: number}[], skip: boolean ) => {
+	
 	const jobIdArray = jobId.map((job) => job.job_id);
 	
-	const {error: jobError, data: jobData } = useQuery(GET_JOB_DATA,
+
+	const {loading, error: jobDataError, data: jobData } = useQuery(GET_JOB_DATA,
 		{
 			variables: {
 				ids: jobIdArray
 			},
-			skip: !jobIdArray
+			skip
 		});
-
+		
 	const jobs = jobData?.jobs;
-
-	if (jobError) {
+	
+	if (jobDataError) {
 		throw new Error('Error while fetching job data');
 	}
-	return jobs;
+	return {loading, jobs};
 };
 
 // fetch user requests
@@ -200,6 +201,8 @@ export const useQueryUsersConversation = (userIds: number[], offset: number, lim
 	if (usersConversationError) {
 		throw new Error('Error while fetching user conversation');
 	}
+	console.log('usersConversationData', usersConversationData);
+	
 	return {loading, usersConversationData};
 };
 

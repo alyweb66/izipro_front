@@ -1,4 +1,5 @@
 @use '../../../styles/variables' as v;
+@use '../../../styles/mixins' as m;
 
 .account {
     //position for spinner
@@ -6,7 +7,7 @@
     width: 80rem;
     max-width: 100%;
     margin: 0 auto;
-    background-color: white;
+    background-color: transparent;
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -32,9 +33,10 @@
             .account__profile__picture__img {
                 margin: auto;
                 width: 8rem;
+                height: 8rem;
                 border-radius: 1rem;
                 box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+                object-fit: cover;
             }
 
             .account__profile__picture__delete {
@@ -63,9 +65,9 @@
             margin: 1rem 2rem 2rem 2rem;
             padding: 0 2rem 2rem 2rem;
             border-radius: 0.5rem;
-            box-shadow: -5px 0 10px #6666661c,
+            /* box-shadow: -5px 0 10px #6666661c,
                     -5px 0 10px #ffffff17,
-                    5px 0 10px #6666661c;
+                    5px 0 10px #6666661c; */
 
             &.password {
                 //position for spinner
@@ -121,7 +123,7 @@
             }
 
             .account__profile__button {
-                @include v.blue-button;
+                @include m.blue-button;
 
             }
 
@@ -160,6 +162,7 @@
 
         .account__profile__modification-message{
             margin: auto;
+            margin-top: 0.3rem;
             font-size: 1rem;
             font-weight: 500;
             color: v.$color-validation;
@@ -169,7 +172,7 @@
 
 }
 
-.modal {
+.delete-account-modal {
     height: 50%;
     display: flex;
     align-items: center;
@@ -177,40 +180,53 @@
     font-family: v.$font;
     font-weight: 500;
 
-    .modal__container {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        background-color: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow:  20px 20px 60px #bebebe,
-             -20px -20px 60px #ffffff;
-
-        .modal__title {
-            margin: auto;
+    .delete-account-modal__container {
+        @include m.modal-container;
+        justify-content: space-around;
+        width: 50vw;
+        height: 30vh;
+        padding: 1rem;
+  
+        .delete-account-modal__container__title {
+            margin: 0 auto;
             font-size: 1.5rem;
             font-weight: 500;
             color: v.$color-primary-orange;
         }
 
-        .modal__description {
+        .delete-account-modal__container__description {
             text-align: center;
             margin: 1rem auto;
             color: red;
 
         }
 
-        .modal__container__button {
+        .delete-account-modal__container__container__button {
             display: flex;
+            position: relative;
+           
+            
+            .delete-account-modal__container__container__button__delete,
+            .delete-account-modal__container__container__button__cancel {
+                @include m.blue-button;
+              
 
-            .modal__delete {
-                @include v.blue-button;
             }
 
-            .modal__cancel {
-                @include v.blue-button;
+            .delete-account-modal__container__container__button__delete {
+          
+                background-color: red;
+                color: white;
             }
+        }
+        .delete-account-modal__container__container__button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
         }
     }
 
@@ -261,6 +277,13 @@
         
     }
 
+    .delete-account-modal {
+        .delete-account-modal__container {
+            width: 80vw;
+            height: 30vh;
+        }
+    }
+
 }
 
 @media (max-width: 480px) {
@@ -268,16 +291,36 @@
         .account__profile {
             .account__profile__form {
                 width: 100%;
-                margin: 1rem;
-                padding: 1rem;
+              margin: 0rem;
+                padding: 0.5rem;
 
                 &.password {
                     margin-top: 2rem;
                 }
+
+                .account__profile__form__title {
+                    margin-top: 0;
+                }
             }
         }
-
-        
     }
 
+    .delete-account-modal {
+        .delete-account-modal__container {
+            justify-content: space-evenly;
+            width: 100%;
+            height: 30%;
+            border-radius: 0;
+            padding: 1rem 1rem 0 1rem;
+        }
+    }
+
+}
+
+@media (max-height: 680px) {
+    .delete-account-modal {
+        .delete-account-modal__container {
+            height: 60%;
+        }
+    }
 }

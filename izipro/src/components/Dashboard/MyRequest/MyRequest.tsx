@@ -35,7 +35,7 @@ import pdfLogo from '/logo/pdf-icon.svg';
 import logoProfile from '/logo/logo profile.jpeg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt, FaCamera } from 'react-icons/fa';
-import { MdSend, MdAttachFile, MdKeyboardArrowLeft } from 'react-icons/md';
+import { MdSend, MdAttachFile, MdKeyboardArrowLeft, MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
 import TextareaAutosize from 'react-textarea-autosize';
@@ -116,7 +116,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { loading: requestLoading, fetchMore } = useQueryUserRequests(id, 0, limit, myRequestStore.length > 0);
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 100);
-
 
 	// useEffect to sort the requests by date and update the subscription
 	useEffect(() => {
@@ -776,63 +775,68 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					)}
 				</div>
 			</div>
-			<div id="scrollableAnswer"
+			<div /* id="scrollableAnswer" */
 				className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''} ${conversationLoading ? 'loading' : ''}`}
-				aria-label="Liste des réponses">
+				aria-label="Liste des réponses"
+			>
 				{conversationLoading && <Spinner />}
-				<MdKeyboardArrowLeft
-					className="my-request__answer-list return"
-					onClick={() => {
-						setSelectedRequest(null),
-						setIsListOpen(true),
-						setIsAnswerOpen(false),
-						setIsMessageOpen(false);
-					}}
-					aria-label="Retour à la liste des demandes"
-				/>
-				{selectedRequest && <h2 className="my-request__answer-list title">{selectedRequest?.title}</h2>}
+				<div className="my-request__answer-list__header">
+					<MdKeyboardArrowLeft
+						className="my-request__answer-list__header return"
+						onClick={() => {
+							setSelectedRequest(null),
+							setIsListOpen(true),
+							setIsAnswerOpen(false),
+							setIsMessageOpen(false);
+						}}
+						aria-label="Retour à la liste des demandes"
+					/>
+					{selectedRequest && <h2 className="my-request__answer-list__header title">{selectedRequest?.title}</h2>}
+				</div>
 				{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
-				{userConvState && userConvState?.map((user: UserDataProps, index) => (
-					<div
-						id={index === 0 ? 'first-user' : undefined}
-						className={`my-request__answer-list__user 
+				<div className="my-request__answer-list__container">
+					{userConvState && userConvState?.map((user: UserDataProps, index) => (
+						<div
+							id={index === 0 ? 'first-user' : undefined}
+							className={`my-request__answer-list__user 
 							${selectedUser?.id === user.id ? 'selected-user' : ''} 
 							${user.deleted_at ? 'deleted' : ''}
 							${(selectedRequest?.conversation
-						.some(conv => notViewedConversationStore?.some(id => id === conv.id)
+							.some(conv => notViewedConversationStore?.some(id => id === conv.id)
 									&& conv.user_1 === user.id || conv.user_2 === user.id)) ? 'not-viewed' : ''}`
 
-						}
-						key={user.id}
-						onClick={(event) => {
-							setSelectedUser(user);
-							handleMessageConversation(user.id, event);
-							//updateViewedMessage();
-							setIsUserMessageOpen(true);
-							setIsMessageOpen(true);
-							setIsAnswerOpen(false);
-							setIsListOpen(false);
-						}}
-						aria-label={`Détails de ${user.first_name} ${user.last_name}`}
-					>
+							}
+							key={user.id}
+							onClick={(event) => {
+								setSelectedUser(user);
+								handleMessageConversation(user.id, event);
+								//updateViewedMessage();
+								setIsUserMessageOpen(true);
+								setIsMessageOpen(true);
+								setIsAnswerOpen(false);
+								setIsListOpen(false);
+							}}
+							aria-label={`Détails de ${user.first_name} ${user.last_name}`}
+						>
 
-						<div className="my-request__answer-list__user__header">
-							<img 
-								className="my-request__answer-list__user__header img" 
-								src={user.image ? user.image : logoProfile} 
-								alt={`Image de profil de ${user.first_name} ${user.last_name}`} />
-							{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
-							{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
-							{user.denomination ? (
-								<p className="my-request__answer-list__user__header denomination">{user.denomination}</p>
-							) : (
-								<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
-							)}
-							{user.deleted_at && <p className="my-request__answer-list__user__header deleted" aria-label="Utilisateur supprimé">
+							<div className="my-request__answer-list__user__header">
+								<img 
+									className="my-request__answer-list__user__header img" 
+									src={user.image ? user.image : logoProfile} 
+									alt={`Image de profil de ${user.first_name} ${user.last_name}`} />
+								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
+								{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
+								{user.denomination ? (
+									<p className="my-request__answer-list__user__header denomination">{user.denomination}</p>
+								) : (
+									<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
+								)}
+								{user.deleted_at && <p className="my-request__answer-list__user__header deleted" aria-label="Utilisateur supprimé">
 								Utilisateur supprimé</p>}
+							</div>
 						</div>
-					</div>
-				))}
+					))}
+				</div>
 			</div>
 			<div className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`} aria-label='Liste des messages'>
 				{messageLoading && <Spinner />}
@@ -870,6 +874,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								<p className="my-request__message-list__user__header__detail name">{selectedUser?.first_name} {selectedUser?.last_name}</p>
 							)}
 							{selectedUser?.deleted_at && <p className="my-request__message-list__user__header__detail deleted" aria-label="Utilisateur supprimé">Utilisateur supprimé</p>}
+							{selectedUser && selectedUser?.id > 0 && <span className="my-request__message-list__user__header__detail deployArrow">{userDescription ? <MdKeyboardArrowDown />  : <MdKeyboardArrowRight /> }</span>}
 						</div>
 
 						{userDescription && <div>
@@ -882,10 +887,10 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					{/* 	)} */}
 
 				</div>
-
-				<div id="scrollableMessage" className="my-request__message-list__message" aria-label='Message de la conversation'>
-
-					{Array.isArray(messageStore) && isUserMessageOpen &&
+				<div className="my-request__container">
+					<div className="my-request__background">
+						<div /* id="scrollableMessage" */ className="my-request__message-list__message" aria-label='Message de la conversation'>
+							{Array.isArray(messageStore) && isUserMessageOpen &&
 						messageStore
 							.filter((message) => message.conversation_id === conversationIdState)
 							.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
@@ -937,7 +942,9 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								</div>
 							))
 
-					}
+							}
+						</div>
+					</div>
 				</div>
 
 				<form className="my-request__message-list__form" onSubmit={(event) => {
