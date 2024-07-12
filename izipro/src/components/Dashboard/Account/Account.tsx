@@ -621,18 +621,18 @@ function Account() {
 
 
 			<ReactModal
-				className="modal"
+				className="delete-account-modal"
 				isOpen={ModalIsOpen}
 				contentLabel="Delete Account"
 				shouldCloseOnOverlayClick={false}
 				aria-label="supprimer mon compte"
 			>
-				<div className="modal__container">
-					<h1 className="modal__title">ATTENTION!!</h1>
-					<p className="modal__description">Vous allez supprimer votre compte definitevement, êtes vous sur?</p>
-					<div className="modal__container__button">
-						<button className="modal__delete" onClick={handledeleteAccount}>Supprimer</button>
-						<button className="modal__cancel" onClick={() => setModalIsOpen(!ModalIsOpen)}>Annuler</button>
+				<div className="delete-account-modal__container">
+					<h1 className="delete-account-modal__container__title">ATTENTION!!</h1>
+					<p className="delete-account-modal__container__description">Vous allez supprimer votre compte definitevement, êtes vous sur?</p>
+					<div className="delete-account-modal__container__container__button">
+						<button className="delete-account-modal__container__container__button__delete" onClick={handledeleteAccount}>Supprimer</button>
+						<button className="delete-account-modal__container__container__button__cancel" onClick={() => setModalIsOpen(!ModalIsOpen)}>Annuler</button>
 					</div>
 				</div>
 			</ReactModal>

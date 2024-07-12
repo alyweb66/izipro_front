@@ -1,0 +1,81 @@
+@use './variables' as v;
+@use './mixins' as m;
+
+
+.delete-item-modal {
+    height: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: v.$font;
+    font-weight: 500;
+
+    .delete-item-modal__container {
+        @include m.modal-container;
+        justify-content: space-around;
+        width: 50vw;
+        height: 30vh;
+        padding: 1rem;
+
+        .delete-item-modal__container__title {
+            margin: 0 auto;
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: v.$color-primary-orange;
+
+            
+        }
+        .delete-item-modal__container__container__button {
+            display: flex;
+            position: relative;
+
+            .delete-item-modal__container__container__button__delete,
+            .delete-item-modal__container__container__button__cancel {
+                @include m.blue-button;
+            }
+        }
+
+        .delete-item-modal__container__container__button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
+        }
+
+        .delete-item-modal__container__description {
+            text-align: center;
+            margin: 1rem auto;
+            color: red;
+        }
+    }
+}
+
+
+@media (max-width: 830px) {
+
+    .delete-item-modal {
+        .delete-item-modal__container {
+            width: 80vw;
+            height: 30vh;
+        }
+    }
+
+}
+
+@media (max-width: 480px) {
+ 
+
+    .delete-item-modal {
+        .delete-item-modal__container {
+            justify-content: space-evenly;
+            width: 100%;
+            height: 30%;
+            border-radius: 0;
+            padding: 1rem 1rem 0 1rem;
+        }
+    }
+
+}

@@ -2,6 +2,8 @@
 import ReactModal from 'react-modal';
 ReactModal.setAppElement('#root');
 
+import '../../styles/deleteItemModal.scss';
+
 interface ModalArgs {
     event: React.MouseEvent;
     requestId: number;
@@ -24,18 +26,18 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 }) => {
 	return (
 		<ReactModal
-			className="modal"
+			className="delete-item-modal"
 			isOpen={deleteItemModalIsOpen}
 			contentLabel="Delete Account"
 			shouldCloseOnOverlayClick={false}
 			aria-label="supprimer mon compte"
 		>
-			<div className="modal__container">
-				<h1 className="modal__title">ATTENTION!!</h1>
-				<p className="modal__description">Vous allez supprimer cette demande, êtes vous sur?</p>
-				<div className="modal__container__button">
+			<div className="delete-item-modal__container">
+				<h1 className="delete-item-modal__container__title">ATTENTION!!</h1>
+				<p className="delete-item-modal__container__description">Vous allez supprimer cette demande, êtes vous sur?</p>
+				<div className="delete-item-modal__container__container__button">
 					<button 
-						className="modal__delete" 
+						className="delete-item-modal__container__container__button__delete" 
 						onClick={() => {
 							if (modalArgs?.event && modalArgs?.requestId) {
 								handleDeleteRequest(modalArgs.event, modalArgs.requestId);
@@ -46,7 +48,7 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
             Supprimer
 					</button>
 					<button 
-						className="modal__cancel" 
+						className="delete-item-modal__container__container__button__cancel" 
 						onClick={() => {
 							setDeleteItemModalIsOpen(!deleteItemModalIsOpen);
 							setModalArgs(null);
