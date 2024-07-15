@@ -111,7 +111,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
 	//query
-	const { loading: convLoading, fetchMore } = useQueryUserConversations(0, limit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
+	//const { loading: convLoading, fetchMore } = useQueryUserConversations(0, limit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
 	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
 
 	// file upload
@@ -226,10 +226,13 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	// cleane the request store if the component is unmounted
 	useEffect(() => {
 		return () => {
+			//if the request is in the requestsConversationStore and if there is a conversation with the user
+			if (requestsConversationStore.some(requestConv => requestConv.id === request.id && !requestConv.conversation?.some(conversation => conversation.user_1 === id || conversation.user_2 === id))) {
 			// remove request.id in requestsConversationStore
-			const removedRequest = requestConversationStore.getState().requests?.filter((requestConv: RequestProps) => request.id !== requestConv.id);
-			requestConversationStore.setState({ requests: removedRequest });
-			setRequestsConversationStore(removedRequest);
+				const removedRequest = requestConversationStore.getState().requests?.filter((requestConv: RequestProps) => request.id !== requestConv.id);
+				requestConversationStore.setState({ requests: removedRequest });
+			}
+			//setRequestsConversationStore(removedRequest);
 			resetRequest();
 			setConversationIdState(0);
 
@@ -421,6 +424,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 		sendMessage();
 	};
+	console.log('requestConversationStore', requestsConversationStore);
 
 	// Function to load more requests with infinite scroll
 	function addRequest() {
@@ -576,7 +580,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	return (
 		<div className="my-conversation">
-			{(convLoading || hideRequestLoading) && <Spinner />}
+			{( hideRequestLoading) && <Spinner />}
 			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
 				{requestByDate && (
 					<div className="my-conversation__list__detail" >

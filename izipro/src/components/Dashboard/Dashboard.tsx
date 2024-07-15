@@ -6,7 +6,6 @@ import { useMutation } from '@apollo/client';
 // @ts-expect-error turf is not typed
 import * as turf from '@turf/turf';
 
-
 // components 
 import Account from './Account/Account';
 import Request from './Request/Request';
@@ -161,8 +160,7 @@ function Dashboard() {
 	} else {
 		isLogged = JSON.parse(decodeData || '{}');
 	}
-	console.log('notViewedRequestStore', notViewedRequestStore);
-console.log('subscription', subscriptionDataStore.getState());
+
 
 	// useEffect to check the size of the window
 	useEffect(() => {
@@ -422,7 +420,7 @@ console.log('subscription', subscriptionDataStore.getState());
 			const messageAdded: MessageProps[] = clientMessageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
-console.log('messageAdded', messageAdded);
+			console.log('messageAdded', messageAdded);
 
 			// add the new message to the message store
 			messageDataStore.setState(prevState => {
@@ -503,9 +501,10 @@ console.log('messageAdded', messageAdded);
 
 		if (clientRequestSubscription) {
 			const requestAdded = clientRequestSubscription.requestAdded[0];
-			console.log('requestAdded', requestAdded);
 
-			if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
+
+			if (clientRequestsStore.length === 0 || clientRequestsStore.some(prevRequest => prevRequest.id !== requestAdded.id)) {
+			
 				RangeFilter([requestAdded], true);
 			}
 			
@@ -519,7 +518,7 @@ console.log('messageAdded', messageAdded);
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
-console.log('messageAdded my request', messageAdded);
+			console.log('messageAdded my request', messageAdded);
 
 			//fetch request if the request is not in the store
 			if (messageAdded[0].request_id && !requestStore.some(request => request.id === messageAdded[0].request_id)) {
@@ -752,14 +751,16 @@ console.log('messageAdded my request', messageAdded);
 		setSelectedTab('My conversations');
 	};
 
+
 	// function to range request by request location
 	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
+
 		// Define the two points for each request and filter them
 		const filteredRequests = requests.filter((request: RequestProps) => {
 			const requestPoint = turf.point([request.lng, request.lat]);
 			const userPoint = turf.point([lng, lat]);
 			const distance = turf.distance(requestPoint, userPoint);
-
+			
 			return (
 				(distance < request.range / 1000 || request.range === 0) &&
 				(distance < settings[0].range / 1000 || settings[0].range === 0) &&
@@ -772,10 +773,12 @@ console.log('messageAdded my request', messageAdded);
 			);
 		});
 
+
 		// Get all requests that are not in the store
 		const newRequests = filteredRequests.filter((request: RequestProps) =>
 			clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id)
 		);
+
 
 		// Add the new requests to the appropriate place in the list
 		if (newRequests && newRequests.length > 0) {
@@ -788,7 +791,6 @@ console.log('messageAdded my request', messageAdded);
 					setNotViewedRequestStore([...notViewedRequestStore, newRequests[0].id]);
 				}
 			} else {
-
 
 				setClientRequestsStore([...(clientRequestsStore || []), ...newRequests]);
 
@@ -855,8 +857,12 @@ console.log('messageAdded my request', messageAdded);
 						</li>
 						{role === 'pro' &&
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
-								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); }}>CLIENT
-								{notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />}
+								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); }}>
+								<div className="tab-content">
+									<span>CLIENT</span>
+									{notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />}
+								</div>
+								{/* {notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />} */}
 								<div className="indicator"></div>
 							</li>
 						}

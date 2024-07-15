@@ -41,6 +41,7 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 						className="delete-item-modal__container__container__button__delete" 
 						onClick={(event) => {
 							event.stopPropagation();
+							event.preventDefault();
 							if (modalArgs?.requestId) {
 								handleDeleteRequest( modalArgs.requestId);
 								setDeleteItemModalIsOpen(!deleteItemModalIsOpen);
@@ -53,6 +54,7 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 						className="delete-item-modal__container__container__button__cancel" 
 						onClick={(event) => {
 							event.stopPropagation();
+							event.preventDefault();
 							setDeleteItemModalIsOpen(!deleteItemModalIsOpen);
 							setModalArgs(null);
 						}}
