@@ -42,7 +42,7 @@ const RequestItem = ({
     isMessageExpanded?: Object,
     setIsMessageExpanded?: Function,
     setIsListOpen?: Function,
-    setModalArgs: React.Dispatch<React.SetStateAction<{ event: React.MouseEvent, requestId: number } | null>>,
+    setModalArgs: React.Dispatch<React.SetStateAction<{ requestId: number, requestTitle: string } | null>>,
     openModal?: Function
   }) => {
 	const idRef = useRef<number>(0);
@@ -117,7 +117,7 @@ const RequestItem = ({
 			>
 				{(request || requestByDate)?.message}
 			</p>
-			<div className="my-conversation__list__detail__item__picture">
+			<div className={`my-conversation__list__detail__item__picture ${requestByDate?.deleted_at ? 'deleted' : ''}`}>
 								
 				{(() => {
 					const imageUrls = (request || requestByDate)?.media?.map(media => media.url) || [];
@@ -159,22 +159,26 @@ const RequestItem = ({
 				className="my-conversation__list__detail__item__delete" 
 				type='button' 
 				onClick={(event) => {
+					event.stopPropagation();
 					if (request?.id) {
 						resetRequest && resetRequest();
 					} else {
 						setDeleteItemModalIsOpen(true);
-						/* handleHideRequest && handleHideRequest(event, requestByDate?.id); */
+
 						if (requestByDate) {
-							setModalArgs({ event, requestId: requestByDate.id });				
+							event.stopPropagation();
+							setModalArgs({requestId: requestByDate.id, requestTitle: requestByDate.title});				
 						}
 					}
-					event.stopPropagation();
+					
 				}}>
 			</button>
 			<FaTrashAlt 
 				className="my-conversation__list__detail__item__delete-FaTrashAlt" 
 				onClick={(event) => {
 					document.getElementById(`delete-request-${(request || requestByDate)?.id}`)?.click(),
+				
+					
 					event.stopPropagation();
 				}}
 			/>

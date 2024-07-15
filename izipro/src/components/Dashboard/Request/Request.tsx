@@ -28,6 +28,8 @@ import TextareaAutosize from 'react-textarea-autosize';
 import './Request.scss';
 import Spinner from '../../Hook/Spinner';
 import SelectBox from '../../Hook/SelectBox';
+import { subscriptionDataStore } from '../../../store/subscription';
+import { useMyRequestMessageSubscriptions } from '../../Hook/MyRequestSubscription';
 
 
 
@@ -43,6 +45,7 @@ function Request() {
 	const last_name = userDataStore((state) => state.last_name);
 	const postal_code = userDataStore((state) => state.postal_code);
 	const [myRequestsStore, setMyRequestsStore] = myRequestStore((state) => [state.requests, state.setMyRequestStore]);
+	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 
 	//state
 	const [urgent, setUrgent] = useState(false);
@@ -128,6 +131,29 @@ function Request() {
 
 					// Add the new request to the store
 					setMyRequestsStore([response.data.createRequest, ...myRequestsStore]);
+					const newRequest = response.data.createRequest;
+					console.log('newRequest', newRequest);
+
+
+					// update subscriptionStore with the new request id
+					if (subscriptionStore.some(subscription => subscription.subscriber === 'request')) {
+						const newSubscription = subscriptionStore.map(subscription => {
+							if (subscription.subscriber === 'request' && Array.isArray(subscription.subscriber_id) && !subscription.subscriber_id.includes(newRequest.id)) {
+								console.log('in the if');
+								// create new subscriber_id array
+								const newSubscriberId = [...subscription.subscriber_id, newRequest.id];
+								// Return new subscription
+								return { ...subscription, subscriber_id: newSubscriberId };
+								//subscription.subscriber_id.push(newRequest.id);
+							}
+							return subscription;
+						});
+						console.log('newSubscription', newSubscription);
+
+						setSubscriptionStore(newSubscription);
+					} else {
+						setSubscriptionStore([...subscriptionStore, { subscriber: 'request', subscriber_id: [newRequest.id], user_id: id, created_at: new Date().toISOString() }]);
+					}
 
 					setSuccessMessage('Demande envoyée avec succès');
 					timer = setTimeout(() => {
@@ -143,6 +169,7 @@ function Request() {
 					setSelectedCategory(0);
 					setSelectedJob(0);
 					setUrgent(false);
+
 				}
 			});
 			clearTimeout(timer);
@@ -157,7 +184,7 @@ function Request() {
 	useEffect(() => {
 		if (jobData) {
 			console.log('jobData', jobData.category.jobs);
-			
+
 			setJobsState(jobData.category.jobs);
 		}
 	}, [jobData]);
@@ -253,7 +280,7 @@ function Request() {
 			}
 		}
 	};
-	
+
 	// Update zoom level when radius changes
 	useEffect(() => {
 		const mediaQuery = window.matchMedia('(max-width: 450px)');
@@ -311,13 +338,13 @@ function Request() {
 		}
 	}, [radius]);
 
+	// reset selected job when category changes
 	useEffect(() => {
 		if (selectedCategory) {
 			setSelectedJob(0);
 		}
 	}, [selectedCategory]);
 
-	console.log('selectedJob', selectedCategory);
 
 	return (
 		<div className="request">
@@ -345,7 +372,7 @@ function Request() {
 						loading={categoryLoading}
 						setSelected={setSelectedCategory}
 					/>
-				
+
 					<SelectBox
 						data={jobsState}
 						isCategory={false}

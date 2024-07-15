@@ -1,8 +1,8 @@
 type SubscriptionProps = {
-    id: number
+    id?: number
     user_id: number
     subscriber: string
-    subscriber_id: number
+    subscriber_id: number[]
     created_at: string
 };
 

@@ -83,7 +83,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [isMessageOpen, setIsMessageOpen] = useState(false);
 	const [requestTitle, setRequestTitle] = useState(true);
-	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
+	const [modalArgs, setModalArgs] = useState<{  requestId: number, requestTitle: string } | null>(null);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 
 	const limit = 4;
@@ -457,8 +457,8 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	}
 
 	// Function to hide a client request
-	const handleHideRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
-		event.preventDefault();
+	const handleHideRequest = ( requestId: number) => {
+		//event.preventDefault();
 
 		hideRequest({
 			variables: {

@@ -79,8 +79,6 @@ function Dashboard() {
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
-	const [isLoading, setIsLoading] = useState<boolean>(true);
-	console.log('isOpened', isOpen);
 
 	//*state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
@@ -163,6 +161,8 @@ function Dashboard() {
 	} else {
 		isLogged = JSON.parse(decodeData || '{}');
 	}
+	console.log('notViewedRequestStore', notViewedRequestStore);
+console.log('subscription', subscriptionDataStore.getState());
 
 	// useEffect to check the size of the window
 	useEffect(() => {
@@ -422,6 +422,7 @@ function Dashboard() {
 			const messageAdded: MessageProps[] = clientMessageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
+console.log('messageAdded', messageAdded);
 
 			// add the new message to the message store
 			messageDataStore.setState(prevState => {
@@ -501,13 +502,13 @@ function Dashboard() {
 	useEffect(() => {
 
 		if (clientRequestSubscription) {
-			if (clientRequestSubscription) {
-				const requestAdded = clientRequestSubscription.requestAdded[0];
+			const requestAdded = clientRequestSubscription.requestAdded[0];
+			console.log('requestAdded', requestAdded);
 
-				if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
-					RangeFilter([requestAdded], true);
-				}
+			if (clientRequestsStore?.some(prevRequest => prevRequest.id !== requestAdded.id)) {
+				RangeFilter([requestAdded], true);
 			}
+			
 		}
 	}, [clientRequestSubscription]);
 
@@ -518,6 +519,7 @@ function Dashboard() {
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
+console.log('messageAdded my request', messageAdded);
 
 			//fetch request if the request is not in the store
 			if (messageAdded[0].request_id && !requestStore.some(request => request.id === messageAdded[0].request_id)) {

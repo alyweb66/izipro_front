@@ -46,6 +46,7 @@
                 cursor: pointer;
                 display: flex;
                 flex-direction: column;
+                position: relative;
                 // border: 1px solid v.$color-secondary-blue;
                 margin: 1rem;
                 background-color: white;
@@ -96,9 +97,9 @@
                 }
 
                 &.deleted {
-
                     background-color: v.$color-deleted-grey;
                     border: 1px solid v.$color-deleted-grey;
+                    z-index: 1;
 
                     .my-conversation__list__detail__item__deleted {
                         position: absolute;
@@ -202,12 +203,16 @@
                     cursor: pointer;
                     width: inherit;
                     border: none;
+                    padding-left: 0.3rem;
+                    padding-right: 0.3rem;
+                    border-radius: 0;
                     background-color: transparent;
                     box-shadow: none;
-                    margin: 0 0.3rem 0 0.3rem;
+                    margin: 0 ;
                     font-size: 1rem;
                     font-weight: 400;
                     background-color: v.$color-light-blue;
+                    z-index: 2;
                 }
 
                 &.expanded {
@@ -234,6 +239,10 @@
 
                     flex-wrap: wrap;
 
+                    &.deleted {
+                        opacity: 0.3;
+                    }
+
                     &.img {
                         margin: 1rem 0.5rem 0 0.5rem;
                         border-radius: 0.5rem;
@@ -254,6 +263,7 @@
                     margin: 1rem 1rem 1rem auto;
                     color: v.$color-error;
                     cursor: pointer;
+                    z-index: 2;
                 }
             }
 

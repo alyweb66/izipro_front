@@ -50,7 +50,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	//const [isHasMore, setIsHasMore] = useState(true);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
-	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
+	const [modalArgs, setModalArgs] = useState<{requestId: number, requestTitle: string } | null>(null);
 	/* 	const [isLoading, setIsLoading] = useState(false); */
 	// Create a ref for the scroll position
 	//const offsetRef = useRef(0);
@@ -232,8 +232,8 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	});
 
 	// Function to hide a request
-	const handleHideRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
-		event.preventDefault();
+	const handleHideRequest = (requestId: number) => {
+
 		hideRequest({
 			variables: {
 				input: {
@@ -401,7 +401,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 									type='button'
 									onClick={(event) => {
 										setDeleteItemModalIsOpen(true);
-										setModalArgs({ event, requestId: request.id });
+										setModalArgs({requestId: request.id, requestTitle: request.title});
 										event.stopPropagation();
 									}}>
 								</button>

@@ -42,12 +42,8 @@ import TextareaAutosize from 'react-textarea-autosize';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 
-
-
 // Configuration for React Modal
 ReactModal.setAppElement('#root');
-
-
 
 type ExpandedState = {
 	[key: number]: boolean;
@@ -82,7 +78,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [isMessageOpen, setIsMessageOpen] = useState<boolean>(false);
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
-	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
+	const [modalArgs, setModalArgs] = useState<{requestId: number, requestTitle: string } | null>(null);
 	const [isUserMessageOpen, setIsUserMessageOpen] = useState(false);
 
 	// Create a state for the scroll position
@@ -116,6 +112,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { loading: requestLoading, fetchMore } = useQueryUserRequests(id, 0, limit, myRequestStore.length > 0);
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 100);
+console.log('myRequestsStore', myRequestsStore);
 
 	// useEffect to sort the requests by date and update the subscription
 	useEffect(() => {
@@ -361,8 +358,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 
 	// Function to delete a request
-	const handleDeleteRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
-		event.preventDefault();
+	const handleDeleteRequest = (requestId: number) => {
 
 		deleteRequest({
 			variables:
@@ -741,7 +737,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 									aria-label={`Supprimer la demande ${request.title}`}
 									onClick={(event) => {
 										setDeleteItemModalIsOpen(true);
-										setModalArgs({ event, requestId: request.id }),
+										setModalArgs({ requestId: request.id, requestTitle: request.title}),
 										event.stopPropagation();
 									}}
 								>
