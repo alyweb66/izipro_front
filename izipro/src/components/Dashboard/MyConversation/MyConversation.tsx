@@ -85,6 +85,9 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [requestTitle, setRequestTitle] = useState(true);
 	const [modalArgs, setModalArgs] = useState<{  requestId: number, requestTitle: string } | null>(null);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
+	const [isSkipMessage, setIsSkipMessage] = useState(true);
+	const [fetchConvIdState, setFetchConvIdState] = useState(0);
+
 
 	const limit = 4;
 
@@ -111,8 +114,8 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
 	//query
-	const { loading: convLoading, fetchMore } = useQueryUserConversations(0, limit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
-	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
+	const { loading: convLoading, fetchMore } = useQueryUserConversations(0, limit, true) as unknown as useQueryUserConversationsProps;
+	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(fetchConvIdState, 0, 100, isSkipMessage);
 
 	// file upload
 	const { file, urlFile, setUrlFile, setFile, handleFileChange } = useFileHandler();
@@ -140,17 +143,33 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 					messages: [...prevState.messages, ...newMessages]
 				};
 			});
+
+			setIsSkipMessage(true);
 		}
 	}, [messageData]);
 
 	// useEffect to update the conversation id
 	useEffect(() => {
-		if (selectedRequest) {
+		if (selectedRequest && selectedRequest.id > 0) {
 			const conversationId = selectedRequest.conversation?.find(conversation => (
 				conversation.user_1 === id || conversation.user_2 === id
 			));
 			setConversationIdState(conversationId?.id ?? 0);
 
+			// get only conversation id who are not in the store
+			let conversationIdNotStore;
+			if (messageStore.length > 0) {
+				conversationIdNotStore = !messageStore.some(message => message.conversation_id === conversationId?.id);
+			} else {
+				conversationIdNotStore = true;
+			}
+
+			if (conversationIdNotStore && conversationId?.id !== 0) {
+				console.log('go to fetch');
+				
+				setFetchConvIdState(conversationId?.id ?? 0);
+				setIsSkipMessage(false);
+			}
 		}
 
 	}, [selectedRequest]);
@@ -247,6 +266,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		}, 200);
 	}, [messageStore]);
 
+console.log('selectedRequest', selectedRequest);
 
 	// Function to send message
 	function sendMessage(updatedRequest?: RequestProps, newClientRequest = false) {
@@ -424,7 +444,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 		sendMessage();
 	};
-	console.log('requestConversationStore', requestsConversationStore);
 
 	// Function to load more requests with infinite scroll
 	function addRequest() {

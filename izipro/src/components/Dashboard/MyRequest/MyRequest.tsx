@@ -489,7 +489,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 
 	};
-console.log(('isSkipMessage', isSkipMessage));
 
 	// Function to handle the users viewedIds for the conversation
 	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLDivElement>) => {
@@ -527,10 +526,6 @@ console.log(('isSkipMessage', isSkipMessage));
 
 		const conversationId = conversation?.id;
 		setConversationIdState(conversationId || 0);
-		
-		console.log('conversationIdin function', conversationId);
-console.log('messageStore', messageStore);
-
 
 		// get only conversation id who are not in the store
 		let conversationIdNotStore;
@@ -541,7 +536,7 @@ console.log('messageStore', messageStore);
 		}
 
 		if (conversationIdNotStore && conversationId !== conversationIdState) {
-			console.log('fetchConv', conversationId);
+
 			setFetchConvIdState(conversationId ?? 0);
 			setIsSkipMessage(false);
 		}
