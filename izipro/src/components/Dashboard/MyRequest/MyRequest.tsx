@@ -78,8 +78,11 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [isMessageOpen, setIsMessageOpen] = useState<boolean>(false);
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
-	const [modalArgs, setModalArgs] = useState<{requestId: number, requestTitle: string } | null>(null);
+	const [modalArgs, setModalArgs] = useState<{ requestId: number, requestTitle: string } | null>(null);
 	const [isUserMessageOpen, setIsUserMessageOpen] = useState(false);
+	const [isSkipRequest] = useState<boolean>(true);
+	const [isSkipMessage, setIsSkipMessage] = useState<boolean>(true);
+	const [fetchConvIdState, setFetchConvIdState] = useState<number>(0);
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
@@ -109,10 +112,9 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
 	// Query to get the user requests
-	const { loading: requestLoading, fetchMore } = useQueryUserRequests(id, 0, limit, myRequestStore.length > 0);
+	const { loading: requestLoading, fetchMore } = useQueryUserRequests(id, 0, limit, isSkipRequest);
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
-	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(conversationIdState, 0, 100);
-console.log('myRequestsStore', myRequestsStore);
+	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(fetchConvIdState, 0, 100, isSkipMessage);
 
 	// useEffect to sort the requests by date and update the subscription
 	useEffect(() => {
@@ -285,6 +287,16 @@ console.log('myRequestsStore', myRequestsStore);
 
 	}, [userConvStore, selectedRequest]);
 
+	// useEffect to change skipmessage state
+	/* useEffect(() => {
+		if (conversationIdState === 0) {
+			setIsSkipMessage(true);
+		} else {
+
+			setIsSkipMessage(false);
+		}
+	}, [conversationIdState]); */
+
 	// useEffect to update the message store
 	useEffect(() => {
 		if (messageData) {
@@ -310,6 +322,8 @@ console.log('myRequestsStore', myRequestsStore);
 					};
 				}
 			});
+
+			setIsSkipMessage(true);
 
 		}
 	}, [messageData]);
@@ -353,6 +367,7 @@ console.log('myRequestsStore', myRequestsStore);
 	useEffect(() => {
 		return () => {
 			setSelectedRequest(null);
+			setConversationIdState(0);
 		};
 	}, []);
 
@@ -474,6 +489,7 @@ console.log('myRequestsStore', myRequestsStore);
 		}
 
 	};
+console.log(('isSkipMessage', isSkipMessage));
 
 	// Function to handle the users viewedIds for the conversation
 	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLDivElement>) => {
@@ -510,9 +526,24 @@ console.log('myRequestsStore', myRequestsStore);
 		);
 
 		const conversationId = conversation?.id;
+		setConversationIdState(conversationId || 0);
+		
+		console.log('conversationIdin function', conversationId);
+console.log('messageStore', messageStore);
 
-		if (conversationId !== conversationIdState) {
-			setConversationIdState(conversationId || 0);
+
+		// get only conversation id who are not in the store
+		let conversationIdNotStore;
+		if (messageStore.length > 0) {
+			conversationIdNotStore = !messageStore.some(message => message.conversation_id === conversationId);
+		} else {
+			conversationIdNotStore = true;
+		}
+
+		if (conversationIdNotStore && conversationId !== conversationIdState) {
+			console.log('fetchConv', conversationId);
+			setFetchConvIdState(conversationId ?? 0);
+			setIsSkipMessage(false);
 		}
 
 		// remove the conversation id from the notViewedConversationStore and database
@@ -616,9 +647,9 @@ console.log('myRequestsStore', myRequestsStore);
 
 	return (
 		<div className="my-request">
-			<div 
-				id="scrollableRequest" 
-				className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`} 
+			<div
+				id="scrollableRequest"
+				className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}
 				aria-label="Liste des demandes">
 				{requestLoading && <Spinner />}
 				{!requestByDate && <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p>}
@@ -737,7 +768,7 @@ console.log('myRequestsStore', myRequestsStore);
 									aria-label={`Supprimer la demande ${request.title}`}
 									onClick={(event) => {
 										setDeleteItemModalIsOpen(true);
-										setModalArgs({ requestId: request.id, requestTitle: request.title}),
+										setModalArgs({ requestId: request.id, requestTitle: request.title }),
 										event.stopPropagation();
 									}}
 								>
@@ -799,7 +830,7 @@ console.log('myRequestsStore', myRequestsStore);
 							${user.deleted_at ? 'deleted' : ''}
 							${(selectedRequest?.conversation
 							.some(conv => notViewedConversationStore?.some(id => id === conv.id)
-									&& conv.user_1 === user.id || conv.user_2 === user.id)) ? 'not-viewed' : ''}`
+										&& conv.user_1 === user.id || conv.user_2 === user.id)) ? 'not-viewed' : ''}`
 
 							}
 							key={user.id}
@@ -816,9 +847,9 @@ console.log('myRequestsStore', myRequestsStore);
 						>
 
 							<div className="my-request__answer-list__user__header">
-								<img 
-									className="my-request__answer-list__user__header img" 
-									src={user.image ? user.image : logoProfile} 
+								<img
+									className="my-request__answer-list__user__header img"
+									src={user.image ? user.image : logoProfile}
 									alt={`Image de profil de ${user.first_name} ${user.last_name}`} />
 								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
 								{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
@@ -828,7 +859,7 @@ console.log('myRequestsStore', myRequestsStore);
 									<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
 								)}
 								{user.deleted_at && <p className="my-request__answer-list__user__header deleted" aria-label="Utilisateur supprimé">
-								Utilisateur supprimé</p>}
+									Utilisateur supprimé</p>}
 							</div>
 						</div>
 					))}
@@ -870,7 +901,7 @@ console.log('myRequestsStore', myRequestsStore);
 								<p className="my-request__message-list__user__header__detail name">{selectedUser?.first_name} {selectedUser?.last_name}</p>
 							)}
 							{selectedUser?.deleted_at && <p className="my-request__message-list__user__header__detail deleted" aria-label="Utilisateur supprimé">Utilisateur supprimé</p>}
-							{selectedUser && selectedUser?.id > 0 && <span className="my-request__message-list__user__header__detail deployArrow">{userDescription ? <MdKeyboardArrowDown />  : <MdKeyboardArrowRight /> }</span>}
+							{selectedUser && selectedUser?.id > 0 && <span className="my-request__message-list__user__header__detail deployArrow">{userDescription ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}</span>}
 						</div>
 
 						{userDescription && <div>
@@ -887,56 +918,56 @@ console.log('myRequestsStore', myRequestsStore);
 					<div className="my-request__background">
 						<div /* id="scrollableMessage" */ className="my-request__message-list__message" aria-label='Message de la conversation'>
 							{Array.isArray(messageStore) && isUserMessageOpen &&
-						messageStore
-							.filter((message) => message.conversation_id === conversationIdState)
-							.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
-							.map((message, index, array) => (
-								<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
-									{index === array.length - 1 ? <div ref={endOfMessagesRef} aria-label="Dernier message visible" /> : null}
-									<div className={`content ${message.user_id === id ? 'me' : ''}`}>
-										{message.media[0].url && (
-											<div className="my-request__message-list__message__detail__image-container">
-												<div className={`map ${message.content ? 'message' : ''}`}>
-													{(() => {
-														const imageUrls = message.media?.map(media => media.url) || [];
-														return message.media?.map((media, index) => (
-															media ? (
-																media.name.endsWith('.pdf') ? (
-																	<a
-																		className="a-pdf"
-																		href={media.url}
-																		key={media.id}
-																		download={media.name}
-																		target="_blank"
-																		rel="noopener noreferrer"
-																		onClick={(event) => { event.stopPropagation(); }} >
-																		<img
-																			className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																			//key={media.id} 
-																			src={pdfLogo}
-																			alt={media.name}
-																		/>
-																	</a>
-																) : (
-																	<img
-																		className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																		key={media.id}
-																		src={media.url}
-																		onClick={() => openModal(imageUrls, index)}
-																		alt={media.name}
-																	/>
-																)
-															) : null
-														));
-													})()}
-												</div>
+								messageStore
+									.filter((message) => message.conversation_id === conversationIdState)
+									.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
+									.map((message, index, array) => (
+										<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
+											{index === array.length - 1 ? <div ref={endOfMessagesRef} aria-label="Dernier message visible" /> : null}
+											<div className={`content ${message.user_id === id ? 'me' : ''}`}>
+												{message.media[0].url && (
+													<div className="my-request__message-list__message__detail__image-container">
+														<div className={`map ${message.content ? 'message' : ''}`}>
+															{(() => {
+																const imageUrls = message.media?.map(media => media.url) || [];
+																return message.media?.map((media, index) => (
+																	media ? (
+																		media.name.endsWith('.pdf') ? (
+																			<a
+																				className="a-pdf"
+																				href={media.url}
+																				key={media.id}
+																				download={media.name}
+																				target="_blank"
+																				rel="noopener noreferrer"
+																				onClick={(event) => { event.stopPropagation(); }} >
+																				<img
+																					className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																					//key={media.id} 
+																					src={pdfLogo}
+																					alt={media.name}
+																				/>
+																			</a>
+																		) : (
+																			<img
+																				className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																				key={media.id}
+																				src={media.url}
+																				onClick={() => openModal(imageUrls, index)}
+																				alt={media.name}
+																			/>
+																		)
+																	) : null
+																));
+															})()}
+														</div>
+													</div>
+												)}
+												{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
 											</div>
-										)}
-										{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
-									</div>
-									<div className="my-request__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
-								</div>
-							))
+											<div className="my-request__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
+										</div>
+									))
 
 							}
 						</div>

@@ -207,7 +207,7 @@ export const useQueryUsersConversation = (userIds: number[], offset: number, lim
 };
 
 // fetch messages by conversation
-export const useQueryMyMessagesByConversation = (conversationId: number, offset: number, limit: number) => {
+export const useQueryMyMessagesByConversation = (conversationId: number, offset: number, limit: number, skip: boolean) => {
 		
 	const {  loading, subscribeToMore,error: messageError, data: messageData } = useQuery(GET_MY_MESSAGES_BY_CONVERSATION, {
 		variables: {
@@ -215,7 +215,7 @@ export const useQueryMyMessagesByConversation = (conversationId: number, offset:
 			offset: offset,
 			limit: limit
 		},
-		skip: !conversationId
+		skip
 	});
 
 	if (messageError) {

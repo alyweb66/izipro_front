@@ -820,6 +820,7 @@ function Dashboard() {
 				{userDataLoading
 					|| notViewedConversationLoading
 					|| myConversationIdsLoading
+					|| requestMyConversationLoading
 					&& <Spinner />}
 				<nav className="__nav">
 					<div className="__burger" >

@@ -111,7 +111,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
 	//query
-	//const { loading: convLoading, fetchMore } = useQueryUserConversations(0, limit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
+	const { loading: convLoading, fetchMore } = useQueryUserConversations(0, limit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
 	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
 
 	// file upload
@@ -580,7 +580,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	return (
 		<div className="my-conversation">
-			{( hideRequestLoading) && <Spinner />}
+			{( hideRequestLoading || convLoading) && <Spinner />}
 			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
 				{requestByDate && (
 					<div className="my-conversation__list__detail" >
