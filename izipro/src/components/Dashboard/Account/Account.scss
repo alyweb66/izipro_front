@@ -127,15 +127,9 @@
 
             }
 
-            .account__profile__button__show-password {
-                text-decoration: underline;
-                border: none;
-                background-color: transparent;
-                margin: 0 0 0 0;
-                font-size: 1rem;
-                font-weight: 200;
-                color: grey;
-                cursor: pointer;}
+            .show-password {
+                @include m.show-password;
+            }
         }
 
         .account__profile__delete {

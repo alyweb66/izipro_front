@@ -600,7 +600,7 @@ function Account() {
 					</label>
 					{errorPassword && <p className="account__profile__modification-error">{errorPassword}</p>}
 					{messagePassword && <p className="account__profile__modification-message">{messagePassword}</p>}
-					<button className="account__profile__button__show-password" onClick={() => setShowPassword(!showPassword)}>
+					<button className="show-password" onClick={() => setShowPassword(!showPassword)}>
 						{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
 					</button>
 					<button

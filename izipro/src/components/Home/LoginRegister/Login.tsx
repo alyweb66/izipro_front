@@ -149,8 +149,8 @@ function Login() {
 			</div>}
 			<p className="login-container__title"> Se connecter</p>
 			{message && <p className="success">{message}</p>}
-			{isChangePassword && <p className="login-success">Votre mot de passe a été modifié, vous pouvez maintenant vous connecter</p>}
-			{isEmailConfirmed && <p className="login-success">Votre adresse e-mail a été confirmée, vous pouvez maintenant vous connecter</p>}
+			{isChangePassword && <p className="success">Votre mot de passe a été modifié, vous pouvez maintenant vous connecter</p>}
+			{isEmailConfirmed && <p className="success">Votre adresse e-mail a été confirmée, vous pouvez maintenant vous connecter</p>}
 			<form className="login-container__form" onSubmit={handleLogin}>
 				<input
 					type="email"
