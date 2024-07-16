@@ -49,7 +49,6 @@ function Footer() {
 
 	//store
 	const [id, CGU] = userDataStore((state) => [state.id, state.CGU]);
-	//const CGU = userDataStore((state) => state.CGU);
 	const [CGUStore, cookieStore] = rulesStore((state) => [state.CGU, state.cookies]);
 	const [cookieConsentsId, cookiesNecessaryStore] = cookieConsents((state) => [state.id, state.cookies_necessary]);
 

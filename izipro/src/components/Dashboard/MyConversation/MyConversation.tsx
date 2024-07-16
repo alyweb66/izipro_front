@@ -266,7 +266,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		}, 200);
 	}, [messageStore]);
 
-console.log('selectedRequest', selectedRequest);
 
 	// Function to send message
 	function sendMessage(updatedRequest?: RequestProps, newClientRequest = false) {

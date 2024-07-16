@@ -703,12 +703,6 @@ function Dashboard() {
 				setNewUserId([messageAdded[0].user_id]);
 			}
 
-			//check if the conversation is already in the clientMessageViewedStore
-			/* if (!myRequestMessageViewedStore.some(id => messageAdded[0].conversation_id === id) && messageAdded[0].viewed === false) {
-				// add the conversation_id to the clientMessageViewedStore
-				setMyRequestMessageViewedStore([...messageAdded.map(message => message.conversation_id), ...(myRequestMessageViewedStore || [])]);
-			} */
-
 		}
 
 	}, [messageSubscription]);
