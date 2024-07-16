@@ -56,26 +56,7 @@
                     5px 0 10px #6666661c;
 
                 &.true {
-
-                    border: 1px solid red;
-
-                    background-color: #FFFFFF;
-                    //background-color: #028cef1f;
-                    border: 1px solid red;
-                    border-radius: 0.5rem;
-                    position: relative;
-
-                    &::before {
-                        content: "";
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(255, 0, 0, 0.068);
-                        border-radius: inherit;
-                        z-index: 0;
-                    }
+                    @include m.urgent-item;
                 }
 
                 &.urgent {
@@ -91,20 +72,18 @@
                     @include m.not-viewed
                 }
 
-                &.new {
-                    background-color: v.$color-chat-orange;
-                    border: 1px solid v.$color-primary-orange;
-                }
+                /* &.new {
+                    @include m.selected;
+                } */
 
                 &.deleted {
-                    background-color: v.$color-deleted-grey;
-                    border: 1px solid v.$color-deleted-grey;
+                   @include m.deleted;
                     z-index: 1;
 
                     .my-conversation__list__detail__item__deleted {
                         position: absolute;
                         top: 50%;
-                        left: 50%;
+                        left: 55%;
                         transform: translate(-50%, -50%);
                         color: v.$color-error;
                         font-size: 1.5rem;
@@ -221,7 +200,7 @@
                 }
 
                 &.false.selected {
-                    border: 1px solid v.$color-primary-blue;
+                    @include m.selected;
                 }
 
                 .my-conversation__list__detail__item__footer {
@@ -236,7 +215,6 @@
 
                 .my-conversation__list__detail__item__picture {
                     display: flex;
-
                     flex-wrap: wrap;
 
                     &.deleted {
@@ -268,41 +246,11 @@
             }
 
             .my-conversation__list__detail__item.false.selected {
-                background-color: #FFFFFF;
-                border: 2px solid v.$color-primary-blue;
-                border-radius: 0.5rem;
-                position: relative;
-
-                &::before {
-                    content: "";
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background-color: #028cef1f;
-                    border-radius: inherit;
-                    z-index: 0;
-                }
+                @include m.selected;
             }
 
             .my-conversation__list__detail__item.true.selected {
-                background-color: #FFFFFF;
-                border: 2px solid v.$color-primary-blue;
-                border-radius: 0.5rem;
-                position: relative;
-
-                &::before {
-                    content: "";
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background-color: #028cef1f;
-                    border-radius: inherit;
-                    z-index: 0;
-                }
+                @include m.selected;
             }
         }
 
@@ -688,9 +636,8 @@
 
 
                 &:focus {
-                    outline: none;
+                        @include m.border;
                     border-radius: 0.2rem;
-                    box-shadow: 0 0 0 1px v.$color-primary-blue;
                 }
             }
 

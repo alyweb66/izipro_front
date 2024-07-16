@@ -199,11 +199,9 @@
                     background-color: transparent;
                 }
 
-                &:focus {
-
-                    outline: none; // Remove default focus indicator
-                    border-radius: 0.2rem;
-                    box-shadow: 0 0 0 1px v.$color-primary-blue; // Add your own focus indicator
+                &:focus {      
+                        @include m.border;
+                    border-radius: 0.4rem;
                 }
             }
         }

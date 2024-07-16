@@ -57,8 +57,7 @@
         5px 0 10px #6666661c;
 
       &.true {
-        background-color: rgba(255, 0, 0, 0.068);
-        border: 1px solid red;
+        @include m.urgent-item
       }
 
       &.urgent {
