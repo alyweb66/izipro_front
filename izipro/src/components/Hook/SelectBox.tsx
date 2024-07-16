@@ -21,7 +21,6 @@ type SelectBoxProps = {
 
 
 const SelectBox = ({ setSelected, loading, isCategory, selected, data, wishListJob, setWishListJob, isWishList, isSetting }: SelectBoxProps) => {
-	console.log(selected);
 
 	const [isOpen, setIsOpen] = useState(false);
 

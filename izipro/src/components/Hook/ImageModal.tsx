@@ -3,6 +3,7 @@ import { useState } from 'react';
 import ReactModal from 'react-modal';
 import { MdKeyboardArrowRight, MdKeyboardArrowLeft, MdClose} from 'react-icons/md';
 import '../../styles/imageModal.scss';
+import { AnimatePresence, motion } from 'framer-motion';
 
 ReactModal.setAppElement('#root');
 
@@ -11,6 +12,7 @@ export function useModal() {
 	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 	const [images, setImages] = useState<string[]>([]);
+
 
 	function openModal(imageUrls: string[], initialIndex: number) {
 		setImages(imageUrls);
@@ -23,17 +25,20 @@ export function useModal() {
 	}
 
 	function nextImage() {
-		setSelectedImageIndex((selectedImageIndex + 1) % images.length);
+		setSelectedImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+
 	}
+
 
 	function previousImage() {
-		setSelectedImageIndex((selectedImageIndex - 1 + images.length) % images.length);
+		setSelectedImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+	
 	}
 
-	return { modalIsOpen, openModal, closeModal, selectedImage: images[selectedImageIndex], nextImage, previousImage };
+	return { modalIsOpen, openModal, closeModal, selectedImage: images[selectedImageIndex], nextImage, previousImage};
 }
 
-export function ImageModal({ modalIsOpen, closeModal, selectedImage, nextImage, previousImage }: { modalIsOpen: boolean, closeModal: () => void, selectedImage: string, nextImage: () => void, previousImage: () => void }) {
+export function ImageModal({ modalIsOpen, closeModal, selectedImage, nextImage, previousImage }: { modalIsOpen: boolean, closeModal: () => void, selectedImage: string, nextImage: () => void, previousImage: () => void}) {
 	return (
 		<ReactModal
 			className="react-modal"
@@ -60,7 +65,17 @@ export function ImageModal({ modalIsOpen, closeModal, selectedImage, nextImage, 
 					className="react-modal__picture back" 
 					onClick={() => document.getElementById('previous')?.click()}
 				/>
-				<img className="react-modal__picture img" src={selectedImage} alt="Selected" />
+				{/* <AnimatePresence initial={false}> */}
+				<motion.img
+					className="react-modal__picture img"
+					key={selectedImage}
+					src={selectedImage}
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					//exit={{ x: direction === 'previous' ? '100%' : '-100%', opacity: 0 }}
+					transition={{ type: 'Spring', duration: 0.3 }}
+				/>
+				{/* </AnimatePresence> */}
 				<button
 					id="next" 
 					className="react-modal__picture button" 

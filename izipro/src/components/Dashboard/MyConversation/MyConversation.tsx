@@ -47,6 +47,8 @@ import { FaCamera } from 'react-icons/fa';
 import { MdAttachFile, MdKeyboardArrowLeft, MdSend, MdKeyboardArrowRight, MdKeyboardArrowDown  } from 'react-icons/md';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+import { AnimatePresence } from 'framer-motion';
+
 
 
 
@@ -165,8 +167,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 			}
 
 			if (conversationIdNotStore && conversationId?.id !== 0) {
-				console.log('go to fetch');
-				
+
 				setFetchConvIdState(conversationId?.id ?? 0);
 				setIsSkipMessage(false);
 			}
@@ -602,8 +603,8 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
 				{requestByDate && (
 					<div className="my-conversation__list__detail" >
-
-						{request && request.id > 0 &&
+						<AnimatePresence>
+							{request && request.id > 0 &&
 							<RequestItem
 								request={request}
 								notViewedConversationStore={notViewedConversationStore}
@@ -619,25 +620,28 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 								setModalArgs={setModalArgs}
 								openModal={openModal}
 							/>
-						}
-						{requestByDate.map((requestByDate, index) => (
-							<RequestItem
-								key={requestByDate.id}
-								index={index}
-								notViewedConversationStore={notViewedConversationStore}
-								requestByDate={requestByDate}
-								handleViewedMessage={handleViewedMessage}
-								setIsMessageOpen={setIsMessageOpen}
-								selectedRequest={selectedRequest!}
-								setSelectedRequest={setSelectedRequest}
-								setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
-								isMessageExpanded={isMessageExpanded}
-								setIsMessageExpanded={setIsMessageExpanded}
-								setIsListOpen={setIsListOpen}
-								setModalArgs={setModalArgs}
-								openModal={openModal}
-							/>
-						))}
+							}
+						</AnimatePresence>
+						<AnimatePresence>
+							{requestByDate.map((requestByDate, index) => (
+								<RequestItem
+									key={requestByDate.id}
+									index={index}
+									notViewedConversationStore={notViewedConversationStore}
+									requestByDate={requestByDate}
+									handleViewedMessage={handleViewedMessage}
+									setIsMessageOpen={setIsMessageOpen}
+									selectedRequest={selectedRequest!}
+									setSelectedRequest={setSelectedRequest}
+									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+									isMessageExpanded={isMessageExpanded}
+									setIsMessageExpanded={setIsMessageExpanded}
+									setIsListOpen={setIsListOpen}
+									setModalArgs={setModalArgs}
+									openModal={openModal}
+								/>
+							))}
+						</AnimatePresence>
 
 					</div>
 				)}

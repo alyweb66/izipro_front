@@ -29,6 +29,7 @@ import './Request.scss';
 import Spinner from '../../Hook/Spinner';
 import SelectBox from '../../Hook/SelectBox';
 import { subscriptionDataStore } from '../../../store/subscription';
+import { motion, AnimatePresence } from 'framer-motion';
 
 
 
@@ -131,14 +132,12 @@ function Request() {
 					// Add the new request to the store
 					setMyRequestsStore([response.data.createRequest, ...myRequestsStore]);
 					const newRequest = response.data.createRequest;
-					console.log('newRequest', newRequest);
-
 
 					// update subscriptionStore with the new request id
 					if (subscriptionStore.some(subscription => subscription.subscriber === 'request')) {
 						const newSubscription = subscriptionStore.map(subscription => {
 							if (subscription.subscriber === 'request' && Array.isArray(subscription.subscriber_id) && !subscription.subscriber_id.includes(newRequest.id)) {
-								console.log('in the if');
+
 								// create new subscriber_id array
 								const newSubscriberId = [...subscription.subscriber_id, newRequest.id];
 								// Return new subscription
@@ -147,7 +146,7 @@ function Request() {
 							}
 							return subscription;
 						});
-						console.log('newSubscription', newSubscription);
+
 
 						setSubscriptionStore(newSubscription);
 					} else {
@@ -182,7 +181,6 @@ function Request() {
 	// Update jobs when category changes
 	useEffect(() => {
 		if (jobData) {
-			console.log('jobData', jobData.category.jobs);
 
 			setJobsState(jobData.category.jobs);
 		}
@@ -446,23 +444,33 @@ function Request() {
 						<p className="request__form__label__input length">{descriptionRequest?.length}/500</p>
 					</label>
 					<div className="request__form__input-media">
-						{urlFile.map((file, index) => (
-							<div className="request__form__input-media container" key={index}>
-
-								<img
-									className="request__form__input-media preview"
-									style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-									src={file.type === 'application/pdf' ? pdfLogo : file.name}
-									alt={`Preview ${index}`}
-								/>
-								<div
-									className="request__form__input-media remove"
-									onClick={() => handleRemove(index)}
+						<AnimatePresence>
+							{urlFile.map((file, index) => (
+								<motion.div
+									className="request__form__input-media container" key={index}
+									layout
+									style={{ overflow: 'scroll' }}
+									initial={{ opacity: 0, scale: 0.9 }}
+									animate={{ opacity: 1, scale: 1 }}
+									exit={{ opacity: 0, scale: 0.9 }}
+									transition={{ duration: 0.2, type: 'Spring' }}
 								>
+
+									<img
+										className="request__form__input-media preview"
+										style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+										src={file.type === 'application/pdf' ? pdfLogo : file.name}
+										alt={`Preview ${index}`}
+									/>
+									<div
+										className="request__form__input-media remove"
+										onClick={() => handleRemove(index)}
+									>
 									X
-								</div>
-							</div>
-						))}
+									</div>
+								</motion.div>
+							))}
+						</AnimatePresence>
 					</div>
 					<p className="request__form error">{uploadFileError}</p>
 					<h2 className="request__form__title media">Ajoutez des photos (3 maximum):</h2>

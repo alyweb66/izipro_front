@@ -41,6 +41,7 @@ import ReactModal from 'react-modal';
 import TextareaAutosize from 'react-textarea-autosize';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Configuration for React Modal
 ReactModal.setAppElement('#root');
@@ -106,7 +107,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { urlFile, setUrlFile, file, setFile, handleFileChange } = useFileHandler();
 
 	//mutation
-	const [deleteRequest, { error: deleteRequestError }] = useMutation(DELETE_REQUEST_MUTATION);
+	const [deleteRequest, { loading: deleteRequestLoading, error: deleteRequestError }] = useMutation(DELETE_REQUEST_MUTATION);
 	const [message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
@@ -647,138 +648,148 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}
 				aria-label="Liste des demandes">
 				{requestLoading && <Spinner />}
-				{!requestByDate && <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p>}
-				{requestByDate && (
+				{!requestByDate ? <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p> : (
+				
 					<div className="my-request__list__detail" >
-						{requestByDate.map((request, index) => (
-							<div
-								id={index === 0 ? 'first-request' : undefined}
-								className={`my-request__list__detail__item 
+						<AnimatePresence>
+							{requestByDate.map((request, index) => (
+								<motion.div
+									id={index === 0 ? 'first-request' : undefined}
+									className={`my-request__list__detail__item 
 									${request.urgent}
 									${selectedRequest?.id === request?.id ? 'selected' : ''} 
 									${request.conversation?.some(conv => notViewedConversationStore?.some(id => id === conv.id)) ? 'not-viewed' : ''} `}
 
-								key={request.id}
-								onClick={(event) => {
-									if (!selectedRequest) {
-										selectedRequestRef.current = request;
-									}
-									handleConversation(request, event);
-									setSelectedRequest(request);
-									setIsListOpen(false);
-									setIsAnswerOpen(true);
-									setIsMessageOpen(false);
-								}}
-								aria-label={`Détails de la demande ${request.title}`}
-							>
-								{request.urgent && <p className="my-request__list__detail__item urgent">URGENT</p>}
-								<div className="my-request__list__detail__item__header">
-									<p className="my-request__list__detail__item__header date" >
-										<span className="my-request__list__detail__item__header date-span">
-											Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
-									</p>
-									<p className="my-request__list__detail__item__header city" >
-										<span className="my-request__list__detail__item__header city-span">
-											Ville:</span>&nbsp;{request.city}
-									</p>
-									<h2 className="my-request__list__detail__item__header job" >
-										<span className="my-request__list__detail__item__header job-span">
-											Métier:</span>&nbsp;{request.job}
-									</h2>
-									{request.denomination ? (
-										<p className="my-request__list__detail__item__header name" >
-											<span className="my-request__list__detail__item__header name-span">
-												Entreprise:</span>&nbsp;{request.denomination}
-										</p>
-									) : (
-										<p className="my-request__list__detail__item__header name" >
-											<span className="my-request__list__detail__item__header name-span">
-												Nom:</span>&nbsp;{request.first_name} {request.last_name}
-										</p>
-									)}
-								</div>
-								<h1 className="my-request__list__detail__item title" >{request.title}</h1>
-								<p
-									//@ts-expect-error con't resolve this type
-									className={`my-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
+									key={request.id}
 									onClick={(event) => {
-										//to open the message when the user clicks on it just for the selected request 
-										idRef.current = request?.id ?? 0; // check if request or requestByDate is not undefined
-
-										if (idRef.current !== undefined && setIsMessageExpanded) {
-											setIsMessageExpanded((prevState: ExpandedState) => ({
-												...prevState,
-												[idRef.current as number]: !prevState[idRef.current]
-											}));
+										if (!selectedRequest) {
+											selectedRequestRef.current = request;
 										}
-										event.stopPropagation();
+										handleConversation(request, event);
+										setSelectedRequest(request);
+										setIsListOpen(false);
+										setIsAnswerOpen(true);
+										setIsMessageOpen(false);
 									}}
+									aria-label={`Détails de la demande ${request.title}`}
+									layout
+									style={{ overflow: 'scroll' }}
+									initial={{ opacity: 0, scale: 0.9 }}
+									animate={{opacity: 1, scale: 1 }}
+									exit={{ opacity: 0, scale: 0.9 }}
+									transition={{duration: 0.2, type: 'Inertia', stiffness: 50 }}
 								>
-									{request.message}
-								</p>
-								<div className="my-request__list__detail__item__picture">
+									{deleteRequestLoading && modalArgs?.requestId === request.id && <Spinner />}
+									{request.urgent && <p className="my-request__list__detail__item urgent">URGENT</p>}
+									<div className="my-request__list__detail__item__header">
+										<p className="my-request__list__detail__item__header date" >
+											<span className="my-request__list__detail__item__header date-span">
+											Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
+										</p>
+										<p className="my-request__list__detail__item__header city" >
+											<span className="my-request__list__detail__item__header city-span">
+											Ville:</span>&nbsp;{request.city}
+										</p>
+										<h2 className="my-request__list__detail__item__header job" >
+											<span className="my-request__list__detail__item__header job-span">
+											Métier:</span>&nbsp;{request.job}
+										</h2>
+										{request.denomination ? (
+											<p className="my-request__list__detail__item__header name" >
+												<span className="my-request__list__detail__item__header name-span">
+												Entreprise:</span>&nbsp;{request.denomination}
+											</p>
+										) : (
+											<p className="my-request__list__detail__item__header name" >
+												<span className="my-request__list__detail__item__header name-span">
+												Nom:</span>&nbsp;{request.first_name} {request.last_name}
+											</p>
+										)}
+									</div>
+									<h1 className="my-request__list__detail__item title" >{request.title}</h1>
+									<p
+									//@ts-expect-error con't resolve this type
+										className={`my-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
+										onClick={(event) => {
+										//to open the message when the user clicks on it just for the selected request 
+											idRef.current = request?.id ?? 0; // check if request or requestByDate is not undefined
 
-									{(() => {
-										const imageUrls = request.media?.map(media => media.url) || [];
-										return request.media?.map((media, index) => (
-											media ? (
-												media.name.endsWith('.pdf') ? (
-													<a
-														href={media.url}
-														key={media.id}
-														download={media.name}
-														target="_blank"
-														rel="noopener noreferrer"
-														onClick={(event) => { event.stopPropagation(); }}
-														aria-label={`PDF associé à la demande ${request.title}`}
-													>
+											if (idRef.current !== undefined && setIsMessageExpanded) {
+												setIsMessageExpanded((prevState: ExpandedState) => ({
+													...prevState,
+													[idRef.current as number]: !prevState[idRef.current]
+												}));
+											}
+											event.stopPropagation();
+										}}
+									>
+										{request.message}
+									</p>
+									<div className="my-request__list__detail__item__picture">
+
+										{(() => {
+											const imageUrls = request.media?.map(media => media.url) || [];
+											return request.media?.map((media, index) => (
+												media ? (
+													media.name.endsWith('.pdf') ? (
+														<a
+															href={media.url}
+															key={media.id}
+															download={media.name}
+															target="_blank"
+															rel="noopener noreferrer"
+															onClick={(event) => { event.stopPropagation(); }}
+															aria-label={`PDF associé à la demande ${request.title}`}
+														>
+															<img
+																className="my-request__list__detail__item__picture img"
+																//key={media.id} 
+																src={pdfLogo}
+																alt={`PDF associé à la demande ${request.title}`}
+															/>
+														</a>
+													) : (
 														<img
 															className="my-request__list__detail__item__picture img"
-															//key={media.id} 
-															src={pdfLogo}
-															alt={`PDF associé à la demande ${request.title}`}
+															key={media.id}
+															src={media.url}
+															onClick={(event) => {
+																openModal(imageUrls, index),
+																event.stopPropagation();
+															}}
+															alt={`Image associée à la demande ${request.title}`}
 														/>
-													</a>
-												) : (
-													<img
-														className="my-request__list__detail__item__picture img"
-														key={media.id}
-														src={media.url}
-														onClick={(event) => {
-															openModal(imageUrls, index),
-															event.stopPropagation();
-														}}
-														alt={`Image associée à la demande ${request.title}`}
-													/>
-												)
-											) : null
-										));
-									})()}
+													)
+												) : null
+											));
+										})()}
 
-								</div>
-								<button
-									id={`delete-request-${request.id}`}
-									className="my-request__list__detail__item__delete"
-									type='button'
-									aria-label={`Supprimer la demande ${request.title}`}
-									onClick={(event) => {
-										setDeleteItemModalIsOpen(true);
-										setModalArgs({ requestId: request.id, requestTitle: request.title }),
-										event.stopPropagation();
-									}}
-								>
-								</button>
-								<FaTrashAlt
-									className="my-request__list__detail__item__delete-FaTrashAlt"
-									onClick={(event) => {
-										document.getElementById(`delete-request-${request.id}`)?.click(),
-										event.stopPropagation();
-									}}
-								/>
-							</div>
-						))}
+									</div>
+									<button
+										id={`delete-request-${request.id}`}
+										className="my-request__list__detail__item__delete"
+										type='button'
+										aria-label={`Supprimer la demande ${request.title}`}
+										onClick={(event) => {
+											setDeleteItemModalIsOpen(true);
+											setModalArgs({ requestId: request.id, requestTitle: request.title }),
+											event.stopPropagation();
+										}}
+									>
+									</button>
+									<FaTrashAlt
+										className="my-request__list__detail__item__delete-FaTrashAlt"
+										onClick={(event) => {
+											document.getElementById(`delete-request-${request.id}`)?.click(),
+											event.stopPropagation();
+										}}
+									/>
+								</motion.div>
+							))}
+						</AnimatePresence>
 					</div>
 				)}
+			
 				<div className="my-request__list__fetch-button">
 					{isHasMore ? (<button
 						className="Btn"
@@ -815,50 +826,63 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					/>
 					{selectedRequest && <h2 className="my-request__answer-list__header title">{selectedRequest?.title}</h2>}
 				</div>
-				{userConvState?.length === 0 && <p className="my-request__answer-list no-conv">Vous n&apos;avez pas de conversation</p>}
-				<div className="my-request__answer-list__container">
-					{userConvState && userConvState?.map((user: UserDataProps, index) => (
-						<div
-							id={index === 0 ? 'first-user' : undefined}
-							className={`my-request__answer-list__user 
+				
+				{userConvState?.length === 0 ? (<p className="my-request__answer-list no-conv">
+					Vous n&apos;avez pas de conversation
+				</p>
+				) : (
+					<div className="my-request__answer-list__container">
+						<AnimatePresence>
+							{userConvState && userConvState?.map((user: UserDataProps, index) => (
+								<motion.div
+									id={index === 0 ? 'first-user' : undefined}
+									className={`my-request__answer-list__user 
 							${selectedUser?.id === user.id ? 'selected-user' : ''} 
 							${user.deleted_at ? 'deleted' : ''}
 							${(selectedRequest?.conversation
-							.some(conv => notViewedConversationStore?.some(id => id === conv.id)
+									.some(conv => notViewedConversationStore?.some(id => id === conv.id)
 										&& conv.user_1 === user.id || conv.user_2 === user.id)) ? 'not-viewed' : ''}`
 
-							}
-							key={user.id}
-							onClick={(event) => {
-								setSelectedUser(user);
-								handleMessageConversation(user.id, event);
-								//updateViewedMessage();
-								setIsUserMessageOpen(true);
-								setIsMessageOpen(true);
-								setIsAnswerOpen(false);
-								setIsListOpen(false);
-							}}
-							aria-label={`Détails de ${user.first_name} ${user.last_name}`}
-						>
+									}
+									key={user.id}
+									onClick={(event) => {
+										setSelectedUser(user);
+										handleMessageConversation(user.id, event);
+										//updateViewedMessage();
+										setIsUserMessageOpen(true);
+										setIsMessageOpen(true);
+										setIsAnswerOpen(false);
+										setIsListOpen(false);
+									}}
+									aria-label={`Détails de ${user.first_name} ${user.last_name}`}
+									layout
+									style={{ overflow: 'scroll' }}
+									initial={{ opacity: 0, scale: 0.9 }}
+									animate={{ opacity: 1, scale: 1 }}
+									exit={{ opacity: 0, scale: 0.9 }}
+									transition={{duration: 0.2, type: 'Inertia', stiffness: 50 }}
+								>
 
-							<div className="my-request__answer-list__user__header">
-								<img
-									className="my-request__answer-list__user__header img"
-									src={user.image ? user.image : logoProfile}
-									alt={`Image de profil de ${user.first_name} ${user.last_name}`} />
-								{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
-								{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
-								{user.denomination ? (
-									<p className="my-request__answer-list__user__header denomination">{user.denomination}</p>
-								) : (
-									<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
-								)}
-								{user.deleted_at && <p className="my-request__answer-list__user__header deleted" aria-label="Utilisateur supprimé">
+									<div className="my-request__answer-list__user__header">
+										<img
+											className="my-request__answer-list__user__header img"
+											src={user.image ? user.image : logoProfile}
+											alt={`Image de profil de ${user.first_name} ${user.last_name}`} />
+										{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
+										{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
+										{user.denomination ? (
+											<p className="my-request__answer-list__user__header denomination">{user.denomination}</p>
+										) : (
+											<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
+										)}
+										{user.deleted_at && <p className="my-request__answer-list__user__header deleted" aria-label="Utilisateur supprimé">
 									Utilisateur supprimé</p>}
-							</div>
-						</div>
-					))}
-				</div>
+									</div>
+								</motion.div>
+							))}
+						</AnimatePresence>
+					</div>
+				)}
 			</div>
 			<div className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`} aria-label='Liste des messages'>
 				{messageLoading && <Spinner />}

@@ -7,11 +7,9 @@ export default function useHandleLogout() {
 	const navigate = useNavigate();
 	const resetUserData = userDataStore((state) => state.resetUserData);
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
-	const id = userDataStore((state) => state.id);
 	
 	// Return a function that will handle the logout
 	return async (userId: number) => {
-		console.log('id', id);
 		await logout({
 			variables: {
 				logoutId: userId

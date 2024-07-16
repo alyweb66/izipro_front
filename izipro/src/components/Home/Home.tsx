@@ -27,7 +27,6 @@ function Home() {
 		}
 		const decodeData = atob(getItem || '');
 		let isLogged;
-		console.log('isLogged', isLogged);
 		
 		if (decodeData === 'session') {
 			isLogged = { value: true };

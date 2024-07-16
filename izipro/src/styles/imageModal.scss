@@ -1,4 +1,5 @@
 @use './variables' as v;
+@use './mixins' as m;
 
 .react-modal {
 
@@ -13,25 +14,28 @@
     }
 
     .react-modal__button-close {
-        position: absolute;
+        position: fixed;
         top: 0;
         right: 0;
         z-index: 1;
-        margin: 1rem 5rem 0.5rem auto;
+        margin: 2rem 2rem 0.5rem auto;
         font-size: 4rem;
         color: v.$color-primary-orange;
         cursor: pointer;
     }
 
     .react-modal__picture {
+        
         display: flex;
         justify-content: center;
+       // align-items: center;
         object-fit: contain;
         position: relative;
         margin: auto;
-        border-radius: 0.5rem;
+        //border-radius: 0.5rem;
         max-width: 100%;
         max-height: 100%;
+        overflow: hidden;
 
 
         &.button {
@@ -53,7 +57,7 @@
         &.forward {
             font-size: 7rem;
             cursor: pointer;
-            position: absolute;
+            position: fixed;
                 top: 50%;
                 transform: translateY(-50%);
                 cursor: pointer;
@@ -62,8 +66,12 @@
         }
 
         &.img {
+           // @include m.border;
             margin: 1rem 0;
             width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border: none;
         }
 
 
@@ -75,10 +83,10 @@
     .react-modal {
 
         .react-modal__button-close {
-            margin: 0;
+            /* margin: 0;
             position: absolute;
             top: 10px;
-            right: 0px;
+            right: 0px; */
         }
 
      /*    .react-modal__picture {

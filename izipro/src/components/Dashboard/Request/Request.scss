@@ -209,10 +209,14 @@
         .request__form__input-media {
             max-width: 100%;
             display: flex;
-            flex-wrap: wrap;
             margin: 1rem auto;
             gap: 1rem;
             border-radius: 0.5rem;
+
+            &.container {
+                overflow: hidden;
+                scrollbar-width: none;
+            }
 
             &.preview {
                 box-shadow: -5px 0 10px #6666661e,

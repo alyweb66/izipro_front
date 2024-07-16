@@ -26,7 +26,6 @@ export const useQueryRules = (getData: boolean) => {
 	});
 	
 	if (rulesError) {
-		console.log('rulesError', rulesError);
 		
 		throw new Error('Error while fetching rules data');
 	}
@@ -149,7 +148,6 @@ export const useQueryUserConversations = (offset: number, limit: number, skip: b
 		},
 		skip
 	});
-console.log('data', data);
 
 	if (conversationError) {
 		throw new Error('Error while fetching user conversations');
@@ -202,7 +200,6 @@ export const useQueryUsersConversation = (userIds: number[], offset: number, lim
 	if (usersConversationError) {
 		throw new Error('Error while fetching user conversation');
 	}
-	console.log('usersConversationData', usersConversationData);
 	
 	return {loading, usersConversationData};
 };

@@ -59,9 +59,7 @@ function SettingAccount() {
 
 	// Update jobs when category changes
 	useEffect(() => {
-		if (jobData) {
-			console.log('jobData', jobData.category.jobs);
-			
+		if (jobData) {	
 			setJobsState(jobData.category.jobs);
 		}
 	}, [jobData]);
@@ -143,8 +141,6 @@ function SettingAccount() {
 		// update jobs in the store
 		// check if the job is already in the store
 		const newjobs = uniqueJobId?.filter((id) => !jobs.some((job) => job.job_id === id));
-		console.log('newjobs', newjobs);
-
 
 		setJobs([...jobs, ...(newjobs || [])].map((job) => typeof job === 'number' ? { job_id: job } : job));
 
@@ -221,42 +217,6 @@ function SettingAccount() {
 								
 							/>
 							
-							{/* 	<select
-								className="setting-account__form__select"
-								name="job"
-								id="job"
-								value={selectedCategory}
-								onChange={(event) => setSelectedCategory(event.target.value)}
-							>
-								<option className="setting-account__form__select__option" value="">Catégorie</option>
-								{categoriesData && categoriesData.categories.map((category: CategoryPros, index: number) => (
-									<option className="setting-account__form__select__option" key={index} value={category.id}>
-										{category.name}
-									</option>
-
-								))}
-							</select>
-					
-							<select
-								className="setting-account__form__select"
-								name="job"
-								id="job"
-								value={JSON.stringify(selectedJob)}
-								onChange={(event) => setWishListJob([JSON.parse(event.target.value), ...wishListJob])}
-							>
-								<option value="">Métiers</option>
-								{jobData && jobData.category.jobs.map((job: JobProps, index: number) => (
-
-									<option
-										key={index}
-										value={JSON.stringify({ id: job.id, name: job.name })}
-										title={job.description}
-									>
-										{job.name}
-									</option>
-								))}
-
-							</select> */}
 							<ul className="setting-account__form__list" >
 								<h2 className="setting-account__subtitle">Métiers séléctionné:</h2>
 								<AnimatePresence>

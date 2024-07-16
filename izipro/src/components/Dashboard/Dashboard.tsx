@@ -420,7 +420,6 @@ function Dashboard() {
 			const messageAdded: MessageProps[] = clientMessageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
-			console.log('messageAdded', messageAdded);
 
 			// add the new message to the message store
 			messageDataStore.setState(prevState => {
@@ -518,7 +517,6 @@ function Dashboard() {
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
-			console.log('messageAdded my request', messageAdded);
 
 			//fetch request if the request is not in the store
 			if (messageAdded[0].request_id && !requestStore.some(request => request.id === messageAdded[0].request_id)) {
