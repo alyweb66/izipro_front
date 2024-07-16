@@ -11,30 +11,30 @@ type SelectBoxProps = {
 	isWishList?: boolean;
 	wishListJob?: JobProps[];
 	setWishListJob?: Dispatch<SetStateAction<JobProps[]>>;
-    data: { id: number; name: string }[];
-    isCategory: boolean;
-    loading: boolean;
-    selected?: number;
+	data: { id: number; name: string }[];
+	isCategory: boolean;
+	loading: boolean;
+	selected?: number;
 	setSelected?: (value: number) => void;
 	//options: { name: string; value: string | number; isPlaceholder?: boolean }[];
 };
 
 
-const SelectBox = ({ setSelected, loading, isCategory, selected, data, wishListJob, setWishListJob, isWishList, isSetting}: SelectBoxProps) => {
+const SelectBox = ({ setSelected, loading, isCategory, selected, data, wishListJob, setWishListJob, isWishList, isSetting }: SelectBoxProps) => {
 	console.log(selected);
-    
+
 	const [isOpen, setIsOpen] = useState(false);
-    
+
 	const selectRef = useRef<HTMLDivElement>(null);
 	const toggleOptions = () => setIsOpen(!isOpen);
-  
+
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
 			if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
 				setIsOpen(false);
 			}
 		};
-    
+
 		document.addEventListener('mousedown', handleClickOutside);
 		return () => {
 			document.removeEventListener('mousedown', handleClickOutside);
@@ -57,7 +57,10 @@ const SelectBox = ({ setSelected, loading, isCategory, selected, data, wishListJ
 								onClick={isWishList
 									? (event) => {
 										const selectedOption = JSON.parse(event.currentTarget.getAttribute('data-option') ?? '');
-										setWishListJob && setWishListJob([selectedOption, ...(wishListJob ?? [])]);
+										if (!wishListJob?.find(option => option.id === selectedOption.id)) {
+											setWishListJob && setWishListJob([selectedOption, ...(wishListJob ?? [])]);
+										}
+										/* setWishListJob && setWishListJob([selectedOption, ...(wishListJob ?? [])]); */
 									}
 									: () => {
 										if (typeof option.id === 'number') {

@@ -77,6 +77,12 @@ if (!client) {
 								return [...new Set([...existing, ...incoming])];
 							},
 						},
+						requests: {
+							
+							merge(existing = [], incoming) {
+								return [...existing, ...incoming];
+							},
+						},
 					},
 				},
 				UserSubscription: {

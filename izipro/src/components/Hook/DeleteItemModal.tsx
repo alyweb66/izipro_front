@@ -5,8 +5,9 @@ ReactModal.setAppElement('#root');
 import '../../styles/deleteItemModal.scss';
 
 interface ModalArgs {
-    event: React.MouseEvent;
+    //event: React.MouseEvent;
     requestId: number;
+	requestTitle: string;
 }
 
 interface DeleteItemModalProps {
@@ -14,7 +15,7 @@ interface DeleteItemModalProps {
     setModalArgs: (args: ModalArgs | null) => void;
     setDeleteItemModalIsOpen: (isOpen: boolean) => void;
     deleteItemModalIsOpen: boolean;
-    handleDeleteRequest: (event: React.MouseEvent, requestId: number) => void;
+    handleDeleteRequest: (requestId: number) => void;
 }
 
 export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
@@ -34,13 +35,15 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 		>
 			<div className="delete-item-modal__container">
 				<h1 className="delete-item-modal__container__title">ATTENTION!!</h1>
-				<p className="delete-item-modal__container__description">Vous allez supprimer cette demande, êtes vous sur?</p>
+				<p className="delete-item-modal__container__description">Vous allez supprimer la demande <span className="modal-args">{modalArgs?.requestTitle}</span> , êtes vous sur?</p>
 				<div className="delete-item-modal__container__container__button">
 					<button 
 						className="delete-item-modal__container__container__button__delete" 
-						onClick={() => {
-							if (modalArgs?.event && modalArgs?.requestId) {
-								handleDeleteRequest(modalArgs.event, modalArgs.requestId);
+						onClick={(event) => {
+							event.stopPropagation();
+							event.preventDefault();
+							if (modalArgs?.requestId) {
+								handleDeleteRequest( modalArgs.requestId);
 								setDeleteItemModalIsOpen(!deleteItemModalIsOpen);
 							}
 						}}
@@ -49,7 +52,9 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 					</button>
 					<button 
 						className="delete-item-modal__container__container__button__cancel" 
-						onClick={() => {
+						onClick={(event) => {
+							event.stopPropagation();
+							event.preventDefault();
 							setDeleteItemModalIsOpen(!deleteItemModalIsOpen);
 							setModalArgs(null);
 						}}

@@ -33,6 +33,10 @@
             .delete-item-modal__container__container__button__cancel {
                 @include m.blue-button;
             }
+
+            .delete-item-modal__container__container__button__delete {
+                background-color: red;
+            }
         }
 
         .delete-item-modal__container__container__button::before {
@@ -48,7 +52,13 @@
         .delete-item-modal__container__description {
             text-align: center;
             margin: 1rem auto;
+            font-size: 1.2rem;
             color: red;
+
+            .modal-args {
+                color: v.$color-primary-blue;
+                font-size: 1.5rem;
+            }
         }
     }
 }

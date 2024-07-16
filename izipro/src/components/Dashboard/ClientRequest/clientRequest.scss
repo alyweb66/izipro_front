@@ -155,11 +155,14 @@
         // text-overflow: ellipsis;
         // white-space: nowrap;
         //cursor: pointer;
+        border-radius: 0;
         width: inherit;
         border: none;
         background-color: transparent;
         box-shadow: none;
-        margin: 0 0.3rem 0 0.3rem;
+        padding-left: 0.3rem;
+        padding-right: 0.3rem;
+        margin: 0 ;
         font-size: 1rem;
         font-weight: 400;
       }
@@ -233,8 +236,9 @@
   .client-request {
     .client-request__list {
       max-width: 95%;
+
       .client-request__list__detail {
-        
+
 
 
         .client-request__list__detail__item {

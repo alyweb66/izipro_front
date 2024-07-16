@@ -1,24 +1,49 @@
 @use '../../styles/variables' as v;
 
 .not-found {
-  margin: v.$gutter;
+  height: 100vh;
+  width: 100vw;
+ // margin: v.$gutter;
   text-align: center;
+  background: radial-gradient(circle,  v.$color-secondary-blue, v.$color-secondary-orange,); 
 
-  h1 {
+  .not-found__title {
     font-family: v.$font;
     font-weight: v.$font-title-weight;
-    color: v.$color-darkest;
+    color: v.$color-primary-orange;
     font-size: 5.5625rem;
     height: v.$gutter * 8;
     line-height: v.$gutter * 8;
   }
 
-  p {
-    font-family: v.$font;
-    margin-bottom: v.$gutter;
+  .not-found__img {
+    width: 100%;
+    max-width: 25%;
+    margin: 0 auto;
+  
+    border-radius: 15rem;
   }
 
-  i {
+  .not-found__description {
+    margin-top: 3rem;
+    font-family: v.$font;
+    font-size: 1.2rem;
+    margin-bottom: 3rem;
+    color: v.$color-primary-blue;
+  }
+
+  .not-found__error {
     color: v.$color;
+  }
+}
+
+@media (max-width: 768px) {
+  .not-found {
+   
+    .not-found__img {
+      max-width: 50%;
+    }
+
+  
   }
 }

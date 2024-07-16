@@ -163,13 +163,15 @@
                     cursor: pointer;
                     width: inherit;
                     border: none;
+                    padding-left: 0.3rem;
+                    padding-right: 0.3rem;
                     background-color: transparent;
                     box-shadow: none;
+                    border-radius: 0;
                     margin: 0;
                     font-size: 1rem;
                     font-weight: 400;
                     background-color: v.$color-light-blue;
-                    border-radius: 0.2rem;
                 }
 
                 &.expanded {
@@ -900,5 +902,12 @@
                 }
             }
         }
+    }
+}
+
+@media (max-height: 480px) {
+    .my-request {
+        overflow: auto;
+        scrollbar-width: none;
     }
 }

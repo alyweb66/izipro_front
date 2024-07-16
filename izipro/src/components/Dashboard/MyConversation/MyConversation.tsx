@@ -83,8 +83,11 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [isMessageOpen, setIsMessageOpen] = useState(false);
 	const [requestTitle, setRequestTitle] = useState(true);
-	const [modalArgs, setModalArgs] = useState<{ event: React.MouseEvent, requestId: number } | null>(null);
+	const [modalArgs, setModalArgs] = useState<{  requestId: number, requestTitle: string } | null>(null);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
+	const [isSkipMessage, setIsSkipMessage] = useState(true);
+	const [fetchConvIdState, setFetchConvIdState] = useState(0);
+
 
 	const limit = 4;
 
@@ -111,8 +114,8 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
 	//query
-	const { loading: convLoading, fetchMore } = useQueryUserConversations(0, limit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
-	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(conversationIdState, 0, 100);
+	const { loading: convLoading, fetchMore } = useQueryUserConversations(0, limit, true) as unknown as useQueryUserConversationsProps;
+	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(fetchConvIdState, 0, 100, isSkipMessage);
 
 	// file upload
 	const { file, urlFile, setUrlFile, setFile, handleFileChange } = useFileHandler();
@@ -140,17 +143,33 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 					messages: [...prevState.messages, ...newMessages]
 				};
 			});
+
+			setIsSkipMessage(true);
 		}
 	}, [messageData]);
 
 	// useEffect to update the conversation id
 	useEffect(() => {
-		if (selectedRequest) {
+		if (selectedRequest && selectedRequest.id > 0) {
 			const conversationId = selectedRequest.conversation?.find(conversation => (
 				conversation.user_1 === id || conversation.user_2 === id
 			));
 			setConversationIdState(conversationId?.id ?? 0);
 
+			// get only conversation id who are not in the store
+			let conversationIdNotStore;
+			if (messageStore.length > 0) {
+				conversationIdNotStore = !messageStore.some(message => message.conversation_id === conversationId?.id);
+			} else {
+				conversationIdNotStore = true;
+			}
+
+			if (conversationIdNotStore && conversationId?.id !== 0) {
+				console.log('go to fetch');
+				
+				setFetchConvIdState(conversationId?.id ?? 0);
+				setIsSkipMessage(false);
+			}
 		}
 
 	}, [selectedRequest]);
@@ -226,10 +245,13 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	// cleane the request store if the component is unmounted
 	useEffect(() => {
 		return () => {
+			//if the request is in the requestsConversationStore and if there is a conversation with the user
+			if (requestsConversationStore.some(requestConv => requestConv.id === request.id && !requestConv.conversation?.some(conversation => conversation.user_1 === id || conversation.user_2 === id))) {
 			// remove request.id in requestsConversationStore
-			const removedRequest = requestConversationStore.getState().requests?.filter((requestConv: RequestProps) => request.id !== requestConv.id);
-			requestConversationStore.setState({ requests: removedRequest });
-			setRequestsConversationStore(removedRequest);
+				const removedRequest = requestConversationStore.getState().requests?.filter((requestConv: RequestProps) => request.id !== requestConv.id);
+				requestConversationStore.setState({ requests: removedRequest });
+			}
+			//setRequestsConversationStore(removedRequest);
 			resetRequest();
 			setConversationIdState(0);
 
@@ -457,8 +479,8 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	}
 
 	// Function to hide a client request
-	const handleHideRequest = (event: React.MouseEvent<Element, MouseEvent>, requestId: number) => {
-		event.preventDefault();
+	const handleHideRequest = ( requestId: number) => {
+		//event.preventDefault();
 
 		hideRequest({
 			variables: {
@@ -576,7 +598,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	return (
 		<div className="my-conversation">
-			{(convLoading || hideRequestLoading) && <Spinner />}
+			{( hideRequestLoading || convLoading) && <Spinner />}
 			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
 				{requestByDate && (
 					<div className="my-conversation__list__detail" >

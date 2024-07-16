@@ -49,7 +49,6 @@ function Footer() {
 
 	//store
 	const [id, CGU] = userDataStore((state) => [state.id, state.CGU]);
-	//const CGU = userDataStore((state) => state.CGU);
 	const [CGUStore, cookieStore] = rulesStore((state) => [state.CGU, state.cookies]);
 	const [cookieConsentsId, cookiesNecessaryStore] = cookieConsents((state) => [state.id, state.cookies_necessary]);
 
@@ -224,7 +223,7 @@ function Footer() {
 			<footer className="footer-container">
 				<a className="footer-container__link" href="#" onClick={() => {setCGUModal(true), isGetRulesRef.current = true;}}>CGU</a>
 				<a className="footer-container__link" href="#" onClick={() => setContactModal(true)} >Contact</a>
-				<a className="footer-container__link" href="#" onClick={() => {setCookiesModal(true), setClickCookie(true);}}>Cookies</a>
+				<a className="footer-container__link" href="#" onClick={() => {setCookiesModal(true), isGetRulesRef.current = true, setClickCookie(true);}}>Cookies</a>
 			</footer>
 
 			<RulesModal

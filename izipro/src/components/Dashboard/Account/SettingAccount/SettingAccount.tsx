@@ -75,7 +75,6 @@ function SettingAccount() {
 
 	useEffect(() => {
 		if (selectedCategory) {
-			//setSelectedJob(0);
 		}
 	}, [selectedCategory]);
 
@@ -221,42 +220,6 @@ function SettingAccount() {
 								
 							/>
 							
-							{/* 	<select
-								className="setting-account__form__select"
-								name="job"
-								id="job"
-								value={selectedCategory}
-								onChange={(event) => setSelectedCategory(event.target.value)}
-							>
-								<option className="setting-account__form__select__option" value="">Catégorie</option>
-								{categoriesData && categoriesData.categories.map((category: CategoryPros, index: number) => (
-									<option className="setting-account__form__select__option" key={index} value={category.id}>
-										{category.name}
-									</option>
-
-								))}
-							</select>
-					
-							<select
-								className="setting-account__form__select"
-								name="job"
-								id="job"
-								value={JSON.stringify(selectedJob)}
-								onChange={(event) => setWishListJob([JSON.parse(event.target.value), ...wishListJob])}
-							>
-								<option value="">Métiers</option>
-								{jobData && jobData.category.jobs.map((job: JobProps, index: number) => (
-
-									<option
-										key={index}
-										value={JSON.stringify({ id: job.id, name: job.name })}
-										title={job.description}
-									>
-										{job.name}
-									</option>
-								))}
-
-							</select> */}
 							<ul className="setting-account__form__list" >
 								<h2 className="setting-account__subtitle">Métiers séléctionné:</h2>
 								<AnimatePresence>

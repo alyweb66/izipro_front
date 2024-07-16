@@ -149,6 +149,7 @@ export const useQueryUserConversations = (offset: number, limit: number, skip: b
 		},
 		skip
 	});
+console.log('data', data);
 
 	if (conversationError) {
 		throw new Error('Error while fetching user conversations');
@@ -161,7 +162,7 @@ export const useQueryUserConversations = (offset: number, limit: number, skip: b
 };
 
 // fetch messages by conversation
-export const useQueryMessagesByConversation = (conversationId: number, offset: number, limit: number) => {
+export const useQueryMessagesByConversation = (conversationId: number, offset: number, limit: number, skip:boolean) => {
 	
 	const {  loading, subscribeToMore,error: messageError, data: messageData, fetchMore: fetchMoreMessage } = useQuery(GET_MESSAGES_BY_CONVERSATION, {
 		variables: {
@@ -169,7 +170,7 @@ export const useQueryMessagesByConversation = (conversationId: number, offset: n
 			offset: offset,
 			limit: limit
 		},
-		skip: !conversationId
+		skip
 	});
 
 	if (messageError) {
@@ -207,7 +208,7 @@ export const useQueryUsersConversation = (userIds: number[], offset: number, lim
 };
 
 // fetch messages by conversation
-export const useQueryMyMessagesByConversation = (conversationId: number, offset: number, limit: number) => {
+export const useQueryMyMessagesByConversation = (conversationId: number, offset: number, limit: number, skip: boolean) => {
 		
 	const {  loading, subscribeToMore,error: messageError, data: messageData } = useQuery(GET_MY_MESSAGES_BY_CONVERSATION, {
 		variables: {
@@ -215,7 +216,7 @@ export const useQueryMyMessagesByConversation = (conversationId: number, offset:
 			offset: offset,
 			limit: limit
 		},
-		skip: !conversationId
+		skip
 	});
 
 	if (messageError) {
