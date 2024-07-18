@@ -32,6 +32,7 @@ import profileLogo from '/logo/logo profile.jpeg';
 
 // Styling imports
 import './Account.scss';
+import { motion, AnimatePresence } from 'framer-motion';
 //import '../../../styles/spinner.scss';
 
 
@@ -385,238 +386,245 @@ function Account() {
 
 	return (
 		<div className="account">
-
-			< div className={`account__profile ${loading ? 'loading' : ''}`} >
-				{loading && <Spinner />}
-				{/* {error && <p className="account__profile__modification-error">{error}</p>}
+			<AnimatePresence>
+				<motion.div 
+					className={`account__profile ${loading ? 'loading' : ''}`}
+					initial={{ opacity: 0, scale: 0.9 }}
+					animate={{ opacity: 1, scale: 1 }}
+					exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
+					transition={{ duration: 0.1, type: 'tween' }}
+				>
+					{loading && <Spinner />}
+					{/* {error && <p className="account__profile__modification-error">{error}</p>}
 				{message && <p className="account__profile__modification-message">{message}</p>} */}
-				<div className="account__picture" >
-					<img
-						className="account__profile__picture__img"
-						src={image || profileLogo}
-						alt="Profile"
-						onClick={() => fileInput.current?.click()}
-						style={{ cursor: 'pointer' }}
-					/>
-					<input
-						className="account__profile__picture__input"
-						type="file"
-						ref={fileInput}
-						onChange={handleProfilePicture}
-						style={{ display: 'none' }}
-						accept=".jpg,.jpeg,.png"
-					/>
-					<button className="account__profile__picture__delete" type='button' onClick={handleDeletePicture}>Supprimer</button>
-				</div >
-				<form className={`account__profile__form ${updateUserLoading ? 'loading' : ''}`} onSubmit={handleAccountSubmit} >
-					{updateUserLoading && <Spinner/> }
-					<h1 className="account__profile__form__title">Mes informations:</h1>
-					<div></div>
-					<label className="account__profile__form__label">
+					<div className="account__picture" >
+						<img
+							className="account__profile__picture__img"
+							src={image || profileLogo}
+							alt="Profile"
+							onClick={() => fileInput.current?.click()}
+							style={{ cursor: 'pointer' }}
+						/>
+						<input
+							className="account__profile__picture__input"
+							type="file"
+							ref={fileInput}
+							onChange={handleProfilePicture}
+							style={{ display: 'none' }}
+							accept=".jpg,.jpeg,.png"
+						/>
+						<button className="account__profile__picture__delete" type='button' onClick={handleDeletePicture}>Supprimer</button>
+					</div >
+					<form className={`account__profile__form ${updateUserLoading ? 'loading' : ''}`} onSubmit={handleAccountSubmit} >
+						{updateUserLoading && <Spinner/> }
+						<h1 className="account__profile__form__title">Mes informations:</h1>
+						<div></div>
+						<label className="account__profile__form__label">
 						Prénom:
-						<input
-							className="account__profile__form__label__input"
-							type="text"
-							name="first_name"
-							value={first_name || ''}
-							placeholder={first_name || ''}
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)}
-							aria-label="Prénom"
-							maxLength={50}
-							autoComplete='first_name'
-						/>
-					</label>
-					<label className="account__profile__form__label">
+							<input
+								className="account__profile__form__label__input"
+								type="text"
+								name="first_name"
+								value={first_name || ''}
+								placeholder={first_name || ''}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)}
+								aria-label="Prénom"
+								maxLength={50}
+								autoComplete='first_name'
+							/>
+						</label>
+						<label className="account__profile__form__label">
 						Nom:
-						<input
-							className="account__profile__form__label__input"
-							type="text"
-							name="last_name"
-							value={last_name || ''}
-							placeholder={last_name || ''}
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
-							aria-label="Nom"
-							maxLength={50}
-							autoComplete='last_name'
-						/>
-					</label>
-					<label className="account__profile__form__label">
+							<input
+								className="account__profile__form__label__input"
+								type="text"
+								name="last_name"
+								value={last_name || ''}
+								placeholder={last_name || ''}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
+								aria-label="Nom"
+								maxLength={50}
+								autoComplete='last_name'
+							/>
+						</label>
+						<label className="account__profile__form__label">
 						Email:
-						<input
-							className="account__profile__form__label__input"
-							type="text"
-							name="email"
-							value={email || ''}
-							placeholder={email || ''}
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
-							aria-label="Email"
-							maxLength={50}
-							autoComplete='email'
-						/>
-					</label>
-					<label className="account__profile__form__label">
+							<input
+								className="account__profile__form__label__input"
+								type="text"
+								name="email"
+								value={email || ''}
+								placeholder={email || ''}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
+								aria-label="Email"
+								maxLength={50}
+								autoComplete='email'
+							/>
+						</label>
+						<label className="account__profile__form__label">
 						Adresse:
-						<input
-							className="account__profile__form__label__input"
-							type="text"
-							name="address"
-							value={address || ''}
-							placeholder={address || ''}
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddress(event.target.value)}
-							aria-label="Adresse"
-							maxLength={100}
-							autoComplete='address'
-							required
-						/>
-					</label>
-					<label className="account__profile__form__label">
+							<input
+								className="account__profile__form__label__input"
+								type="text"
+								name="address"
+								value={address || ''}
+								placeholder={address || ''}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddress(event.target.value)}
+								aria-label="Adresse"
+								maxLength={100}
+								autoComplete='address'
+								required
+							/>
+						</label>
+						<label className="account__profile__form__label">
 						Code postal:
-						<input
-							className="account__profile__form__label__input"
-							type="text"
-							name="postal_code"
-							value={postal_code || ''}
-							placeholder={postal_code || ''}
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCode(event.target.value)}
-							aria-label="Code postal"
-							autoComplete='postal_code'
-							maxLength={10}
-							required
-						/>
-					</label>
-					<label className="account__profile__form__label">
+							<input
+								className="account__profile__form__label__input"
+								type="text"
+								name="postal_code"
+								value={postal_code || ''}
+								placeholder={postal_code || ''}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCode(event.target.value)}
+								aria-label="Code postal"
+								autoComplete='postal_code'
+								maxLength={10}
+								required
+							/>
+						</label>
+						<label className="account__profile__form__label">
 						Ville:
-						<input
-							className="account__profile__form__label__input"
-							type="text"
-							name="city"
-							value={city || ''}
-							placeholder={city || ''}
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCity(event.target.value)}
-							aria-label="Ville"
-							autoComplete='city'
-							maxLength={20}
-							required
-						/>
-					</label>
-					{role === 'pro' && (
-						<>
-							<label className="account__profile__form__label">
+							<input
+								className="account__profile__form__label__input"
+								type="text"
+								name="city"
+								value={city || ''}
+								placeholder={city || ''}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCity(event.target.value)}
+								aria-label="Ville"
+								autoComplete='city'
+								maxLength={20}
+								required
+							/>
+						</label>
+						{role === 'pro' && (
+							<>
+								<label className="account__profile__form__label">
 								Siret:
-								<input
-									className="account__profile__form__label__input"
-									type="text"
-									name="siret"
-									value={siret || ''}
-									placeholder={siret || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
-									aria-label="Siret"
-									autoComplete='siret'
-									maxLength={14}
-								/>
-							</label>
-							<label className="account__profile__form__label">
+									<input
+										className="account__profile__form__label__input"
+										type="text"
+										name="siret"
+										value={siret || ''}
+										placeholder={siret || ''}
+										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
+										aria-label="Siret"
+										autoComplete='siret'
+										maxLength={14}
+									/>
+								</label>
+								<label className="account__profile__form__label">
 								Dénomination:
-								<input
-									className="account__profile__form__label__input"
-									type="text"
-									name="denomination"
-									value={denomination || ''}
-									placeholder={denomination || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenomination(event.target.value)}
-									aria-label="Dénomination"
-									autoComplete='denomination'
-									maxLength={50}
-								/>
-							</label>
-							<label className="account__profile__form__label">
+									<input
+										className="account__profile__form__label__input"
+										type="text"
+										name="denomination"
+										value={denomination || ''}
+										placeholder={denomination || ''}
+										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenomination(event.target.value)}
+										aria-label="Dénomination"
+										autoComplete='denomination'
+										maxLength={50}
+									/>
+								</label>
+								<label className="account__profile__form__label">
 								Description:
-								<textarea
-									className="account__profile__form__label__input textarea"
-									name="description"
-									id="description"
-									placeholder="Exprimez-vous 200 caractères maximum"
-									value={description}
-									onChange={(event) => setDescription(event.target.value)}
-									aria-label="Exprimez-vous 200 caractères maximum"
-									maxLength={200}
-								>
-								</textarea>
-								<p>{description?.length}/200</p>
-							</label>
-						</>
+									<textarea
+										className="account__profile__form__label__input textarea"
+										name="description"
+										id="description"
+										placeholder="Exprimez-vous 200 caractères maximum"
+										value={description}
+										onChange={(event) => setDescription(event.target.value)}
+										aria-label="Exprimez-vous 200 caractères maximum"
+										maxLength={200}
+									>
+									</textarea>
+									<p>{description?.length}/200</p>
+								</label>
+							</>
 
-					)}
-					{errorAccount && <p className="account__profile__modification-error">{errorAccount}</p>}
-					{messageAccount && <p className="account__profile__modification-message">{messageAccount}</p>}
-					<button className="account__profile__button" type="submit">Valider</button>
-				</form>
-				<SettingAccount />
-				<form
-					className={`account__profile__form password ${changepasswordLoading ? 'loading' : ''}`}
-					onSubmit={handleSubmitNewPassword}>
-					{changepasswordLoading && <Spinner />}
+						)}
+						{errorAccount && <p className="account__profile__modification-error">{errorAccount}</p>}
+						{messageAccount && <p className="account__profile__modification-message">{messageAccount}</p>}
+						<button className="account__profile__button" type="submit">Valider</button>
+					</form>
+					<SettingAccount />
+					<form
+						className={`account__profile__form password ${changepasswordLoading ? 'loading' : ''}`}
+						onSubmit={handleSubmitNewPassword}>
+						{changepasswordLoading && <Spinner />}
 
-					<h1 className="account__profile__form__title">Changer le mot de passe:</h1>
-					<label className="account__profile__form__label">
+						<h1 className="account__profile__form__title">Changer le mot de passe:</h1>
+						<label className="account__profile__form__label">
 
-						<input
-							className="account__profile__form__label__input"
-							type={showPassword ? 'text' : 'password'}
-							name="oldPassword"
-							value={oldPassword}
-							placeholder="Ancien mot de passe"
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setOldPassword(event.target.value)}
-							aria-label="Ancien mot de passe"
-							maxLength={60}
-							required
-						/>
-					</label>
-					<label className="account__profile__form__label">
-						<input
-							className="account__profile__form__label__input"
-							type={showPassword ? 'text' : 'password'}
-							name="newPassword"
-							value={newPassword}
-							placeholder="Nouveau mot de passe"
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewPassword(event.target.value)}
-							aria-label="Nouveau mot de passe"
-							maxLength={60}
-							required
-						/>
-					</label>
-					<label className="account__profile__form__label">
-						<input
-							className="account__profile__form__label__input"
-							type={showPassword ? 'text' : 'password'}
-							name="confirmNewPassword"
-							value={confirmNewPassword}
-							placeholder="Confirmer le nouveau mot de passe"
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(event.target.value)}
-							aria-label="Confirmer le nouveau mot de passe"
-							maxLength={60}
-							required
-						/>
-					</label>
-					{errorPassword && <p className="account__profile__modification-error">{errorPassword}</p>}
-					{messagePassword && <p className="account__profile__modification-message">{messagePassword}</p>}
-					<button className="show-password" onClick={() => setShowPassword(!showPassword)}>
-						{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
-					</button>
-					<button
-						className="account__profile__button"
-						type="submit">
+							<input
+								className="account__profile__form__label__input"
+								type={showPassword ? 'text' : 'password'}
+								name="oldPassword"
+								value={oldPassword}
+								placeholder="Ancien mot de passe"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setOldPassword(event.target.value)}
+								aria-label="Ancien mot de passe"
+								maxLength={60}
+								required
+							/>
+						</label>
+						<label className="account__profile__form__label">
+							<input
+								className="account__profile__form__label__input"
+								type={showPassword ? 'text' : 'password'}
+								name="newPassword"
+								value={newPassword}
+								placeholder="Nouveau mot de passe"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewPassword(event.target.value)}
+								aria-label="Nouveau mot de passe"
+								maxLength={60}
+								required
+							/>
+						</label>
+						<label className="account__profile__form__label">
+							<input
+								className="account__profile__form__label__input"
+								type={showPassword ? 'text' : 'password'}
+								name="confirmNewPassword"
+								value={confirmNewPassword}
+								placeholder="Confirmer le nouveau mot de passe"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(event.target.value)}
+								aria-label="Confirmer le nouveau mot de passe"
+								maxLength={60}
+								required
+							/>
+						</label>
+						{errorPassword && <p className="account__profile__modification-error">{errorPassword}</p>}
+						{messagePassword && <p className="account__profile__modification-message">{messagePassword}</p>}
+						<button className="show-password" onClick={() => setShowPassword(!showPassword)}>
+							{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
+						</button>
+						<button
+							className="account__profile__button"
+							type="submit">
 						Valider
+						</button>
+
+
+					</form>
+					<button
+						className="account__profile__delete"
+						type='button'
+						onClick={() => setModalIsOpen(!ModalIsOpen)}>supprimer mon compte
 					</button>
-
-
-				</form>
-				<button
-					className="account__profile__delete"
-					type='button'
-					onClick={() => setModalIsOpen(!ModalIsOpen)}>supprimer mon compte
-				</button>
-			</div >
+				</motion.div >
+			</AnimatePresence>
 
 
 

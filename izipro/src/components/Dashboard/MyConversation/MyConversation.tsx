@@ -667,14 +667,14 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 									request={request}
 									notViewedConversationStore={notViewedConversationStore}
 									handleViewedMessage={handleViewedMessage}
-									setIsMessageOpen={setIsMessageOpen}
+									//setIsMessageOpen={setIsMessageOpen}
 									resetRequest={resetRequest}
 									selectedRequest={selectedRequest!}
 									setSelectedRequest={setSelectedRequest}
 									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
 									isMessageExpanded={isMessageExpanded}
 									setIsMessageExpanded={setIsMessageExpanded}
-									setIsListOpen={setIsListOpen}
+									//setIsListOpen={setIsListOpen}
 									setModalArgs={setModalArgs}
 									openModal={openModal}
 								/>
@@ -689,13 +689,13 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 									notViewedConversationStore={notViewedConversationStore}
 									requestByDate={requestByDate}
 									handleViewedMessage={handleViewedMessage}
-									setIsMessageOpen={setIsMessageOpen}
+									//setIsMessageOpen={setIsMessageOpen}
 									selectedRequest={selectedRequest!}
 									setSelectedRequest={setSelectedRequest}
 									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
 									isMessageExpanded={isMessageExpanded}
 									setIsMessageExpanded={setIsMessageExpanded}
-									setIsListOpen={setIsListOpen}
+									//setIsListOpen={setIsListOpen}
 									setModalArgs={setModalArgs}
 									openModal={openModal}
 								/>

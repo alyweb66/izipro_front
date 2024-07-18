@@ -18,7 +18,7 @@ const RequestItem = ({
 	requestByDate,
 	notViewedConversationStore,
 	handleViewedMessage,
-	setIsMessageOpen,
+	//setIsMessageOpen,
 	request,
 	resetRequest,
 	selectedRequest,
@@ -26,7 +26,7 @@ const RequestItem = ({
 	setDeleteItemModalIsOpen,
 	isMessageExpanded,
 	setIsMessageExpanded,
-	setIsListOpen,
+	//setIsListOpen,
 	setModalArgs,
 	openModal
 }: {
