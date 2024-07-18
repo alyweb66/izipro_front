@@ -324,17 +324,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		
 
 	}, [userConvStore, selectedRequest]);
-	//console.log('selectedRequest', selectedRequest);
-
-	// useEffect to change skipmessage state
-	/* useEffect(() => {
-		if (conversationIdState === 0) {
-			setIsSkipMessage(true);
-		} else {
-
-			setIsSkipMessage(false);
-		}
-	}, [conversationIdState]); */
 
 	// useEffect to update the message store
 	useEffect(() => {
@@ -368,7 +357,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	}, [messageData]);
 
-
 	// useEffect to update the user conversation state
 	useEffect(() => {
 		if (usersConversationData) {
@@ -399,10 +387,10 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	useEffect(() => {
 
 		setTimeout(() => {
-			endOfMessagesRef.current?.scrollIntoView(/* { behavior: 'smooth' } */);
+			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
 		}, 200);
 
-	}, [messageStore]);
+	}, [messageStore, conversationIdState, isMessageOpen ]);
 
 	//  set selected request at null when the component is unmounted
 	useEffect(() => {
@@ -681,7 +669,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	};
 
-	// useEffect to update the visibility of the request list under 1000px
+	// useEffect to update the visibility of the request list
 	useEffect(() => {
 		if (isListOpen) {
 			setIsVisible(true);

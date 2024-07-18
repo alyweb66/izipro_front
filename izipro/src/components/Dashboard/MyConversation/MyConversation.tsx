@@ -44,10 +44,10 @@ import './MyConversation.scss';
 import RequestItem from '../../Hook/RequestHook'; // Assuming RequestItem is imported correctly
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaCamera } from 'react-icons/fa';
-import { MdAttachFile, MdKeyboardArrowLeft, MdSend, MdKeyboardArrowRight, MdKeyboardArrowDown  } from 'react-icons/md';
+import { MdAttachFile, MdKeyboardArrowLeft, MdSend, MdKeyboardArrowRight, MdKeyboardArrowDown } from 'react-icons/md';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 
 
@@ -83,12 +83,13 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
 	const [isListOpen, setIsListOpen] = useState(true);
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
-	const [isMessageOpen, setIsMessageOpen] = useState(false);
+	const [isMessageOpen, setIsMessageOpen] = useState(window.innerWidth > 780 ? true : false);
 	const [requestTitle, setRequestTitle] = useState(true);
-	const [modalArgs, setModalArgs] = useState<{  requestId: number, requestTitle: string } | null>(null);
+	const [modalArgs, setModalArgs] = useState<{ requestId: number, requestTitle: string } | null>(null);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [isSkipMessage, setIsSkipMessage] = useState(true);
 	const [fetchConvIdState, setFetchConvIdState] = useState(0);
+	const [isItemOpen, setIsItemOpen] = useState(true);
 
 
 	const limit = 4;
@@ -248,7 +249,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		return () => {
 			//if the request is in the requestsConversationStore and if there is a conversation with the user
 			if (requestsConversationStore.some(requestConv => requestConv.id === request.id && !requestConv.conversation?.some(conversation => conversation.user_1 === id || conversation.user_2 === id))) {
-			// remove request.id in requestsConversationStore
+				// remove request.id in requestsConversationStore
 				const removedRequest = requestConversationStore.getState().requests?.filter((requestConv: RequestProps) => request.id !== requestConv.id);
 				requestConversationStore.setState({ requests: removedRequest });
 			}
@@ -265,7 +266,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		setTimeout(() => {
 			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
 		}, 200);
-	}, [messageStore]);
+	}, [messageStore, isMessageOpen, selectedRequest]);
 
 
 	// Function to send message
@@ -480,7 +481,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	}
 
 	// Function to hide a client request
-	const handleHideRequest = ( requestId: number) => {
+	const handleHideRequest = (requestId: number) => {
 		//event.preventDefault();
 
 		hideRequest({
@@ -597,34 +598,92 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	};
 
+	// useEffect to check the size of the window
+	useEffect(() => {
+		const handleResize = () => {
+			if (window.innerWidth < 780) {
+				setIsMessageOpen(false);
+			} else {
+				setIsMessageOpen(true);
+				setIsItemOpen(true);				
+			}
+		};
+
+		// add event listener to check the size of the window
+		window.addEventListener('resize', handleResize);
+
+		// 	call the function to check the size of the window
+		handleResize();
+
+		// remove the event listener when the component unmount
+		return () => window.removeEventListener('resize', handleResize);
+	}, []); 
+
+	// useEffect to update the visibility of the request list under 1000px
+	useEffect(() => {
+		if (isListOpen) {
+			setIsItemOpen(true);
+		}
+	}, [isListOpen]);
+
+	// useEffect to update the visibility of the request list under 1000px
+	useEffect(() => {
+		if (isMessageOpen) {
+			setIsMessageOpen(true);
+		
+		}
+	}, [isMessageOpen]);
+
+	// function to set the visibility of the user answer 
+	const itemList = () => {
+		setIsItemOpen(false);
+
+		setTimeout(() => {
+			setIsListOpen(false);
+			setIsMessageOpen(true);
+		}, 200); // time must be the same as the transition duration
+	};
+
+	// function to set the visibility of the user answer 
+	const messageList = () => {
+		setIsMessageOpen(false);
+
+		setTimeout(() => {
+			setIsMessageOpen(false);
+			setIsListOpen(true);
+		}, 200); // time must be the same as the transition duration
+	};
+
 	return (
 		<div className="my-conversation">
-			{( hideRequestLoading || convLoading) && <Spinner />}
+			{(hideRequestLoading || convLoading) && <Spinner />}
 			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
 				{requestByDate && (
 					<div className="my-conversation__list__detail" >
 						<AnimatePresence>
-							{request && request.id > 0 &&
-							<RequestItem
-								request={request}
-								notViewedConversationStore={notViewedConversationStore}
-								handleViewedMessage={handleViewedMessage}
-								setIsMessageOpen={setIsMessageOpen}
-								resetRequest={resetRequest}
-								selectedRequest={selectedRequest!}
-								setSelectedRequest={setSelectedRequest}
-								setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
-								isMessageExpanded={isMessageExpanded}
-								setIsMessageExpanded={setIsMessageExpanded}
-								setIsListOpen={setIsListOpen}
-								setModalArgs={setModalArgs}
-								openModal={openModal}
-							/>
+							{isItemOpen && request && request.id > 0 &&
+								<RequestItem
+									itemList={itemList}
+									request={request}
+									notViewedConversationStore={notViewedConversationStore}
+									handleViewedMessage={handleViewedMessage}
+									setIsMessageOpen={setIsMessageOpen}
+									resetRequest={resetRequest}
+									selectedRequest={selectedRequest!}
+									setSelectedRequest={setSelectedRequest}
+									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+									isMessageExpanded={isMessageExpanded}
+									setIsMessageExpanded={setIsMessageExpanded}
+									setIsListOpen={setIsListOpen}
+									setModalArgs={setModalArgs}
+									openModal={openModal}
+								/>
 							}
 						</AnimatePresence>
 						<AnimatePresence>
-							{requestByDate.map((requestByDate, index) => (
+							{isItemOpen && requestByDate.map((requestByDate, index) => (
 								<RequestItem
+									itemList={itemList}
 									key={requestByDate.id}
 									index={index}
 									notViewedConversationStore={notViewedConversationStore}
@@ -663,188 +722,198 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 					)}
 				</div>
 			</div>
-
-			<div className={`my-conversation__message-list ${isMessageOpen ? 'open' : ''} ${(messageLoading || messageMutLoading || convMutLoading) ? 'loading' : ''}`}>
-				{(messageLoading || messageMutLoading || convMutLoading) && <Spinner />}
-				<div className="my-conversation__message-list__user">
-					{selectedRequest && (
-						<div
-							className="my-conversation__message-list__user__header"
-							onClick={(event) => {
-								setRequestTitle(!requestTitle);
-								event.stopPropagation();
-							}}
-						>
-							<div
-								className="my-conversation__message-list__user__header__detail"
-							>
-								<MdKeyboardArrowLeft
-									className="my-conversation__message-list__user__header__detail return"
+			<AnimatePresence>
+				{isMessageOpen && (
+					<motion.div
+						className={`my-conversation__message-list ${isMessageOpen ? 'open' : ''} ${(messageLoading || messageMutLoading || convMutLoading) ? 'loading' : ''}`}
+						initial={{ opacity: 0, scale: 0.9 }}
+						animate={{ opacity: 1, scale: 1 }}
+						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
+						transition={{ duration: 0.1, type: 'tween' }}
+					>
+						{(messageLoading || messageMutLoading || convMutLoading) && <Spinner />}
+						<div className="my-conversation__message-list__user">
+							{selectedRequest && (
+								<div
+									className="my-conversation__message-list__user__header"
 									onClick={(event) => {
-										setIsMessageOpen(false),
-										setIsListOpen(true),
+										setRequestTitle(!requestTitle);
 										event.stopPropagation();
 									}}
-								/>
-								<img
-									className="my-conversation__message-list__user__header__detail img"
-									src={selectedRequest.image ? selectedRequest.image : logoProfile}
-									alt="" />
-								{selectedRequest.denomination ? (
-									<p className="my-conversation__message-list__user__header__detail name" >
-										<span className="my-conversation__message-list__user__header__detail name-span">
-										</span>&nbsp;{selectedRequest.denomination}
-									</p>
-								) : (
-									<p className="my-conversation__message-list__user__header__detail name" >
-										<span className="my-conversation__message-list__user__header__detail name-span">
-										</span>&nbsp;{selectedRequest.first_name} {selectedRequest.last_name}
-									</p>
-								)}
-
-								{selectedRequest.id > 0 && <span className="my-conversation__message-list__user__header__detail deployArrow">{requestTitle ? <MdKeyboardArrowDown />  : <MdKeyboardArrowRight /> }</span>}
-							</div>
-							{requestTitle && <div className="my-conversation__message-list__user__header__request">
-								<p className="my-conversation__message-list__user__header__request title">{selectedRequest.title}</p>
-							</div>}
-						</div>
-					)}
-
-				</div>
-				{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
-				<div className="my-conversation__container">
-					<div className="my-conversation__background">
-						<div /* id="scrollableMessageList" */ className="my-conversation__message-list__message">
-							{Array.isArray(messageStore) &&
-							messageStore
-								.filter((message) => message.conversation_id === conversationIdState)
-								.map((message, index, array) => (
-									<div className={`my-conversation__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
-										{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
-										<div className={`content ${message.user_id === id ? 'me' : ''}`}>
-											{message.media[0].url && (
-												<div className="my-conversation__message-list__message__detail__image-container">
-													<div className={`map ${message.content ? 'message' : ''}`}>
-														{(() => {
-															const imageUrls = message.media?.map(media => media.url) || [];
-															return message.media?.map((media, index) => (
-																media ? (
-																	media.name.endsWith('.pdf') ? (
-																		<a
-																			className="a-pdf"
-																			href={media.url}
-																			key={media.id}
-																			download={media.name}
-																			target="_blank"
-																			rel="noopener noreferrer"
-																			onClick={(event) => { event.stopPropagation(); }} >
-																			<img
-																				className={`my-conversation__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																				//key={media.id} 
-																				src={pdfLogo}
-																				alt={media.name}
-																			/>
-																		</a>
-																	) : (
-
-																		<img
-																			className={`my-conversation__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																			key={media.id}
-																			src={media.url}
-																			onClick={() => openModal(imageUrls, index)}
-																			alt={media.name}
-																		/>
-																	)
-
-																) : null
-															));
-														})()}
-													</div>
-												</div>
-											)}
-											{message.content && <div className="my-conversation__message-list__message__detail__texte">{message.content}</div>}
-										</div>
-										<div className="my-conversation__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
-									</div>
-								))
-
-							}
-						</div>
-					</div>
-				</div>
-
-				<form className="my-conversation__message-list__form" onSubmit={(event) => {
-					event.preventDefault();
-					if (selectedRequest?.id && !selectedRequest.deleted_at) {
-						handleMessageSubmit(event, selectedRequest.id);
-					}
-				}}>
-					{urlFile.length > 0 && <div className="my-conversation__message-list__form__preview">
-						{urlFile.map((file, index) => (
-							<div className="my-conversation__message-list__form__preview__container" key={index}>
-
-								<img
-									className="my-conversation__message-list__form__preview__container__image"
-									src={file.type === 'application/pdf' ? pdfLogo : file.name}
-									alt={`Preview ${index}`}
-								/>
-								<div
-									className="my-conversation__message-list__form__preview__container__remove"
-									onClick={() => handleRemove(index)}
 								>
-									X
+									<div
+										className="my-conversation__message-list__user__header__detail"
+									>
+										<MdKeyboardArrowLeft
+											className="my-conversation__message-list__user__header__detail return"
+											onClick={(event) => {
+												event.stopPropagation();
+												messageList();
+												/* setIsMessageOpen(false),
+												setIsListOpen(true), */
+											}}
+										/>
+										<img
+											className="my-conversation__message-list__user__header__detail img"
+											src={selectedRequest.image ? selectedRequest.image : logoProfile}
+											alt="" />
+										{selectedRequest.denomination ? (
+											<p className="my-conversation__message-list__user__header__detail name" >
+												<span className="my-conversation__message-list__user__header__detail name-span">
+												</span>&nbsp;{selectedRequest.denomination}
+											</p>
+										) : (
+											<p className="my-conversation__message-list__user__header__detail name" >
+												<span className="my-conversation__message-list__user__header__detail name-span">
+												</span>&nbsp;{selectedRequest.first_name} {selectedRequest.last_name}
+											</p>
+										)}
+
+										{selectedRequest.id > 0 && <span className="my-conversation__message-list__user__header__detail deployArrow">{requestTitle ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}</span>}
+									</div>
+									{requestTitle && <div className="my-conversation__message-list__user__header__request">
+										<p className="my-conversation__message-list__user__header__request title">{selectedRequest.title}</p>
+									</div>}
+								</div>
+							)}
+
+						</div>
+						{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
+						<div className="my-conversation__container">
+							<div className="my-conversation__background">
+								<div /* id="scrollableMessageList" */ className="my-conversation__message-list__message">
+									{Array.isArray(messageStore) &&
+										messageStore
+											.filter((message) => message.conversation_id === conversationIdState)
+											.map((message, index, array) => (
+												<div className={`my-conversation__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
+													{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
+													<div className={`content ${message.user_id === id ? 'me' : ''}`}>
+														{message.media[0].url && (
+															<div className="my-conversation__message-list__message__detail__image-container">
+																<div className={`map ${message.content ? 'message' : ''}`}>
+																	{(() => {
+																		const imageUrls = message.media?.map(media => media.url) || [];
+																		return message.media?.map((media, index) => (
+																			media ? (
+																				media.name.endsWith('.pdf') ? (
+																					<a
+																						className="a-pdf"
+																						href={media.url}
+																						key={media.id}
+																						download={media.name}
+																						target="_blank"
+																						rel="noopener noreferrer"
+																						onClick={(event) => { event.stopPropagation(); }} >
+																						<img
+																							className={`my-conversation__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																							//key={media.id} 
+																							src={pdfLogo}
+																							alt={media.name}
+																						/>
+																					</a>
+																				) : (
+
+																					<img
+																						className={`my-conversation__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																						key={media.id}
+																						src={media.url}
+																						onClick={() => openModal(imageUrls, index)}
+																						alt={media.name}
+																					/>
+																				)
+
+																			) : null
+																		));
+																	})()}
+																</div>
+															</div>
+														)}
+														{message.content && <div className="my-conversation__message-list__message__detail__texte">{message.content}</div>}
+													</div>
+													<div className="my-conversation__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
+												</div>
+											))
+
+									}
 								</div>
 							</div>
-						))}
-					</div>}
-					<label className="my-conversation__message-list__form__label">
-						<MdAttachFile
-							className="my-conversation__message-list__form__label__attach"
-							onClick={() => document.getElementById('send-file')?.click()}
-						/>
-						<FaCamera
-							className="my-conversation__message-list__form__label__camera"
-							onClick={() => document.getElementById('file-camera')?.click()}
-						/>
-						<TextareaAutosize
-							className="my-conversation__message-list__form__label__input"
-							value={messageValue}
-							onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}
-							placeholder="Tapez votre message ici..."
-							maxLength={500}
-							minRows={1}
-						/>
-						<MdSend
-							className="my-conversation__message-list__form__label__send"
-							onClick={() => document.getElementById('send-message')?.click()}
-						/>
-					</label>
-					<input
-						id="send-file"
-						className="my-conversation__message-list__form__input"
-						type="file"
-						accept="image/*,.pdf"
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
-						multiple={true}
-					/>
-					<input
-						id="file-camera"
-						className="my-conversation__message-list__form__input medi"
-						type="file"
-						accept="image/*"
-						capture="environment"
-						onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
-					/>
-					<button
-						id="send-message"
-						className="my-conversation__message-list__form__button"
-						type="submit"
-					>
-						Send
-					</button>
-				</form>
+						</div>
 
-			</div>
+						<form className="my-conversation__message-list__form" onSubmit={(event) => {
+							event.preventDefault();
+							if (selectedRequest?.id && !selectedRequest.deleted_at) {
+								handleMessageSubmit(event, selectedRequest.id);
+							}
+						}}>
+							{urlFile.length > 0 && <div className="my-conversation__message-list__form__preview">
+								{urlFile.map((file, index) => (
+									<div className="my-conversation__message-list__form__preview__container" key={index}>
+
+										<img
+											className="my-conversation__message-list__form__preview__container__image"
+											src={file.type === 'application/pdf' ? pdfLogo : file.name}
+											alt={`Preview ${index}`}
+										/>
+										<div
+											className="my-conversation__message-list__form__preview__container__remove"
+											onClick={() => handleRemove(index)}
+										>
+											X
+										</div>
+									</div>
+								))}
+							</div>}
+							<label className="my-conversation__message-list__form__label">
+								<MdAttachFile
+									className="my-conversation__message-list__form__label__attach"
+									onClick={() => document.getElementById('send-file')?.click()}
+								/>
+								<FaCamera
+									className="my-conversation__message-list__form__label__camera"
+									onClick={() => document.getElementById('file-camera')?.click()}
+								/>
+								<TextareaAutosize
+									className="my-conversation__message-list__form__label__input"
+									value={messageValue}
+									onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}
+									placeholder="Tapez votre message ici..."
+									maxLength={500}
+									minRows={1}
+								/>
+								<MdSend
+									className="my-conversation__message-list__form__label__send"
+									onClick={() => document.getElementById('send-message')?.click()}
+								/>
+							</label>
+							<input
+								id="send-file"
+								className="my-conversation__message-list__form__input"
+								type="file"
+								accept="image/*,.pdf"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
+								multiple={true}
+							/>
+							<input
+								id="file-camera"
+								className="my-conversation__message-list__form__input medi"
+								type="file"
+								accept="image/*"
+								capture="environment"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
+							/>
+							<button
+								id="send-message"
+								className="my-conversation__message-list__form__button"
+								type="submit"
+							>
+								Send
+							</button>
+						</form>
+
+					</motion.div>
+				)}
+			</AnimatePresence>
 
 			<ImageModal
 				modalIsOpen={modalIsOpen}

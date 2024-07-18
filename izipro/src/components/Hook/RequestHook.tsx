@@ -13,6 +13,7 @@ type ExpandedState = {
 
 const RequestItem = ({
 	index,
+	itemList,
 	//messageStore,
 	requestByDate,
 	notViewedConversationStore,
@@ -32,6 +33,7 @@ const RequestItem = ({
 	index?: number,
 	requestByDate?: RequestProps,
 	//messageStore?: MessageProps[],
+	itemList: Function,
 	handleViewedMessage: Function,
 	notViewedConversationStore?: number[],
 	setIsMessageOpen?: Function,
@@ -67,15 +69,18 @@ const RequestItem = ({
 				}
 				const convId = (request || requestByDate)?.conversation?.find(conv => conv.user_1 === id || conv.user_2 === id)?.id;
 				handleViewedMessage(convId);
-				setIsListOpen && setIsListOpen(false);
-				setIsMessageOpen && setIsMessageOpen(true);
+				if (window.innerWidth < 780) {
+					itemList();
+				}
+				/* setIsListOpen && setIsListOpen(false);
+				setIsMessageOpen && setIsMessageOpen(true); */
 			}}
 			layout
 			style={{ overflow: 'scroll' }}
 			initial={{ opacity: 0, scale: 0.9 }}
 			animate={{ opacity: 1, scale: 1 }}
 			exit={{ opacity: 0, scale: 0.9 }}
-			transition={{ duration: 0.2, type: 'Spring' }}
+			transition={{ duration: 0.1, type: 'tween' }}
 		>
 			{requestByDate?.deleted_at && <p className="my-conversation__list__detail__item__deleted">SUPPRIMÉ PAR L&apos;UTILISATEUR</p>}
 			{(request || requestByDate)?.urgent && <p className="my-conversation__list__detail__item urgent">URGENT</p>}
