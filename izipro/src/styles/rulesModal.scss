@@ -2,13 +2,23 @@
 @use './mixins' as m;
 
 .rules-modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: v.$font;
+    font-weight: 500;
+    height: 100vh;
+    height: 100dvh;
+    
     .rules-modal__container {
         @include m.modal-container;
-
+       // top: 50%;
+      // left: 50%;
+        width: 60vw;
+        height: 70vh;
         .rules-modal__container__content {
             overflow: auto;
             overflow-x: hidden;
-        
             height: 100%;
 
             .rules-modal__container__content__description {
@@ -26,8 +36,6 @@
                     flex-direction: column;
                     width: 100%;
                     max-width: 100%;
-                   // padding: 1rem;
-                   // margin: 1rem;
                     background: white;
                     border-radius: 0.5rem;
                     font-size: 0.9rem;
@@ -99,7 +107,8 @@
 @media (max-width: 700px) {
     .rules-modal {
         .rules-modal__container {
-
+            width: 80vw;
+            height: 80vh;
 
             .rules-modal__container__button {
 

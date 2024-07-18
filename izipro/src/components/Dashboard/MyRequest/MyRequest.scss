@@ -6,7 +6,7 @@
     display: flex;
     align-items: stretch;
     height: 100%;
-    overflow: hidden;
+    //overflow: hidden;
 
     .my-request__list {
         overflow-y: auto;
@@ -46,13 +46,14 @@
 
 
         .my-request__list__detail {
+            overflow: hidden;
+            scrollbar-width: none;
             .my-request__list__detail__item {
                 cursor: pointer;
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
                 scrollbar-width: none;
-                // border: 1px solid v.$color-secondary-blue;
                 margin: 1rem;
                 background-color: white;
                 border-radius: 0.5rem;
@@ -203,7 +204,6 @@
 
                 .my-request__list__detail__item__delete {
                     display: none;
-
                 }
 
                 .my-request__list__detail__item__delete-FaTrashAlt {
@@ -211,6 +211,7 @@
                     margin: 1rem 1rem 1rem auto;
                     color: v.$color-error;
                     cursor: pointer;
+                    z-index: 2;
                 }
             }
         }
@@ -757,7 +758,7 @@
     .my-request {
         width: 100%;
         max-height: 100%;
-
+ 
         .my-request__list {
             display: none;
 
@@ -765,6 +766,7 @@
                 display: block;
                 margin: auto;
                 max-width: 90%;
+               
             }
 
         }
@@ -862,13 +864,10 @@
 
         .my-request__answer-list {
             &.open {
-                //margin: 0;
                 margin: 0.5rem auto 0 auto;
-                /*  overflow: auto;
-                scrollbar-width: none; */
+
 
                 .my-request__answer-list__header {
-
                     &.return {
                         font-size: 4rem;
                         // height: 50px;

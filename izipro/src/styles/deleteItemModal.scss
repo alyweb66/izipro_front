@@ -3,15 +3,19 @@
 
 
 .delete-item-modal {
-    height: 50%;
+    //height: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: v.$font;
     font-weight: 500;
+    height: 100vh;
+    height: 100dvh;
+   
 
     .delete-item-modal__container {
         @include m.modal-container;
+        
         justify-content: space-around;
         width: 50vw;
         height: 30vh;
@@ -90,7 +94,7 @@
 
 }
 
-@media (max-height: 480px) {
+@media (max-height: 550px) {
     .delete-item-modal {
         .delete-item-modal__container {
             height: 60%;

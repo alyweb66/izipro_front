@@ -2,15 +2,18 @@
 @use './mixins' as m;
 
 .contact-modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-family: v.$font;
+    font-weight: 500;
+    height: 100vh;
+    height: 100dvh;
 
     .contact-modal__container {
         @include m.modal-container;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-around;
-        padding-bottom: 1rem;
+        width: 60vw;
+        height: 80vh;
 
         .contact-modal__container__content {
             overflow: auto;
@@ -125,11 +128,13 @@
     .contact-modal {
         .contact-modal__container {
             padding: 1rem 1rem 0 1rem;
+            width: 70vw;
+            height: 80vh;
 
             .contact-modal__container__content {
                 .contact-modal__container__content__label {
                     width: 90%;
-                    max-width: 90%;
+                    max-width: 60%;
 
                     &.textarea {
                         width: 90%;

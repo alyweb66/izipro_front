@@ -3,7 +3,7 @@ import { useState } from 'react';
 import ReactModal from 'react-modal';
 import { MdKeyboardArrowRight, MdKeyboardArrowLeft, MdClose} from 'react-icons/md';
 import '../../styles/imageModal.scss';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 ReactModal.setAppElement('#root');
 
@@ -28,7 +28,6 @@ export function useModal() {
 		setSelectedImageIndex((prevIndex) => (prevIndex + 1) % images.length);
 
 	}
-
 
 	function previousImage() {
 		setSelectedImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);

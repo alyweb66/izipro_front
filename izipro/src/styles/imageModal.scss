@@ -28,11 +28,9 @@
         
         display: flex;
         justify-content: center;
-       // align-items: center;
         object-fit: contain;
         position: relative;
         margin: auto;
-        //border-radius: 0.5rem;
         max-width: 100%;
         max-height: 100%;
         overflow: hidden;
@@ -79,43 +77,3 @@
 
 }
 
-@media (max-width: 1200px) {
-    .react-modal {
-
-        .react-modal__button-close {
-            /* margin: 0;
-            position: absolute;
-            top: 10px;
-            right: 0px; */
-        }
-
-     /*    .react-modal__picture {
-            position: relative;
-           // display: inline-block;
-
-            &.back {
-                left: 0px;
-            }
-
-            &.forward {
-                right: 0px;
-            }
-            
-            &.back,
-            &.forward {
-                position: absolute;
-                top: 50%;
-                transform: translateY(-50%);
-                cursor: pointer;
-                z-index: 10;
-                font-size: 5rem;
-            }
-
-            &.img {
-                display: block;
-            }
-
-        } */
-    }
-
-}
