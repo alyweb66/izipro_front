@@ -15,9 +15,9 @@
         max-width: 30%;
         margin: 1rem 0.1rem 0 0.1rem;
 
-        .my-request__list::-webkit-scrollbar {
+        &::-webkit-scrollbar {
             display: none;
-
+            /* For Chrome, Safari and Opera */
         }
 
         &.no-req {
@@ -49,6 +49,11 @@
             overflow: hidden;
             scrollbar-width: none;
 
+            &::-webkit-scrollbar {
+                display: none;
+                /* For Chrome, Safari and Opera */
+            }
+
             .my-request__list__detail__item {
                 cursor: pointer;
                 display: flex;
@@ -61,6 +66,11 @@
                 box-shadow: -5px 0 10px #6666661c,
                     -5px 0 10px #ffffff17,
                     5px 0 10px #6666661c;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                    /* For Chrome, Safari and Opera */
+                }
 
                 &.true {
                     @include m.urgent-item;
@@ -286,6 +296,11 @@
             scrollbar-width: none;
             height: 93%;
 
+            &::-webkit-scrollbar {
+                display: none;
+                /* For Chrome, Safari and Opera */
+            }
+
             .my-request__answer-list__user {
                 overflow: hidden;
                 scrollbar-width: none;
@@ -299,6 +314,10 @@
                     5px 0 10px #6666661c;
                 height: 4rem;
 
+                &::-webkit-scrollbar {
+                    display: none;
+                    /* For Chrome, Safari and Opera */
+                }
 
                 &.deleted {
                     @include m.deleted;
@@ -432,7 +451,7 @@
                         font-weight: 600;
                         margin-left: 0.5rem;
                         margin-right: 0.5rem;
-                        
+
                     }
 
                     &.deleted {
@@ -512,10 +531,10 @@
                 background: transparent;
                 height: 100%;
 
-                .my-request__message-list__message::-webkit-scrollbar {
+                &::-webkit-scrollbar {
                     display: none;
                     /* For Chrome, Safari and Opera */
-                }
+                  }
 
                 .my-request__message-list__message__detail {
                     display: flex;
@@ -672,7 +691,7 @@
                 gap: 1rem;
                 box-shadow: 0 -1px 6px 5px rgba(255, 255, 255, 0.637);
 
-                background-color:transparent;
+                background-color: transparent;
 
                 .my-request__message-list__form__preview__container {
                     display: flex;
@@ -749,6 +768,10 @@
                 background-color: transparent;
                 resize: none;
 
+                &::-webkit-scrollbar {
+                    display: none;
+                    /* For Chrome, Safari and Opera */
+                  }
 
                 &:focus {
                     @include m.border;
@@ -802,8 +825,6 @@
             &.open {
                 display: flex;
                 flex-direction: column;
-                /*      overflow: auto;
-                scrollbar-width: none; */
                 margin: 0.5rem auto 0 auto;
                 width: 70%;
                 max-width: 70%;
@@ -853,17 +874,18 @@
                 .my-request__message-list__user {
 
                     .my-request__message-list__user__header {
-                       
+
                         &.description {
                             margin-top: 0;
-                            
+
                         }
+
                         .my-request__message-list__user__header__detail {
-                        
+
                             /* &.deploy-arrow {
                                 width: 50%;
                             } */
-                            
+
 
                             &.return {
                                 display: block;
@@ -917,7 +939,7 @@
                 .my-request__message-list__user {
                     .my-request__message-list__user__header {
 
-                       
+
                         .my-request__message-list__user__header__detail {
                             border-radius: 0;
 
@@ -938,6 +960,7 @@
                                 margin: 0.5rem 0.5rem 0.5rem 0.2rem;
                                 border-radius: 0.5rem;
                             }
+
                             &.denomination {
                                 width: 40%;
 
@@ -961,5 +984,10 @@
     .my-request {
         overflow: auto;
         scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+            /* For Chrome, Safari and Opera */
+          }
     }
 }

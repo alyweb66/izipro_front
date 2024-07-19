@@ -17,9 +17,13 @@
         overflow-y: auto;
         scrollbar-width: none;
         width: 100%;
-        // height: 95%;
         max-width: 40%;
         margin: 1rem 0.1rem 0 0.1rem;
+
+        &::-webkit-scrollbar {
+            display: none;
+            /* For Chrome, Safari and Opera */
+        }
 
         &.no-req {
             display: flex;
@@ -55,7 +59,11 @@
                 box-shadow: -5px 0 10px #6666661c,
                     -5px 0 10px #ffffff17,
                     5px 0 10px #6666661c;
-             
+
+                &::-webkit-scrollbar {
+                    display: none;
+                    /* For Chrome, Safari and Opera */
+                }
 
                 &.true {
                     @include m.urgent-item;
@@ -275,7 +283,7 @@
         }
 
         .my-conversation__message-list__user {
-        
+
             .my-conversation__message-list__user__header {
                 width: 100%;
                 display: flex;
@@ -285,6 +293,7 @@
                 cursor: pointer;
                 position: relative;
                 border-radius: 0.3rem 0.3rem 0;
+
                 .my-conversation__message-list__user__header__detail {
                     display: flex;
                     align-items: center;
@@ -317,10 +326,10 @@
 
                         &.deployed {
                             margin: 0.3rem 1rem;
-                            font-size: 0.8rem; 
+                            font-size: 0.8rem;
                         }
                     }
-                    
+
                     &.deploy-arrow {
                         color: v.$color-primary-blue;
                         font-size: 2.5rem;
@@ -405,10 +414,10 @@
                 background: transparent;
                 height: 100%;
 
-                .my-conversation__message-list__message::-webkit-scrollbar {
+                &::-webkit-scrollbar {
                     display: none;
                     /* For Chrome, Safari and Opera */
-                }
+                  }
 
                 .my-conversation__message-list__message__detail {
                     display: flex;
@@ -648,6 +657,10 @@
                 background-color: transparent;
                 resize: none;
 
+                &::-webkit-scrollbar {
+                    display: none;
+                    /* For Chrome, Safari and Opera */
+                  }
 
                 &:focus {
                     @include m.border;
