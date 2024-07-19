@@ -36,16 +36,14 @@
 
     .request__form {
         @include m.select;
-        width: 80%;
+        &{width: 80%;
         margin: auto;
         margin-top: 1rem;
         border-radius: 0.5rem;
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        /*  box-shadow: -5px 0 10px #6666661c,
-            -5px 0 10px #ffffff17,
-            5px 0 10px #6666661c; */
+        justify-content: center;}
+       
 
 
 
@@ -201,7 +199,7 @@
 
                 &:focus {
                     @include m.border;
-                    border-radius: 0.4rem;
+                    &{border-radius: 0.4rem;}
                 }
             }
         }
@@ -288,7 +286,7 @@
 
         .request__form__button {
             @include m.blue-button;
-            margin: 1rem auto;
+            &{margin: 1rem auto;}
         }
 
 

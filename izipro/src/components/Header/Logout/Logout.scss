@@ -65,11 +65,12 @@
 
         .logout__icon {
             display: block;
-            width: 70px;
-            height: 50px;
+            //width: 70px;
+            //height: 50px;
+            font-size: 3.5rem;
             color: v.$color-primary-orange;
-            margin-top: 0.5rem;
-            margin-right: 2rem;
+           // margin-top: 0.5rem;
+            margin-right: 1rem;
         }
 
         .logout__button {

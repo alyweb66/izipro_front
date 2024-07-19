@@ -12,8 +12,11 @@
 
     .contact-modal__container {
         @include m.modal-container;
-        width: 60vw;
-        height: 80vh;
+
+        & {
+            width: 60vw;
+            height: 80vh;
+        }
 
         .contact-modal__container__content {
             overflow: auto;
@@ -28,7 +31,7 @@
             &::-webkit-scrollbar {
                 display: none;
                 /* For Chrome, Safari and Opera */
-              }
+            }
 
             .contact-modal__container__content__title {
                 color: v.$color-primary-orange;
@@ -80,7 +83,10 @@
 
                     &:focus {
                         @include m.border;
-                        border-radius: 0.2rem;
+
+                        & {
+                            border-radius: 0.2rem;
+                        }
                     }
 
                     &.textarea {
@@ -112,8 +118,11 @@
             .contact-modal__close,
             .contact-modal__accept {
                 @include m.blue-button;
-                width: initial;
-                font-size: 1rem;
+
+                & {
+                    width: initial;
+                    font-size: 1rem;
+                }
             }
         }
 

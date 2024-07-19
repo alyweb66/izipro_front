@@ -14,22 +14,22 @@
   box-shadow: 5px 5px 10px #dfdfdf,
     -5px -5px 10px #ffffff;
 
-    .login-container__logo {
-      display: flex;
-      margin: 0;
+  .login-container__logo {
+    display: flex;
+    margin: 0;
 
-      .__image {
-        width: 50px;
-        height: 50px;
-      }
-
-      .__title {
-        color: v.$color-primary-blue;
-        font-family: v.$font;
-        font-weight: v.$font-title-weight;
-        font-size: 2.3rem;
-      }
+    .__image {
+      width: 50px;
+      height: 50px;
     }
+
+    .__title {
+      color: v.$color-primary-blue;
+      font-family: v.$font;
+      font-weight: v.$font-title-weight;
+      font-size: 2.3rem;
+    }
+  }
 
 
   .login-error {
@@ -74,9 +74,12 @@
 
     .button {
       @include m.orange-button;
-      margin-top: 0;
-      margin-right: 1rem;
-      max-width: 20%;
+
+      & {
+        margin-top: 0;
+        margin-right: 1rem;
+        max-width: 20%;
+      }
 
     }
 
@@ -192,7 +195,7 @@
         border-radius: 12px;
         height: 40px;
         padding: 10px;
-        
+
         &:focus {
           @include m.border;
         }
@@ -200,10 +203,12 @@
 
       &.button {
         @include m.orange-button;
-        margin: auto;
-        margin-top: 1rem;
 
-        width: 50%;
+        & {
+          margin: auto;
+          margin-top: 1rem;
+          width: 50%;
+        }
       }
 
       @media (max-width: 800px) {
@@ -211,17 +216,18 @@
           margin: 0 1rem;
           text-align: center;
         }
-          &.input {
-            max-width: 70%;
-            margin-bottom: 1rem;
-          }
 
-          &.button {
-            margin: auto;
-            max-width: 50%;
-            width: 50%;
-          }
-        
+        &.input {
+          max-width: 70%;
+          margin-bottom: 1rem;
+        }
+
+        &.button {
+          margin: auto;
+          max-width: 50%;
+          width: 50%;
+        }
+
       }
     }
   }

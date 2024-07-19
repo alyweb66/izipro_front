@@ -11,10 +11,13 @@
 
     .expired-session-modal__container {
         @include m.modal-container;
-        justify-content: space-around;
-        width: 50vw;
-        height: 30vh;
-        padding: 1rem;
+
+        & {
+            justify-content: space-around;
+            width: 50vw;
+            height: 30vh;
+            padding: 1rem;
+        }
 
         .expired-session-modal__container__title {
             text-align: center;
@@ -22,10 +25,10 @@
             font-size: 1.5rem;
             font-weight: 500;
             color: v.$color-primary-orange;
-            
-            
+
+
         }
-        
+
         .expired-session-modal__container__description {
             text-align: center;
             margin: 1rem auto;
@@ -35,10 +38,12 @@
         .expired-session-modal__container__button {
             display: flex;
             position: relative;
+
             .expired-session-modal__container__button__validate {
                 @include m.blue-button;
             }
         }
+
         .expired-session-modal__container__button::before {
             content: "";
             position: absolute;
@@ -64,7 +69,7 @@
 }
 
 @media (max-width: 480px) {
- 
+
 
     .expired-session-modal {
         .expired-session-modal__container {

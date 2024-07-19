@@ -33,9 +33,9 @@
     }
 
     .client-request__list__fetch-button {
-      display: flex;
-      justify-content: center;
       @include m.fetch-button;
+      &{display: flex;
+      justify-content: center;}
     }
 
 

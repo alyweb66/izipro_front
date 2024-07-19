@@ -23,9 +23,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  // margin: auto;
-  // max-width: 20%;
-  //margin-top: 0rem;
   padding: 0.5rem 1.5rem;
   border-radius: 0.5rem;
   border: none;
@@ -155,10 +152,10 @@
     -5px 0 10px #ffffff05,
     5px 0 10px #6666660e;
 
-    &::-webkit-scrollbar {
-        display: none;
-        /* For Chrome, Safari and Opera */
-      }
+  &::-webkit-scrollbar {
+    display: none;
+    /* For Chrome, Safari and Opera */
+  }
 }
 
 @mixin not-viewed {
@@ -340,6 +337,7 @@
       visibility: hidden;
       pointer-events: none;
       transform: translateY(-15px);
+
       &::-webkit-scrollbar {
         display: none;
         /* For Chrome, Safari and Opera */

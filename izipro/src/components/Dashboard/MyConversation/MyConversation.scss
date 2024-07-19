@@ -39,9 +39,12 @@
         }
 
         .my-conversation__list__fetch-button {
-            display: flex;
-            justify-content: center;
             @include m.fetch-button;
+
+            & {
+                display: flex;
+                justify-content: center;
+            }
         }
 
         .my-conversation__list__detail {
@@ -82,13 +85,12 @@
                     @include m.not-viewed
                 }
 
-                /* &.new {
-                    @include m.selected;
-                } */
-
                 &.deleted {
                     @include m.deleted;
-                    z-index: 1;
+
+                    & {
+                        z-index: 1;
+                    }
 
                     .my-conversation__list__detail__item__deleted {
                         position: absolute;
@@ -417,7 +419,7 @@
                 &::-webkit-scrollbar {
                     display: none;
                     /* For Chrome, Safari and Opera */
-                  }
+                }
 
                 .my-conversation__message-list__message__detail {
                     display: flex;
@@ -660,11 +662,14 @@
                 &::-webkit-scrollbar {
                     display: none;
                     /* For Chrome, Safari and Opera */
-                  }
+                }
 
                 &:focus {
                     @include m.border;
-                    border-radius: 0.2rem;
+
+                    & {
+                        border-radius: 0.2rem;
+                    }
                 }
             }
 
@@ -800,13 +805,3 @@
         }
     }
 }
-
-
-
-/* 
-@include m.picture-modal;
-
-
-@media (max-width: 1200px) {
-    @include m.picture-modal-querie;
-} */

@@ -76,7 +76,7 @@
             }
 
             &.loading {
-                 //position for spinner
+                //position for spinner
                 position: relative;
                 margin-bottom: 5rem;
             }
@@ -96,8 +96,8 @@
                 flex-direction: column;
                 background: white;
                 box-shadow: -5px 0 10px #66666610,
-                -5px 0 10px #ffffff05,
-                5px 0 10px #6666660e;
+                    -5px 0 10px #ffffff05,
+                    5px 0 10px #6666660e;
                 border-radius: 0.5rem;
                 font-size: 1rem;
                 font-weight: 500;
@@ -115,8 +115,11 @@
                     }
 
                     &:focus {
-                            @include m.border;
-                        border-radius: 0.2rem;
+                        @include m.border;
+
+                        & {
+                            border-radius: 0.2rem;
+                        }
 
                     }
                 }
@@ -146,7 +149,7 @@
 
         }
 
-        .account__profile__modification-error{
+        .account__profile__modification-error {
             margin: auto;
             font-size: 1rem;
             font-weight: 500;
@@ -154,13 +157,13 @@
 
         }
 
-        .account__profile__modification-message{
+        .account__profile__modification-message {
             margin: auto;
             margin-top: 0.3rem;
             font-size: 1rem;
             font-weight: 500;
             color: v.$color-validation;
-            
+
         }
     }
 
@@ -209,7 +212,7 @@
             }
         }
 
-        
+
     }
 
 }
@@ -219,7 +222,7 @@
         .account__profile {
             .account__profile__form {
                 width: 100%;
-              margin: 0rem;
+                margin: 0rem;
                 padding: 0.5rem;
 
                 &.password {

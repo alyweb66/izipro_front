@@ -152,6 +152,7 @@ function Dashboard() {
 	let isLogged;
 	const getItem = localStorage.getItem('chekayl');
 
+	// decode the data
 	const decodeData = atob(getItem || '');
 
 	if (decodeData === 'session') {
