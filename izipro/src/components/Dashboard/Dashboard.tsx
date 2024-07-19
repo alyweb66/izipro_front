@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 
 // Modules without types
-// @ts-expect-error turf is not typed
 import * as turf from '@turf/turf';
 
 // components 
@@ -750,7 +749,7 @@ function Dashboard() {
 		// Define the two points for each request and filter them
 		const filteredRequests = requests.filter((request: RequestProps) => {
 			const requestPoint = turf.point([request.lng, request.lat]);
-			const userPoint = turf.point([lng, lat]);
+			const userPoint = turf.point([lng ?? 0, lat ?? 0]);
 			const distance = turf.distance(requestPoint, userPoint);
 			
 			return (
