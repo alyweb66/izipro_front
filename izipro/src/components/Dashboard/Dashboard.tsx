@@ -16,7 +16,7 @@ import ClientRequest from './ClientRequest/ClientRequest';
 import Footer from '../Footer/Footer';
 import Spinner from '../Hook/Spinner';
 import { ExpiredSessionModal } from '../Hook/ExpiredSession';
-import { ClientRequestBadge } from '../Hook/Badge';
+import { Badge } from '../Hook/Badge';
 
 // Hook personal
 import {
@@ -844,7 +844,9 @@ function Dashboard() {
 							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); }}>
 							<div className="tab-content">
 								<span>MES DEMANDES</span>
-								{viewedMessageState.length > 0 && <ClientRequestBadge count={viewedMessageState.length} />}
+								<div className={`badge-container ${viewedMessageState.length > 0 ? 'visible' : ''}`}>
+									{viewedMessageState.length > 0 && <Badge count={viewedMessageState.length} />}
+								</div>
 							</div>
 							<div className="indicator"></div>
 						</li>
@@ -853,7 +855,9 @@ function Dashboard() {
 								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); }}>
 								<div className="tab-content">
 									<span>CLIENT</span>
-									{notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />}
+									<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>
+										{notViewedRequestStore.length > 0 && <Badge count={notViewedRequestStore.length} />}
+									</div>
 								</div>
 								{/* {notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />} */}
 								<div className="indicator"></div>
@@ -864,7 +868,9 @@ function Dashboard() {
 								onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }}>
 								<div className="tab-content">
 									<span>MES CONVERSATIONS</span>
-									{viewedMyConversationState.length > 0 && <ClientRequestBadge count={viewedMyConversationState.length} />}
+									<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
+										{viewedMyConversationState.length > 0 && <Badge count={viewedMyConversationState.length} />}
+									</div>
 								</div>
 								<div className="indicator"></div>
 							</li>

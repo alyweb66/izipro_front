@@ -192,6 +192,10 @@
         border-radius: 12px;
         height: 40px;
         padding: 10px;
+        
+        &:focus {
+          @include m.border;
+        }
       }
 
       &.button {

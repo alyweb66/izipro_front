@@ -179,8 +179,8 @@
 
       .client-request__list__detail__item__picture {
         display: flex;
-
         flex-wrap: wrap;
+        z-index: 1;
 
         &.img {
           margin: 1rem 0.5rem 0 0.5rem;
@@ -188,6 +188,7 @@
           width: 70px;
           height: 70px;
           cursor: pointer;
+
 
         }
       }

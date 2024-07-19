@@ -80,14 +80,12 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ requestId: number, requestTitle: string } | null>(null);
-	//const [isUserMessageOpen, setIsUserMessageOpen] = useState(false);
+	const [isUserMessageOpen, setIsUserMessageOpen] = useState(false);
 	const [isSkipRequest] = useState<boolean>(true);
 	const [isSkipMessage, setIsSkipMessage] = useState<boolean>(true);
 	const [fetchConvIdState, setFetchConvIdState] = useState<number>(0);
-	const [isVisible, setIsVisible] = useState(isListOpen);
-	//const [isRequestListVisible, setIsRequestListVisible] = useState(window.innerWidth < 1000 ? isListOpen : true);
-	const [isAnswerVisible, setIsAnswerVisible] = useState(window.innerWidth < 1000 ? isAnswerOpen : true);
-	const [isAnswerListVisible, setIsAnswerListVisible] = useState(window.innerWidth < 1000 ? isAnswerOpen : true);
+	//const [isHandleClick, setIsHandleClick] = useState<boolean>(false);
+
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
@@ -106,6 +104,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const selectedRequestRef = useRef<RequestProps | null>(null);
 
 	const limit = 5;
+	console.log('couocu');
 
 	// file upload
 	const { urlFile, setUrlFile, file, setFile, handleFileChange } = useFileHandler();
@@ -120,20 +119,55 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { loading: requestLoading, fetchMore } = useQueryUserRequests(id, 0, limit, isSkipRequest);
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(fetchConvIdState, 0, 100, isSkipMessage);
-
+	console.log('isListOpen', isListOpen);
+	console.log('isAnswerOpen', isAnswerOpen);
+	console.log('isUserMessageOpen', isUserMessageOpen);
+	//console.log('isHandleClick', isHandleClick);
+	
+	console.log('isMessageOpen', isMessageOpen);
 	// useEffect to check the size of the window
 	useEffect(() => {
 		const handleResize = () => {
-			if (window.innerWidth < 1000) {
-				setIsMessageOpen(false);
-			} else {
-				setIsMessageOpen(true);
-				setIsAnswerVisible(true);
-				setIsVisible(true);
-				setIsAnswerListVisible(true);
-			}
-		};
+			///if (!isHandleClick) {
+			console.log('not handle click');
+				
+			if (window.innerWidth < 1000 ) {
+	
+				if ( isUserMessageOpen) {
 
+					setIsMessageOpen(true);
+					setIsAnswerOpen(false);
+					setIsListOpen(false);
+				} else if ( !isUserMessageOpen ) {
+					
+					setIsMessageOpen(false);
+					setIsAnswerOpen(false);
+					setIsListOpen(true);
+				
+				}else {
+					if (isAnswerOpen) {
+						setIsMessageOpen(false);
+						setIsAnswerOpen(true);
+						setIsListOpen(false);
+					}
+					if (isListOpen) {
+						setIsMessageOpen(false);
+						setIsAnswerOpen(false);
+						setIsListOpen(true);
+					}
+				}
+	
+			} else {
+					
+				setIsMessageOpen(true);
+				setIsAnswerOpen(true);
+				setIsListOpen(true);
+					
+
+			}
+			//}
+		};
+		
 		// add event listener to check the size of the window
 		window.addEventListener('resize', handleResize);
 
@@ -142,7 +176,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
-	}, []); 
+	}, [/* isMessageOpen, isAnswerOpen, isListOpen */]); 
 
 	// useEffect to sort the requests by date and update the subscription
 	useEffect(() => {
@@ -281,7 +315,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	}, [myRequestsStore]);
 
-
 	// useEffect to update user conversation by date
 	useEffect(() => {
 		if (userConvStore && selectedRequest && selectedRequest.conversation) {
@@ -399,6 +432,16 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			setConversationIdState(0);
 		};
 	}, []);
+
+	// useEffect to update the visibility of the message if a user is selected
+	useEffect(() => {
+		if (selectedUser && selectedUser?.id > 0) {
+			setIsUserMessageOpen(true);
+		} else {
+			setIsUserMessageOpen(false);
+		
+		}
+	}, [selectedUser]);
 
 
 	// Function to delete a request
@@ -669,79 +712,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	};
 
-	// useEffect to update the visibility of the request list
-	useEffect(() => {
-		if (isListOpen) {
-			setIsVisible(true);
-			if (window.innerWidth < 1000) {
-				//setIsRequestListVisible(true);
-			}
-		}
-	}, [isListOpen]);
-
-	// useEffect to update the visibility of the request list under 1000px
-	useEffect(() => {
-		if (isAnswerOpen) {
-			setIsAnswerListVisible(true);
-			if (window.innerWidth < 1000) {
-				setIsAnswerVisible(true);
-			}
-		}
-	}, [isAnswerOpen]);
-	
-	// function to set the visibility of the request list
-	const itemList = () => {
-		setIsVisible(false);
-		//setIsRequestListVisible(false);
-		if (window.innerWidth < 1000) {
-			setIsAnswerVisible(true);
-		}
-
-		setTimeout(() => {
-			setIsListOpen(false);
-			setIsAnswerOpen(true);
-			setIsMessageOpen(false);
-		}, 200); // time must be the same as the transition duration
-	};
-
-	// function to set the visibility of the answer list
-	const answerList = () => {
-		setIsAnswerVisible(false);
-
-		setTimeout(() => {
-			setIsListOpen(true),
-			setIsAnswerOpen(false),
-			setIsMessageOpen(false);
-		}, 200); // time must be the same as the transition duration
-	};
-
-	// function to set the visibility of the user answer 
-	const answerListUser = () => {
-		setIsAnswerListVisible(false);
-		setIsAnswerVisible(false);
-
-		setTimeout(() => {
-			setIsMessageOpen(true);
-			setIsMessageOpen(true);
-			setIsAnswerOpen(false);
-			setIsListOpen(false);
-		}, 200); // time must be the same as the transition duration
-	};
-
-	// function to set the visibility of the user message
-	const messageListUser = () => {
-		setIsMessageOpen(false);
-
-		setTimeout(() => {
-			setIsMessageOpen(false),
-			setIsAnswerOpen(true),
-			//setIsUserMessageOpen(false),
-			setIsListOpen(false);
-		}, 200); // time must be the same as the transition duration
-	};
-
-
-
 
 	return (
 		<div className="my-request">
@@ -757,7 +727,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					<div className="my-request__list__detail" >
 						<AnimatePresence>
 
-							{isVisible && requestByDate.map((request, index) => (
+							{isListOpen && requestByDate.map((request, index) => (
 								<motion.div
 									id={index === 0 ? 'first-request' : undefined}
 									className={`my-request__list__detail__item 
@@ -769,12 +739,19 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 									onClick={(event) => {
 										handleConversation(request, event);
 										setSelectedRequest(request);
+										//	setIsHandleClick(true);
 										if (window.innerWidth < 1000) {
 											setIsListOpen(false);
-											setIsAnswerOpen(true);
-											setIsMessageOpen(false);
-											itemList();
+											setTimeout(() => {
+												setIsAnswerOpen(true);
+												setIsMessageOpen(false);
+
+											}, 200);
+											//itemList();
 										}
+										/* setTimeout(() => {
+											setIsHandleClick(false);
+										}, 400); */
 										if (!selectedRequest) {
 											selectedRequestRef.current = request;
 										}
@@ -919,7 +896,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			</div>
 
 			<AnimatePresence>
-				{isAnswerVisible && (
+				{isAnswerOpen && (
 					<motion.div /* id="scrollableAnswer" */
 						className={`my-request__answer-list ${isAnswerOpen ? 'open' : ''} ${conversationLoading ? 'loading' : ''}`}
 						aria-label="Liste des réponses"
@@ -933,7 +910,18 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							<MdKeyboardArrowLeft
 								className="my-request__answer-list__header return"
 								onClick={() => {
-									answerList();
+									if (window.innerWidth < 1000) {
+										//setIsHandleClick(true);
+										setIsAnswerOpen(false);
+										setTimeout(() => {
+											setIsListOpen(true);
+											setIsMessageOpen(false);
+										}, 200);
+										//answerList();
+									}
+									/* setTimeout(() => {
+										setIsHandleClick(false);
+									}, 400); */
 									setSelectedRequest(null);
 								}}
 								aria-label="Retour à la liste des demandes"
@@ -947,7 +935,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						) : (
 							<div className="my-request__answer-list__container">
 								<AnimatePresence>
-									{isAnswerListVisible && userConvState && userConvState?.map((user: UserDataProps, index) => (
+									{isAnswerOpen && userConvState && userConvState?.map((user: UserDataProps, index) => (
 										<motion.div
 											id={index === 0 ? 'first-user' : undefined}
 											className={`my-request__answer-list__user 
@@ -964,8 +952,17 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 												setSelectedUser(user);
 												handleMessageConversation(user.id, event);
 												if (window.innerWidth < 1000) {
-													answerListUser();
+													//setIsHandleClick(true);
+													setIsAnswerOpen(false);
+													setTimeout(() => {
+														setIsMessageOpen(true);
+														setIsListOpen(false);
+													},200);
+													//answerListUser();
 												}
+												/* setTimeout(() => {
+													setIsHandleClick(false);
+												}, 400); */
 									
 											}}
 											aria-label={`Détails de ${user.first_name} ${user.last_name}`}
@@ -1026,7 +1023,18 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 									<MdKeyboardArrowLeft
 										className="my-request__message-list__user__header__detail return"
 										onClick={(event) => {
-											messageListUser();
+											if (window.innerWidth < 1000) {
+												//setIsHandleClick(true);
+												setIsMessageOpen(false);
+												setTimeout(() => {
+													setIsListOpen(false);
+													setIsAnswerOpen(true);
+												}, 200);
+												//messageListUser();
+											}
+											/* setTimeout(() => {
+												setIsHandleClick(false);
+											}, 400); */
 											setSelectedUser(null);
 											event.stopPropagation();
 										}}
@@ -1042,10 +1050,15 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 										<p className="my-request__message-list__user__header__detail name">{selectedUser?.first_name} {selectedUser?.last_name}</p>
 									)}
 									{selectedUser?.deleted_at && <p className="my-request__message-list__user__header__detail deleted" aria-label="Utilisateur supprimé">Utilisateur supprimé</p>}
-									{selectedUser && selectedUser?.id > 0 && <span className="my-request__message-list__user__header__detail deployArrow">{userDescription ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}</span>}
+									{selectedUser && selectedUser?.id > 0 && <span className="my-request__message-list__user__header__detail deploy-arrow">{userDescription ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}</span>}
 								</div>
 
 								{userDescription && <div>
+									{selectedUser?.denomination ? (
+										<p className="my-request__message-list__user__header__detail denomination deployed">{selectedUser?.denomination}</p>
+									) : (
+										<p className="my-request__message-list__user__header__detail name description">{selectedUser?.first_name} {selectedUser?.last_name}</p>
+									)}
 									<p className="my-request__message-list__user__header description" aria-label="Description de l'utilisateur">
 										{selectedUser?.description ? selectedUser.description : 'Pas de description'}
 									</p>
@@ -1058,7 +1071,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						<div className="my-request__container">
 							<div className="my-request__background">
 								<div /* id="scrollableMessage" */ className="my-request__message-list__message" aria-label='Message de la conversation'>
-									{Array.isArray(messageStore) && /* isUserMessageOpen && */
+									{Array.isArray(messageStore) && isUserMessageOpen &&
 								messageStore
 									.filter((message) => message.conversation_id === conversationIdState)
 									.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
@@ -1210,7 +1223,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				setModalArgs={setModalArgs}
 				setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
 				deleteItemModalIsOpen={deleteItemModalIsOpen}
-				handleDeleteRequest={handleDeleteRequest}
+				handleDeleteItem={handleDeleteRequest}
 			/>
 
 		</div>

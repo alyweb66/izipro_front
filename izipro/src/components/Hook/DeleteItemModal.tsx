@@ -13,19 +13,21 @@ interface ModalArgs {
 }
 
 interface DeleteItemModalProps {
-    modalArgs: ModalArgs | null;
-    setModalArgs: (args: ModalArgs | null) => void;
+	isDeleteUser?: boolean;
+    modalArgs?: ModalArgs | null;
+    setModalArgs?: (args: ModalArgs | null) => void;
     setDeleteItemModalIsOpen: (isOpen: boolean) => void;
     deleteItemModalIsOpen: boolean;
-    handleDeleteRequest: (requestId: number) => void;
+    handleDeleteItem: (requestId: number) => void;
 }
 
 export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
+	isDeleteUser,
 	modalArgs, 
 	setModalArgs, 
 	setDeleteItemModalIsOpen, 
 	deleteItemModalIsOpen, 
-	handleDeleteRequest
+	handleDeleteItem
 }) => {
 
 	const [isVisible, setIsVisible] = useState(deleteItemModalIsOpen);
@@ -40,8 +42,8 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 		setIsVisible(false);
 		setTimeout(() => {
 			setDeleteItemModalIsOpen(false);
-			setModalArgs(null);
-		}, 300); // La durée doit correspondre à celle de l'animation de sortie
+			setModalArgs && setModalArgs(null);
+		}, 200); // time must be equal to the exit transition duration
 	};
 	
 	return (
@@ -63,7 +65,11 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 						transition={{duration: 0.2, type: 'Inertia', stiffness: 50 }}
 					>
 						<h1 className="delete-item-modal__container__title">ATTENTION!!</h1>
-						<p className="delete-item-modal__container__description">Vous allez supprimer la demande <span className="modal-args">{modalArgs?.requestTitle}</span> , êtes vous sur?</p>
+						{isDeleteUser ? (
+							<p className="delete-item-modal__container__description">Vous allez supprimer votre compte definitevement, êtes vous sur?</p>
+						) : (
+							<p className="delete-item-modal__container__description">Vous allez supprimer la demande <span className="modal-args">{modalArgs?.requestTitle}</span> , êtes vous sur?</p>
+						)}
 						<div className="delete-item-modal__container__container__button">
 							<button 
 								className="delete-item-modal__container__container__button__delete" 
@@ -71,8 +77,7 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 									event.stopPropagation();
 									event.preventDefault();
 									if (modalArgs?.requestId) {
-										handleDeleteRequest( modalArgs.requestId);
-										//setDeleteItemModalIsOpen(!deleteItemModalIsOpen);
+										handleDeleteItem( modalArgs.requestId);
 										closeModal();
 									}
 								}}
@@ -85,7 +90,7 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 									event.stopPropagation();
 									event.preventDefault();
 									//setDeleteItemModalIsOpen(!deleteItemModalIsOpen);
-									setModalArgs(null);
+									setModalArgs && setModalArgs(null);
 									closeModal();
 								}}
 							>

@@ -90,24 +90,9 @@
 
 
       &.button {
-        box-shadow: none;
-        text-align: center;
-        width: 30%;
-        height: 40px;
-        margin-top: 0.5rem;
-        margin-bottom: 1rem;
-        background-color: v.$color-primary-orange;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-      }
+        @include m.orange-button;
 
-      &.button:hover {
-        background-color: v.$color-primary-blue;
       }
-
 
     }
   }

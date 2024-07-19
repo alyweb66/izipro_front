@@ -48,6 +48,7 @@
         .my-request__list__detail {
             overflow: hidden;
             scrollbar-width: none;
+
             .my-request__list__detail__item {
                 cursor: pointer;
                 display: flex;
@@ -190,14 +191,15 @@
                 .my-request__list__detail__item__picture {
                     display: flex;
                     flex-wrap: wrap;
-        
+                    z-index: 1;
+
                     &.img {
                         margin: 1rem 0.5rem 0 0.5rem;
                         border-radius: 0.5rem;
                         width: 70px;
                         height: 70px;
                         cursor: pointer;
-                     
+
 
                     }
                 }
@@ -232,7 +234,7 @@
         width: 30%;
         max-width: 30%;
         //height: 100%;
-   
+
 
         .my-request__answer-list__header {
             &.title {
@@ -253,9 +255,9 @@
                 bottom: 0;
                 left: 0;
                 width: 100%;
-                height: 1px; 
+                height: 1px;
                 background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
-              }
+            }
 
             &.return {
                 display: none;
@@ -282,7 +284,7 @@
         .my-request__answer-list__container {
             overflow-y: auto;
             scrollbar-width: none;
-           height: 93%;
+            height: 93%;
 
             .my-request__answer-list__user {
                 overflow: hidden;
@@ -300,13 +302,13 @@
 
                 &.deleted {
                     @include m.deleted;
-   
+
                 }
 
 
                 &.selected-user {
                     @include m.selected-user;
-        
+
                 }
 
                 &.not-viewed {
@@ -316,6 +318,7 @@
 
                 .my-request__answer-list__user__header {
                     display: flex;
+                    overflow: hidden;
 
                     &.img {
                         margin: 0.5rem;
@@ -362,6 +365,8 @@
         flex-direction: column;
         margin: 0.5rem 1rem 0 1rem;
         width: 40%;
+        min-width: 40%;
+        max-width: 40%;
 
         &.loading {
             position: relative;
@@ -377,7 +382,8 @@
                 cursor: pointer;
                 position: relative;
                 background-color: white;
-                border-radius: 8px 8px 0 0;
+                border-radius: 0.3rem 0.3rem 0 0;
+
 
                 .my-request__message-list__user__header__detail {
                     display: flex;
@@ -407,6 +413,11 @@
                     }
 
                     &.denomination {
+                        display: block;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        width: inherit;
                         box-shadow: none;
                         margin: auto 0.3rem auto 0;
                         background-color: transparent;
@@ -415,12 +426,13 @@
 
                     }
 
-                    &.deployArrow {
+                    &.deploy-arrow {
                         color: v.$color-primary-blue;
                         font-size: 2.5rem;
                         font-weight: 600;
                         margin-left: 0.5rem;
                         margin-right: 0.5rem;
+                        
                     }
 
                     &.deleted {
@@ -429,16 +441,25 @@
                         font-size: 1rem;
                         font-weight: 500;
                     }
+
+                    &.deployed {
+                        font-size: 0.8rem;
+                        padding: 0 1rem;
+                        display: b lock;
+                        overflow: hidden;
+                        text-overflow: none;
+                        white-space: normal;
+                    }
                 }
 
                 &.description {
                     width: 98%;
                     padding: 0.5rem;
                     box-shadow: none;
-                    margin: 0.5rem;
+                    margin: 0 0.5rem;
                     background-color: white;
                     color: v.$color-primary-blue;
-                    font-size: 1rem;
+                    font-size: 0.8rem;
                     font-weight: 500;
 
 
@@ -651,6 +672,7 @@
                 gap: 1rem;
                 box-shadow: 0 -1px 6px 5px rgba(255, 255, 255, 0.637);
 
+                background-color:transparent;
 
                 .my-request__message-list__form__preview__container {
                     display: flex;
@@ -701,7 +723,7 @@
             font-size: 1rem;
             font-weight: 500;
             color: v.$color-primary-orange;
-            border-radius: 0 0 10px 10px;
+            border-radius: 0 0 0.3rem 0.3rem;
 
             .my-request__message-list__form__label__attach {
                 font-size: 2rem;
@@ -716,6 +738,8 @@
             }
 
             .my-request__message-list__form__label__input {
+                overflow: none;
+                scrollbar-width: none;
                 border-radius: 0.5rem;
                 width: 100%;
                 margin: 0 0.3rem;
@@ -726,10 +750,10 @@
                 resize: none;
 
 
-                &:focus {   
-                        @include m.border;
+                &:focus {
+                    @include m.border;
                     border-radius: 0.2rem;
-  
+
                 }
             }
 
@@ -758,7 +782,7 @@
     .my-request {
         width: 100%;
         max-height: 100%;
- 
+
         .my-request__list {
             display: none;
 
@@ -766,7 +790,7 @@
                 display: block;
                 margin: 0 auto;
                 max-width: 90%;
-               
+
             }
 
         }
@@ -794,7 +818,7 @@
                         margin: 0;
                         width: 100%;
                         box-shadow: none;
-                        padding: 0 0.8rem 0 0.8rem;
+                        padding: 0 0.8rem 0.8rem 0.8rem;
                         color: v.$color-primary-blue;
                         font-size: 1.2rem;
                         font-weight: 500;
@@ -821,7 +845,7 @@
 
             &.open {
                 display: flex;
-                margin: 1rem auto;
+                margin: 1rem auto 0 auto;
                 max-width: 80%;
                 width: 80%;
                 //max-height: 100vh;
@@ -829,8 +853,17 @@
                 .my-request__message-list__user {
 
                     .my-request__message-list__user__header {
-
+                       
+                        &.description {
+                            margin-top: 0;
+                            
+                        }
                         .my-request__message-list__user__header__detail {
+                        
+                            /* &.deploy-arrow {
+                                width: 50%;
+                            } */
+                            
 
                             &.return {
                                 display: block;
@@ -878,21 +911,39 @@
 
         .my-request__message-list {
             &.open {
-                margin-top: 0.2rem;
+                margin-top: 0;
                 margin-bottom: 0;
 
                 .my-request__message-list__user {
                     .my-request__message-list__user__header {
+
+                       
                         .my-request__message-list__user__header__detail {
                             border-radius: 0;
 
+                            &.description {
+                                padding: 0 0.5rem;
+                                display: b lock;
+                                overflow: hidden;
+                                text-overflow: none;
+                                white-space: normal;
+                            }
+
                             &.return {
                                 font-size: 4rem;
+                                width: 15%;
                             }
 
                             &.img {
                                 margin: 0.5rem 0.5rem 0.5rem 0.2rem;
                                 border-radius: 0.5rem;
+                            }
+                            &.denomination {
+                                width: 40%;
+
+                                &.deployed {
+                                    width: 100%;
+                                }
                             }
                         }
                     }

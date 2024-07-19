@@ -33,6 +33,7 @@ import profileLogo from '/logo/logo profile.jpeg';
 // Styling imports
 import './Account.scss';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 //import '../../../styles/spinner.scss';
 
 
@@ -65,7 +66,7 @@ function Account() {
 	const [oldPassword, setOldPassword] = useState('');
 	const [newPassword, setNewPassword] = useState('');
 	const [confirmNewPassword, setConfirmNewPassword] = useState('');
-	const [ModalIsOpen, setModalIsOpen] = useState(false);
+	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
 
 	// Message modification account
@@ -347,8 +348,7 @@ function Account() {
 	};
 
 	// Handle the account delete
-	const handledeleteAccount = (event: React.MouseEvent<HTMLButtonElement>) => {
-		event.preventDefault();
+	const handledeleteAccount = () => {
 
 		// Delete the user account
 		deleteAccount({
@@ -621,29 +621,18 @@ function Account() {
 					<button
 						className="account__profile__delete"
 						type='button'
-						onClick={() => setModalIsOpen(!ModalIsOpen)}>supprimer mon compte
+						onClick={() => setModalIsOpen(!modalIsOpen)}>supprimer mon compte
 					</button>
 				</motion.div >
 			</AnimatePresence>
 
+			<DeleteItemModal
+				isDeleteUser={true}
+				setDeleteItemModalIsOpen={setModalIsOpen}
+				deleteItemModalIsOpen={modalIsOpen}
+				handleDeleteItem={handledeleteAccount}
+			/>
 
-
-			<ReactModal
-				className="delete-account-modal"
-				isOpen={ModalIsOpen}
-				contentLabel="Delete Account"
-				shouldCloseOnOverlayClick={false}
-				aria-label="supprimer mon compte"
-			>
-				<div className="delete-account-modal__container">
-					<h1 className="delete-account-modal__container__title">ATTENTION!!</h1>
-					<p className="delete-account-modal__container__description">Vous allez supprimer votre compte definitevement, êtes vous sur?</p>
-					<div className="delete-account-modal__container__container__button">
-						<button className="delete-account-modal__container__container__button__delete" onClick={handledeleteAccount}>Supprimer</button>
-						<button className="delete-account-modal__container__container__button__cancel" onClick={() => setModalIsOpen(!ModalIsOpen)}>Annuler</button>
-					</div>
-				</div>
-			</ReactModal>
 
 		</div >
 	);

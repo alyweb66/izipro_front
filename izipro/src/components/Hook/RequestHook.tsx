@@ -13,12 +13,10 @@ type ExpandedState = {
 
 const RequestItem = ({
 	index,
-	itemList,
-	//messageStore,
 	requestByDate,
 	notViewedConversationStore,
 	handleViewedMessage,
-	//setIsMessageOpen,
+	setIsMessageOpen,
 	request,
 	resetRequest,
 	selectedRequest,
@@ -26,19 +24,17 @@ const RequestItem = ({
 	setDeleteItemModalIsOpen,
 	isMessageExpanded,
 	setIsMessageExpanded,
-	//setIsListOpen,
+	setIsListOpen,
 	setModalArgs,
 	openModal
 }: {
 	index?: number,
 	requestByDate?: RequestProps,
-	//messageStore?: MessageProps[],
-	itemList: Function,
 	handleViewedMessage: Function,
 	notViewedConversationStore?: number[],
 	setIsMessageOpen?: Function,
 	request?: RequestProps,
-	resetRequest?: Function, // replace YourRequestType with the actual type of your request object
+	resetRequest?: Function, 
 	selectedRequest?: RequestProps,
 	setSelectedRequest?: Function,
 	setDeleteItemModalIsOpen: React.Dispatch<React.SetStateAction<boolean>>,
@@ -70,10 +66,12 @@ const RequestItem = ({
 				const convId = (request || requestByDate)?.conversation?.find(conv => conv.user_1 === id || conv.user_2 === id)?.id;
 				handleViewedMessage(convId);
 				if (window.innerWidth < 780) {
-					itemList();
+					//itemList();
+					setIsListOpen && setIsListOpen(false);
+					setTimeout(() => {
+						setIsMessageOpen && setIsMessageOpen(true);
+					}, 200);
 				}
-				/* setIsListOpen && setIsListOpen(false);
-				setIsMessageOpen && setIsMessageOpen(true); */
 			}}
 			layout
 			style={{ overflow: 'scroll' }}
