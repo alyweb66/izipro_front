@@ -445,7 +445,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 
 	// Function to delete a request
-	const handleDeleteRequest = (requestId: number) => {
+	const handleDeleteRequest = (requestId?: number) => {
 
 		deleteRequest({
 			variables:
@@ -739,19 +739,15 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 									onClick={(event) => {
 										handleConversation(request, event);
 										setSelectedRequest(request);
-										//	setIsHandleClick(true);
+
 										if (window.innerWidth < 1000) {
 											setIsListOpen(false);
 											setTimeout(() => {
 												setIsAnswerOpen(true);
 												setIsMessageOpen(false);
-
 											}, 200);
-											//itemList();
 										}
-										/* setTimeout(() => {
-											setIsHandleClick(false);
-										}, 400); */
+
 										if (!selectedRequest) {
 											selectedRequestRef.current = request;
 										}
@@ -828,7 +824,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 														>
 															<img
 																className="my-request__list__detail__item__picture img"
-																//key={media.id} 
 																src={pdfLogo}
 																alt={`PDF associé à la demande ${request.title}`}
 															/>
@@ -911,17 +906,15 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								className="my-request__answer-list__header return"
 								onClick={() => {
 									if (window.innerWidth < 1000) {
-										//setIsHandleClick(true);
+
 										setIsAnswerOpen(false);
 										setTimeout(() => {
 											setIsListOpen(true);
 											setIsMessageOpen(false);
 										}, 200);
-										//answerList();
+
 									}
-									/* setTimeout(() => {
-										setIsHandleClick(false);
-									}, 400); */
+
 									setSelectedRequest(null);
 								}}
 								aria-label="Retour à la liste des demandes"
@@ -1009,7 +1002,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					>
 						{messageLoading && <Spinner />}
 						<div className="my-request__message-list__user" aria-label="Détails de l'utilisateur" >
-							{/* {selectedUser && ( */}
 							<div
 								className="my-request__message-list__user__header"
 								onClick={(event) => {
@@ -1024,17 +1016,14 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 										className="my-request__message-list__user__header__detail return"
 										onClick={(event) => {
 											if (window.innerWidth < 1000) {
-												//setIsHandleClick(true);
+	
 												setIsMessageOpen(false);
 												setTimeout(() => {
 													setIsListOpen(false);
 													setIsAnswerOpen(true);
 												}, 200);
-												//messageListUser();
 											}
-											/* setTimeout(() => {
-												setIsHandleClick(false);
-											}, 400); */
+									
 											setSelectedUser(null);
 											event.stopPropagation();
 										}}

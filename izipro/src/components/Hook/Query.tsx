@@ -8,11 +8,14 @@ import { GET_MESSAGES_BY_CONVERSATION, GET_MY_MESSAGES_BY_CONVERSATION } from '.
 import '../../styles/spinner.scss';
 
 
+
+
 // fetch user data
 export const useQueryUserData = () => {
 	const { loading, error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
 	
 	if (getUserError) {
+		
 		throw new Error('Error while fetching user data');
 	}
 

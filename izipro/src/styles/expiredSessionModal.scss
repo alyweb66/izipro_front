@@ -2,12 +2,13 @@
 @use './mixins' as m;
 
 .expired-session-modal {
-    height: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: v.$font;
     font-weight: 500;
+    height: 100vh;
+    height: 100dvh;
 
     .expired-session-modal__container {
         @include m.modal-container;

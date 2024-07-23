@@ -8,7 +8,6 @@
         display: none;
     }
 
-    
     .logout__button {
         margin-top: 0.5rem;
         font-family: v.$font;
@@ -65,11 +64,8 @@
 
         .logout__icon {
             display: block;
-            //width: 70px;
-            //height: 50px;
             font-size: 3.5rem;
             color: v.$color-primary-orange;
-           // margin-top: 0.5rem;
             margin-right: 1rem;
         }
 

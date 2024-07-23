@@ -7,7 +7,7 @@ export default function useHandleLogout() {
 	const navigate = useNavigate();
 	const resetUserData = userDataStore((state) => state.resetUserData);
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
-	
+
 	// Return a function that will handle the logout
 	return async (userId: number) => {
 		await logout({
@@ -19,13 +19,12 @@ export default function useHandleLogout() {
 			resetUserData();
 
 			// clear local storage and session storage
-			const getItem = localStorage.getItem('chekayl');
+			/* const getItem = localStorage.getItem('chekayl');
 			const decodeData = atob(getItem || '');
-			if (decodeData === 'session') {
-				localStorage.clear();
-			} else {
-				localStorage.removeItem('chekayl');
-			}
+			if (decodeData === 'session') { */
+			localStorage.removeItem('chekayl')
+			//} 
+
 			sessionStorage.clear();
 
 			// clear the cookie

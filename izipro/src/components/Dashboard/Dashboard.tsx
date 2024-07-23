@@ -14,7 +14,6 @@ import MyConversation from './MyConversation/MyConversation';
 import ClientRequest from './ClientRequest/ClientRequest';
 import Footer from '../Footer/Footer';
 import Spinner from '../Hook/Spinner';
-import { ExpiredSessionModal } from '../Hook/ExpiredSession';
 import { Badge } from '../Hook/Badge';
 
 // Hook personal
@@ -52,6 +51,7 @@ import { messageDataStore, myMessageDataStore } from '../../store/message';
 
 // Style
 import './Dashboard.scss';
+import { DeleteItemModal } from '../Hook/DeleteItemModal';
 
 
 
@@ -65,6 +65,35 @@ type useQueryUserConversationsProps = {
 function Dashboard() {
 	const navigate = useNavigate();
 	const handleLogout = useHandleLogout();
+
+	// function to get the cookie value
+	function getCookieValue(name: string) {
+		const value = `; ${document.cookie}`;
+		const parts = value.split(`; ${name}=`);
+		if (parts.length === 2) return parts.pop()?.split(';').shift();
+		return null;
+	}
+
+	// function to delete the cookie
+	function deleteCookie(name: string) {
+		document.cookie = `${name}=; Max-Age=0; path=/; domain=${window.location.hostname};`;
+	}
+
+	const cookies = document.cookie;
+	// useEffect to check if user is logged out by the server
+	useEffect(() => {
+		if (cookies) {
+			// check if the user is logged out by the server
+			const logoutCookieValue = getCookieValue('logout');
+			console.log('logoutcookievalue', logoutCookieValue);
+			if (logoutCookieValue === 'true') {
+				localStorage.removeItem('chekayl');
+				navigate('/');
+				deleteCookie('logout');
+			}
+		}
+	}, [cookies]);
+
 
 	// State
 	const [isOpen, setIsOpen] = useState(false);
@@ -137,7 +166,7 @@ function Dashboard() {
 	const { getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, clientRequestsStore.length > 0);
 
 	//*Query for MyConversation
-	const {loading: requestMyConversationLoading, data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
+	const { loading: requestMyConversationLoading, data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
 
 	//mutation
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
@@ -161,9 +190,10 @@ function Dashboard() {
 		isLogged = JSON.parse(decodeData || '{}');
 	}
 
-
 	// useEffect to check the size of the window
 	useEffect(() => {
+
+		// function to check the size of the window
 		const handleResize = () => {
 			if (window.innerWidth < 480) {
 				setIsFooter(false);
@@ -180,20 +210,23 @@ function Dashboard() {
 
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
-	}, []); 
+	}, []);
 
-	// function to check if user is logged in
+	// function to check if user is logged in and listener if close the page
 	useEffect(() => {
-
 		// clear local storage and session storage when user leaves the page if local storage is set to session
-		const handleBeforeUnload = () => {
+		const handleBeforeUnload = (event: { preventDefault: () => void; returnValue: string; }) => {
+			event.preventDefault();
+			event.returnValue = '';
 			if (decodeData === 'session') {
 				// clear local storage,session storage and cookie
 				handleLogout(id);
+				
 			}
 		};
 		window.addEventListener('beforeunload', handleBeforeUnload);
 
+	
 		// check if user is logged in
 		if (isLogged !== null && Object.keys(isLogged).length !== 0) {
 			if (new Date().getTime() > isLogged.expiry) {
@@ -209,9 +242,11 @@ function Dashboard() {
 			if (window.location.pathname !== '/') {
 				navigate('/');
 			}
-
 		}
-
+		// clean event listener
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
 	}, []);
 
 	// set the new request from requestById to myRequestStore 
@@ -503,10 +538,10 @@ function Dashboard() {
 
 
 			if (clientRequestsStore.length === 0 || clientRequestsStore.some(prevRequest => prevRequest.id !== requestAdded.id)) {
-			
+
 				RangeFilter([requestAdded], true);
 			}
-			
+
 		}
 	}, [clientRequestSubscription]);
 
@@ -752,7 +787,7 @@ function Dashboard() {
 			const requestPoint = turf.point([request.lng, request.lat]);
 			const userPoint = turf.point([lng ?? 0, lat ?? 0]);
 			const distance = turf.distance(requestPoint, userPoint);
-			
+
 			return (
 				(distance < request.range / 1000 || request.range === 0) &&
 				(distance < settings[0].range / 1000 || settings[0].range === 0) &&
@@ -916,11 +951,13 @@ function Dashboard() {
 
 				</div>
 
-				<ExpiredSessionModal
-					isExpiredSession={isExpiredSession}
-					setIsExpiredSession={setIsExpiredSession}
-					RedirectExpiredSession={RedirectExpiredSession}
+				<DeleteItemModal
+					isSessionExpired={true}
+					setDeleteItemModalIsOpen={setIsExpiredSession}
+					deleteItemModalIsOpen={isExpiredSession}
+					handleDeleteItem={RedirectExpiredSession}
 				/>
+
 				{isFooter && <Footer />}
 			</div>
 			{/* {selectedTab === 'My profile' && <Footer />} */}
