@@ -36,14 +36,17 @@
 
     .request__form {
         @include m.select;
-        &{width: 80%;
-        margin: auto;
-        margin-top: 1rem;
-        border-radius: 0.5rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;}
-       
+
+        & {
+            width: 80%;
+            margin: auto;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
 
 
 
@@ -159,6 +162,13 @@
                 box-shadow: -5px 0 10px #6666661c,
                     -5px 0 10px #ffffff17,
                     5px 0 10px #6666661c;
+
+                .map-marker {
+                    .map-marker__icon {
+                        font-size: 2rem;
+                        color: v.$color-primary-blue;
+                    }
+                }
             }
 
         }
@@ -199,7 +209,10 @@
 
                 &:focus {
                     @include m.border;
-                    &{border-radius: 0.4rem;}
+
+                    & {
+                        border-radius: 0.4rem;
+                    }
                 }
             }
         }
@@ -220,7 +233,7 @@
                 &::-webkit-scrollbar {
                     display: none;
                     /* For Chrome, Safari and Opera */
-                  }
+                }
             }
 
             &.preview {
@@ -286,7 +299,10 @@
 
         .request__form__button {
             @include m.blue-button;
-            &{margin: 1rem auto;}
+
+            & {
+                margin: 1rem auto;
+            }
         }
 
 

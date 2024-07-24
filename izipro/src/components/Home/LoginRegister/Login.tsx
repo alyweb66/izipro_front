@@ -56,6 +56,17 @@ function Login() {
 		};
 	}, [error]);
 
+	useEffect(() => {
+		if (isEmailConfirmed) {
+			setMessage('');
+		}
+
+		if (message) {
+			setIsEmailConfirmed(false);
+		}
+
+	}, [isEmailConfirmed, message]);
+
 	// useEffect to check the size of the window
 	useEffect(() => {
 		const handleResize = () => {
@@ -95,7 +106,6 @@ function Login() {
 				if (activeSession) {
 					const data = {
 						value: 'true',
-						expiry: new Date().getTime() + 1*24*60*60*1000, // 24 hours from now
 					};
 					const encodeData = btoa(JSON.stringify(data));
 					localStorage.setItem('chekayl', encodeData);

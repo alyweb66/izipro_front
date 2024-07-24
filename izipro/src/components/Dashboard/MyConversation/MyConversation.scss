@@ -307,6 +307,7 @@
                     }
 
                     &.img {
+                        @include m.border;
                         margin: 0.5rem 1rem;
                         border-radius: 0.5rem;
                         width: 50px;
@@ -556,10 +557,12 @@
 
         .my-conversation__container::before {
             top: 0;
+            z-index: 2;
         }
 
         .my-conversation__container::after {
             bottom: 0;
+            z-index: 2;
         }
 
 

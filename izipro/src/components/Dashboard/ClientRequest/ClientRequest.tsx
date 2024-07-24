@@ -19,7 +19,7 @@ import { notViewedRequest } from '../../../store/Viewed';
 // Types and assets
 import { RequestProps } from '../../../Type/Request';
 import { SubscriptionProps } from '../../../Type/Subscription';
-import pdfLogo from '/logo/pdf-icon.svg';
+import pdfLogo from '/logo/logo-pdf.jpg';
 
 // Components and utilities
 import './clientRequest.scss';
@@ -80,6 +80,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 	const [notViewedRequestStore] = notViewedRequest((state) => [state.notViewed]);
 
+
 	// mutation
 	const [hideRequest, { loading: hiddenLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 	const [subscriptionMutation, { loading: subscribeLoading, error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
@@ -92,7 +93,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	useEffect(() => {
 
 		// If there are subscriptions, check if the jobs are in the subscription
-		if (subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest')) {
+		if (subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest') && id > 0) {
 
 			subscriptionStore.forEach((subscription) => {
 				if (subscription.subscriber === 'jobRequest' && Array.isArray(subscription.subscriber_id)) {
@@ -233,7 +234,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	});
 
 	// Function to hide a request
-	const handleHideRequest = (requestId: number) => {
+	function handleHideRequest(requestId?: number) {
 
 		hideRequest({
 			variables: {
@@ -248,12 +249,6 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 
 				setClientRequestsStore(clientRequestsStore.filter(request => request.id !== requestId));
 
-				/* 	clientRequestStore((prevClientRequests: RequestProps[]) => {
-						if (prevClientRequests) {
-							return prevClientRequests.filter((request) => request.id !== requestId);
-						}
-						return null;
-					}); */
 			}
 		});
 		if (hideRequestError) {
@@ -458,7 +453,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 				setModalArgs={setModalArgs}
 				setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
 				deleteItemModalIsOpen={deleteItemModalIsOpen}
-				handleDeleteRequest={handleHideRequest}
+				handleDeleteItem={handleHideRequest}
 			/>
 		</div>
 	);

@@ -31,7 +31,7 @@ import { SubscriptionProps } from '../../../Type/Subscription';
 
 // Components and utilities
 import './MyRequest.scss';
-import pdfLogo from '/logo/pdf-icon.svg';
+import pdfLogo from '/logo/logo-pdf.jpg';
 import logoProfile from '/logo/logo profile.jpeg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt, FaCamera } from 'react-icons/fa';
@@ -104,10 +104,11 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const selectedRequestRef = useRef<RequestProps | null>(null);
 
 	const limit = 5;
-	console.log('couocu');
+
 
 	// file upload
 	const { urlFile, setUrlFile, file, setFile, handleFileChange } = useFileHandler();
+console.log('myrequest');
 
 	//mutation
 	const [deleteRequest, { loading: deleteRequestLoading, error: deleteRequestError }] = useMutation(DELETE_REQUEST_MUTATION);
@@ -119,17 +120,11 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { loading: requestLoading, fetchMore } = useQueryUserRequests(id, 0, limit, isSkipRequest);
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(fetchConvIdState, 0, 100, isSkipMessage);
-	console.log('isListOpen', isListOpen);
-	console.log('isAnswerOpen', isAnswerOpen);
-	console.log('isUserMessageOpen', isUserMessageOpen);
-	//console.log('isHandleClick', isHandleClick);
-	
-	console.log('isMessageOpen', isMessageOpen);
+
 	// useEffect to check the size of the window
 	useEffect(() => {
 		const handleResize = () => {
 			///if (!isHandleClick) {
-			console.log('not handle click');
 				
 			if (window.innerWidth < 1000 ) {
 	
@@ -575,7 +570,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			const viewedIds = request?.conversation?.map(conversation => {
 				return conversation.user_1 !== id ? conversation.user_1 : conversation.user_2;
 			});
-			console.log('viewedIds', viewedIds);
 
 			// Filter out the user viewedIds that are already in the userConvStore
 			const idStore = userConvStore.map(user => user.id);

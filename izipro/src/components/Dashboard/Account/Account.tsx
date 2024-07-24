@@ -30,10 +30,17 @@ import { UserDataProps } from '../../../Type/User';
 // Asset imports
 import profileLogo from '/logo/logo profile.jpeg';
 
+//Mapbox
+import Map, { Marker } from 'react-map-gl';
+// @ts-expect-error no types for mapbox-gl
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+
 // Styling imports
 import './Account.scss';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+import { IoLocationSharp } from "react-icons/io5";
 //import '../../../styles/spinner.scss';
 
 
@@ -69,6 +76,7 @@ function Account() {
 	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
 
+
 	// Message modification account
 	const [messageAccount, setMessageAccount] = useState('');
 	const [errorAccount, setErrorAccount] = useState('');
@@ -81,7 +89,7 @@ function Account() {
 	const [userData, setUserData] = useState(getUserData?.user || {} as UserDataProps);
 
 	// Store data
-	const id = userDataStore((state) => state.id);
+	const [id, lngStore, latStore] = userDataStore((state) => [state.id, state.lng, state.lat]);
 	const [initialData, setInitialData] = userDataStore((state) => [state.initialData, state.setInitialData]);
 	const setAll = userDataStore((state) => state.setAll);
 	const setAccount = userDataStore((state) => state.setAccount);
@@ -384,10 +392,23 @@ function Account() {
 	};
 
 
+	const [viewState, setViewState] = useState({
+		longitude: lngStore || lng,
+		latitude: latStore || lat,
+		zoom: 12,
+	});
+
+	useEffect(() => {
+		setViewState({
+			longitude: lngStore || lng,
+			latitude: latStore || lat,
+			zoom: 12,
+		});
+	}, [lngStore, latStore, lng, lat]);
 	return (
 		<div className="account">
 			<AnimatePresence>
-				<motion.div 
+				<motion.div
 					className={`account__profile ${loading ? 'loading' : ''}`}
 					initial={{ opacity: 0, scale: 0.9 }}
 					animate={{ opacity: 1, scale: 1 }}
@@ -416,11 +437,11 @@ function Account() {
 						<button className="account__profile__picture__delete" type='button' onClick={handleDeletePicture}>Supprimer</button>
 					</div >
 					<form className={`account__profile__form ${updateUserLoading ? 'loading' : ''}`} onSubmit={handleAccountSubmit} >
-						{updateUserLoading && <Spinner/> }
+						{updateUserLoading && <Spinner />}
 						<h1 className="account__profile__form__title">Mes informations:</h1>
 						<div></div>
 						<label className="account__profile__form__label">
-						Prénom:
+							Prénom:
 							<input
 								className="account__profile__form__label__input"
 								type="text"
@@ -434,7 +455,7 @@ function Account() {
 							/>
 						</label>
 						<label className="account__profile__form__label">
-						Nom:
+							Nom:
 							<input
 								className="account__profile__form__label__input"
 								type="text"
@@ -448,7 +469,7 @@ function Account() {
 							/>
 						</label>
 						<label className="account__profile__form__label">
-						Email:
+							Email:
 							<input
 								className="account__profile__form__label__input"
 								type="text"
@@ -462,7 +483,7 @@ function Account() {
 							/>
 						</label>
 						<label className="account__profile__form__label">
-						Adresse:
+							Adresse:
 							<input
 								className="account__profile__form__label__input"
 								type="text"
@@ -477,7 +498,7 @@ function Account() {
 							/>
 						</label>
 						<label className="account__profile__form__label">
-						Code postal:
+							Code postal:
 							<input
 								className="account__profile__form__label__input"
 								type="text"
@@ -492,7 +513,7 @@ function Account() {
 							/>
 						</label>
 						<label className="account__profile__form__label">
-						Ville:
+							Ville:
 							<input
 								className="account__profile__form__label__input"
 								type="text"
@@ -509,7 +530,7 @@ function Account() {
 						{role === 'pro' && (
 							<>
 								<label className="account__profile__form__label">
-								Siret:
+									Siret:
 									<input
 										className="account__profile__form__label__input"
 										type="text"
@@ -523,7 +544,7 @@ function Account() {
 									/>
 								</label>
 								<label className="account__profile__form__label">
-								Dénomination:
+									Dénomination:
 									<input
 										className="account__profile__form__label__input"
 										type="text"
@@ -537,7 +558,7 @@ function Account() {
 									/>
 								</label>
 								<label className="account__profile__form__label">
-								Description:
+									Description:
 									<textarea
 										className="account__profile__form__label__input textarea"
 										name="description"
@@ -554,6 +575,32 @@ function Account() {
 							</>
 
 						)}
+						<div className="request__form__map">
+							<p className="request__title-map">Vérifiez votre adresse sur la carte après validation:</p>
+							<div className="request__form__map__map">
+								<Map
+									reuseMaps
+									mapboxAccessToken="pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg"
+									{...viewState}
+									onMove={evt => setViewState(evt.viewState)}
+									//zoom={zoom}
+									scrollZoom={true}
+									maxZoom={15}
+									minZoom={10}
+									mapStyle="mapbox://styles/mapbox/streets-v12"
+									dragRotate={false}
+									dragPan={false}
+
+								>
+									<Marker longitude={lngStore || lng} latitude={latStore || lat}>
+										<div className="map-marker">
+											<IoLocationSharp className="map-marker__icon" />
+										</div>
+									</Marker>
+								</Map>
+							</div>
+
+						</div>
 						{errorAccount && <p className="account__profile__modification-error">{errorAccount}</p>}
 						{messageAccount && <p className="account__profile__modification-message">{messageAccount}</p>}
 						<button className="account__profile__button" type="submit">Valider</button>
@@ -613,7 +660,7 @@ function Account() {
 						<button
 							className="account__profile__button"
 							type="submit">
-						Valider
+							Valider
 						</button>
 
 

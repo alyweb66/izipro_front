@@ -31,6 +31,7 @@
             text-align: center;
 
             .account__profile__picture__img {
+                // @include m.border;
                 margin: auto;
                 width: 8rem;
                 height: 8rem;
@@ -132,6 +133,45 @@
 
             .show-password {
                 @include m.show-password;
+            }
+
+            .request__form__map {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                width: 100%;
+                max-width: 100%;
+                margin: 1rem 0;
+
+                .request__title-map {
+                    color: v.$color-primary-orange;
+                    font-size: 1rem;
+                    font-weight: 500;
+                    margin-bottom: 0.5rem;
+                    margin-left: 1rem;
+                    
+                }
+    
+                .request__form__map__map {
+                    
+                    margin: 0 auto;
+                    width: 100%;
+                    max-width: 90%;
+                    height: 300px;
+                    border-radius: 0.5rem;
+                    overflow: hidden;
+                    box-shadow: -5px 0 10px #6666661c,
+                        -5px 0 10px #ffffff17,
+                        5px 0 10px #6666661c;
+
+                        .map-marker {
+                            .map-marker__icon {
+                                font-size: 2rem;
+                                color: v.$color-primary-blue;
+                            }
+                        }
+                }
+    
             }
         }
 

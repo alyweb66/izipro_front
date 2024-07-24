@@ -85,7 +85,6 @@ function Dashboard() {
 		if (cookies) {
 			// check if the user is logged out by the server
 			const logoutCookieValue = getCookieValue('logout');
-			console.log('logoutcookievalue', logoutCookieValue);
 			if (logoutCookieValue === 'true') {
 				localStorage.removeItem('chekayl');
 				navigate('/');
@@ -183,6 +182,7 @@ function Dashboard() {
 
 	// decode the data
 	const decodeData = atob(getItem || '');
+console.log('decodeData', decodeData);
 
 	if (decodeData === 'session') {
 		isLogged = { value: true };

@@ -36,7 +36,7 @@ import { notViewedConversation } from '../../../store/Viewed';
 import { RequestProps } from '../../../Type/Request';
 import { MessageProps, MessageStoreProps } from '../../../Type/message';
 import { SubscriptionProps } from '../../../Type/Subscription';
-import pdfLogo from '/logo/pdf-icon.svg';
+import pdfLogo from '/logo/logo-pdf.jpg';
 import logoProfile from '/logo/logo profile.jpeg';
 
 // Components and utilities
@@ -84,6 +84,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [isSkipMessage, setIsSkipMessage] = useState(true);
 	const [fetchConvIdState, setFetchConvIdState] = useState(0);
+	
 
 	const limit = 4;
 
@@ -114,7 +115,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const { loading: messageLoading, messageData } = useQueryMessagesByConversation(fetchConvIdState, 0, 100, isSkipMessage);
 
 	// file upload
-	const { file, urlFile, setUrlFile, setFile, handleFileChange } = useFileHandler();
+	const { fileError, file, urlFile, setUrlFile, setFile, setFileError, handleFileChange } = useFileHandler();
 
 	// Function to send message
 	function sendMessage(updatedRequest?: RequestProps, newClientRequest = false) {
@@ -174,7 +175,12 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	// Function to send message and create conversation
 	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>, requestId: number) => {
 		event.preventDefault();
-	
+		if (fileError) {
+			setFile([]);
+			setUrlFile([]);
+			setFileError('');
+		}
+		
 		// create conversation 
 		if (request.id === requestId && role === 'pro') {
 	
@@ -328,7 +334,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	}
 	
 	// Function to hide a client request
-	const handleHideRequest = (requestId: number) => {
+	const handleHideRequest = (requestId?: number) => {
 		//event.preventDefault();
 	
 		hideRequest({
@@ -824,6 +830,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 								handleMessageSubmit(event, selectedRequest.id);
 							}
 						}}>
+							{fileError && <p className="error">{fileError}</p>}
 							{urlFile.length > 0 && <div className="my-conversation__message-list__form__preview">
 								{urlFile.map((file, index) => (
 									<div className="my-conversation__message-list__form__preview__container" key={index}>

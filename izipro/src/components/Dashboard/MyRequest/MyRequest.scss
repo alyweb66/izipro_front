@@ -6,7 +6,13 @@
     display: flex;
     align-items: stretch;
     height: 100%;
-    //overflow: hidden;
+    overflow: hidden;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+        /* For Chrome, Safari and Opera */
+    }
 
     .my-request__list {
         overflow-y: auto;
@@ -40,8 +46,11 @@
 
         .my-request__list__fetch-button {
             @include m.fetch-button;
-            &{display: flex;
-            justify-content: center;}
+
+            & {
+                display: flex;
+                justify-content: center;
+            }
         }
 
 
@@ -340,18 +349,29 @@
                     overflow: hidden;
 
                     &.img {
+                        @include m.border;
                         margin: 0.5rem;
                         border-radius: 0.5rem;
                         width: 50px;
+                        min-width: 50px;
                         height: 50px;
 
                     }
 
                     &.name {
-                        margin: auto 0.3rem auto 0;
+                        /* margin: auto 0.3rem auto 0;
                         font-size: 0.8rem;
                         font-weight: 500;
+                        word-break: break-all; */
                         word-break: break-all;
+                        margin: auto 0.3rem auto 0;
+                        background-color: transparent;
+                        font-size: 0.8rem;
+                        font-weight: 500;
+                        width: 100%;
+                        max-width: 75%;
+                        
+
                     }
 
                     &.denomination {
@@ -360,6 +380,8 @@
                         background-color: transparent;
                         font-size: 0.8rem;
                         font-weight: 500;
+                        width: 100%;
+                        max-width: 75%;
                     }
 
                     &.deleted {
@@ -415,6 +437,7 @@
                     }
 
                     &.img {
+                        @include m.border;
                         margin: 0.5rem 1rem;
                         border-radius: 0.5rem;
                         width: 50px;
@@ -534,7 +557,7 @@
                 &::-webkit-scrollbar {
                     display: none;
                     /* For Chrome, Safari and Opera */
-                  }
+                }
 
                 .my-request__message-list__message__detail {
                     display: flex;
@@ -667,10 +690,12 @@
 
         .my-request__container::before {
             top: 0;
+            z-index: 2;
         }
 
         .my-request__container::after {
             bottom: 0;
+            z-index: 2;
         }
 
         .my-request__message-list__form {
@@ -771,11 +796,14 @@
                 &::-webkit-scrollbar {
                     display: none;
                     /* For Chrome, Safari and Opera */
-                  }
+                }
 
                 &:focus {
                     @include m.border;
-                    &{border-radius: 0.2rem;}
+
+                    & {
+                        border-radius: 0.2rem;
+                    }
 
                 }
             }
@@ -988,6 +1016,6 @@
         &::-webkit-scrollbar {
             display: none;
             /* For Chrome, Safari and Opera */
-          }
+        }
     }
 }

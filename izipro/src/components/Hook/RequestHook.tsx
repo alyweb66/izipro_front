@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { FaTrashAlt } from 'react-icons/fa';
-import pdfLogo from '/logo/pdf-icon.svg';
+import pdfLogo from '/logo/logo-pdf.jpg';
 import { RequestProps } from '../../Type/Request';
 import React, { useRef } from 'react';
 //import { MessageProps } from '../../Type/message';

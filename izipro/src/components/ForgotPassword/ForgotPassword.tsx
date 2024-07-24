@@ -38,6 +38,7 @@ function ForgotPassword() {
 
 	const handleSubmitForm = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		event.stopPropagation();
 
 		// Check if the password and confirm password are the same
 		if (password !== confirmPassword) {
@@ -125,7 +126,7 @@ function ForgotPassword() {
 					maxLength={60}
 					required
 				/>
-				<button className="show-password" onClick={() => setShowPassword(!showPassword)}>
+				<button type="button" className="show-password" onClick={() => setShowPassword(!showPassword)}>
 					{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
 				</button>
 				{error && <p className="error">{error}</p>}

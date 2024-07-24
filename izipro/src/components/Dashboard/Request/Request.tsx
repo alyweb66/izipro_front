@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import Map from 'react-map-gl';
+import Map, { Layer, Marker, Source } from 'react-map-gl';
 // @ts-expect-error no types for mapbox-gl
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -18,7 +18,7 @@ import { myRequestStore } from '../../../store/Request';
 
 // Types and icons
 import { CategoryPros, JobProps } from '../../../Type/Request';
-import pdfLogo from '/logo/pdf-icon.svg';
+import pdfLogo from '/logo/logo-pdf.jpg';
 import { TbUrgent } from 'react-icons/tb';
 import { FaCamera } from 'react-icons/fa';
 
@@ -30,6 +30,7 @@ import Spinner from '../../Hook/Spinner';
 import SelectBox from '../../Hook/SelectBox';
 import { subscriptionDataStore } from '../../../store/subscription';
 import { motion, AnimatePresence } from 'framer-motion';
+import { IoLocationSharp } from "react-icons/io5";
 
 
 
@@ -65,8 +66,7 @@ function Request() {
 
 	// map
 	const [radius, setRadius] = useState(0); // Radius in meters
-	//const [location, setLocation] = useState(localization);
-	const [map, setMap] = useState<mapboxgl.Map | null>(null);
+	//const [map, setMap] = useState<mapboxgl.Map | null>(null);
 	const [zoom, setZoom] = useState(10);
 
 
@@ -194,7 +194,7 @@ function Request() {
 	}, [categoriesData]);
 
 	// radius on map
-	useEffect(() => {
+	/* useEffect(() => {
 		if (map && lat && lng) {
 			// Remove existing circles
 			if (map.getLayer('radius-circle') && map.getSource('radius-circle')) {
@@ -213,12 +213,12 @@ function Request() {
 						geometry: {
 							type: 'Point',
 							coordinates: [lng, lat]
-						}
+						},
+						properties: {} // Add an empty properties object
 					}
 				},
 				paint: {
 					'circle-radius': {
-
 						stops: [
 							[0, 0],
 							[15.8, radius] // Adjust the multiplier for scaling
@@ -230,13 +230,13 @@ function Request() {
 				}
 			});
 		}
-	}, [map, lng, lat, radius]);
+	}, [map, lng, lat, radius]); */
 
 	// Get map instance
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const handleMapLoaded = (event: any) => {
+	/* const handleMapLoaded = (event: any) => {
 		setMap(event.target);
-	};
+	}; */
 
 	// Handle file upload
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -351,8 +351,8 @@ function Request() {
 				(<p className="request no-req">Veuillez renseigner les champs de &quot;Mes informations&quot; dans votre compte pour faire une demande</p>)}
 			<AnimatePresence>
 				{address && city && postal_code && first_name && last_name && (
-					<motion.form 
-						className="request__form" 
+					<motion.form
+						className="request__form"
 						onSubmit={handleSubmitRequest}
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
@@ -407,6 +407,7 @@ function Request() {
 
 									<div className="request__form__map__map">
 										<Map
+											reuseMaps
 											mapboxAccessToken="pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg"
 											initialViewState={{
 												longitude: lng,
@@ -415,10 +416,44 @@ function Request() {
 											}}
 											zoom={zoom}
 											scrollZoom={false}
-											mapStyle="mapbox://styles/mapbox/streets-v9"
-											onLoad={handleMapLoaded}
+											mapStyle="mapbox://styles/mapbox/streets-v12"
+											//onLoad={handleMapLoaded}
 											dragRotate={false}
-										/>
+											dragPan={false}
+										>
+											<Source
+												id="circle-data"
+												type="geojson"
+												data={{
+													type: 'Feature',
+													geometry: {
+														type: 'Point',
+														coordinates: [lng, lat]
+													}
+												}}
+											>
+												<Layer
+													id="circle-layer"
+													type="circle"
+													paint={{
+														'circle-radius': {
+															stops: [
+																[0, 0],
+																[15.8, radius] // Adjust the multiplier for scaling
+															],
+															base: 2
+														}, // Adjust the radius as needed
+														'circle-color': 'orange',
+														'circle-opacity': 0.4
+													}}
+												/>
+											</Source>
+											<Marker longitude={lng} latitude={lat}>
+												<div className="map-marker">
+													<IoLocationSharp className="map-marker__icon" />
+												</div>
+											</Marker>
+										</Map>
 									</div>
 
 								</div>
@@ -452,10 +487,11 @@ function Request() {
 							<p className="request__form__label__input length">{descriptionRequest?.length}/500</p>
 						</label>
 						<div className="request__form__input-media">
-							<AnimatePresence>
+							<AnimatePresence mode='popLayout'>
 								{urlFile.map((file, index) => (
 									<motion.div
-										className="request__form__input-media container" key={index}
+										className="request__form__input-media container"
+										key={index}
 										layout
 										style={{ overflow: 'scroll' }}
 										initial={{ opacity: 0, scale: 0.9 }}
@@ -474,7 +510,7 @@ function Request() {
 											className="request__form__input-media remove"
 											onClick={() => handleRemove(index)}
 										>
-									X
+											X
 										</div>
 									</motion.div>
 								))}
