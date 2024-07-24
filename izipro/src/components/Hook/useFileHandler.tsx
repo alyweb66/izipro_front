@@ -6,7 +6,7 @@ export function useFileHandler() {
 	const [urlFile, setUrlFile] = useState<File[]>([]);
 
 	const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLLabelElement>, onDrag = false, media?: File[] ) => {
-
+		setFileError('');
 		let files;
 		if (onDrag) {
 			files = (event as React.DragEvent<HTMLLabelElement>).dataTransfer.files;
@@ -20,14 +20,14 @@ export function useFileHandler() {
 		const validFiles = Array.from(files!).filter(file => {
 			if (file.name.endsWith('.pdf')) {
 				if (file.size > maxFileSize) {
-					setFileError(`File ${file.name} is too large, please select a file smaller than 1MB.`);
+					setFileError(`Fichier ${file.name} est trop grand, veuillez choisir un fichier de moins de 1MB.`);
+
 					return false;
 				}
 				return true;
 			}
 			return true;
 		});
-		setFileError('');
 		
 		if (validFiles) {
 			const urls = validFiles.map(file => URL.createObjectURL(file));
@@ -36,6 +36,7 @@ export function useFileHandler() {
 			setUrlFile([...urlFile, ...fileObjects]);
 		}
 	};
+
 
 	return { fileError, file, setFile, setUrlFile, setFileError, urlFile, handleFileChange };
 }

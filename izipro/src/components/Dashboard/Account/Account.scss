@@ -31,6 +31,7 @@
             text-align: center;
 
             .account__profile__picture__img {
+                // @include m.border;
                 margin: auto;
                 width: 8rem;
                 height: 8rem;
@@ -76,7 +77,7 @@
             }
 
             &.loading {
-                 //position for spinner
+                //position for spinner
                 position: relative;
                 margin-bottom: 5rem;
             }
@@ -96,8 +97,8 @@
                 flex-direction: column;
                 background: white;
                 box-shadow: -5px 0 10px #66666610,
-                -5px 0 10px #ffffff05,
-                5px 0 10px #6666660e;
+                    -5px 0 10px #ffffff05,
+                    5px 0 10px #6666660e;
                 border-radius: 0.5rem;
                 font-size: 1rem;
                 font-weight: 500;
@@ -115,9 +116,12 @@
                     }
 
                     &:focus {
-                        outline: none; // Remove default focus indicator
-                        border-radius: 0.2rem;
-                        box-shadow: 0 0 0 1px v.$color-primary-blue; // Add your own focus indicator
+                        @include m.border;
+
+                        & {
+                            border-radius: 0.2rem;
+                        }
+
                     }
                 }
             }
@@ -127,15 +131,48 @@
 
             }
 
-            .account__profile__button__show-password {
-                text-decoration: underline;
-                border: none;
-                background-color: transparent;
-                margin: 0 0 0 0;
-                font-size: 1rem;
-                font-weight: 200;
-                color: grey;
-                cursor: pointer;}
+            .show-password {
+                @include m.show-password;
+            }
+
+            .request__form__map {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                width: 100%;
+                max-width: 100%;
+                margin: 1rem 0;
+
+                .request__title-map {
+                    color: v.$color-primary-orange;
+                    font-size: 1rem;
+                    font-weight: 500;
+                    margin-bottom: 0.5rem;
+                    margin-left: 1rem;
+                    
+                }
+    
+                .request__form__map__map {
+                  
+                    margin: 0 auto;
+                    width: 100%;
+                    max-width: 90%;
+                    height: 300px;
+                    border-radius: 0.5rem;
+                    overflow: hidden;
+                    box-shadow: -5px 0 10px #6666661c,
+                        -5px 0 10px #ffffff17,
+                        5px 0 10px #6666661c;
+
+                        .map-marker {
+                            .map-marker__icon {
+                                font-size: 2rem;
+                                color: v.$color-primary-blue;
+                            }
+                        }
+                }
+    
+            }
         }
 
         .account__profile__delete {
@@ -152,7 +189,7 @@
 
         }
 
-        .account__profile__modification-error{
+        .account__profile__modification-error {
             margin: auto;
             font-size: 1rem;
             font-weight: 500;
@@ -160,78 +197,19 @@
 
         }
 
-        .account__profile__modification-message{
+        .account__profile__modification-message {
             margin: auto;
             margin-top: 0.3rem;
             font-size: 1rem;
             font-weight: 500;
             color: v.$color-validation;
-            
+
         }
     }
 
 }
 
-.delete-account-modal {
-    height: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: v.$font;
-    font-weight: 500;
-
-    .delete-account-modal__container {
-        @include m.modal-container;
-        justify-content: space-around;
-        width: 50vw;
-        height: 30vh;
-        padding: 1rem;
-  
-        .delete-account-modal__container__title {
-            margin: 0 auto;
-            font-size: 1.5rem;
-            font-weight: 500;
-            color: v.$color-primary-orange;
-        }
-
-        .delete-account-modal__container__description {
-            text-align: center;
-            margin: 1rem auto;
-            color: red;
-
-        }
-
-        .delete-account-modal__container__container__button {
-            display: flex;
-            position: relative;
-           
-            
-            .delete-account-modal__container__container__button__delete,
-            .delete-account-modal__container__container__button__cancel {
-                @include m.blue-button;
-              
-
-            }
-
-            .delete-account-modal__container__container__button__delete {
-          
-                background-color: red;
-                color: white;
-            }
-        }
-        .delete-account-modal__container__container__button::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
-        }
-    }
-
-}
-
+/* 
 .modal-info{
     height: 50%;
     display: flex;
@@ -260,7 +238,7 @@
             
         }
     }
-}
+} */
 
 @media (max-width: 830px) {
     .account {
@@ -274,14 +252,7 @@
             }
         }
 
-        
-    }
 
-    .delete-account-modal {
-        .delete-account-modal__container {
-            width: 80vw;
-            height: 30vh;
-        }
     }
 
 }
@@ -291,7 +262,7 @@
         .account__profile {
             .account__profile__form {
                 width: 100%;
-              margin: 0rem;
+                margin: 0rem;
                 padding: 0.5rem;
 
                 &.password {
@@ -305,22 +276,4 @@
         }
     }
 
-    .delete-account-modal {
-        .delete-account-modal__container {
-            justify-content: space-evenly;
-            width: 100%;
-            height: 30%;
-            border-radius: 0;
-            padding: 1rem 1rem 0 1rem;
-        }
-    }
-
-}
-
-@media (max-height: 680px) {
-    .delete-account-modal {
-        .delete-account-modal__container {
-            height: 60%;
-        }
-    }
 }

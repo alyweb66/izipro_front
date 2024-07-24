@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 
 function Root() {
 
+	// disable background image on home page
 	useEffect(() => {
 	// check whitch page is active
 		if (window.location.pathname === '/') {

@@ -1,22 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 
 // Modules without types
-// @ts-expect-error turf is not typed
 import * as turf from '@turf/turf';
+import { ErrorBoundary } from "react-error-boundary";
 
 // components 
-import Account from './Account/Account';
-import Request from './Request/Request';
-import MyRequest from './MyRequest/MyRequest';
+//import Account from './Account/Account';
+//import Request from './Request/Request';
+//import MyRequest from './MyRequest/MyRequest';
 import Logout from '../Header/Logout/Logout';
-import MyConversation from './MyConversation/MyConversation';
-import ClientRequest from './ClientRequest/ClientRequest';
+//import MyConversation from './MyConversation/MyConversation';
+//import ClientRequest from './ClientRequest/ClientRequest';
 import Footer from '../Footer/Footer';
 import Spinner from '../Hook/Spinner';
-import { ExpiredSessionModal } from '../Hook/ExpiredSession';
-import { ClientRequestBadge } from '../Hook/Badge';
+import { Badge } from '../Hook/Badge';
 
 // Hook personal
 import {
@@ -53,7 +52,13 @@ import { messageDataStore, myMessageDataStore } from '../../store/message';
 
 // Style
 import './Dashboard.scss';
+import { DeleteItemModal } from '../Hook/DeleteItemModal';
 
+const Request = lazy(() => import('./Request/Request'));
+const MyRequest = lazy(() => import('./MyRequest/MyRequest'));
+const MyConversation = lazy(() => import('./MyConversation/MyConversation'));
+const Account = lazy(() => import('./Account/Account'));
+const ClientRequest = lazy(() => import('./ClientRequest/ClientRequest'));
 
 
 type useQueryUserConversationsProps = {
@@ -66,6 +71,34 @@ type useQueryUserConversationsProps = {
 function Dashboard() {
 	const navigate = useNavigate();
 	const handleLogout = useHandleLogout();
+
+	// function to get the cookie value
+	function getCookieValue(name: string) {
+		const value = `; ${document.cookie}`;
+		const parts = value.split(`; ${name}=`);
+		if (parts.length === 2) return parts.pop()?.split(';').shift();
+		return null;
+	}
+
+	// function to delete the cookie
+	function deleteCookie(name: string) {
+		document.cookie = `${name}=; Max-Age=0; path=/; domain=${window.location.hostname};`;
+	}
+
+	const cookies = document.cookie;
+	// useEffect to check if user is logged out by the server
+	useEffect(() => {
+		if (cookies) {
+			// check if the user is logged out by the server
+			const logoutCookieValue = getCookieValue('logout');
+			if (logoutCookieValue === 'true') {
+				localStorage.removeItem('chekayl');
+				navigate('/');
+				deleteCookie('logout');
+			}
+		}
+	}, [cookies]);
+
 
 	// State
 	const [isOpen, setIsOpen] = useState(false);
@@ -138,7 +171,7 @@ function Dashboard() {
 	const { getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, clientRequestsStore.length > 0);
 
 	//*Query for MyConversation
-	const {loading: requestMyConversationLoading, data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
+	const { loading: requestMyConversationLoading, data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
 
 	//mutation
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
@@ -153,6 +186,7 @@ function Dashboard() {
 	let isLogged;
 	const getItem = localStorage.getItem('chekayl');
 
+	// decode the data
 	const decodeData = atob(getItem || '');
 
 	if (decodeData === 'session') {
@@ -161,9 +195,10 @@ function Dashboard() {
 		isLogged = JSON.parse(decodeData || '{}');
 	}
 
-
 	// useEffect to check the size of the window
 	useEffect(() => {
+
+		// function to check the size of the window
 		const handleResize = () => {
 			if (window.innerWidth < 480) {
 				setIsFooter(false);
@@ -180,19 +215,22 @@ function Dashboard() {
 
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
-	}, []); 
+	}, []);
 
-	// function to check if user is logged in
+	// function to check if user is logged in and listener if close the page
 	useEffect(() => {
-
 		// clear local storage and session storage when user leaves the page if local storage is set to session
-		const handleBeforeUnload = () => {
+		const handleBeforeUnload = (event: { preventDefault: () => void; returnValue: string; }) => {
+			event.preventDefault();
+			event.returnValue = '';
 			if (decodeData === 'session') {
 				// clear local storage,session storage and cookie
 				handleLogout(id);
+
 			}
 		};
 		window.addEventListener('beforeunload', handleBeforeUnload);
+
 
 		// check if user is logged in
 		if (isLogged !== null && Object.keys(isLogged).length !== 0) {
@@ -209,9 +247,11 @@ function Dashboard() {
 			if (window.location.pathname !== '/') {
 				navigate('/');
 			}
-
 		}
-
+		// clean event listener
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
 	}, []);
 
 	// set the new request from requestById to myRequestStore 
@@ -420,7 +460,6 @@ function Dashboard() {
 			const messageAdded: MessageProps[] = clientMessageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
-			console.log('messageAdded', messageAdded);
 
 			// add the new message to the message store
 			messageDataStore.setState(prevState => {
@@ -504,10 +543,10 @@ function Dashboard() {
 
 
 			if (clientRequestsStore.length === 0 || clientRequestsStore.some(prevRequest => prevRequest.id !== requestAdded.id)) {
-			
+
 				RangeFilter([requestAdded], true);
 			}
-			
+
 		}
 	}, [clientRequestSubscription]);
 
@@ -518,7 +557,6 @@ function Dashboard() {
 			const messageAdded: MessageProps[] = messageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
-			console.log('messageAdded my request', messageAdded);
 
 			//fetch request if the request is not in the store
 			if (messageAdded[0].request_id && !requestStore.some(request => request.id === messageAdded[0].request_id)) {
@@ -752,9 +790,9 @@ function Dashboard() {
 		// Define the two points for each request and filter them
 		const filteredRequests = requests.filter((request: RequestProps) => {
 			const requestPoint = turf.point([request.lng, request.lat]);
-			const userPoint = turf.point([lng, lat]);
+			const userPoint = turf.point([lng ?? 0, lat ?? 0]);
 			const distance = turf.distance(requestPoint, userPoint);
-			
+
 			return (
 				(distance < request.range / 1000 || request.range === 0) &&
 				(distance < settings[0].range / 1000 || settings[0].range === 0) &&
@@ -846,7 +884,9 @@ function Dashboard() {
 							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); }}>
 							<div className="tab-content">
 								<span>MES DEMANDES</span>
-								{viewedMessageState.length > 0 && <ClientRequestBadge count={viewedMessageState.length} />}
+								<div className={`badge-container ${viewedMessageState.length > 0 ? 'visible' : ''}`}>
+									{viewedMessageState.length > 0 && <Badge count={viewedMessageState.length} />}
+								</div>
 							</div>
 							<div className="indicator"></div>
 						</li>
@@ -855,7 +895,9 @@ function Dashboard() {
 								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); }}>
 								<div className="tab-content">
 									<span>CLIENT</span>
-									{notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />}
+									<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>
+										{notViewedRequestStore.length > 0 && <Badge count={notViewedRequestStore.length} />}
+									</div>
 								</div>
 								{/* {notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />} */}
 								<div className="indicator"></div>
@@ -866,7 +908,9 @@ function Dashboard() {
 								onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }}>
 								<div className="tab-content">
 									<span>MES CONVERSATIONS</span>
-									{viewedMyConversationState.length > 0 && <ClientRequestBadge count={viewedMyConversationState.length} />}
+									<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
+										{viewedMyConversationState.length > 0 && <Badge count={viewedMyConversationState.length} />}
+									</div>
 								</div>
 								<div className="indicator"></div>
 							</li>
@@ -881,42 +925,52 @@ function Dashboard() {
 
 
 				<div className="dashboard__content">
-
-					{selectedTab === 'Request' && <Request />}
-					{selectedTab === 'My requests' && <MyRequest
-						setIsHasMore={setIsMyRequestHasMore}
-						isHasMore={isMyRequestHasMore}
-						conversationIdState={conversationIdState}
-						setConversationIdState={setConversationIdState}
-						selectedRequest={selectedRequest}
-						setSelectedRequest={setSelectedRequest}
-						newUserId={newUserId}
-						setNewUserId={setNewUserId}
-					/>}
-					{selectedTab === 'My conversations' && <MyConversation
-						isHasMore={isMyConversationHasMore}
-						setIsHasMore={setIsMyConversationHasMore}
-						offsetRef={myConversationOffsetRef}
-						conversationIdState={myConversationIdState}
-						setConversationIdState={setMyConversationIdState}
-						clientMessageSubscription={clientMessageSubscription}
-					/>}
-					{selectedTab === 'My profile' && <Account />}
-					{selectedTab === 'Client request' && <ClientRequest
-						offsetRef={clientRequestOffset}
-						setIsHasMore={setIsClientRequestHasMore}
-						isHasMore={isCLientRequestHasMore}
-						onDetailsClick={handleMyConvesationNavigate}
-						RangeFilter={RangeFilter}
-					/>}
-
+					<Suspense fallback={<Spinner />}>
+						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
+							{selectedTab === 'Request' && <Request />}
+						</ErrorBoundary>
+						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
+							{selectedTab === 'My requests' && <MyRequest
+								setIsHasMore={setIsMyRequestHasMore}
+								isHasMore={isMyRequestHasMore}
+								conversationIdState={conversationIdState}
+								setConversationIdState={setConversationIdState}
+								selectedRequest={selectedRequest}
+								setSelectedRequest={setSelectedRequest}
+								newUserId={newUserId}
+								setNewUserId={setNewUserId}
+							/>}
+						</ErrorBoundary>
+						{selectedTab === 'My conversations' && <MyConversation
+							isHasMore={isMyConversationHasMore}
+							setIsHasMore={setIsMyConversationHasMore}
+							offsetRef={myConversationOffsetRef}
+							conversationIdState={myConversationIdState}
+							setConversationIdState={setMyConversationIdState}
+							clientMessageSubscription={clientMessageSubscription}
+						/>}
+						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
+							{selectedTab === 'My profile' && <Account />}
+						</ErrorBoundary>
+						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
+							{selectedTab === 'Client request' && <ClientRequest
+								offsetRef={clientRequestOffset}
+								setIsHasMore={setIsClientRequestHasMore}
+								isHasMore={isCLientRequestHasMore}
+								onDetailsClick={handleMyConvesationNavigate}
+								RangeFilter={RangeFilter}
+							/>}
+						</ErrorBoundary>
+					</Suspense>
 				</div>
 
-				<ExpiredSessionModal
-					isExpiredSession={isExpiredSession}
-					setIsExpiredSession={setIsExpiredSession}
-					RedirectExpiredSession={RedirectExpiredSession}
+				<DeleteItemModal
+					isSessionExpired={true}
+					setDeleteItemModalIsOpen={setIsExpiredSession}
+					deleteItemModalIsOpen={isExpiredSession}
+					handleDeleteItem={RedirectExpiredSession}
 				/>
+
 				{isFooter && <Footer />}
 			</div>
 			{/* {selectedTab === 'My profile' && <Footer />} */}

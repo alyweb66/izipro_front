@@ -1,4 +1,5 @@
 @use '../../../styles/variables' as v;
+@use '../../../styles/mixins' as m;
 
 
 .register-container {
@@ -47,7 +48,6 @@
     .register-container__form__form {
       padding: 1rem;
       width: 48%;
-      ;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -61,6 +61,7 @@
       -5px -5px 10px #ffffff; */
       box-shadow: 5px 5px 10px #dfdfdf,
         -5px -5px 10px #ffffff;
+   
 
       &.category {
         box-shadow: none;
@@ -81,28 +82,17 @@
         border: 1px solid #ccc;
         border-radius: 12px;
         box-shadow: none;
+
+        &:focus {
+          @include m.border;
+        }
       }
 
 
       &.button {
-        box-shadow: none;
-        text-align: center;
-        width: 30%;
-        height: 40px;
-        margin-top: 0.5rem;
-        margin-bottom: 1rem;
-        background-color: v.$color-primary-orange;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-      }
+        @include m.orange-button;
 
-      &.button:hover {
-        background-color: v.$color-primary-blue;
       }
-
 
     }
   }

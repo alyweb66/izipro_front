@@ -8,11 +8,14 @@ import { GET_MESSAGES_BY_CONVERSATION, GET_MY_MESSAGES_BY_CONVERSATION } from '.
 import '../../styles/spinner.scss';
 
 
+
+
 // fetch user data
 export const useQueryUserData = () => {
 	const { loading, error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
 	
 	if (getUserError) {
+		
 		throw new Error('Error while fetching user data');
 	}
 
@@ -26,7 +29,6 @@ export const useQueryRules = (getData: boolean) => {
 	});
 	
 	if (rulesError) {
-		console.log('rulesError', rulesError);
 		
 		throw new Error('Error while fetching rules data');
 	}
@@ -149,7 +151,6 @@ export const useQueryUserConversations = (offset: number, limit: number, skip: b
 		},
 		skip
 	});
-console.log('data', data);
 
 	if (conversationError) {
 		throw new Error('Error while fetching user conversations');
@@ -202,7 +203,6 @@ export const useQueryUsersConversation = (userIds: number[], offset: number, lim
 	if (usersConversationError) {
 		throw new Error('Error while fetching user conversation');
 	}
-	console.log('usersConversationData', usersConversationData);
 	
 	return {loading, usersConversationData};
 };

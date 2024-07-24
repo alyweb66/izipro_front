@@ -59,9 +59,7 @@ function SettingAccount() {
 
 	// Update jobs when category changes
 	useEffect(() => {
-		if (jobData) {
-			console.log('jobData', jobData.category.jobs);
-			
+		if (jobData) {	
 			setJobsState(jobData.category.jobs);
 		}
 	}, [jobData]);
@@ -73,10 +71,11 @@ function SettingAccount() {
 		}
 	}, [categoriesData]);
 
-	useEffect(() => {
+	/* 	useEffect(() => {
 		if (selectedCategory) {
+			//setSelectedJob(0);
 		}
-	}, [selectedCategory]);
+	}, [selectedCategory]); */
 
 	// mutation
 	const [createUserJob, { loading: userJobLoading, error: errorCreateUserJob }] = useMutation(USER_HAS_JOB_MUTATION);
@@ -142,8 +141,6 @@ function SettingAccount() {
 		// update jobs in the store
 		// check if the job is already in the store
 		const newjobs = uniqueJobId?.filter((id) => !jobs.some((job) => job.job_id === id));
-		console.log('newjobs', newjobs);
-
 
 		setJobs([...jobs, ...(newjobs || [])].map((job) => typeof job === 'number' ? { job_id: job } : job));
 

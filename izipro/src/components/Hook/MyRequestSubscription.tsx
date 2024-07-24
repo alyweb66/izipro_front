@@ -12,7 +12,6 @@ export const useMyRequestMessageSubscriptions = () => {
 	// get the subscription
 	const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');
 	const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'conversation');
-	console.log('request', request);
 
 	// Subscription to get new message
 	const { data: messageSubscription, error: errorSubscription } = useSubscription<{ messageAdded: MessageProps[] }>(MESSAGE_SUBSCRIPTION, {

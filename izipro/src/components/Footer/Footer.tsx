@@ -39,7 +39,7 @@ function Footer() {
 	
 	//state
 	const [cookiesModal, setCookiesModal] = useState<boolean>(false);
-	const [isGetCookieConsents, setIsGetCookieConsents] = useState<boolean>(true);
+	const [isGetCookieConsents, setIsGetCookieConsents] = useState<boolean>(false);
 	const [clickCookie, setClickCookie] = useState<boolean>(false);
 	const [CGUModal, setCGUModal] = useState<boolean>(false);
 	const [contactModal, setContactModal] = useState<boolean>(false);
@@ -77,10 +77,10 @@ function Footer() {
 
 		if (acceptAll) {
 			localStorage.setItem('cookieConsents', 'all');
-			setCookiesModal(false);
+
 		} else {
 			localStorage.setItem('cookieConsents', 'necessary');
-			setCookiesModal(false);
+
 		}
 
 		if (id !== 0) {
@@ -146,7 +146,8 @@ function Footer() {
 				},
 			}
 		}).then(() => {
-			setCGUModal(false);
+			//setTimeout(() => setCGUModal(false), 300);
+			//setCGUModal(false);
 			userDataStore.setState({ CGU: true });
 		});
 
@@ -192,6 +193,12 @@ function Footer() {
 			isGetRulesRef.current = false;
 		}
 	}, [rulesData]);
+
+	useEffect(() => {
+		if (id) {
+			setIsGetCookieConsents(true);
+		}
+	}, [id]);
 
 	// check if cookie consents are accepted
 	useEffect(() => {

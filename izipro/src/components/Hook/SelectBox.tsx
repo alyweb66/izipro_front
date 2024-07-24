@@ -21,7 +21,6 @@ type SelectBoxProps = {
 
 
 const SelectBox = ({ setSelected, loading, isCategory, selected, data, wishListJob, setWishListJob, isWishList, isSetting }: SelectBoxProps) => {
-	console.log(selected);
 
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -60,7 +59,6 @@ const SelectBox = ({ setSelected, loading, isCategory, selected, data, wishListJ
 										if (!wishListJob?.find(option => option.id === selectedOption.id)) {
 											setWishListJob && setWishListJob([selectedOption, ...(wishListJob ?? [])]);
 										}
-										/* setWishListJob && setWishListJob([selectedOption, ...(wishListJob ?? [])]); */
 									}
 									: () => {
 										if (typeof option.id === 'number') {

@@ -17,9 +17,13 @@
         overflow-y: auto;
         scrollbar-width: none;
         width: 100%;
-        // height: 95%;
         max-width: 40%;
         margin: 1rem 0.1rem 0 0.1rem;
+
+        &::-webkit-scrollbar {
+            display: none;
+            /* For Chrome, Safari and Opera */
+        }
 
         &.no-req {
             display: flex;
@@ -35,19 +39,23 @@
         }
 
         .my-conversation__list__fetch-button {
-            display: flex;
-            justify-content: center;
             @include m.fetch-button;
+
+            & {
+                display: flex;
+                justify-content: center;
+            }
         }
 
         .my-conversation__list__detail {
 
             .my-conversation__list__detail__item {
+                overflow: hidden;
+                scrollbar-width: none;
                 cursor: pointer;
                 display: flex;
                 flex-direction: column;
                 position: relative;
-                // border: 1px solid v.$color-secondary-blue;
                 margin: 1rem;
                 background-color: white;
                 border-radius: 0.5rem;
@@ -55,27 +63,13 @@
                     -5px 0 10px #ffffff17,
                     5px 0 10px #6666661c;
 
+                &::-webkit-scrollbar {
+                    display: none;
+                    /* For Chrome, Safari and Opera */
+                }
+
                 &.true {
-
-                    border: 1px solid red;
-
-                    background-color: #FFFFFF;
-                    //background-color: #028cef1f;
-                    border: 1px solid red;
-                    border-radius: 0.5rem;
-                    position: relative;
-
-                    &::before {
-                        content: "";
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: rgba(255, 0, 0, 0.068);
-                        border-radius: inherit;
-                        z-index: 0;
-                    }
+                    @include m.urgent-item;
                 }
 
                 &.urgent {
@@ -91,20 +85,17 @@
                     @include m.not-viewed
                 }
 
-                &.new {
-                    background-color: v.$color-chat-orange;
-                    border: 1px solid v.$color-primary-orange;
-                }
-
                 &.deleted {
-                    background-color: v.$color-deleted-grey;
-                    border: 1px solid v.$color-deleted-grey;
-                    z-index: 1;
+                    @include m.deleted;
+
+                    & {
+                        z-index: 1;
+                    }
 
                     .my-conversation__list__detail__item__deleted {
                         position: absolute;
                         top: 50%;
-                        left: 50%;
+                        left: 55%;
                         transform: translate(-50%, -50%);
                         color: v.$color-error;
                         font-size: 1.5rem;
@@ -208,7 +199,7 @@
                     border-radius: 0;
                     background-color: transparent;
                     box-shadow: none;
-                    margin: 0 ;
+                    margin: 0;
                     font-size: 1rem;
                     font-weight: 400;
                     background-color: v.$color-light-blue;
@@ -221,7 +212,7 @@
                 }
 
                 &.false.selected {
-                    border: 1px solid v.$color-primary-blue;
+                    @include m.selected;
                 }
 
                 .my-conversation__list__detail__item__footer {
@@ -236,7 +227,6 @@
 
                 .my-conversation__list__detail__item__picture {
                     display: flex;
-
                     flex-wrap: wrap;
 
                     &.deleted {
@@ -268,41 +258,11 @@
             }
 
             .my-conversation__list__detail__item.false.selected {
-                background-color: #FFFFFF;
-                border: 2px solid v.$color-primary-blue;
-                border-radius: 0.5rem;
-                position: relative;
-
-                &::before {
-                    content: "";
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background-color: #028cef1f;
-                    border-radius: inherit;
-                    z-index: 0;
-                }
+                @include m.selected;
             }
 
             .my-conversation__list__detail__item.true.selected {
-                background-color: #FFFFFF;
-                border: 2px solid v.$color-primary-blue;
-                border-radius: 0.5rem;
-                position: relative;
-
-                &::before {
-                    content: "";
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background-color: #028cef1f;
-                    border-radius: inherit;
-                    z-index: 0;
-                }
+                @include m.selected;
             }
         }
 
@@ -331,20 +291,23 @@
                 display: flex;
                 flex-direction: column;
                 box-shadow: 0 1px 6px -2px rgba(0, 0, 0, 0.2);
+                background-color: white;
                 cursor: pointer;
                 position: relative;
+                border-radius: 0.3rem 0.3rem 0;
 
                 .my-conversation__message-list__user__header__detail {
                     display: flex;
                     align-items: center;
                     background-color: white;
-                    border-radius: 8px 8px 0 0;
+                    border-radius: 0.3rem 0.3rem 0;
 
                     &.return {
                         display: none;
                     }
 
                     &.img {
+                        @include m.border;
                         margin: 0.5rem 1rem;
                         border-radius: 0.5rem;
                         width: 50px;
@@ -355,13 +318,22 @@
                     }
 
                     &.name {
+                        display: block;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
                         box-shadow: none;
-                        margin: 0.5rem 0.3rem;
+                        margin: 0rem 0.3rem 0.3rem 0.3rem;
                         font-size: 1rem;
                         font-weight: 500;
+
+                        &.deployed {
+                            margin: 0.3rem 1rem;
+                            font-size: 0.8rem;
+                        }
                     }
 
-                    &.deployArrow {
+                    &.deploy-arrow {
                         color: v.$color-primary-blue;
                         font-size: 2.5rem;
                         font-weight: 600;
@@ -376,12 +348,12 @@
 
                     &.title {
                         width: 98%;
-                        padding: 0.5rem;
+                        padding: 0 0.5rem;
                         box-shadow: none;
-                        margin: 0.5rem;
+                        margin: 0 0.5rem 0.5rem 0.5rem;
                         background-color: white;
                         color: v.$color-primary-blue;
-                        font-size: 1rem;
+                        font-size: 0.8rem;
                         font-weight: 500;
                     }
                 }
@@ -445,7 +417,7 @@
                 background: transparent;
                 height: 100%;
 
-                .my-conversation__message-list__message::-webkit-scrollbar {
+                &::-webkit-scrollbar {
                     display: none;
                     /* For Chrome, Safari and Opera */
                 }
@@ -577,7 +549,7 @@
             content: "";
             position: absolute;
             //top: 0;
-            left:0;
+            left: 0;
             width: 100%;
             height: 1px;
             background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
@@ -585,10 +557,12 @@
 
         .my-conversation__container::before {
             top: 0;
+            z-index: 2;
         }
 
         .my-conversation__container::after {
             bottom: 0;
+            z-index: 2;
         }
 
 
@@ -661,7 +635,7 @@
             font-size: 1rem;
             font-weight: 500;
             color: v.$color-primary-orange;
-            border-radius: 0 0 10px 10px;
+            border-radius: 0 0 0.3rem 0.3rem;
 
 
             .my-conversation__message-list__form__label__attach {
@@ -677,6 +651,8 @@
             }
 
             .my-conversation__message-list__form__label__input {
+                overflow: none;
+                scrollbar-width: none;
                 border-radius: 0.5rem;
                 width: 100%;
                 margin: 0 0.3rem;
@@ -686,11 +662,17 @@
                 background-color: transparent;
                 resize: none;
 
+                &::-webkit-scrollbar {
+                    display: none;
+                    /* For Chrome, Safari and Opera */
+                }
 
                 &:focus {
-                    outline: none;
-                    border-radius: 0.2rem;
-                    box-shadow: 0 0 0 1px v.$color-primary-blue;
+                    @include m.border;
+
+                    & {
+                        border-radius: 0.2rem;
+                    }
                 }
             }
 
@@ -756,7 +738,7 @@
                     .my-conversation__message-list__user__header {
 
                         .my-conversation__message-list__user__header__detail {
-                         
+
                             &.return {
                                 display: block;
                                 font-size: 4rem;
@@ -780,17 +762,20 @@
 
         .my-conversation__message-list {
             &.open {
-                margin-top: 0.2rem;
+                margin-top: 0;
                 width: 100%;
                 max-width: 100%;
                 border-radius: 0;
 
                 .my-conversation__message-list__user {
                     border-radius: 0;
+
                     .my-conversation__message-list__user__header {
                         border-radius: 0;
+
                         .my-conversation__message-list__user__header__detail {
                             border-radius: 0;
+
                             &.return {
                                 font-size: 4rem;
                             }
@@ -811,7 +796,7 @@
 
                 .my-conversation__message-list__form__label {
                     border-radius: 0;
-                
+
                 }
             }
         }
@@ -823,13 +808,3 @@
         }
     }
 }
-
-
-
-/* 
-@include m.picture-modal;
-
-
-@media (max-width: 1200px) {
-    @include m.picture-modal-querie;
-} */

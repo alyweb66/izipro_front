@@ -56,6 +56,17 @@ function Login() {
 		};
 	}, [error]);
 
+	useEffect(() => {
+		if (isEmailConfirmed) {
+			setMessage('');
+		}
+
+		if (message) {
+			setIsEmailConfirmed(false);
+		}
+
+	}, [isEmailConfirmed, message]);
+
 	// useEffect to check the size of the window
 	useEffect(() => {
 		const handleResize = () => {
@@ -95,7 +106,6 @@ function Login() {
 				if (activeSession) {
 					const data = {
 						value: 'true',
-						expiry: new Date().getTime() + 1*24*60*60*1000, // 24 hours from now
 					};
 					const encodeData = btoa(JSON.stringify(data));
 					localStorage.setItem('chekayl', encodeData);
@@ -149,8 +159,8 @@ function Login() {
 			</div>}
 			<p className="login-container__title"> Se connecter</p>
 			{message && <p className="success">{message}</p>}
-			{isChangePassword && <p className="login-success">Votre mot de passe a été modifié, vous pouvez maintenant vous connecter</p>}
-			{isEmailConfirmed && <p className="login-success">Votre adresse e-mail a été confirmée, vous pouvez maintenant vous connecter</p>}
+			{isChangePassword && <p className="success">Votre mot de passe a été modifié, vous pouvez maintenant vous connecter</p>}
+			{isEmailConfirmed && <p className="success">Votre adresse e-mail a été confirmée, vous pouvez maintenant vous connecter</p>}
 			<form className="login-container__form" onSubmit={handleLogin}>
 				<input
 					type="email"

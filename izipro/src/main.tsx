@@ -11,6 +11,7 @@ import { router } from './routes';
 
 import './styles/index.scss';
 
+
 // Default options for Apollo Client
 const defaultOptions: DefaultOptions = {
 	watchQuery: {
