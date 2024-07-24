@@ -19,6 +19,7 @@ import validator from 'validator';
 // @ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
 
+
 // Local component imports
 import SettingAccount from './SettingAccount/SettingAccount';
 import { Localization } from '../../Hook/Localization';

@@ -234,9 +234,10 @@ function Request() {
 
 	// Get map instance
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	/* const handleMapLoaded = (event: any) => {
-		setMap(event.target);
-	}; */
+	const [isLoading, setIsLoading] = useState(true);
+	const handleMapLoaded = () => {
+		setIsLoading(false);
+	};
 
 	// Handle file upload
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -406,6 +407,7 @@ function Request() {
 								<div className="request__form__map">
 
 									<div className="request__form__map__map">
+										{isLoading && <Spinner />}
 										<Map
 											reuseMaps
 											mapboxAccessToken="pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg"
@@ -417,7 +419,7 @@ function Request() {
 											zoom={zoom}
 											scrollZoom={false}
 											mapStyle="mapbox://styles/mapbox/streets-v12"
-											//onLoad={handleMapLoaded}
+											onLoad={handleMapLoaded}
 											dragRotate={false}
 											dragPan={false}
 										>

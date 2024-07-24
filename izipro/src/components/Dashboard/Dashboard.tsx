@@ -1,17 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
 
 // Modules without types
 import * as turf from '@turf/turf';
+import { ErrorBoundary } from "react-error-boundary";
 
 // components 
-import Account from './Account/Account';
-import Request from './Request/Request';
-import MyRequest from './MyRequest/MyRequest';
+//import Account from './Account/Account';
+//import Request from './Request/Request';
+//import MyRequest from './MyRequest/MyRequest';
 import Logout from '../Header/Logout/Logout';
-import MyConversation from './MyConversation/MyConversation';
-import ClientRequest from './ClientRequest/ClientRequest';
+//import MyConversation from './MyConversation/MyConversation';
+//import ClientRequest from './ClientRequest/ClientRequest';
 import Footer from '../Footer/Footer';
 import Spinner from '../Hook/Spinner';
 import { Badge } from '../Hook/Badge';
@@ -53,6 +54,11 @@ import { messageDataStore, myMessageDataStore } from '../../store/message';
 import './Dashboard.scss';
 import { DeleteItemModal } from '../Hook/DeleteItemModal';
 
+const Request = lazy(() => import('./Request/Request'));
+const MyRequest = lazy(() => import('./MyRequest/MyRequest'));
+const MyConversation = lazy(() => import('./MyConversation/MyConversation'));
+const Account = lazy(() => import('./Account/Account'));
+const ClientRequest = lazy(() => import('./ClientRequest/ClientRequest'));
 
 
 type useQueryUserConversationsProps = {
@@ -182,7 +188,6 @@ function Dashboard() {
 
 	// decode the data
 	const decodeData = atob(getItem || '');
-console.log('decodeData', decodeData);
 
 	if (decodeData === 'session') {
 		isLogged = { value: true };
@@ -221,12 +226,12 @@ console.log('decodeData', decodeData);
 			if (decodeData === 'session') {
 				// clear local storage,session storage and cookie
 				handleLogout(id);
-				
+
 			}
 		};
 		window.addEventListener('beforeunload', handleBeforeUnload);
 
-	
+
 		// check if user is logged in
 		if (isLogged !== null && Object.keys(isLogged).length !== 0) {
 			if (new Date().getTime() > isLogged.expiry) {
@@ -920,35 +925,43 @@ console.log('decodeData', decodeData);
 
 
 				<div className="dashboard__content">
-
-					{selectedTab === 'Request' && <Request />}
-					{selectedTab === 'My requests' && <MyRequest
-						setIsHasMore={setIsMyRequestHasMore}
-						isHasMore={isMyRequestHasMore}
-						conversationIdState={conversationIdState}
-						setConversationIdState={setConversationIdState}
-						selectedRequest={selectedRequest}
-						setSelectedRequest={setSelectedRequest}
-						newUserId={newUserId}
-						setNewUserId={setNewUserId}
-					/>}
-					{selectedTab === 'My conversations' && <MyConversation
-						isHasMore={isMyConversationHasMore}
-						setIsHasMore={setIsMyConversationHasMore}
-						offsetRef={myConversationOffsetRef}
-						conversationIdState={myConversationIdState}
-						setConversationIdState={setMyConversationIdState}
-						clientMessageSubscription={clientMessageSubscription}
-					/>}
-					{selectedTab === 'My profile' && <Account />}
-					{selectedTab === 'Client request' && <ClientRequest
-						offsetRef={clientRequestOffset}
-						setIsHasMore={setIsClientRequestHasMore}
-						isHasMore={isCLientRequestHasMore}
-						onDetailsClick={handleMyConvesationNavigate}
-						RangeFilter={RangeFilter}
-					/>}
-
+					<Suspense fallback={<Spinner />}>
+						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
+							{selectedTab === 'Request' && <Request />}
+						</ErrorBoundary>
+						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
+							{selectedTab === 'My requests' && <MyRequest
+								setIsHasMore={setIsMyRequestHasMore}
+								isHasMore={isMyRequestHasMore}
+								conversationIdState={conversationIdState}
+								setConversationIdState={setConversationIdState}
+								selectedRequest={selectedRequest}
+								setSelectedRequest={setSelectedRequest}
+								newUserId={newUserId}
+								setNewUserId={setNewUserId}
+							/>}
+						</ErrorBoundary>
+						{selectedTab === 'My conversations' && <MyConversation
+							isHasMore={isMyConversationHasMore}
+							setIsHasMore={setIsMyConversationHasMore}
+							offsetRef={myConversationOffsetRef}
+							conversationIdState={myConversationIdState}
+							setConversationIdState={setMyConversationIdState}
+							clientMessageSubscription={clientMessageSubscription}
+						/>}
+						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
+							{selectedTab === 'My profile' && <Account />}
+						</ErrorBoundary>
+						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
+							{selectedTab === 'Client request' && <ClientRequest
+								offsetRef={clientRequestOffset}
+								setIsHasMore={setIsClientRequestHasMore}
+								isHasMore={isCLientRequestHasMore}
+								onDetailsClick={handleMyConvesationNavigate}
+								RangeFilter={RangeFilter}
+							/>}
+						</ErrorBoundary>
+					</Suspense>
 				</div>
 
 				<DeleteItemModal
