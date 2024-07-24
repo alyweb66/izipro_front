@@ -48,7 +48,6 @@
     .register-container__form__form {
       padding: 1rem;
       width: 48%;
-      ;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -62,6 +61,7 @@
       -5px -5px 10px #ffffff; */
       box-shadow: 5px 5px 10px #dfdfdf,
         -5px -5px 10px #ffffff;
+   
 
       &.category {
         box-shadow: none;

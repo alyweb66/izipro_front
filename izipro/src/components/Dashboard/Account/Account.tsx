@@ -577,7 +577,7 @@ function Account() {
 
 						)}
 						<div className="request__form__map">
-							<p className="request__title-map">Vérifiez votre adresse sur la carte après validation:</p>
+							<p className="request__title-map">Vérifiez votre adresse sur la carte (validez pour actualiser):</p>
 							<div className="request__form__map__map">
 								<Map
 									reuseMaps

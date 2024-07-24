@@ -361,6 +361,12 @@
                 width: 70%;
             }
 
+            .request__form__title {
+                &.urgent {
+                    margin-top: 0rem;
+                }
+            }
+
         }
     }
 }

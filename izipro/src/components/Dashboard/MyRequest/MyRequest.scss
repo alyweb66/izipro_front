@@ -553,6 +553,7 @@
                 z-index: 1;
                 background: transparent;
                 height: 100%;
+                width: 100%;
 
                 &::-webkit-scrollbar {
                     display: none;
@@ -564,6 +565,7 @@
                     flex-direction: column;
                     margin: 0.5rem 0;
                     background: transparent;
+                    width: 100%;
 
                     &.me {
                         justify-content: flex-end;
@@ -597,22 +599,27 @@
                         border-radius: 0 1rem 1rem 1rem;
                         margin-top: 1rem;
                         max-width: 70%;
-
+                        width: fit-content;
+                        
+                        
                         &.me {
                             border-radius: 1rem 1rem 0rem 1rem;
                             align-self: flex-end;
                             background-color: v.$color-chat-orange;
                             margin-top: 1rem;
-
-                            .my-request__message-list__message__detail__image-container {
-
+                            
+                           /*  .my-request__message-list__message__detail__image-container {
+                                
+                               // margin: auto;
                                 .map {
-                                    display: flex;
-                                    flex-wrap: wrap;
-                                    justify-content: flex-end;
+                                   // display: flex;
+                                    //flex-wrap: wrap;
+                                   // justify-content: flex-end;
+                                    
+                                    
 
                                 }
-                            }
+                            } */
 
                             .my-request__message-list__message__detail__texte {
                                 word-wrap: break-word;
@@ -644,6 +651,7 @@
                                 .my-request__message-list__message__detail__image {
                                     border-radius: 0.5rem;
                                     cursor: pointer;
+                                   // margin: 0.2rem;
 
                                     &.single {
                                         width: auto;
