@@ -49,6 +49,7 @@ ReactModal.setAppElement('#root');
 
 
 function Account() {
+	const mapboxAccessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 	// Navigate
 	const navigate = useNavigate();
 
@@ -581,7 +582,7 @@ function Account() {
 							<div className="request__form__map__map">
 								<Map
 									reuseMaps
-									mapboxAccessToken="pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg"
+									mapboxAccessToken={mapboxAccessToken}
 									{...viewState}
 									onMove={evt => setViewState(evt.viewState)}
 									//zoom={zoom}

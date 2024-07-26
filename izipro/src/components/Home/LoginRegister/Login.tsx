@@ -108,10 +108,10 @@ function Login() {
 						value: 'true',
 					};
 					const encodeData = btoa(JSON.stringify(data));
-					localStorage.setItem('chekayl', encodeData);
+					localStorage.setItem('login', encodeData);
 				} else {
 					const value = btoa('session');
-					localStorage.setItem('chekayl', value);
+					localStorage.setItem('login', value);
 				}
 				setIsChangePassword(false);
 				setIsEmailConfirmed(false);

@@ -7,7 +7,7 @@ export default defineConfig({
 	
 	plugins: [react()],
 	build: {
-		sourcemap: true, // Assurez-vous que cette option est activée
+		sourcemap: true, 
 	},
 });
 

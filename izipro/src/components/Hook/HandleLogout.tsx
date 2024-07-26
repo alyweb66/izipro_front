@@ -19,10 +19,10 @@ export default function useHandleLogout() {
 			resetUserData();
 
 			// clear local storage and session storage
-			/* const getItem = localStorage.getItem('chekayl');
+			/* const getItem = localStorage.getItem('login');
 			const decodeData = atob(getItem || '');
 			if (decodeData === 'session') { */
-			localStorage.removeItem('chekayl')
+			localStorage.removeItem('login')
 			//} 
 
 			sessionStorage.clear();

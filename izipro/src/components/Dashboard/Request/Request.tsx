@@ -35,6 +35,7 @@ import { IoLocationSharp } from "react-icons/io5";
 
 
 function Request() {
+	const mapboxAccessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -98,7 +99,7 @@ function Request() {
 		let timer: number | undefined;
 		if (!titleRequest || !descriptionRequest || !selectedJob) {
 			setErrorMessage('Veuillez remplir tous les champs');
-			timer = setTimeout(() => {
+			setTimeout(() => {
 				setErrorMessage('');
 			}, 5000); // 5000ms = 5s
 
@@ -154,7 +155,7 @@ function Request() {
 					}
 
 					setSuccessMessage('Demande envoyée avec succès');
-					timer = setTimeout(() => {
+					 setTimeout(() => {
 						setSuccessMessage('');
 					}, 5000); // 5000ms = 5s
 
@@ -410,7 +411,7 @@ function Request() {
 										{isLoading && <Spinner />}
 										<Map
 											reuseMaps
-											mapboxAccessToken="pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg"
+											mapboxAccessToken={mapboxAccessToken}
 											initialViewState={{
 												longitude: lng,
 												latitude: lat,

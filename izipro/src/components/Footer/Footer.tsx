@@ -39,24 +39,28 @@ function Footer() {
 	
 	//state
 	const [cookiesModal, setCookiesModal] = useState<boolean>(false);
-	const [isGetCookieConsents, setIsGetCookieConsents] = useState<boolean>(false);
+	//const [isGetCookieConsents, setIsGetCookieConsents] = useState<boolean>(false);
 	const [clickCookie, setClickCookie] = useState<boolean>(false);
 	const [CGUModal, setCGUModal] = useState<boolean>(false);
 	const [contactModal, setContactModal] = useState<boolean>(false);
 	
 	//useRef
 	const isGetRulesRef = useRef<boolean>(false);
+	const isGetCookieConsentsRef = useRef<boolean>(false);
 
 	//store
 	const [id, CGU] = userDataStore((state) => [state.id, state.CGU]);
 	const [CGUStore, cookieStore] = rulesStore((state) => [state.CGU, state.cookies]);
 	const [cookieConsentsId, cookiesNecessaryStore] = cookieConsents((state) => [state.id, state.cookies_necessary]);
+console.log('cookieConsentsId', cookieConsentsId);
+console.log('isGetCookieConsentsRef', isGetCookieConsentsRef.current);
+
 
 	const handleLogout = useHandleLogout();
 
 	//Query
 	const { loading: rulesLoading, rulesData } = useQueryRules(isGetRulesRef.current);
-	const { loading: getCookieConsentsLoading, cookieData } = useQueryCookieConsents(isGetCookieConsents);
+	const { loading: getCookieConsentsLoading, cookieData } = useQueryCookieConsents(isGetCookieConsentsRef.current);
 
 	//Mutation
 	const [createCookieConsents, { loading: createCookieConsentsLoading, error: createCookieConsentsError }] = useMutation(COOKIE_CONSENTS_MUTATION);
@@ -98,6 +102,8 @@ function Footer() {
 				}).then(result => handleResponse(transformResultToResponseCookieConsents(result)));
 
 			} else {
+
+				
 				updateCookieConsents({
 					variables: {
 						createCookieConsentsId: id,
@@ -158,7 +164,9 @@ function Footer() {
 
 	// set the cookie consents to the store and database
 	useEffect(() => {
-		if (!getCookieConsentsLoading && !rulesLoading && !isGetRulesRef) {
+		if (!getCookieConsentsLoading) {
+			console.log('cookieData', cookieData);
+			
 			if (cookieData && cookieData.user.cookieConsents && cookieData.user.cookieConsents.user_id === id) {
 			// set cookie consents to the store
 				const { id, cookies_analytics, cookies_marketing, cookies_necessary } = cookieData.user.cookieConsents;
@@ -170,15 +178,15 @@ function Footer() {
 					cookies_necessary
 				});
 
-				setIsGetCookieConsents(false);
+				isGetCookieConsentsRef.current = true;
 			} else {
 			// set cookie consents to the database and store
 				const localConsents = localStorage.getItem('cookieConsents');
 
-				if (id !== 0 && (localConsents === 'all' || localConsents === 'necessary') && !cookiesNecessaryStore && isGetCookieConsents) {
+				if (id !== 0 && (localConsents === 'all' || localConsents === 'necessary') && !cookiesNecessaryStore && !isGetCookieConsentsRef.current) {
 					handleAcceptCookies(localConsents);
 
-					setIsGetCookieConsents(false);
+					isGetCookieConsentsRef.current = true;
 				}
 			}
 		}
@@ -196,7 +204,7 @@ function Footer() {
 
 	useEffect(() => {
 		if (id) {
-			setIsGetCookieConsents(true);
+			isGetCookieConsentsRef.current = true;;
 		}
 	}, [id]);
 

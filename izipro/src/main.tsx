@@ -1,3 +1,4 @@
+
 import { RouterProvider } from 'react-router-dom';
 import { ApolloClient, InMemoryCache, ApolloProvider, DefaultOptions } from '@apollo/client';
 // @ts-expect-error - no types available
@@ -8,6 +9,7 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient } from 'graphql-ws';
 import ReactDOM from 'react-dom/client';
 import { router } from './routes';
+
 
 import './styles/index.scss';
 
@@ -26,13 +28,13 @@ const defaultOptions: DefaultOptions = {
 
 // Create an upload link
 const httpLink = createUploadLink({
-	uri: 'http://localhost:3000/',
+	uri: import.meta.env.VITE_SERVER_URL,
 	credentials: 'include',
 	headers: { 'Apollo-Require-Preflight': 'true' },
 });
 
 const wsLink = new GraphQLWsLink(createClient({
-	url: 'ws://localhost:3000/subscriptions',
+	url: import.meta.env.VITE_SERVER_SUBSCRIPTION,
 }));
 
 // The split function takes three parameters:

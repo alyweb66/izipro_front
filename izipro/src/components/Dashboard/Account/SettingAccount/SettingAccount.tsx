@@ -71,11 +71,6 @@ function SettingAccount() {
 		}
 	}, [categoriesData]);
 
-	/* 	useEffect(() => {
-		if (selectedCategory) {
-			//setSelectedJob(0);
-		}
-	}, [selectedCategory]); */
 
 	// mutation
 	const [createUserJob, { loading: userJobLoading, error: errorCreateUserJob }] = useMutation(USER_HAS_JOB_MUTATION);
