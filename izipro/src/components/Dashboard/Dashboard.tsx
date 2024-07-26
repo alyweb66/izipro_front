@@ -7,12 +7,7 @@ import * as turf from '@turf/turf';
 import { ErrorBoundary } from "react-error-boundary";
 
 // components 
-//import Account from './Account/Account';
-//import Request from './Request/Request';
-//import MyRequest from './MyRequest/MyRequest';
 import Logout from '../Header/Logout/Logout';
-//import MyConversation from './MyConversation/MyConversation';
-//import ClientRequest from './ClientRequest/ClientRequest';
 import Footer from '../Footer/Footer';
 import Spinner from '../Hook/Spinner';
 import { Badge } from '../Hook/Badge';
@@ -34,7 +29,6 @@ import { useClientRequestSubscriptions } from '../Hook/ClientRequestSubscription
 import { useMyConversationSubscriptions } from '../Hook/MyConversationSubscription';
 import { useLogoutSubscription } from '../Hook/LogoutSubscription';
 import useHandleLogout from '../Hook/HandleLogout';
-
 
 // Mutation
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
@@ -92,7 +86,7 @@ function Dashboard() {
 			// check if the user is logged out by the server
 			const logoutCookieValue = getCookieValue('logout');
 			if (logoutCookieValue === 'true') {
-				localStorage.removeItem('chekayl');
+				localStorage.removeItem('login');
 				navigate('/');
 				deleteCookie('logout');
 			}
@@ -111,19 +105,23 @@ function Dashboard() {
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
-
+	//const [isSkipGetUserData, setIsSkipGetUserData] = useState<boolean>(true);
+	//const [isSkipSubscription, setIsSkipSubscription] = useState<boolean>(false);
+	
 	//*state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [conversationIdState, setConversationIdState] = useState<number>(0);
 	const [isMyRequestHasMore, setIsMyRequestHasMore] = useState<boolean>(true);
+	//const [isSkipMyRequest, setIsSkipMyRequest] = useState<boolean>(true);
 
 	//*state for myConversation
 	const [myConversationIdState, setMyConversationIdState] = useState<number>(0);
 	const [isMyConversationHasMore, setIsMyConversationHasMore] = useState<boolean>(true);
 	const [isForMyConversation, setIsForMyConversation] = useState<boolean>(false);
-
+	
 	//*state for clientRequest
 	const [isCLientRequestHasMore, setIsClientRequestHasMore] = useState<boolean>(true);
+	const [isSkipClientRequest, setIsSkipClientRequest] = useState<boolean>(true);
 
 	//store
 	const [id, role, lng, lat, settings, jobs, setAll] = userDataStore((state) => [state.id, state.role, state.lng, state.lat, state.settings, state.jobs, state.setAll]);
@@ -153,38 +151,43 @@ function Dashboard() {
 	//useRef
 	const clientRequestOffset = useRef<number>(0);
 	const myConversationOffsetRef = useRef<number>(0);
+	const isSkipGetUserDataRef = useRef<boolean>(true);
+	const isSkipSubscriptionRef = useRef<boolean>(false);
+	const isSkipMyRequestRef = useRef<boolean>(true);
+
 
 	// Query 
-	const { loading: userDataLoading, getUserData } = useQueryUserData();
-	const getUserSubscription = useQueryUserSubscriptions();
-	const notViewedRequestQuery = useQueryNotViewedRequests();
+	const { loading: userDataLoading, getUserData } = useQueryUserData(isSkipGetUserDataRef.current || id !== 0);
+	const getUserSubscription = useQueryUserSubscriptions(isSkipSubscriptionRef.current);
+	const notViewedRequestQuery = useQueryNotViewedRequests((role !== 'pro' || notViewedRequestStore.length > 0));
 	const { loading: notViewedConversationLoading, notViewedConversationQuery } = useQueryNotViewedConversations();
 	// this query is only ids of all conversation used to compare with the notViewedConversationStore to get the number of not viewed conversation
 	const { loading: myConversationIdsLoading, myConversationIds } = useQueryUserConversationIds(requestConversationIdStore.length > 0);
 
 	//* Query for MyRequest
-	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, requestStore.length > 0);
+	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, (isSkipMyRequestRef.current || requestStore.length > 0));
 	const { loading: requestByIdLoading, requestById } = useQueryGetRequestById(requestByIdState);
 	console.log('id', id);
 
+
 	//*Query for ClientRequest
-	const { getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, clientRequestsStore.length > 0);
+	const { getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequest || clientRequestsStore.length > 0));
 
 	//*Query for MyConversation
-	const { loading: requestMyConversationLoading, data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, requestsConversationStore.length > 0) as unknown as useQueryUserConversationsProps;
+	const { loading: requestMyConversationLoading, data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, (role === 'pro' ? requestsConversationStore.length > 0 : true)) as unknown as useQueryUserConversationsProps;
 
 	//mutation
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
 	// Subscription
 	const { messageSubscription } = useMyRequestMessageSubscriptions();
-	const { clientRequestSubscription } = useClientRequestSubscriptions();
-	const { clientMessageSubscription } = useMyConversationSubscriptions();
+	const { clientRequestSubscription } = useClientRequestSubscriptions((role !== 'pro'));
+	const { clientMessageSubscription } = useMyConversationSubscriptions((role !== 'pro'));
 	const { logoutSubscription } = useLogoutSubscription();
 
 	// condition if user not logged in
 	let isLogged;
-	const getItem = localStorage.getItem('chekayl');
+	const getItem = localStorage.getItem('login');
 
 	// decode the data
 	const decodeData = atob(getItem || '');
@@ -351,6 +354,7 @@ function Dashboard() {
 		if (getUserSubscription) {
 
 			setSubscription(getUserSubscription?.user.subscription);
+			isSkipSubscriptionRef.current = true;
 		}
 	}, [getUserSubscription]);
 
@@ -361,6 +365,7 @@ function Dashboard() {
 				setSelectedTab('My conversations');
 			} else {
 				setSelectedTab('My requests');
+				isSkipMyRequestRef.current = false;
 			}
 
 		}
@@ -377,8 +382,9 @@ function Dashboard() {
 			const newRequests = requestByJob?.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
 
 			// Filter the requests
+			setIsSkipClientRequest(true);
 			if (newRequests && newRequests.length > 0) {
-
+				setIsSkipClientRequest(true);
 				clientRequestOffset.current = clientRequestOffset.current + requestByJob?.length;
 				RangeFilter(requestByJob);
 			}
@@ -400,6 +406,7 @@ function Dashboard() {
 				// check if requests are already in the store
 				const requestsIds = requestStore.map(request => request.id);
 				const newRequests = getUserRequestsData.user.requests?.filter((request: RequestProps) => !requestsIds.includes(request.id));
+				isSkipMyRequestRef.current = true;
 				if (newRequests.length > 0) {
 					myRequestStore.setState(prevRequests => {
 						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
@@ -450,6 +457,7 @@ function Dashboard() {
 		if (getUserData) {
 
 			setAll(getUserData?.user);
+			isSkipGetUserDataRef.current = false;
 		}
 	}, [getUserData]);
 
@@ -842,7 +850,7 @@ function Dashboard() {
 	const RedirectExpiredSession = () => {
 		setIsExpiredSession(false);
 		sessionStorage.clear();
-		localStorage.removeItem('chekayl');
+		localStorage.removeItem('login');
 		navigate('/');
 	};
 
@@ -881,7 +889,7 @@ function Dashboard() {
 							<div className="indicator"></div>
 						</li>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); }}>
+							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }}>
 							<div className="tab-content">
 								<span>MES DEMANDES</span>
 								<div className={`badge-container ${viewedMessageState.length > 0 ? 'visible' : ''}`}>
@@ -892,7 +900,7 @@ function Dashboard() {
 						</li>
 						{role === 'pro' &&
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
-								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); }}>
+								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); setIsSkipClientRequest(false); }}>
 								<div className="tab-content">
 									<span>CLIENT</span>
 									<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>

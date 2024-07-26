@@ -26,9 +26,6 @@ export const useMyRequestMessageSubscriptions = () => {
 		throw new Error('Error while subscribing to message');
 	}
 
-
-	
-
 	return { messageSubscription };
 };
 

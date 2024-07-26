@@ -5,7 +5,7 @@ import { subscriptionDataStore } from '../../store/subscription';
 import { MessageProps } from '../../Type/message';
 
 
-export const useMyConversationSubscriptions = () => {
+export const useMyConversationSubscriptions = (skip: boolean) => {
 //store
 	const [subscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 
@@ -18,6 +18,7 @@ export const useMyConversationSubscriptions = () => {
 			request_ids: [],
 			is_request: false
 		},
+		skip
 	});
 	if (errorSubscription) {
 		throw new Error('Error while subscribing to message');

@@ -14,7 +14,7 @@ function Header() {
 	// Check if user is logged in
 	useEffect(() => {
 		// condition if user not logged in
-		const getItem = localStorage.getItem('chekayl');
+		const getItem = localStorage.getItem('login');
 		const decodeData = atob(getItem || '');
 		let isLoggedValue;
 		if (decodeData === 'session') {

@@ -4,7 +4,7 @@ import { userDataStore } from '../../store/UserData';
 import { RequestProps } from '../../Type/Request';
 
 
-export const useClientRequestSubscriptions = () => {
+export const useClientRequestSubscriptions = (skip: boolean) => {
 	// store
 	const jobs = userDataStore((state) => state.jobs);
 	const id = userDataStore((state) => state.id);
@@ -14,7 +14,8 @@ export const useClientRequestSubscriptions = () => {
 		variables: {
 			job_ids: jobs.map(job => job.job_id).filter(id => id != null),
 			user_id: id
-		}
+		},
+		skip
 	});
     
 	if (errorClientRequestSubscription) {

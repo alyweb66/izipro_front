@@ -21,7 +21,7 @@ function Home() {
 	// check if user is logged in and if cookie consents are accepted
 	useEffect(() => {
 		// condition if user not logged in
-		const getItem = localStorage.getItem('chekayl');
+		const getItem = localStorage.getItem('login');
 		if (!getItem) {	
 			return;
 		}

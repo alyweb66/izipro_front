@@ -10,9 +10,12 @@ import '../../styles/spinner.scss';
 
 
 
+
 // fetch user data
-export const useQueryUserData = () => {
-	const { loading, error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
+export const useQueryUserData = (getData: boolean) => {
+	const { loading, error: getUserError, data: getUserData } = useQuery(GET_USER_DATA, {
+		skip: !getData
+	});
 	
 	if (getUserError) {
 		
@@ -35,9 +38,9 @@ export const useQueryRules = (getData: boolean) => {
 	return {loading, rulesData};
 };
 
-export const useQueryCookieConsents = (getCookie: boolean) => {
+export const useQueryCookieConsents = (skip: boolean) => {
 	const { loading, error: cookieError, data: cookieData } = useQuery(GET_COOKIE_CONSENTS, {
-		skip: !getCookie
+		skip
 	
 	});
 
@@ -181,8 +184,10 @@ export const useQueryMessagesByConversation = (conversationId: number, offset: n
 };
 
 // fetch user subscriptions
-export const useQueryUserSubscriptions = () => {
-	const { error: subscriptionError, data: subscriptionData } = useQuery(GET_USER_SUBSCRIPTION);
+export const useQueryUserSubscriptions = (skip: boolean) => {
+	const { error: subscriptionError, data: subscriptionData } = useQuery(GET_USER_SUBSCRIPTION, {
+		skip
+	});
 	if (subscriptionError) {
 		throw new Error('Error while fetching user subscriptions');
 	}
@@ -241,8 +246,10 @@ export const useQueryConversation = (id: number) => {
 	return {conversationData, refetchConversation};
 };
 
-export const useQueryNotViewedRequests = () => {
-	const { loading, error: viewedError, data: viewedData } = useQuery(GET_USER_NOT_VIEWED_REQUESTS);
+export const useQueryNotViewedRequests = (skip: boolean) => {
+	const { loading, error: viewedError, data: viewedData } = useQuery(GET_USER_NOT_VIEWED_REQUESTS, {
+		skip
+	});
 
 	if (viewedError) {
 		throw new Error('Error while fetching viewed requests');

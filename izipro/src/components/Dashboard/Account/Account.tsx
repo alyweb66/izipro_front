@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 
 // State management and GraphQL imports
 import { userDataStore } from '../../../store/UserData';
-import { useMutation, useQuery } from '@apollo/client';
-import { GET_USER_DATA } from '../../GraphQL/UserQueries';
+import { useMutation } from '@apollo/client';
+//import { GET_USER_DATA } from '../../GraphQL/UserQueries';
 import {
 	CHANGE_PASSWORD_MUTATION,
 	DELETE_ACCOUNT_MUTATION,
@@ -26,7 +26,7 @@ import { Localization } from '../../Hook/Localization';
 import Spinner from '../../Hook/Spinner';
 
 // Type definitions
-import { UserDataProps } from '../../../Type/User';
+import { UserAccountDataProps, UserDataProps } from '../../../Type/User';
 
 // Asset imports
 import profileLogo from '/logo/logo profile.jpeg';
@@ -49,33 +49,64 @@ ReactModal.setAppElement('#root');
 
 
 function Account() {
+	// token for mapbox
+	const mapboxAccessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 	// Navigate
 	const navigate = useNavigate();
 
 	// useRef for profile picture
 	const fileInput = useRef<HTMLInputElement>(null);
 
-	// Get the user data
-	const { loading, error: getUserError, data: getUserData } = useQuery(GET_USER_DATA);
+	const [
+		id,
+		emailStore,
+		addressStore,
+		cityStore,
+		first_nameStore,
+		last_nameStore,
+		lngStore,
+		siretStore,
+		denominationStore,
+		imageStore,
+		descriptionStore,
+		latStore,
+		postal_codeStore] = userDataStore((state) => [
+		state.id,
+		state.email,
+		state.address, 
+		state.city, 
+		state.first_name, 
+		state.last_name,
+		state.lng,
+		state.siret,
+		state.denomination,
+		state.image,
+		state.description,
+		state.lat, 
+		state.postal_code
+	]);
+
+
 
 	//state
-	const [first_name, setFirstName] = useState(getUserData?.user.first_name || '');
-	const [last_name, setLastName] = useState(getUserData?.user.last_name || '');
-	const [email, setEmail] = useState(getUserData?.user.email || '');
-	const [address, setAddress] = useState(getUserData?.user.address || '');
-	const [postal_code, setPostalCode] = useState(getUserData?.user.postal_code || '');
-	const [city, setCity] = useState(getUserData?.user.city || '');
-	const [lng, setLng] = useState(getUserData?.user.lng || '');
-	const [lat, setLat] = useState(getUserData?.user.lat || '');
-	const [siret, setSiret] = useState(getUserData?.user.siret || '');
-	const [denomination, setDenomination] = useState(getUserData?.user.denomination || '');
-	const [description, setDescription] = useState(getUserData?.user.description || '');
-	const [picture, setPicture] = useState(getUserData?.user.image || '');
+	const [first_name, setFirstName] = useState(first_nameStore || '');
+	const [last_name, setLastName] = useState(last_nameStore || '');
+	const [email, setEmail] = useState(emailStore || '');
+	const [address, setAddress] = useState(addressStore || '');
+	const [postal_code, setPostalCode] = useState(postal_codeStore || '');
+	const [city, setCity] = useState( cityStore || '');
+	const [lng, setLng] = useState(lngStore || '');
+	const [lat, setLat] = useState(latStore || '');
+	const [siret, setSiret] = useState( siretStore || '');
+	const [denomination, setDenomination] = useState(denominationStore || '');
+	const [description, setDescription] = useState(descriptionStore || '');
+	const [picture, setPicture] = useState(imageStore || '');
 	const [oldPassword, setOldPassword] = useState('');
 	const [newPassword, setNewPassword] = useState('');
 	const [confirmNewPassword, setConfirmNewPassword] = useState('');
 	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
+	const [ChangeEmail, setChangeEmail] = useState('');
 
 
 	// Message modification account
@@ -86,13 +117,11 @@ function Account() {
 	const [messagePassword, setMessagePassword] = useState('');
 	const [errorPassword, setErrorPassword] = useState('');
 
+
 	// Set the changing user data
-	const [userData, setUserData] = useState(getUserData?.user || {} as UserDataProps);
+	const [userData, setUserData] = useState( {} as UserAccountDataProps); 
 
 	// Store data
-	const [id, lngStore, latStore] = userDataStore((state) => [state.id, state.lng, state.lat]);
-	const [initialData, setInitialData] = userDataStore((state) => [state.initialData, state.setInitialData]);
-	const setAll = userDataStore((state) => state.setAll);
 	const setAccount = userDataStore((state) => state.setAccount);
 	const role = userDataStore((state) => state.role);
 	const [image, setImage] = userDataStore((state) => [state.image, state.setImage]);
@@ -100,6 +129,7 @@ function Account() {
 
 	// Mutation to update the user data
 	const [updateUser, { loading: updateUserLoading, error: updateUserError }] = useMutation(UPDATE_USER_MUTATION, {
+		// update the cache
 		update(cache, { data: { updateUser } }) {
 			cache.modify({
 				fields: {
@@ -114,26 +144,6 @@ function Account() {
 	const [deleteProfilePicture, { error: deleteProfilePictureError }] = useMutation(DELETE_PROFILE_PICTURE_MUTATION);
 	const [deleteAccount, { error: deleteAccountError }] = useMutation(DELETE_ACCOUNT_MUTATION);
 
-	// Set the user data to state
-	useEffect(() => {
-
-		if (getUserData?.user) {
-			setFirstName(getUserData.user.first_name);
-			setLastName(getUserData.user.last_name);
-			setEmail(getUserData.user.email);
-			setAddress(getUserData.user.address);
-			setPostalCode(getUserData.user.postal_code);
-			setCity(getUserData.user.city);
-			setLng(getUserData.user.lng);
-			setLat(getUserData.user.lat);
-			setSiret(getUserData.user.siret);
-			setDenomination(getUserData.user.denomination);
-			setUserData(getUserData.user);
-			setDescription(getUserData.user.description || '');
-			setPicture(getUserData.user.image);
-		}
-	}, [getUserData]);
-
 	// Set the new user data to state
 	useEffect(() => {
 		//sanitize the input
@@ -144,8 +154,6 @@ function Account() {
 			address: DOMPurify.sanitize(address),
 			postal_code: DOMPurify.sanitize(postal_code),
 			city: DOMPurify.sanitize(city),
-			lng,
-			lat,
 			siret: DOMPurify.sanitize(siret),
 			denomination: DOMPurify.sanitize(denomination),
 			description: DOMPurify.sanitize(description),
@@ -155,35 +163,13 @@ function Account() {
 		setUserData(newUserData);
 	}, [first_name, last_name, email, address, postal_code, city, lng, lat, siret, denomination, description]);
 
-	// Set the user data to the store
-	useEffect(() => {
-
-		if (getUserData?.user) {
-			// Change the null values to empty strings
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const userData: UserDataProps = Object.entries(getUserData.user).reduce((acc: any, [key, value]) => {
-				acc[key as keyof UserDataProps] = value === null ? '' : value;
-				return acc;
-			}, {} as UserDataProps);
-
-			setInitialData(userData);
-			setAll(userData);
-		}
-
-
-		if (getUserError) {
-			throw new Error('Error while fetching user data');
-		}
-
-	}, [getUserData]);
-
 
 	// Handle the account submit
 	const handleAccountSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
 		// fetch the location
-		let newUserData = {} as UserDataProps;
+		let newUserData = {} as UserAccountDataProps; ;
 		if (address && city && postal_code) {
 			const location = await Localization(address, city, postal_code);
 			// Add lng and lat to userData
@@ -197,9 +183,9 @@ function Account() {
 
 		// Compare the initial data with the new data and get the changed fields
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const changedFields = (Object.keys(initialData) as Array<keyof UserDataProps>).reduce((result: any, key: keyof UserDataProps) => {
+		const changedFields = (Object.keys(userDataStore.getState()) as Array<keyof UserDataProps>).reduce((result: any, key: keyof UserDataProps) => {
 
-			if (initialData[key] !== newUserData[key]) {
+			if (userDataStore.getState()[key] !== newUserData[key]) {
 				result[key] = newUserData[key];
 			}
 
@@ -224,12 +210,7 @@ function Account() {
 				}, 5000);
 				return;
 			}
-			setMessageAccount('Un email de confirmation a été envoyé, le nouvel email sera effectif après confirmation');
-			setTimeout(() => {
-				setMessageAccount('');
-
-			}, 10000);
-			return;
+		
 		}
 
 		// Delete the role and id fields
@@ -240,7 +221,6 @@ function Account() {
 
 		// if there are changed values, use mutation
 		if (keys.length > 0) {
-
 			updateUser({
 				variables: {
 					updateUserId: id,
@@ -249,15 +229,25 @@ function Account() {
 			}).then((response): void => {
 
 				const { updateUser } = response.data;
+				console.log('updateUser', updateUser);
+				
 				// Set the new user data to the store
 				setAccount(updateUser);
+
+				if (changedFields.email) {
+					setChangeEmail('Un email de confirmation a été envoyé, le nouvel email sera effectif après confirmation');
+					setTimeout(() => {
+						setChangeEmail('');
+		
+					}, 15000);
+				}
 
 				if (updateUser) {
 					setMessageAccount('Modifications éfféctué');
 					setTimeout(() => {
 						setMessageAccount('');
 
-					}, 5000);
+					}, 15000);
 				}
 			});
 
@@ -394,31 +384,30 @@ function Account() {
 
 
 	const [viewState, setViewState] = useState({
-		longitude: lngStore || lng,
-		latitude: latStore || lat,
+		longitude: typeof lng === 'number' ? lng : parseFloat(lng),
+		latitude: typeof lat === 'number' ? lat : parseFloat(lat),
 		zoom: 12,
 	});
 
 	useEffect(() => {
 		setViewState({
-			longitude: lngStore || lng,
-			latitude: latStore || lat,
+			longitude: typeof lng === 'number' ? lng : parseFloat(lng),
+			latitude: typeof lat === 'number' ? lat : parseFloat(lat),
 			zoom: 12,
 		});
 	}, [lngStore, latStore, lng, lat]);
+
 	return (
 		<div className="account">
 			<AnimatePresence>
 				<motion.div
-					className={`account__profile ${loading ? 'loading' : ''}`}
+				className='account__profile'
+					/* className={`account__profile ${loading ? 'loading' : ''}`} */
 					initial={{ opacity: 0, scale: 0.9 }}
 					animate={{ opacity: 1, scale: 1 }}
 					exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 					transition={{ duration: 0.1, type: 'tween' }}
 				>
-					{loading && <Spinner />}
-					{/* {error && <p className="account__profile__modification-error">{error}</p>}
-				{message && <p className="account__profile__modification-message">{message}</p>} */}
 					<div className="account__picture" >
 						<img
 							className="account__profile__picture__img"
@@ -581,7 +570,7 @@ function Account() {
 							<div className="request__form__map__map">
 								<Map
 									reuseMaps
-									mapboxAccessToken="pk.eyJ1IjoiYWx5d2ViIiwiYSI6ImNsdTcwM2xnazAwdHMya3BpamhmdjRvM3AifQ.V3d3rCH-FYb4s_e9fIzNxg"
+									mapboxAccessToken={mapboxAccessToken}
 									{...viewState}
 									onMove={evt => setViewState(evt.viewState)}
 									//zoom={zoom}
@@ -593,7 +582,10 @@ function Account() {
 									dragPan={false}
 
 								>
-									<Marker longitude={lngStore || lng} latitude={latStore || lat}>
+									<Marker 
+									longitude={typeof lng === 'number' ? lng : parseFloat(lng)} 
+									latitude={typeof lat === 'number' ? lat : parseFloat(lat)}
+									>
 										<div className="map-marker">
 											<IoLocationSharp className="map-marker__icon" />
 										</div>
@@ -604,6 +596,7 @@ function Account() {
 						</div>
 						{errorAccount && <p className="account__profile__modification-error">{errorAccount}</p>}
 						{messageAccount && <p className="account__profile__modification-message">{messageAccount}</p>}
+						{ChangeEmail && <p className="account__profile__modification-message">{ChangeEmail}</p>}
 						<button className="account__profile__button" type="submit">Valider</button>
 					</form>
 					<SettingAccount />
