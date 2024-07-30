@@ -129,3 +129,11 @@ query NotViewedRequest {
   }
 }
 `;
+
+export const VAPID_PUBLIC_KEY = gql`
+  query UserVapidKey {
+    user {
+      publicKey
+    }
+  }
+`;

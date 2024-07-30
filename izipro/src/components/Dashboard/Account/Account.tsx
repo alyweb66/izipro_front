@@ -24,6 +24,7 @@ import ReactModal from 'react-modal';
 import SettingAccount from './SettingAccount/SettingAccount';
 import { Localization } from '../../Hook/Localization';
 import Spinner from '../../Hook/Spinner';
+import serviceWorkerRegistration from '../../Hook/ServiceWorkerRegistration';
 
 // Type definitions
 import { UserAccountDataProps, UserDataProps } from '../../../Type/User';
@@ -42,6 +43,9 @@ import './Account.scss';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import { IoLocationSharp } from "react-icons/io5";
+import Switch from '@mui/material/Switch';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
 //import '../../../styles/spinner.scss';
 
 
@@ -54,6 +58,7 @@ function Account() {
 	// Navigate
 	const navigate = useNavigate();
 
+	const { askPermission, disableNotifications } = serviceWorkerRegistration();
 	// useRef for profile picture
 	const fileInput = useRef<HTMLInputElement>(null);
 
@@ -71,20 +76,20 @@ function Account() {
 		descriptionStore,
 		latStore,
 		postal_codeStore] = userDataStore((state) => [
-		state.id,
-		state.email,
-		state.address, 
-		state.city, 
-		state.first_name, 
-		state.last_name,
-		state.lng,
-		state.siret,
-		state.denomination,
-		state.image,
-		state.description,
-		state.lat, 
-		state.postal_code
-	]);
+			state.id,
+			state.email,
+			state.address,
+			state.city,
+			state.first_name,
+			state.last_name,
+			state.lng,
+			state.siret,
+			state.denomination,
+			state.image,
+			state.description,
+			state.lat,
+			state.postal_code
+		]);
 
 
 
@@ -94,10 +99,10 @@ function Account() {
 	const [email, setEmail] = useState(emailStore || '');
 	const [address, setAddress] = useState(addressStore || '');
 	const [postal_code, setPostalCode] = useState(postal_codeStore || '');
-	const [city, setCity] = useState( cityStore || '');
+	const [city, setCity] = useState(cityStore || '');
 	const [lng, setLng] = useState(lngStore || '');
 	const [lat, setLat] = useState(latStore || '');
-	const [siret, setSiret] = useState( siretStore || '');
+	const [siret, setSiret] = useState(siretStore || '');
 	const [denomination, setDenomination] = useState(denominationStore || '');
 	const [description, setDescription] = useState(descriptionStore || '');
 	const [picture, setPicture] = useState(imageStore || '');
@@ -107,6 +112,13 @@ function Account() {
 	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
 	const [ChangeEmail, setChangeEmail] = useState('');
+	const [isNotificationEnabled, setIsNotificationEnabled] = useState(Notification.permission === 'granted');
+	// state for mapBox
+	const [viewState, setViewState] = useState({
+		longitude: typeof lng === 'number' ? lng : parseFloat(lng),
+		latitude: typeof lat === 'number' ? lat : parseFloat(lat),
+		zoom: 12,
+	});
 
 
 	// Message modification account
@@ -117,9 +129,8 @@ function Account() {
 	const [messagePassword, setMessagePassword] = useState('');
 	const [errorPassword, setErrorPassword] = useState('');
 
-
 	// Set the changing user data
-	const [userData, setUserData] = useState( {} as UserAccountDataProps); 
+	const [userData, setUserData] = useState({} as UserAccountDataProps);
 
 	// Store data
 	const setAccount = userDataStore((state) => state.setAccount);
@@ -169,7 +180,7 @@ function Account() {
 		event.preventDefault();
 
 		// fetch the location
-		let newUserData = {} as UserAccountDataProps; ;
+		let newUserData = {} as UserAccountDataProps;;
 		if (address && city && postal_code) {
 			const location = await Localization(address, city, postal_code);
 			// Add lng and lat to userData
@@ -210,7 +221,7 @@ function Account() {
 				}, 5000);
 				return;
 			}
-		
+
 		}
 
 		// Delete the role and id fields
@@ -230,7 +241,7 @@ function Account() {
 
 				const { updateUser } = response.data;
 				console.log('updateUser', updateUser);
-				
+
 				// Set the new user data to the store
 				setAccount(updateUser);
 
@@ -238,7 +249,7 @@ function Account() {
 					setChangeEmail('Un email de confirmation a été envoyé, le nouvel email sera effectif après confirmation');
 					setTimeout(() => {
 						setChangeEmail('');
-		
+
 					}, 15000);
 				}
 
@@ -382,13 +393,48 @@ function Account() {
 
 	};
 
+	// useEffect for notification push
+	useEffect(() => {
+		const checkNotificationStatus = async () => {
+            // set the state of the notification
+			// check if the user is already subscribed to push notifications
+            const registration = await navigator.serviceWorker.getRegistration();
+            if (registration) {
+                const subscription = await registration.pushManager.getSubscription();
+                setIsNotificationEnabled(!!subscription);
+            } else {
+                setIsNotificationEnabled(false);
+            }
 
-	const [viewState, setViewState] = useState({
-		longitude: typeof lng === 'number' ? lng : parseFloat(lng),
-		latitude: typeof lat === 'number' ? lat : parseFloat(lat),
-		zoom: 12,
-	});
+            // verify if the browser supports notifications push and service workers
+            const permission = document.getElementById('push-permission');
+            console.log('permission', permission);
+            if (
+                !permission &&
+                !('serviceWorker' in navigator) ||
+                !('Notification' in window)
+            ) {
+                if (permission) {
+                    permission.style.display = 'none';
+                }
+                return;
+            }
+        };
 
+        checkNotificationStatus();
+	}, []);
+
+	// handle the switch change for notification
+	const handleSwitchChange = () => {
+        if (isNotificationEnabled) {
+            disableNotifications();
+        } else {
+            askPermission();
+        }
+        setIsNotificationEnabled(!isNotificationEnabled);
+    };
+
+	// useEffect for mapBox lng lat
 	useEffect(() => {
 		setViewState({
 			longitude: typeof lng === 'number' ? lng : parseFloat(lng),
@@ -401,7 +447,7 @@ function Account() {
 		<div className="account">
 			<AnimatePresence>
 				<motion.div
-				className='account__profile'
+					className='account__profile'
 					/* className={`account__profile ${loading ? 'loading' : ''}`} */
 					initial={{ opacity: 0, scale: 0.9 }}
 					animate={{ opacity: 1, scale: 1 }}
@@ -427,6 +473,21 @@ function Account() {
 						<button className="account__profile__picture__delete" type='button' onClick={handleDeletePicture}>Supprimer</button>
 					</div >
 					<form className={`account__profile__form ${updateUserLoading ? 'loading' : ''}`} onSubmit={handleAccountSubmit} >
+						<div id="push-permission">
+							<FormGroup>
+								<FormControlLabel
+									control={<Switch
+										color="warning"
+										checked={isNotificationEnabled}
+										onChange={handleSwitchChange}
+										inputProps={{ 'aria-label': 'Activer les notifications' }}
+									/>}
+									label="Activer les notifications"
+									labelPlacement="start"
+									classes={{ label: 'custom-label' }}
+								/>
+							</FormGroup>
+						</div>
 						{updateUserLoading && <Spinner />}
 						<h1 className="account__profile__form__title">Mes informations:</h1>
 						<div></div>
@@ -582,9 +643,9 @@ function Account() {
 									dragPan={false}
 
 								>
-									<Marker 
-									longitude={typeof lng === 'number' ? lng : parseFloat(lng)} 
-									latitude={typeof lat === 'number' ? lat : parseFloat(lat)}
+									<Marker
+										longitude={typeof lng === 'number' ? lng : parseFloat(lng)}
+										latitude={typeof lat === 'number' ? lat : parseFloat(lat)}
 									>
 										<div className="map-marker">
 											<IoLocationSharp className="map-marker__icon" />
