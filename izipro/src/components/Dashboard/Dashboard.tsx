@@ -105,8 +105,6 @@ function Dashboard() {
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
-	//const [isSkipGetUserData, setIsSkipGetUserData] = useState<boolean>(true);
-	//const [isSkipSubscription, setIsSkipSubscription] = useState<boolean>(false);
 	
 	//*state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);

@@ -1,14 +1,11 @@
-import { useQuery } from '@apollo/client';
+import { useLazyQuery, useQuery } from '@apollo/client';
 import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY, GET_REQUEST_BY_ID, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
 import { GET_JOB_DATA } from '../GraphQL/Job';
-import { GET_COOKIE_CONSENTS, GET_USERS_CONVERSATION, GET_USER_DATA, GET_USER_NOT_VIEWED_REQUESTS, GET_USER_REQUEST_BY_CONVERSATIONS, GET_USER_SUBSCRIPTION, RULES } from '../GraphQL/UserQueries';
+import { GET_COOKIE_CONSENTS, GET_USERS_CONVERSATION, GET_USER_DATA, GET_USER_NOT_VIEWED_REQUESTS, GET_USER_REQUEST_BY_CONVERSATIONS, GET_USER_SUBSCRIPTION, RULES, VAPID_PUBLIC_KEY } from '../GraphQL/UserQueries';
 import { GET_CONVERSATION, GET_CONVERSATION_ID, NOT_VIEWED_CONVERSATIONS } from '../GraphQL/ConversationQueries';
 import { GET_MESSAGES_BY_CONVERSATION, GET_MY_MESSAGES_BY_CONVERSATION } from '../GraphQL/MessageQueries';
 
 import '../../styles/spinner.scss';
-
-
-
 
 
 // fetch user data
@@ -297,4 +294,17 @@ export const useQueryGetRequestById = (requestId: number) => {
 		throw new Error('Error while fetching request');
 	}
 	return {loading, requestById};
+};
+
+export const useQueryVAPIDKey = () => {
+	
+	const [fetchVAPIDKey, { loading, error: getVAPIDKeyError, data: getVAPIDKey }] = useLazyQuery(VAPID_PUBLIC_KEY);
+	
+	if (getVAPIDKeyError) {
+		
+		throw new Error('Error while fetching user data');
+	}
+console.log('getVAPIDKeyqqqqqqq', getVAPIDKey);
+
+	return { loading, getVAPIDKey, fetchVAPIDKey };
 };
