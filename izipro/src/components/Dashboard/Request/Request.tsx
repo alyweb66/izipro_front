@@ -60,9 +60,9 @@ function Request() {
 	const [errorMessage, setErrorMessage] = useState('');
 	const [successMessage, setSuccessMessage] = useState('');
 	const [uploadFileError, setUploadFileError] = useState('');
-	//const [description, setDescription] = useState('');
 	const [categoriesState, setCategoriesState] = useState<CategoryPros[]>([]);
 	const [jobsState, setJobsState] = useState<JobProps[]>([]);
+	const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 450px)').matches);
 
 	// file upload
 	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
@@ -157,7 +157,7 @@ function Request() {
 					}
 
 					setSuccessMessage('Demande envoyée avec succès');
-					 setTimeout(() => {
+					setTimeout(() => {
 						setSuccessMessage('');
 					}, 5000); // 5000ms = 5s
 
@@ -195,45 +195,6 @@ function Request() {
 			setCategoriesState(categoriesData.categories);
 		}
 	}, [categoriesData]);
-
-	// radius on map
-	/* useEffect(() => {
-		if (map && lat && lng) {
-			// Remove existing circles
-			if (map.getLayer('radius-circle') && map.getSource('radius-circle')) {
-				map.removeLayer('radius-circle');
-				map.removeSource('radius-circle');
-			}
-
-			// Add circle layer
-			map.addLayer({
-				id: 'radius-circle',
-				type: 'circle',
-				source: {
-					type: 'geojson',
-					data: {
-						type: 'Feature',
-						geometry: {
-							type: 'Point',
-							coordinates: [lng, lat]
-						},
-						properties: {} // Add an empty properties object
-					}
-				},
-				paint: {
-					'circle-radius': {
-						stops: [
-							[0, 0],
-							[15.8, radius] // Adjust the multiplier for scaling
-						],
-						base: 2
-					},
-					'circle-color': 'orange',
-					'circle-opacity': 0.3
-				}
-			});
-		}
-	}, [map, lng, lat, radius]); */
 
 	// Get map instance
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -282,69 +243,54 @@ function Request() {
 		}
 	};
 
-	// Update zoom level when radius changes
-	useEffect(() => {
-		const mediaQuery = window.matchMedia('(max-width: 450px)');
-
-		if (mediaQuery.matches) {
-			if (radius <= 5000) {
-				setZoom(10.5);
-			} else if (radius <= 10000) {
-				setZoom(9.5);
-			} else if (radius <= 15000) {
-				setZoom(9);
-			} else if (radius <= 20000) {
-				setZoom(8.5);
-			} else if (radius <= 25000) {
-				setZoom(8.2);
-			} else if (radius <= 35000) {
-				setZoom(7.9);
-			} else if (radius <= 40000) {
-				setZoom(7.7);
-			} else if (radius <= 45000) {
-				setZoom(7.5);
-			} else if (radius <= 50000) {
-				setZoom(7.4);
-			} else if (radius <= 60000) {
-				setZoom(6.9);
-			} else if (radius <= 100000) {
-				setZoom(6.4);
-			} else {
-				setZoom(6);
-			}
-		} else {
-			if (radius <= 5000) {
-				setZoom(11);
-			} else if (radius <= 10000) {
-				setZoom(10);
-			} else if (radius <= 15000) {
-				setZoom(9.5);
-			} else if (radius <= 20000) {
-				setZoom(9);
-			} else if (radius <= 25000) {
-				setZoom(8.5);
-			} else if (radius <= 35000) {
-				setZoom(8);
-			} else if (radius <= 40000) {
-				setZoom(8);
-			} else if (radius <= 45000) {
-				setZoom(7.7);
-			} else if (radius <= 60000) {
-				setZoom(7);
-			} else if (radius <= 100000) {
-				setZoom(6.8);
-			} else {
-				setZoom(7);
-			}
-		}
-	}, [radius]);
-
 	// reset selected job when category changes
 	useEffect(() => {
 		if (selectedCategory) {
 			setSelectedJob(0);
 		}
 	}, [selectedCategory]);
+
+	
+	//* Mapping radius to zoom level
+	const radiusToZoomMapping = [
+		{ maxRadius: 5000, zoomMobile: 10.5, zoomDesktop: 11 },
+		{ maxRadius: 10000, zoomMobile: 9.5, zoomDesktop: 10 },
+		{ maxRadius: 15000, zoomMobile: 9, zoomDesktop: 9.5 },
+		{ maxRadius: 20000, zoomMobile: 8.5, zoomDesktop: 9 },
+		{ maxRadius: 25000, zoomMobile: 8.2, zoomDesktop: 8.5 },
+		{ maxRadius: 35000, zoomMobile: 7.9, zoomDesktop: 8 },
+		{ maxRadius: 40000, zoomMobile: 7.7, zoomDesktop: 8 },
+		{ maxRadius: 45000, zoomMobile: 7.5, zoomDesktop: 7.7 },
+		{ maxRadius: 50000, zoomMobile: 7.4, zoomDesktop: 7.5 },
+		{ maxRadius: 60000, zoomMobile: 6.9, zoomDesktop: 7 },
+		{ maxRadius: 100000, zoomMobile: 6.4, zoomDesktop: 6.8 },
+		{ maxRadius: Infinity, zoomMobile: 6, zoomDesktop: 7 }
+	];
+
+	// Calculate the zoom level based on the radius
+	const calculateZoomLevel = (radius: number, isMobile: boolean) => {
+		for (const { maxRadius, zoomMobile, zoomDesktop } of radiusToZoomMapping) {
+			if (radius <= maxRadius) {
+				return isMobile ? zoomMobile : zoomDesktop;
+			}
+		}
+	};
+
+	// Update the zoom level based on the radius and screen size
+	useEffect(() => {
+		const handleResize = () => setIsMobile(window.matchMedia('(max-width: 450px)').matches);
+		window.addEventListener('resize', handleResize);
+
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
+
+	// Update the zoom level when the radius or screen size changes
+	useEffect(() => {
+		const newZoom = calculateZoomLevel(radius, isMobile);
+		newZoom && setZoom(newZoom);
+	}, [radius, isMobile]);
+	//* end Mapping radius to zoom level
+
 
 	return (
 		<div className="request">
@@ -396,19 +342,19 @@ function Request() {
 									{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
 								</label>
 								<Box className="request__slider-container" sx={{ width: 250 }}>
-								<Slider 
-								defaultValue={105} 
-								aria-label="Distance d'action" 
-								valueLabelDisplay="auto"
-								value={radius === 0 ? 105 : radius / 1000} 
-								step={5} 
-								marks 
-								min={5} 
-								max={105}
-								onChange={(_, value) => setRadius((value as number) === 105 ? 0 : (value as number) * 1000)}
-								valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
-								/>
-							</Box>
+									<Slider
+										defaultValue={105}
+										aria-label="Distance d'action"
+										valueLabelDisplay="auto"
+										value={radius === 0 ? 105 : radius / 1000}
+										step={5}
+										marks
+										min={5}
+										max={105}
+										onChange={(_, value) => setRadius((value as number) === 105 ? 0 : (value as number) * 1000)}
+										valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
+									/>
+								</Box>
 								<div className="request__form__map">
 
 									<div className="request__form__map__map">
