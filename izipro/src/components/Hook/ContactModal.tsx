@@ -86,7 +86,15 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 	useEffect(() => {
 		if (isOpenModal) {
 			setIsVisible(true);
+			document.body.style.overflow = 'hidden'; 
+		} else {
+		  document.body.style.overflow = '';
 		}
+	
+		// Cleanup function to reset the overflow style
+		return () => {
+		  document.body.style.overflow = ''; 
+		};
 	}, [isOpenModal]);
 
 	const closeModal = () => {

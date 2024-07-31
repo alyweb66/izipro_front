@@ -31,6 +31,8 @@ import SelectBox from '../../Hook/SelectBox';
 import { subscriptionDataStore } from '../../../store/subscription';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IoLocationSharp } from "react-icons/io5";
+import Box from '@mui/material/Box';
+import Slider from '@mui/material/Slider';
 
 
 
@@ -344,7 +346,6 @@ function Request() {
 		}
 	}, [selectedCategory]);
 
-
 	return (
 		<div className="request">
 			{categoryLoading || JobDataLoading || createLoading && <Spinner />}
@@ -394,17 +395,20 @@ function Request() {
 								<label className="request__form__label-radius" htmlFor="radius">
 									{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
 								</label>
-								<input
-									className="request__form__input-radius"
-									id="radius"
-									type="range"
-									min="0"
-									max="100000"
-									step="5000"
-									value={radius}
-									onChange={e => setRadius(Number(e.target.value))}
+								<Box className="request__slider-container" sx={{ width: 250 }}>
+								<Slider 
+								defaultValue={105} 
+								aria-label="Distance d'action" 
+								valueLabelDisplay="auto"
+								value={radius === 0 ? 105 : radius / 1000} 
+								step={5} 
+								marks 
+								min={5} 
+								max={105}
+								onChange={(_, value) => setRadius((value as number) === 105 ? 0 : (value as number) * 1000)}
+								valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
 								/>
-
+							</Box>
 								<div className="request__form__map">
 
 									<div className="request__form__map__map">

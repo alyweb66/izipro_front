@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
 import { MdKeyboardArrowRight, MdKeyboardArrowLeft, MdClose } from 'react-icons/md';
@@ -39,6 +39,19 @@ export function useModal() {
 }
 
 export function ImageModal({ modalIsOpen, closeModal, selectedImage, nextImage, previousImage }: { modalIsOpen: boolean, closeModal: () => void, selectedImage: string, nextImage: () => void, previousImage: () => void }) {
+	
+	// useEffect to block the background scrolling
+	useEffect(() => {
+		if (modalIsOpen) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = '';
+		}
+		return () => {
+			document.body.style.overflow = '';
+		};
+	}, [modalIsOpen]);
+	
 	return (
 		<ReactModal
 			className="react-modal"

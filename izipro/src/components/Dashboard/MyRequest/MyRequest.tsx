@@ -105,10 +105,8 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	const limit = 5;
 
-
 	// file upload
 	const { urlFile, setUrlFile, file, setFile, handleFileChange } = useFileHandler();
-console.log('myrequest');
 
 	//mutation
 	const [deleteRequest, { loading: deleteRequestLoading, error: deleteRequestError }] = useMutation(DELETE_REQUEST_MUTATION);
@@ -831,6 +829,9 @@ console.log('myrequest');
 																openModal(imageUrls, index),
 																event.stopPropagation();
 															}}
+															onError={(event) => {
+																event.currentTarget.src = '/logo/no-picture.jpg';
+															  }}
 															alt={`Image associée à la demande ${request.title}`}
 														/>
 													)
@@ -965,6 +966,9 @@ console.log('myrequest');
 												<img
 													className="my-request__answer-list__user__header img"
 													src={user.image ? user.image : logoProfile}
+													onError={(event) => {
+														event.currentTarget.src = '/logo/no-picture.jpg';
+													  }}
 													alt={`Image de profil de ${user.first_name} ${user.last_name}`} />
 												{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
 												{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
@@ -1026,6 +1030,9 @@ console.log('myrequest');
 									<img
 										className="my-request__message-list__user__header__detail img"
 										src={selectedUser?.image ? selectedUser.image : logoProfile}
+										onError={(event) => {
+											event.currentTarget.src = '/logo/no-picture.jpg';
+										  }}
 										alt={selectedUser?.denomination ? selectedUser.denomination : `${selectedUser?.first_name} ${selectedUser?.last_name}`} />
 									{selectedUser?.denomination ? (
 										<p className="my-request__message-list__user__header__detail denomination">{selectedUser?.denomination}</p>
@@ -1092,6 +1099,9 @@ console.log('myrequest');
 																				src={media.url}
 																				onClick={() => openModal(imageUrls, index)}
 																				alt={media.name}
+																				onError={(event) => {
+																					event.currentTarget.src = '/logo/no-picture.jpg';
+																				  }}
 																			/>
 																		)
 																	) : null
@@ -1158,6 +1168,7 @@ console.log('myrequest');
 									placeholder="Tapez votre message ici..."
 									aria-label='Tapez votre message'
 									maxLength={500}
+									readOnly={selectedUser && selectedUser?.id > 0 ? false : true}
 								/>
 								<MdSend
 									className="my-request__message-list__form__label__send"

@@ -35,6 +35,7 @@ type ExpandedState = {
 };
 
 type clientRequestProps = {
+	loading?: boolean;
 	offsetRef: React.MutableRefObject<number>;
 	isHasMore: boolean;
 	setIsHasMore: (value: boolean) => void;
@@ -42,7 +43,7 @@ type clientRequestProps = {
 	RangeFilter: (requests: RequestProps[], fromSubscribeToMore?: boolean) => void;
 };
 
-function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, offsetRef }: clientRequestProps) {
+function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, offsetRef, loading }: clientRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -288,7 +289,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	return (
 		<div className="client-request">
 			<div id="scrollableClientRequest" className="client-request__list">
-				{(requestJobLoading || subscribeLoading) && <Spinner />}
+				{(requestJobLoading || subscribeLoading || loading) && <Spinner />}
 				{(!address && !city && !postal_code && !first_name && !last_name) &&
 					(<p className="request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>)}
 				{/* {!clientRequestsStore?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>} */}
@@ -391,6 +392,9 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 																event.stopPropagation();
 															}}
 															alt={media.name}
+															onError={(event) => {
+																event.currentTarget.src = '/logo/no-picture.jpg';
+															  }}
 														/>
 													)
 												) : null

@@ -105,7 +105,7 @@ function Dashboard() {
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
-	
+
 	//*state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [conversationIdState, setConversationIdState] = useState<number>(0);
@@ -116,7 +116,7 @@ function Dashboard() {
 	const [myConversationIdState, setMyConversationIdState] = useState<number>(0);
 	const [isMyConversationHasMore, setIsMyConversationHasMore] = useState<boolean>(true);
 	const [isForMyConversation, setIsForMyConversation] = useState<boolean>(false);
-	
+
 	//*state for clientRequest
 	const [isCLientRequestHasMore, setIsClientRequestHasMore] = useState<boolean>(true);
 	const [isSkipClientRequest, setIsSkipClientRequest] = useState<boolean>(true);
@@ -169,7 +169,7 @@ function Dashboard() {
 
 
 	//*Query for ClientRequest
-	const { getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequest || clientRequestsStore.length > 0));
+	const { loading: getRequestByJobLoading, getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequest || clientRequestsStore.length > 0));
 
 	//*Query for MyConversation
 	const { loading: requestMyConversationLoading, data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, (role === 'pro' ? requestsConversationStore.length > 0 : true)) as unknown as useQueryUserConversationsProps;
@@ -960,6 +960,7 @@ function Dashboard() {
 						</ErrorBoundary>
 						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
 							{selectedTab === 'Client request' && <ClientRequest
+								loading={getRequestByJobLoading}
 								offsetRef={clientRequestOffset}
 								setIsHasMore={setIsClientRequestHasMore}
 								isHasMore={isCLientRequestHasMore}
@@ -976,10 +977,7 @@ function Dashboard() {
 					deleteItemModalIsOpen={isExpiredSession}
 					handleDeleteItem={RedirectExpiredSession}
 				/>
-
-				{isFooter && <Footer />}
 			</div>
-			{/* {selectedTab === 'My profile' && <Footer />} */}
 		</>
 
 	);

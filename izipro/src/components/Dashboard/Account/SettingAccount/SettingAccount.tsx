@@ -21,6 +21,8 @@ import Spinner from '../../../Hook/Spinner';
 import './SettingAccount.scss';
 import { motion, AnimatePresence } from 'framer-motion';
 import SelectBox from '../../../Hook/SelectBox';
+import Box from '@mui/material/Box';
+import Slider from '@mui/material/Slider';
 
 
 function SettingAccount() {
@@ -40,7 +42,7 @@ function SettingAccount() {
 	const [skip, setSkip] = useState(false);
 	const [categoriesState, setCategoriesState] = useState<CategoryPros[]>([]);
 	const [jobsState, setJobsState] = useState<JobProps[]>([]);
-	
+
 
 
 	// query
@@ -54,12 +56,12 @@ function SettingAccount() {
 			setSelectedJob(jobDataName);
 			setSkip(true);
 		}
-		
+
 	}, [jobDataName, jobDataLoading]);
 
 	// Update jobs when category changes
 	useEffect(() => {
-		if (jobData) {	
+		if (jobData) {
 			setJobsState(jobData.category.jobs);
 		}
 	}, [jobData]);
@@ -147,7 +149,7 @@ function SettingAccount() {
 					job_id: uniqueJobId || submitJobId
 				}
 			}
-		}).then(() =>{
+		}).then(() => {
 
 			setWishListJob([]);
 
@@ -183,6 +185,7 @@ function SettingAccount() {
 		}
 
 	};
+console.log('radius', radius);
 
 	return (
 		<>
@@ -200,7 +203,7 @@ function SettingAccount() {
 								loading={categoryLoading}
 								setSelected={setSelectedCategory}
 							/>
-				
+
 							<SelectBox
 								isSetting={true}
 								isWishList={true}
@@ -209,9 +212,9 @@ function SettingAccount() {
 								isCategory={false}
 								setWishListJob={setWishListJob}
 								loading={jobLoading}
-								
+
 							/>
-							
+
 							<ul className="setting-account__form__list" >
 								<h2 className="setting-account__subtitle">Métiers séléctionné:</h2>
 								<AnimatePresence>
@@ -239,7 +242,7 @@ function SettingAccount() {
 									))}
 								</AnimatePresence>
 							</ul>
-							<button className="setting-account__form__button" type='submit'>valider</button>
+							<button className="setting-account__form__button" type='submit'>valider les métiers</button>
 							<ul className={`setting-account__form__list job ${(userJobLoading || deleteJobLoading || categoryLoading) ? 'loading' : ''}`}>
 								{(userJobLoading || categoryLoading) && <Spinner />}
 
@@ -281,22 +284,29 @@ function SettingAccount() {
 							{settingLoading && <Spinner />}
 							<label className="setting-account__radius__label">
 								<h2 className="setting-account__subtitle">Selectionnez une distance d&apos;action:</h2>
-								{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
+								<span className="setting-account__radius__range">
+									{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
+								</span>
 							</label>
-							<input
-								className="setting-account__radius__input"
-								id="radius"
-								type="range"
-								min="0"
-								max="100000"
-								step="5000"
-								value={radius}
-								onChange={e => setRadius(Number(e.target.value))}
-							/>
+							<Box className="slider-container" sx={{ width: 300 }}>
+								<Slider
+									defaultValue={105}
+									aria-label="Distance d'action"
+									valueLabelDisplay="auto"
+									value={radius === 0 ? 105 : radius / 1000}
+									step={5}
+									marks
+									min={5}
+									max={105}
+									// transform 105 to 0 for condition in the function and database
+									onChange={(_, value) => setRadius((value as number) === 105 ? 0 : (value as number) * 1000)}
+									valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
+								/>
+							</Box>
 							<div className="setting-account__radius__input__message">
 								{message && <p>{message}</p>}
 							</div>
-							<button className="setting-account__radius__button" onClick={handleValidateRange}>Valider</button>
+							<button className="setting-account__radius__button" onClick={handleValidateRange}>Valider la distance</button>
 						</div>
 					</>
 				</div >

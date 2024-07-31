@@ -40,7 +40,7 @@ function Header() {
 		<header className="header" id="header">
 			<div className="header__container">
 				<img className='header__container image' src="/izipro-logo.svg" alt="Izipro logo" />
-				<h1 className="header__container title">Izipro</h1>
+				<h1 className="header__container title">POP</h1>
 			</div>
 			{isLogged && <Logout />}
 		</header>

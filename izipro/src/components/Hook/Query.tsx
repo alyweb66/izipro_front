@@ -304,7 +304,7 @@ export const useQueryVAPIDKey = () => {
 		
 		throw new Error('Error while fetching user data');
 	}
-console.log('getVAPIDKeyqqqqqqq', getVAPIDKey);
+
 
 	return { loading, getVAPIDKey, fetchVAPIDKey };
 };

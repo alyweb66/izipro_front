@@ -98,7 +98,7 @@ function ForgotPassword() {
 		<div className="forgot-password-container">
 			{isLogo && <div className="login-container__logo">
 				<img className='__image' src="/izipro-logo.svg" alt="Izipro logo" />
-				<h1 className="__title">Izipro</h1>
+				<h1 className="__title">POP</h1>
 			</div>}
 			<form className="forgot-password-container__form" onSubmit={handleSubmitForm}>
 				<h1 className="forgot-password-container__form__title">Réinitialisez votre mot de passe</h1>

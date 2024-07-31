@@ -150,7 +150,7 @@ function Register() {
 
 	return (
 		<div className="register-container" >
-			<p className="register-container title" ><span onClick={toggleRegisterVisibility}><span>&rarr;</span> Créer un compte <span>&larr;</span></span></p>
+			<p className="register-container title" ><span onClick={toggleRegisterVisibility}> Créer un compte </span></p>
 			{isRegisterVisible && (
 				<div className="register-container__form">
 					<form className="register-container__form__form" onSubmit={(event) => handleRegister(event)}>

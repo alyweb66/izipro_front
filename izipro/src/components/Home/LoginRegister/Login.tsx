@@ -47,7 +47,7 @@ function Login() {
 		let timer: number | undefined;
 		if (error) {
 			setMessageError('Adresse e-mail ou mot de passe incorrect');
-			timer = setTimeout(() => {
+			setTimeout(() => {
 				setMessageError('');
 			}, 5000); // 5000ms = 5s
 		}
@@ -155,7 +155,7 @@ function Login() {
 		<div className="login-container">
 			{isLogo && <div className="login-container__logo">
 				<img className='__image' src="/izipro-logo.svg" alt="Izipro logo" />
-				<h1 className="__title">Izipro</h1>
+				<h1 className="__title">POP</h1>
 			</div>}
 			<p className="login-container__title"> Se connecter</p>
 			{message && <p className="success">{message}</p>}
@@ -195,7 +195,7 @@ function Login() {
 					onChange={() => setActiveSession(!activeSession)}
 				/>
 				<div className="checkmark"></div>
-				<span>Garder ma session active</span>
+				<span className="active-session">Garder ma session active</span>
 			</label>
 			<span 
 				className="link" 

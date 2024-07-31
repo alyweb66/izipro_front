@@ -233,6 +233,14 @@
 
 }
 
+@media (max-width: 1000px) {
+  .client-request {
+    .client-request__list {
+      max-width: 90%;
+    }
+  }
+}
+
 @media (max-width: 800px) {
   .client-request {
     .client-request__list {

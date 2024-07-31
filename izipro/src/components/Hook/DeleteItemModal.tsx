@@ -33,11 +33,18 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 }) => {
 
 	const [isVisible, setIsVisible] = useState(deleteItemModalIsOpen);
-
+    // useEffect to stop scrolling when the modal is open
 	useEffect(() => {
 		if (deleteItemModalIsOpen) {
 			setIsVisible(true);
+			document.body.style.overflow = 'hidden'; 
+		} else {
+		  document.body.style.overflow = ''; 
 		}
+		// Cleanup function to reset the overflow style
+		return () => {
+		  document.body.style.overflow = ''; 
+		};
 	}, [deleteItemModalIsOpen]);
 
 	const closeModal = () => {
@@ -87,7 +94,6 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 								onClick={(event) => {
 									event.stopPropagation();
 									event.preventDefault();
-									//setDeleteItemModalIsOpen(!deleteItemModalIsOpen);
 									handleDeleteItem();
 									closeModal();
 								}}

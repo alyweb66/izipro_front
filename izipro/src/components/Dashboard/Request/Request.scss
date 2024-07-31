@@ -37,6 +37,10 @@
     .request__form {
         @include m.select;
 
+        .request__slider-container {
+            margin: auto;
+        }
+
         & {
             width: 80%;
             margin: auto;

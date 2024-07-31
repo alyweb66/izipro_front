@@ -582,7 +582,6 @@
                 margin: 0;
                 padding: 0.5rem;
                 gap: 1rem;
-                box-shadow: 0 -1px 6px 5px rgba(255, 255, 255, 0.637);
 
 
                 .my-conversation__message-list__form__preview__container {
@@ -668,11 +667,7 @@
                 }
 
                 &:focus {
-                    @include m.border;
-
-                    & {
-                        border-radius: 0.2rem;
-                    }
+                    outline: none;
                 }
             }
 

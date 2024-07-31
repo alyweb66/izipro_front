@@ -157,6 +157,9 @@ const RequestItem = ({
 										event.stopPropagation();
 									}}
 									alt={media.name}
+									onError={(event) => {
+										event.currentTarget.src = '/logo/no-picture.jpg';
+									  }}
 								/>
 							)
 						) : null

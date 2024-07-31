@@ -729,6 +729,9 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 										<img
 											className="my-conversation__message-list__user__header__detail img"
 											src={selectedRequest.image ? selectedRequest.image : logoProfile}
+											onError={(event) => {
+												event.currentTarget.src = '/logo/no-picture.jpg';
+											  }}
 											alt="" />
 										{selectedRequest.denomination ? (
 											<p className="my-conversation__message-list__user__header__detail name" >
@@ -804,6 +807,9 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 																						src={media.url}
 																						onClick={() => openModal(imageUrls, index)}
 																						alt={media.name}
+																						onError={(event) => {
+																							event.currentTarget.src = '/logo/no-picture.jpg';
+																						  }}
 																					/>
 																				)
 
@@ -865,6 +871,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 									placeholder="Tapez votre message ici..."
 									maxLength={500}
 									minRows={1}
+									readOnly={selectedRequest && selectedRequest?.id > 0 ? false : true}
 								/>
 								<MdSend
 									className="my-conversation__message-list__form__label__send"
