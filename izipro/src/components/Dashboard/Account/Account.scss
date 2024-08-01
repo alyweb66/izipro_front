@@ -26,12 +26,13 @@
 
         .message {
             width: 90%;
-            max-width:fit-content;
-           // max-width: clamp(30rem, 100%, 50rem); // to adapt to the screen size
+            max-width: fit-content;
+            // max-width: clamp(30rem, 100%, 50rem); // to adapt to the screen size
             margin: 0.5rem auto 0 auto;
-            
+
 
         }
+
         .account__picture {
             //position: relative;
             width: 100%;
@@ -131,8 +132,10 @@
                     .account__profile__form__label__input {
                         color: black;
                         font-weight: 400;
+                        height: 1.7rem;
                         margin-bottom: 0.5rem;
                         border: none;
+                        border-radius: 0.5rem;
                         background-color: transparent;
 
                         &.textarea {
@@ -143,7 +146,7 @@
                             @include m.border;
 
                             & {
-                                border-radius: 0.2rem;
+                                border-radius: 0.5rem;
                             }
 
                         }
@@ -233,7 +236,24 @@
                     font-size: 1rem;
                     font-weight: 500;
                     color: v.$color-primary-orange;
+
+                    .show-password {
+                        @include m.show-password;
+
+                        & {
+                            .__input {
+                                height: 1.7rem;
+                                color: black;
+                                font-weight: 400;
+                                margin-bottom: 0rem;
+                                border: none;
+                                border-radius: 0.5rem;
+                                background-color: transparent;
+                            }
+                        }
+                    }
                 }
+
 
                 .__input {
                     color: black;
@@ -335,7 +355,7 @@
     .account {
         .account__profile {
 
-           
+
             .account_profile_container {
                 width: 100%;
                 display: flex;
@@ -363,9 +383,10 @@
 @media (max-width: 480px) {
     .account {
         .account__profile {
-            
+
             .account_profile_container {
                 width: 100%;
+
                 .account__profile__form {
                     width: 100%;
                     margin: 0rem;

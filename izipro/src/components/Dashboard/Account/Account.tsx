@@ -49,6 +49,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
+import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 //import '../../../styles/spinner.scss';
 
 
@@ -119,6 +120,8 @@ function Account() {
 	const [ChangeEmail, setChangeEmail] = useState('');
 	const [isNotificationEnabled, setIsNotificationEnabled] = useState(Notification.permission === 'granted');
 	const [errorPicture, setErrorPicture] = useState('');
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const [showOldPassword, setShowOldPassword] = useState(false);
 	// state for mapBox
 	const [viewState, setViewState] = useState({
 		longitude: typeof lngState === 'number' ? lngState : parseFloat(lngState),
@@ -738,8 +741,27 @@ function Account() {
 								onSubmit={handleSubmitNewPassword}>
 								{changepasswordLoading && <Spinner />}
 								<h1 className="__title">Changer le mot de passe:</h1>
-								<label className="__label">
-									<input
+								<label className="__label"> Ancien mot de passe:
+								<div className="show-password">
+										<input
+											type={showOldPassword ? 'text' : 'password'}
+											name="oldPassword"
+											value={oldPassword}
+											className="__input"
+											placeholder="Ancien mot de passe"
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setOldPassword(event.target.value)}
+											aria-label="Ancien mot de passe"
+											maxLength={60}
+											required
+										/>
+										<span
+											className="toggle-password-icon"
+											onClick={(event) => {setShowOldPassword(!showOldPassword), event.preventDefault()}}
+										>
+											{showOldPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+										</span>
+									</div>
+									{/* <input
 										className="__input"
 										type={showPassword ? 'text' : 'password'}
 										name="oldPassword"
@@ -749,10 +771,29 @@ function Account() {
 										aria-label="Ancien mot de passe"
 										maxLength={60}
 										required
-									/>
+									/> */}
 								</label>
-								<label className="__label">
-									<input
+								<label className="__label">Nouveau mot de passe:
+									<div className="show-password">
+										<input
+											type={showPassword ? 'text' : 'password'}
+											name="newPassword"
+											value={newPassword}
+											className="__input"
+											placeholder="Nouveau mot de passe"
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewPassword(event.target.value)}
+											aria-label="Nouveau mot de passe"
+											maxLength={60}
+											required
+										/>
+										<span
+											className="toggle-password-icon"
+											onClick={(event) => {setShowPassword(!showPassword),  event.preventDefault()}}
+										>
+											{showPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+										</span>
+									</div>
+									{/* <input
 										className="__input"
 										type={showPassword ? 'text' : 'password'}
 										name="newPassword"
@@ -762,10 +803,29 @@ function Account() {
 										aria-label="Nouveau mot de passe"
 										maxLength={60}
 										required
-									/>
+									/> */}
 								</label>
-								<label className="__label">
-									<input
+								<label className="__label">Confirmer le nouveau mot de passe:
+									<div className="show-password">
+										<input
+											type={showConfirmPassword ? 'text' : 'password'}
+											name="confirmPassword"
+											value={confirmNewPassword}
+											className="__input"
+											placeholder="Confirmer mot de passe"
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(event.target.value)}
+											aria-label="Confirmer mot de passe"
+											maxLength={60}
+											required
+										/>
+										<span
+											className="toggle-password-icon"
+											onClick={(event) => {setShowConfirmPassword(!showConfirmPassword),  event.preventDefault()}}
+										>
+											{showConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+										</span>
+									</div>
+									{/* <input
 										className="__input"
 										type={showPassword ? 'text' : 'password'}
 										name="confirmNewPassword"
@@ -775,25 +835,25 @@ function Account() {
 										aria-label="Confirmer le nouveau mot de passe"
 										maxLength={60}
 										required
-									/>
+									/> */}
 								</label>
 								<div className="message">
-								<Stack sx={{ width: '100%' }} spacing={2}>
-									{messagePassword && (
-										<Fade in={!!messagePassword} timeout={300}>
-											<Alert variant="filled" severity="success">{messagePassword}</Alert>
-										</Fade>
-									)}
-									{errorPassword && (
-										<Fade in={!!errorPassword} timeout={300}>
-											<Alert variant="filled" severity="error">{errorPassword}</Alert>
-										</Fade>
-									)}
-								</Stack>
-							</div>
-								<button className="show-password" onClick={() => setShowPassword(!showPassword)}>
+									<Stack sx={{ width: '100%' }} spacing={2}>
+										{messagePassword && (
+											<Fade in={!!messagePassword} timeout={300}>
+												<Alert variant="filled" severity="success">{messagePassword}</Alert>
+											</Fade>
+										)}
+										{errorPassword && (
+											<Fade in={!!errorPassword} timeout={300}>
+												<Alert variant="filled" severity="error">{errorPassword}</Alert>
+											</Fade>
+										)}
+									</Stack>
+								</div>
+								{/* <button className="show-password" onClick={() => setShowPassword(!showPassword)}>
 									{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
-								</button>
+								</button> */}
 								<button
 									className="account__profile__button"
 									type="submit">

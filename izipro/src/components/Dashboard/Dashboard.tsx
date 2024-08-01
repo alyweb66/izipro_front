@@ -24,7 +24,7 @@ import {
 	useQueryUserRequests,
 	useQueryUserSubscriptions
 } from '../Hook/Query';
-import { useMyRequestMessageSubscriptions } from '../Hook/MyRequestSubscription';
+import { useMyRequestMessageSubscriptions } from '../GraphQL/MyRequestSubscription';
 import { useClientRequestSubscriptions } from '../GraphQL/ClientRequestSubscription';
 import { useMyConversationSubscriptions } from '../GraphQL/MyConversationSubscription';
 import { useLogoutSubscription } from '../GraphQL/LogoutSubscription';

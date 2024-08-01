@@ -13,6 +13,8 @@ import validator from 'validator';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
+import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
+
 
 // State management and stores
 import { confirmEmailStore } from '../../../store/LoginRegister';
@@ -35,6 +37,7 @@ function Login() {
 	const [message, setMessage] = useState('');
 	const [emailModal, setEmailModal] = useState(false);
 	const [isLogo, setIsLogo] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
 
 	// Store
 	const [isEmailConfirmed, setIsEmailConfirmed] = confirmEmailStore((state) => [state.isEmailConfirmed, state.setIsEmailConfirmed]);
@@ -52,7 +55,7 @@ function Login() {
 			setMessageError('Adresse e-mail ou mot de passe incorrect');
 			setTimeout(() => {
 				setMessageError('');
-			}, 15000); 
+			}, 15000);
 		}
 		return () => {
 			clearTimeout(timer);
@@ -200,19 +203,58 @@ function Login() {
 					maxLength={50}
 					required
 				/>
-				<input
-					type="password"
-					name="password"
-					value={password}
-					className="login-container__form input"
-					placeholder="Mot de passe"
-					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
-					aria-label="Mot de passe"
-					maxLength={60}
-					required
-				/>
+				<div className="show-password">
+					<input
+						type={showPassword ? 'text' : 'password'}
+						name="password"
+						value={password}
+						className="__input"
+						placeholder="Mot de passe"
+						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
+						aria-label="Mot de passe"
+						maxLength={60}
+						required
+					/>
+					<span
+						className="toggle-password-icon"
+						onClick={() => setShowPassword(!showPassword)}
+					>
+						{showPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+					</span>
+				</div>
+
+				{/* <TextField
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={password}
+                    className="custom-input"
+                    placeholder="Mot de passe"
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
+                    aria-label="Mot de passe"
+                    //maxLength={60}
+                    required
+                    fullWidth
+                    margin="normal"
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    edge="end"
+                                >
+                                    {showPassword ? <MdOutlineVisibilityOff />: <MdOutlineVisibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
+					
+                /> */}
 				<button type="submit" className='login-container__form button'>Se connecter</button>
 			</form>
+		{/* 	<button className="show-password" onClick={() => setShowPassword(!showPassword)}>
+				{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
+			</button> */}
 			<div className="message">
 				<Stack sx={{ width: '100%' }} spacing={2}>
 					{messageError && (

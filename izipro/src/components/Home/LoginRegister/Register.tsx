@@ -10,6 +10,7 @@ import DOMPurify from 'dompurify';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
+import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 
 // Styles
 import './Register.scss';
@@ -17,6 +18,7 @@ import './Register.scss';
 
 
 function Register() {
+	// State
 	const [email, setEmail] = useState('');
 	const [proEmail, setProEmail] = useState('');
 	const [password, setPassword] = useState('');
@@ -29,6 +31,10 @@ function Register() {
 	const [userCreated, setUserCreated] = useState(false);
 	const [isProError, setIsProError] = useState('');
 	const [proCreated, setProCreated] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const [showProPassword, setShowProPassword] = useState(false);
+	const [showProConfirmPassword, setShowProConfirmPassword] = useState(false);
 
 	// function to toggle the visibility of the register form
 	const toggleRegisterVisibility = () => {
@@ -53,7 +59,7 @@ function Register() {
 			setIsProError('Adresse e-mail invalide');
 			setTimeout(() => {
 				setIsProError('');
-			},15000);
+			}, 15000);
 			return;
 		}
 
@@ -62,7 +68,7 @@ function Register() {
 			setIsProError('Les mots de passe ne correspondent pas');
 			setTimeout(() => {
 				setIsProError('');
-			},15000);
+			}, 15000);
 			return;
 		}
 
@@ -71,7 +77,7 @@ function Register() {
 			setIsProError('Mot de passe faible, doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial');
 			setTimeout(() => {
 				setIsProError('');
-			},15000);
+			}, 15000);
 			return;
 		}
 
@@ -80,7 +86,7 @@ function Register() {
 			setIsProError('Siret invalide');
 			setTimeout(() => {
 				setIsProError('');
-			},15000);
+			}, 15000);
 			return;
 		}
 
@@ -126,7 +132,7 @@ function Register() {
 			setError('Adresse e-mail invalide');
 			setTimeout(() => {
 				setError('');
-			},15000);
+			}, 15000);
 			return;
 		}
 
@@ -135,7 +141,7 @@ function Register() {
 			setError('Les mots de passe ne correspondent pas');
 			setTimeout(() => {
 				setError('');
-			},15000);
+			}, 15000);
 			return;
 		}
 
@@ -144,7 +150,7 @@ function Register() {
 			setError('Mot de passe faible, doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial');
 			setTimeout(() => {
 				setError('');
-			},15000);
+			}, 15000);
 			return;
 		}
 
@@ -192,7 +198,45 @@ function Register() {
 							maxLength={50}
 							required
 						/>
-						<input
+						<div className="show-password">
+							<input
+								type={showPassword ? 'text' : 'password'}
+								name="password"
+								value={password}
+								className="__input"
+								placeholder="Mot de passe"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
+								aria-label="Mot de passe"
+								maxLength={60}
+								required
+							/>
+							<span
+								className="toggle-password-icon"
+								onClick={() => setShowPassword(!showPassword)}
+							>
+								{showPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+							</span>
+						</div>
+						<div className="show-password">
+							<input
+								type={showConfirmPassword ? 'text' : 'password'}
+								name="confirmPassword"
+								value={confirmPassword}
+								className="__input"
+								placeholder="Confirmer mot de passe"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(event.target.value)}
+								aria-label="Confirmer mot de passe"
+								maxLength={60}
+								required
+							/>
+							<span
+								className="toggle-password-icon"
+								onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+							>
+								{showConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+							</span>
+						</div>
+						{/* <input
 							type="password"
 							name="password"
 							value={password}
@@ -213,7 +257,7 @@ function Register() {
 							aria-label="Confirmer mot de passe"
 							maxLength={60}
 							required
-						/>
+						/> */}
 						<div className="message">
 							<Stack sx={{ width: '100%' }} spacing={2}>
 								{error && (
@@ -246,7 +290,7 @@ function Register() {
 							maxLength={50}
 							required
 						/>
-						<input
+						{/* <input
 							type="password"
 							name="password"
 							value={proPassword}
@@ -256,8 +300,46 @@ function Register() {
 							aria-label="Mot de passe"
 							maxLength={60}
 							required
-						/>
-						<input
+						/> */}
+						<div className="show-password">
+							<input
+								type={showProPassword ? 'text' : 'password'}
+								name="password"
+								value={proPassword}
+								className="__input"
+								placeholder="Mot de passe"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProPassword(event.target.value)}
+								aria-label="Mot de passe"
+								maxLength={60}
+								required
+							/>
+							<span
+								className="toggle-password-icon"
+								onClick={() => setShowProPassword(!showProPassword)}
+							>
+								{showProPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+							</span>
+						</div>
+						<div className="show-password">
+							<input
+								type={showProConfirmPassword ? 'text' : 'password'}
+								name="confirmPassword"
+								value={proConfirmPassword}
+								className="__input"
+								placeholder="Confirmer mot de passe"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProConfirmPassword(event.target.value)}
+								aria-label="Confirmer mot de passe"
+								maxLength={60}
+								required
+							/>
+							<span
+								className="toggle-password-icon"
+								onClick={() => setShowProConfirmPassword(!showProConfirmPassword)}
+							>
+								{showProConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+							</span>
+						</div>
+						{/* <input
 							type="password"
 							name="confirmPassword"
 							value={proConfirmPassword}
@@ -267,7 +349,7 @@ function Register() {
 							aria-label="Confirmer mot de passe"
 							maxLength={60}
 							required
-						/>
+						/> */}
 						<input
 							type="siret"
 							name="siret"
@@ -279,7 +361,7 @@ function Register() {
 							maxLength={14}
 							required
 						/>
-						<div className="message" style={{marginBottom: '1rem'}}>
+						<div className="message" style={{ marginBottom: '1rem' }}>
 							<Stack sx={{ width: '100%' }} spacing={2}>
 								{isProError && (
 									<Fade in={!!isProError} timeout={300}>
