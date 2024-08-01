@@ -48,6 +48,9 @@ import { MdAttachFile, MdKeyboardArrowLeft, MdSend, MdKeyboardArrowRight, MdKeyb
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import { AnimatePresence, motion } from 'framer-motion';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
 
 
 type useQueryUserConversationsProps = {
@@ -836,7 +839,16 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 								handleMessageSubmit(event, selectedRequest.id);
 							}
 						}}>
-							{fileError && <p className="error">{fileError}</p>}
+
+							<div className="message">
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{fileError && (
+										<Fade in={!!fileError} timeout={300}>
+											<Alert variant="filled" severity="error">{fileError}</Alert>
+										</Fade>
+									)}
+								</Stack>
+							</div>
 							{urlFile.length > 0 && <div className="my-conversation__message-list__form__preview">
 								{urlFile.map((file, index) => (
 									<div className="my-conversation__message-list__form__preview__container" key={index}>

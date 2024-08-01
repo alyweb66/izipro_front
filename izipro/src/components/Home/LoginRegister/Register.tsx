@@ -7,6 +7,9 @@ import { REGISTER_USER_MUTATION, REGISTER_PRO_USER_MUTATION } from '../../GraphQ
 // External libraries
 import validator from 'validator';
 import DOMPurify from 'dompurify';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
 
 // Styles
 import './Register.scss';
@@ -26,7 +29,7 @@ function Register() {
 	const [userCreated, setUserCreated] = useState(false);
 	const [isProError, setIsProError] = useState('');
 	const [proCreated, setProCreated] = useState(false);
-  
+
 	// function to toggle the visibility of the register form
 	const toggleRegisterVisibility = () => {
 		setIsRegisterVisible(!isRegisterVisible);
@@ -34,37 +37,50 @@ function Register() {
 
 	// Mutation to register a user
 	const [createUser, { error: userError }] = useMutation(REGISTER_USER_MUTATION);
-	const [createProUser, { error: proUserError}] = useMutation(REGISTER_PRO_USER_MUTATION);
+	const [createProUser, { error: proUserError }] = useMutation(REGISTER_PRO_USER_MUTATION);
 
 	// function to handle the registration of a pro user
 	const handleProRegister = (event: React.FormEvent<HTMLFormElement>) => {
 		// reset the state
 		setUserCreated(false);
 		setError('');
+		setIsProError('');
 
 		event.preventDefault();
 
 		// Check if the email is valid
 		if (proEmail && !validator.isEmail(proEmail)) {
 			setIsProError('Adresse e-mail invalide');
+			setTimeout(() => {
+				setIsProError('');
+			},15000);
 			return;
 		}
-    
+
 		// Check if the password and confirm password are the same
 		if (proPassword && (proPassword !== proConfirmPassword)) {
 			setIsProError('Les mots de passe ne correspondent pas');
+			setTimeout(() => {
+				setIsProError('');
+			},15000);
 			return;
 		}
-    
+
 		// Check if the password is strong
 		if (proPassword && !validator.isStrongPassword(proPassword)) {
 			setIsProError('Mot de passe faible, doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial');
+			setTimeout(() => {
+				setIsProError('');
+			},15000);
 			return;
 		}
- 
+
 		// Check if the siret is valid
 		if (siret && siret.length !== 14) {
 			setIsProError('Siret invalide');
+			setTimeout(() => {
+				setIsProError('');
+			},15000);
 			return;
 		}
 
@@ -77,10 +93,10 @@ function Register() {
 				}
 			}
 		}).then((response) => {
-			
+
 			if (response.data.createProUser.id) {
 				setProCreated(true);
-			} 
+			}
 			setProEmail('');
 			setProPassword('');
 			setProConfirmPassword('');
@@ -93,7 +109,7 @@ function Register() {
 			setIsProError('Erreur lors de la création de l\'utilisateur');
 			throw new Error('Submission error!');
 		}
-   
+
 	};
 
 	// function to handle the registration of a user
@@ -101,28 +117,38 @@ function Register() {
 		// reset the state
 		setUserCreated(false);
 		setError('');
+		setIsProError('');
 
 		event.preventDefault();
 
 		// Check if the email is valid
 		if (email && !validator.isEmail(email)) {
 			setError('Adresse e-mail invalide');
+			setTimeout(() => {
+				setError('');
+			},15000);
 			return;
 		}
-    
+
 		// Check if the password and confirm password are the same
 		if (password !== confirmPassword) {
 			setError('Les mots de passe ne correspondent pas');
+			setTimeout(() => {
+				setError('');
+			},15000);
 			return;
 		}
 
 		// Check if the password is strong
 		if (password && !validator.isStrongPassword(password)) {
 			setError('Mot de passe faible, doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial');
+			setTimeout(() => {
+				setError('');
+			},15000);
 			return;
 		}
- 
-		createUser({ 
+
+		createUser({
 			variables: {
 				input: {
 					email: DOMPurify.sanitize(email),
@@ -133,19 +159,19 @@ function Register() {
 
 			if (response.data.createUser.id) {
 				setUserCreated(true);
-			} 
+			}
 			setEmail('');
 			setPassword('');
 			setConfirmPassword('');
 			setError('');
 		});
-					
+
 		// handle errors
 		if (userError) {
 			setError('Erreur lors de la création de l\'utilisateur');
 			throw new Error('Submission error!');
-		} 
-   
+		}
+
 	};
 
 	return (
@@ -188,8 +214,23 @@ function Register() {
 							maxLength={60}
 							required
 						/>
-						{userCreated && <p className="success">Utilisateur créé avec succès, un email de validation vous a été envoyé </p>}
-						{error && <p className="error">{error}</p>}
+						<div className="message">
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{error && (
+									<Fade in={!!error} timeout={300}>
+										<Alert variant="filled" severity="error">{error}</Alert>
+									</Fade>
+								)}
+							</Stack>
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{userCreated && (
+									<Fade in={!!userCreated} timeout={300}>
+										<Alert variant="filled" severity="success">Utilisateur créé avec succès, un email de validation vous a été envoyé</Alert>
+									</Fade>
+								)}
+							</Stack>
+						</div>
+
 						<button type="submit" className="register-container__form__form button">Enregistrer</button>
 					</form>
 					<form className="register-container__form__form" onSubmit={(event) => handleProRegister(event)}>
@@ -238,9 +279,23 @@ function Register() {
 							maxLength={14}
 							required
 						/>
-						{proCreated && <p className="success">Utilisateur créé avec succès, un email de validation vous a été envoyé </p>}
-						{isProError && <p className="error">{isProError}</p>}
-						<button type="submit" className="register-container__form__form button">Enregistrer</button>
+						<div className="message" style={{marginBottom: '1rem'}}>
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{isProError && (
+									<Fade in={!!isProError} timeout={300}>
+										<Alert variant="filled" severity="error">{isProError}</Alert>
+									</Fade>
+								)}
+							</Stack>
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{proCreated && (
+									<Fade in={!!proCreated} timeout={300}>
+										<Alert variant="filled" severity="success">Utilisateur créé avec succès, un email de validation vous a été envoyé</Alert>
+									</Fade>
+								)}
+							</Stack>
+						</div>
+						<button type="submit" className="register-container__form__form button pro">Enregistrer</button>
 					</form>
 				</div>
 			)}

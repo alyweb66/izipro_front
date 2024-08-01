@@ -24,11 +24,20 @@
             height: 100vh;
         }
 
+        .message {
+            width: 90%;
+            max-width:fit-content;
+           // max-width: clamp(30rem, 100%, 50rem); // to adapt to the screen size
+            margin: 0.5rem auto 0 auto;
+            
+
+        }
         .account__picture {
             //position: relative;
             width: 100%;
             margin-top: 1rem;
             text-align: center;
+
 
             .account__profile__picture__img {
                 // @include m.border;
@@ -325,6 +334,8 @@
 @media (max-width: 830px) {
     .account {
         .account__profile {
+
+           
             .account_profile_container {
                 width: 100%;
                 display: flex;
@@ -352,6 +363,7 @@
 @media (max-width: 480px) {
     .account {
         .account__profile {
+            
             .account_profile_container {
                 width: 100%;
                 .account__profile__form {

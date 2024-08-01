@@ -10,6 +10,9 @@ import { FORGOT_PASSWORD_MUTATION, LOGIN_USER_MUTATION } from '../../GraphQL/Use
 // External libraries
 import DOMPurify from 'dompurify';
 import validator from 'validator';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
 
 // State management and stores
 import { confirmEmailStore } from '../../../store/LoginRegister';
@@ -49,7 +52,7 @@ function Login() {
 			setMessageError('Adresse e-mail ou mot de passe incorrect');
 			setTimeout(() => {
 				setMessageError('');
-			}, 5000); // 5000ms = 5s
+			}, 15000); 
 		}
 		return () => {
 			clearTimeout(timer);
@@ -85,10 +88,10 @@ function Login() {
 
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
-	}, []); 
-	
+	}, []);
+
 	// send login request
-	const handleLogin = (event: FormEvent<HTMLFormElement>) =>{
+	const handleLogin = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
 		login({
@@ -116,7 +119,7 @@ function Login() {
 				setIsChangePassword(false);
 				setIsEmailConfirmed(false);
 				navigate('/dashboard');
-			} 
+			}
 		});
 
 	};
@@ -128,6 +131,10 @@ function Login() {
 		//check if the email is valid
 		if (!validator.isEmail(forgotPasswordEmail)) {
 			setMessageError('Adresse e-mail invalide');
+
+			setTimeout(() => {
+				setMessageError('');
+			}, 15000);
 			return;
 		}
 
@@ -158,9 +165,29 @@ function Login() {
 				<h1 className="__title">POP</h1>
 			</div>}
 			<p className="login-container__title"> Se connecter</p>
-			{message && <p className="success">{message}</p>}
-			{isChangePassword && <p className="success">Votre mot de passe a été modifié, vous pouvez maintenant vous connecter</p>}
-			{isEmailConfirmed && <p className="success">Votre adresse e-mail a été confirmée, vous pouvez maintenant vous connecter</p>}
+			<div className="message">
+				<Stack sx={{ width: '100%' }} spacing={2}>
+					{message && (
+						<Fade in={!!message} timeout={300}>
+							<Alert variant="filled" severity="info">{message}</Alert>
+						</Fade>
+					)}
+				</Stack>
+				<Stack sx={{ width: '100%' }} spacing={2}>
+					{isChangePassword && (
+						<Fade in={!!isChangePassword} timeout={300}>
+							<Alert variant="filled" severity="success">Votre mot de passe a été modifié, vous pouvez maintenant vous connecter</Alert>
+						</Fade>
+					)}
+				</Stack>
+				<Stack sx={{ width: '100%' }} spacing={2}>
+					{isEmailConfirmed && (
+						<Fade in={!!isEmailConfirmed} timeout={300}>
+							<Alert variant="filled" severity="success">Votre adresse e-mail a été confirmée, vous pouvez maintenant vous connecter</Alert>
+						</Fade>
+					)}
+				</Stack>
+			</div>
 			<form className="login-container__form" onSubmit={handleLogin}>
 				<input
 					type="email"
@@ -186,19 +213,27 @@ function Login() {
 				/>
 				<button type="submit" className='login-container__form button'>Se connecter</button>
 			</form>
-			{messageError && <p className="error">{messageError}</p>}
+			<div className="message">
+				<Stack sx={{ width: '100%' }} spacing={2}>
+					{messageError && (
+						<Fade in={!!messageError} timeout={300}>
+							<Alert variant="filled" severity="error">{messageError}</Alert>
+						</Fade>
+					)}
+				</Stack>
+			</div>
 			<label className="checkbox-session-container">
-				<input 
+				<input
 					className="input-checkbox-session"
-					checked={activeSession} 
+					checked={activeSession}
 					type="checkbox"
 					onChange={() => setActiveSession(!activeSession)}
 				/>
 				<div className="checkmark"></div>
 				<span className="active-session">Garder ma session active</span>
 			</label>
-			<span 
-				className="link" 
+			<span
+				className="link"
 				onClick={() => setEmailModal(!emailModal)}
 			>
 				Mot de passe oublié?</span>

@@ -25,9 +25,9 @@ import {
 	useQueryUserSubscriptions
 } from '../Hook/Query';
 import { useMyRequestMessageSubscriptions } from '../Hook/MyRequestSubscription';
-import { useClientRequestSubscriptions } from '../Hook/ClientRequestSubscription';
-import { useMyConversationSubscriptions } from '../Hook/MyConversationSubscription';
-import { useLogoutSubscription } from '../Hook/LogoutSubscription';
+import { useClientRequestSubscriptions } from '../GraphQL/ClientRequestSubscription';
+import { useMyConversationSubscriptions } from '../GraphQL/MyConversationSubscription';
+import { useLogoutSubscription } from '../GraphQL/LogoutSubscription';
 import useHandleLogout from '../Hook/HandleLogout';
 
 // Mutation

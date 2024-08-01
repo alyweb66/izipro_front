@@ -8,6 +8,9 @@ import { VALIDATE_FORGOT_PASSWORD_MUTATION } from '../GraphQL/UserMutations';
 // External libraries
 import validator from 'validator';
 import DOMPurify from 'dompurify';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
 
 // State management and stores
 import { changeForgotPasswordStore } from '../../store/UserData';
@@ -43,12 +46,18 @@ function ForgotPassword() {
 		// Check if the password and confirm password are the same
 		if (password !== confirmPassword) {
 			setError('Les mots de passe ne correspondent pas');
+			setTimeout(() => {
+				setError('');
+			},15000);
 			return;
 		}
 
 		// Check if the password is strong
 		if ((password && !validator.isStrongPassword(password))) {
 			setError('Mot de passe faible, doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial');
+			setTimeout(() => {
+				setError('');
+			},15000);
 			return;
 		}
 
@@ -129,7 +138,15 @@ function ForgotPassword() {
 				<button type="button" className="show-password" onClick={() => setShowPassword(!showPassword)}>
 					{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
 				</button>
-				{error && <p className="error">{error}</p>}
+				<div className="message">
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{error && (
+									<Fade in={!!error} timeout={300}>
+										<Alert variant="filled" severity="error">{error}</Alert>
+									</Fade>
+								)}
+							</Stack>
+						</div>
 				<button className="forgot-password-container__form__button" type="submit">Valider</button>
 			</form>
 		</div>

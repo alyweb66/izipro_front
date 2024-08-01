@@ -119,6 +119,9 @@ margin: auto;
       &.button {
         @include m.orange-button;
 
+        &.pro {
+          margin-bottom: 0.5rem;
+        }
       }
 
     }

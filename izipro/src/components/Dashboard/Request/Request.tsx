@@ -33,6 +33,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { IoLocationSharp } from "react-icons/io5";
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
 
 
 
@@ -103,7 +106,7 @@ function Request() {
 			setErrorMessage('Veuillez remplir tous les champs');
 			setTimeout(() => {
 				setErrorMessage('');
-			}, 5000); // 5000ms = 5s
+			}, 10000); // 10000ms = 10s
 
 		} else {
 			clearTimeout(timer);
@@ -159,7 +162,7 @@ function Request() {
 					setSuccessMessage('Demande envoyée avec succès');
 					setTimeout(() => {
 						setSuccessMessage('');
-					}, 5000); // 5000ms = 5s
+					}, 10000); // 5000ms = 5s
 
 					// Clear fields
 					setTitleRequest('');
@@ -250,7 +253,7 @@ function Request() {
 		}
 	}, [selectedCategory]);
 
-	
+
 	//* Mapping radius to zoom level
 	const radiusToZoomMapping = [
 		{ maxRadius: 5000, zoomMobile: 10.5, zoomDesktop: 11 },
@@ -294,7 +297,7 @@ function Request() {
 
 	return (
 		<div className="request">
-			{categoryLoading || JobDataLoading || createLoading && <Spinner />}
+			{categoryLoading || JobDataLoading && <Spinner />}
 
 			{(!address && !city && !postal_code && !first_name && !last_name) &&
 				(<p className="request no-req">Veuillez renseigner les champs de &quot;Mes informations&quot; dans votre compte pour faire une demande</p>)}
@@ -543,11 +546,26 @@ function Request() {
 						/>
 
 						<div className="message">
-							{errorMessage && <p className="message__error">{errorMessage}</p>}
-							{successMessage && <p className="message__success">{successMessage}</p>}
-							{fileError && <p className="message__error">{fileError}</p>}
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{successMessage && (
+									<Fade in={!!successMessage} timeout={300}>
+										<Alert variant="filled" severity="success">{successMessage}</Alert>
+									</Fade>
+								)}
+								{errorMessage && (
+									<Fade in={!!errorMessage} timeout={300}>
+										<Alert variant="filled" severity="error">{errorMessage}</Alert>
+									</Fade>
+								)}
+								{fileError && (
+									<Fade in={!!fileError} timeout={300}>
+										<Alert variant="filled" severity="error">{fileError}</Alert>
+									</Fade>
+								)}
+							</Stack>
 						</div>
-						<button className="request__form__button" type="submit">Envoyer</button>
+						{createLoading && <Spinner />}
+						<button className="request__form__button" type="submit" disabled={createLoading}>Envoyer</button>
 					</motion.form>
 				)}
 			</AnimatePresence>

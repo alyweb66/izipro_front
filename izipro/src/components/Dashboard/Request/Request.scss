@@ -273,6 +273,7 @@
             }
 
             &.camera-icone {
+                margin-bottom: 0;
                 font-size: 2rem;
                 cursor: pointer;
                 color: v.$color-primary-orange;
@@ -307,6 +308,7 @@
 
             & {
                 margin: 1rem auto;
+                position: relative;
             }
         }
 
@@ -314,10 +316,14 @@
         .message {
             margin: auto;
             margin-top: 1rem;
-
             font-size: 0.8rem;
+            min-height: 50px;
+            /* margin: auto;
+            margin-top: 1rem;
 
-            .message__error {
+            font-size: 0.8rem; */
+
+            /* .message__error {
                 font-size: 1rem;
                 color: v.$color-error;
             }
@@ -325,7 +331,7 @@
             .message__success {
                 font-size: 1rem;
                 color: v.$color-validation;
-            }
+            } */
         }
 
     }

@@ -1,5 +1,5 @@
 import { useSubscription } from '@apollo/client';
-import { MESSAGE_SUBSCRIPTION } from '../GraphQL/Subscription';
+import { MESSAGE_SUBSCRIPTION } from './Subscription';
 import { SubscriptionProps } from '../../Type/Subscription';
 import { subscriptionDataStore } from '../../store/subscription';
 import { MessageProps } from '../../Type/message';

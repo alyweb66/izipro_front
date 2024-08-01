@@ -19,6 +19,9 @@ import validator from 'validator';
 import '../../styles/contactModal.scss';
 import TextareaAutosize from 'react-textarea-autosize';
 import { motion, AnimatePresence } from 'framer-motion';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
 
 ReactModal.setAppElement('#root');
 
@@ -199,9 +202,23 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 								<p>{description?.length}/1000</p>
 							</label>
 						</div>
+						<div className="message">
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{errorMessage && (
+										<Fade in={!!errorMessage} timeout={300}>
+											<Alert variant="filled" severity="error">{errorMessage}</Alert>
+										</Fade>
+									)}
+								</Stack>
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{confirmationMessage && (
+										<Fade in={!!confirmationMessage} timeout={300}>
+											<Alert variant="filled" severity="success">{confirmationMessage}</Alert>
+										</Fade>
+									)}
+								</Stack>
 
-						{errorMessage && <p className="error">{errorMessage}</p>}
-						{confirmationMessage && <p className="success">{confirmationMessage}</p>}
+							</div>
 						<div className="contact-modal__container__button">
 							<button
 								className="contact-modal__close"

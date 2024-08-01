@@ -23,6 +23,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SelectBox from '../../../Hook/SelectBox';
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
 
 
 function SettingAccount() {
@@ -303,8 +306,14 @@ console.log('radius', radius);
 									valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
 								/>
 							</Box>
-							<div className="setting-account__radius__input__message">
-								{message && <p>{message}</p>}
+							<div className="message">
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{message && (
+										<Fade in={!!message} timeout={300}>
+											<Alert variant="filled" severity="success">{message}</Alert>
+										</Fade>
+									)}
+								</Stack>
 							</div>
 							<button className="setting-account__radius__button" onClick={handleValidateRange}>Valider la distance</button>
 						</div>

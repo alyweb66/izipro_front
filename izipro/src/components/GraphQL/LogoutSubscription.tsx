@@ -1,5 +1,5 @@
 import { useSubscription } from '@apollo/client';
-import { LOGOUT } from '../GraphQL/Subscription';
+import { LOGOUT } from './Subscription';
 import { userDataStore } from '../../store/UserData';
 
 export const useLogoutSubscription = () => {

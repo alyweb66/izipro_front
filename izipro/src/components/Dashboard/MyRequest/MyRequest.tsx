@@ -42,6 +42,9 @@ import TextareaAutosize from 'react-textarea-autosize';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
 
 // Configuration for React Modal
 ReactModal.setAppElement('#root');
@@ -106,7 +109,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const limit = 5;
 
 	// file upload
-	const { urlFile, setUrlFile, file, setFile, handleFileChange } = useFileHandler();
+	const { urlFile, setUrlFile, fileError, file, setFile, handleFileChange } = useFileHandler();
 
 	//mutation
 	const [deleteRequest, { loading: deleteRequestLoading, error: deleteRequestError }] = useMutation(DELETE_REQUEST_MUTATION);
@@ -1128,6 +1131,15 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							}
 
 						}}>
+							<div className="message">
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{fileError && (
+										<Fade in={!!fileError} timeout={300}>
+											<Alert variant="filled" severity="error">{fileError}</Alert>
+										</Fade>
+									)}
+								</Stack>
+							</div>
 							{urlFile.length > 0 && <div className="my-request__message-list__form__preview">
 								{urlFile.map((file, index) => (
 									<div className="my-request__message-list__form__preview__container" key={index}>

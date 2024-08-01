@@ -46,6 +46,9 @@ import { IoLocationSharp } from "react-icons/io5";
 import Switch from '@mui/material/Switch';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
 //import '../../../styles/spinner.scss';
 
 
@@ -64,18 +67,19 @@ function Account() {
 
 	const [
 		id,
-		emailStore,
-		addressStore,
+		email,
+		address,
 		cityStore,
-		first_nameStore,
-		last_nameStore,
-		lngStore,
-		siretStore,
-		denominationStore,
-		imageStore,
-		descriptionStore,
-		latStore,
-		postal_codeStore] = userDataStore((state) => [
+		first_name,
+		last_name,
+		lng,
+		siret,
+		denomination,
+		image,
+		description,
+		lat,
+		setImage,
+		postal_code] = userDataStore((state) => [
 			state.id,
 			state.email,
 			state.address,
@@ -88,24 +92,25 @@ function Account() {
 			state.image,
 			state.description,
 			state.lat,
+			state.setImage,
 			state.postal_code
 		]);
 
 
 
 	//state
-	const [first_name, setFirstName] = useState(first_nameStore || '');
-	const [last_name, setLastName] = useState(last_nameStore || '');
-	const [email, setEmail] = useState(emailStore || '');
-	const [address, setAddress] = useState(addressStore || '');
-	const [postal_code, setPostalCode] = useState(postal_codeStore || '');
-	const [city, setCity] = useState(cityStore || '');
-	const [lng, setLng] = useState(lngStore || '');
-	const [lat, setLat] = useState(latStore || '');
-	const [siret, setSiret] = useState(siretStore || '');
-	const [denomination, setDenomination] = useState(denominationStore || '');
-	const [description, setDescription] = useState(descriptionStore || '');
-	const [picture, setPicture] = useState(imageStore || '');
+	const [first_nameState, setFirstNameState] = useState(first_name || '');
+	const [last_nameState, setLastNameState] = useState(last_name || '');
+	const [emailState, setEmailState] = useState(email || '');
+	const [addressState, setAddressState] = useState(address || '');
+	const [postal_codeState, setPostalCodeState] = useState(postal_code || '');
+	const [cityState, setCityState] = useState(cityStore || '');
+	const [lngState, setLngState] = useState(lng || '');
+	const [latState, setLatState] = useState(lat || '');
+	const [siretState, setSiretState] = useState(siret || '');
+	const [denominationState, setDenominationState] = useState(denomination || '');
+	const [descriptionState, setDescriptionState] = useState(description || '');
+	const [pictureState, setPictureState] = useState(image || '');
 	const [oldPassword, setOldPassword] = useState('');
 	const [newPassword, setNewPassword] = useState('');
 	const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -116,8 +121,8 @@ function Account() {
 	const [errorPicture, setErrorPicture] = useState('');
 	// state for mapBox
 	const [viewState, setViewState] = useState({
-		longitude: typeof lng === 'number' ? lng : parseFloat(lng),
-		latitude: typeof lat === 'number' ? lat : parseFloat(lat),
+		longitude: typeof lngState === 'number' ? lngState : parseFloat(lngState),
+		latitude: typeof latState === 'number' ? latState : parseFloat(latState),
 		zoom: 12,
 	});
 
@@ -136,7 +141,7 @@ function Account() {
 	// Store data
 	const setAccount = userDataStore((state) => state.setAccount);
 	const role = userDataStore((state) => state.role);
-	const [image, setImage] = userDataStore((state) => [state.image, state.setImage]);
+	//const [image, setImage] = userDataStore((state) => [state.image, state.setImage]);
 	const resetUserData = userDataStore((state) => state.resetUserData);
 
 	// Mutation to update the user data
@@ -160,20 +165,20 @@ function Account() {
 	useEffect(() => {
 		//sanitize the input
 		const newUserData = {
-			first_name: DOMPurify.sanitize(first_name),
-			last_name: DOMPurify.sanitize(last_name),
-			email: DOMPurify.sanitize(email),
-			address: DOMPurify.sanitize(address),
-			postal_code: DOMPurify.sanitize(postal_code),
-			city: DOMPurify.sanitize(city),
-			siret: DOMPurify.sanitize(siret),
-			denomination: DOMPurify.sanitize(denomination),
-			description: DOMPurify.sanitize(description),
-			image: DOMPurify.sanitize(picture),
+			first_name: DOMPurify.sanitize(first_nameState),
+			last_name: DOMPurify.sanitize(last_nameState),
+			email: DOMPurify.sanitize(emailState),
+			address: DOMPurify.sanitize(addressState),
+			postal_code: DOMPurify.sanitize(postal_codeState),
+			city: DOMPurify.sanitize(cityState),
+			siret: DOMPurify.sanitize(siretState),
+			denomination: DOMPurify.sanitize(denominationState),
+			description: DOMPurify.sanitize(descriptionState),
+			image: DOMPurify.sanitize(pictureState),
 		};
 
 		setUserData(newUserData);
-	}, [first_name, last_name, email, address, postal_code, city, lng, lat, siret, denomination, description]);
+	}, [first_nameState, last_nameState, emailState, addressState, postal_codeState, cityState, lngState, latState, siretState, denominationState, descriptionState]);
 
 
 	// Handle the account submit
@@ -185,11 +190,11 @@ function Account() {
 		setChangeEmail('');
 
 		let newUserData = {} as UserAccountDataProps;
-		if (addressStore !== address || cityStore !== city || postal_codeStore !== postal_code) {
+		if (address !== addressState || cityStore !== cityState || postal_code !== postal_codeState) {
 			// fetch the location
 			//let newUserData = {} as UserAccountDataProps;;
-			if (address && city && postal_code) {
-				const location = await Localization(address, city, postal_code, setErrorAccount);
+			if (addressState && cityState && postal_codeState) {
+				const location = await Localization(addressState, cityState, postal_codeState, setErrorAccount);
 
 				if (!location) {
 					return;
@@ -199,8 +204,8 @@ function Account() {
 				newUserData = { ...userData };
 				newUserData.lng = location?.lng;
 				newUserData.lat = location?.lat;
-				setLng(location?.lng);
-				setLat(location?.lat);
+				setLngState(location?.lng);
+				setLatState(location?.lat);
 			}
 		}
 
@@ -208,12 +213,13 @@ function Account() {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const changedFields = (Object.keys(userDataStore.getState()) as Array<keyof UserDataProps>).reduce((result: any, key: keyof UserDataProps) => {
 
-			if (userDataStore.getState()[key] !== newUserData[key]) {
-				result[key] = newUserData[key];
+			if (userDataStore.getState()[key] !== userData[key]) {
+				result[key] = userData[key];
 			}
 
 			return result;
 		}, {});
+
 
 		if (changedFields.siret && changedFields.siret.length !== 14) {
 			setErrorAccount('Siret invalide');
@@ -383,7 +389,7 @@ function Account() {
 		}).then((response): void => {
 
 			if (response.data?.deleteProfilePicture) {
-				setPicture('');
+				setPictureState('');
 				setImage('');
 			}
 		});
@@ -473,11 +479,11 @@ function Account() {
 	// useEffect for mapBox lng lat
 	useEffect(() => {
 		setViewState({
-			longitude: typeof lng === 'number' ? lng : parseFloat(lng),
-			latitude: typeof lat === 'number' ? lat : parseFloat(lat),
+			longitude: typeof lngState === 'number' ? lngState : parseFloat(lngState),
+			latitude: typeof latState === 'number' ? latState : parseFloat(latState),
 			zoom: 12,
 		});
-	}, [lngStore, latStore, lng, lat]);
+	}, [lng, lat, lngState, latState]);
 
 	return (
 		<div className="account">
@@ -509,7 +515,15 @@ function Account() {
 							style={{ display: 'none' }}
 							accept=".jpg,.jpeg,.png"
 						/>
-						{errorPicture && <p className="error">{errorPicture}</p>}
+						<div className="message">
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{errorPicture && (
+									<Fade in={!!errorPicture} timeout={300}>
+										<Alert variant="filled" severity="error">{errorPicture}</Alert>
+									</Fade>
+								)}
+							</Stack>
+						</div>
 						<button className="account__profile__picture__delete" type='button' onClick={handleDeletePicture}>Supprimer</button>
 					</div >
 
@@ -539,9 +553,9 @@ function Account() {
 									className="account__profile__form__label__input"
 									type="text"
 									name="first_name"
-									value={first_name || ''}
-									placeholder={first_name || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)}
+									value={first_nameState || ''}
+									placeholder={first_nameState || ''}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstNameState(event.target.value)}
 									aria-label="Prénom"
 									maxLength={50}
 									autoComplete='first_name'
@@ -553,9 +567,9 @@ function Account() {
 									className="account__profile__form__label__input"
 									type="text"
 									name="last_name"
-									value={last_name || ''}
-									placeholder={last_name || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
+									value={last_nameState || ''}
+									placeholder={last_nameState || ''}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastNameState(event.target.value)}
 									aria-label="Nom"
 									maxLength={50}
 									autoComplete='last_name'
@@ -567,23 +581,23 @@ function Account() {
 									className="account__profile__form__label__input"
 									type="text"
 									name="email"
-									value={email || ''}
-									placeholder={email || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
+									value={emailState || ''}
+									placeholder={emailState || ''}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmailState(event.target.value)}
 									aria-label="Email"
 									maxLength={50}
 									autoComplete='email'
 								/>
 							</label>
 							<label className="account__profile__form__label">
-								Adresse:
+								Adresse:StateState
 								<input
 									className="account__profile__form__label__input"
 									type="text"
 									name="address"
-									value={address || ''}
-									placeholder={address || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddress(event.target.value)}
+									value={addressState || ''}
+									placeholder={addressState || ''}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddressState(event.target.value)}
 									aria-label="Adresse"
 									maxLength={100}
 									autoComplete='address'
@@ -596,9 +610,9 @@ function Account() {
 									className="account__profile__form__label__input"
 									type="text"
 									name="postal_code"
-									value={postal_code || ''}
-									placeholder={postal_code || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCode(event.target.value)}
+									value={postal_codeState || ''}
+									placeholder={postal_codeState || ''}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCodeState(event.target.value)}
 									aria-label="Code postal"
 									autoComplete='postal_code'
 									maxLength={10}
@@ -611,9 +625,9 @@ function Account() {
 									className="account__profile__form__label__input"
 									type="text"
 									name="city"
-									value={city || ''}
-									placeholder={city || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCity(event.target.value)}
+									value={cityState || ''}
+									placeholder={cityState || ''}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCityState(event.target.value)}
 									aria-label="Ville"
 									autoComplete='city'
 									maxLength={20}
@@ -628,9 +642,9 @@ function Account() {
 											className="account__profile__form__label__input"
 											type="text"
 											name="siret"
-											value={siret || ''}
-											placeholder={siret || ''}
-											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
+											value={siretState || ''}
+											placeholder={siretState || ''}
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiretState(event.target.value)}
 											aria-label="Siret"
 											autoComplete='siret'
 											maxLength={14}
@@ -642,9 +656,9 @@ function Account() {
 											className="account__profile__form__label__input"
 											type="text"
 											name="denomination"
-											value={denomination || ''}
-											placeholder={denomination || ''}
-											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenomination(event.target.value)}
+											value={denominationState || ''}
+											placeholder={denominationState || ''}
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenominationState(event.target.value)}
 											aria-label="Dénomination"
 											autoComplete='denomination'
 											maxLength={50}
@@ -657,19 +671,35 @@ function Account() {
 											name="description"
 											id="description"
 											placeholder="Exprimez-vous 200 caractères maximum"
-											value={description}
-											onChange={(event) => setDescription(event.target.value)}
+											value={descriptionState}
+											onChange={(event) => setDescriptionState(event.target.value)}
 											aria-label="Exprimez-vous 200 caractères maximum"
 											maxLength={200}
 										>
 										</textarea>
-										<p>{description?.length}/200</p>
+										<p>{descriptionState?.length}/200</p>
 									</label>
 								</>
 							)}
-							{errorAccount && <p className="account__profile__modification-error">{errorAccount}</p>}
-							{messageAccount && <p className="account__profile__modification-message">{messageAccount}</p>}
-							{ChangeEmail && <p className="account__profile__modification-message">{ChangeEmail}</p>}
+							<div className="message">
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{messageAccount && (
+										<Fade in={!!messageAccount} timeout={300}>
+											<Alert variant="filled" severity="success">{messageAccount}</Alert>
+										</Fade>
+									)}
+									{errorAccount && (
+										<Fade in={!!errorAccount} timeout={300}>
+											<Alert variant="filled" severity="error">{errorAccount}</Alert>
+										</Fade>
+									)}
+									{ChangeEmail && (
+										<Fade in={!!ChangeEmail} timeout={300}>
+											<Alert variant="filled" severity="success">{ChangeEmail}</Alert>
+										</Fade>
+									)}
+								</Stack>
+							</div>
 							<button className="account__profile__button" type="submit">Valider</button>
 							<div className="request__form__map">
 								<p className="request__title-map">Vérifiez votre adresse sur la carte (validez pour actualiser):</p>
@@ -688,8 +718,8 @@ function Account() {
 										dragPan={false}
 									>
 										<Marker
-											longitude={typeof lng === 'number' ? lng : parseFloat(lng)}
-											latitude={typeof lat === 'number' ? lat : parseFloat(lat)}
+											longitude={typeof lngState === 'number' ? lngState : parseFloat(lngState)}
+											latitude={typeof latState === 'number' ? latState : parseFloat(latState)}
 										>
 											<div className="map-marker">
 												<IoLocationSharp className="map-marker__icon" />
@@ -747,8 +777,20 @@ function Account() {
 										required
 									/>
 								</label>
-								{errorPassword && <p className="account__profile__modification-error">{errorPassword}</p>}
-								{messagePassword && <p className="account__profile__modification-message">{messagePassword}</p>}
+								<div className="message">
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{messagePassword && (
+										<Fade in={!!messagePassword} timeout={300}>
+											<Alert variant="filled" severity="success">{messagePassword}</Alert>
+										</Fade>
+									)}
+									{errorPassword && (
+										<Fade in={!!errorPassword} timeout={300}>
+											<Alert variant="filled" severity="error">{errorPassword}</Alert>
+										</Fade>
+									)}
+								</Stack>
+							</div>
 								<button className="show-password" onClick={() => setShowPassword(!showPassword)}>
 									{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
 								</button>
