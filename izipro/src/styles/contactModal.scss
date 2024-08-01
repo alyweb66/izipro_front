@@ -60,7 +60,18 @@
                 color: v.$color-primary-orange;
 
                 &.email {
+                    position: relative;
                     margin-top: 2rem;
+                    padding-top: 2rem;
+                }
+                &.email::before {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 1px;
+                    background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
                 }
 
                 &.textarea {
