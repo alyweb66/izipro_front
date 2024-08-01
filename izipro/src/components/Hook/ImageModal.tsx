@@ -8,11 +8,14 @@ import pdfLogo from '/logo/logo-pdf.jpg';
 
 ReactModal.setAppElement('#root');
 
+
 // function to use the image modal
 export function useModal() {
 	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 	const [images, setImages] = useState<string[]>([]);
+
+
 
 
 	function openModal(imageUrls: string[], initialIndex: number) {
@@ -38,7 +41,17 @@ export function useModal() {
 	return { modalIsOpen, openModal, closeModal, selectedImage: images[selectedImageIndex], nextImage, previousImage };
 }
 
-export function ImageModal({ modalIsOpen, closeModal, selectedImage, nextImage, previousImage }: { modalIsOpen: boolean, closeModal: () => void, selectedImage: string, nextImage: () => void, previousImage: () => void }) {
+export function ImageModal({ 
+	modalIsOpen, 
+	closeModal, 
+	selectedImage, 
+	nextImage, 
+	previousImage, 
+	hasManyImages
+
+}: { 
+		
+	modalIsOpen: boolean, closeModal: () => void, selectedImage: string, nextImage: () => void, previousImage: () => void, hasManyImages: boolean }) {
 	
 	// useEffect to block the background scrolling
 	useEffect(() => {
@@ -74,10 +87,10 @@ export function ImageModal({ modalIsOpen, closeModal, selectedImage, nextImage, 
 					id="previous"
 					className="react-modal__picture button"
 					onClick={previousImage}>Précédent</button>
-				<MdKeyboardArrowLeft
+				{hasManyImages && <MdKeyboardArrowLeft
 					className="react-modal__picture back"
 					onClick={() => document.getElementById('previous')?.click()}
-				/>
+				/>}
 				{selectedImage?.endsWith('.pdf') ? (
 					<a
 						className="a-pdf"
@@ -108,10 +121,10 @@ export function ImageModal({ modalIsOpen, closeModal, selectedImage, nextImage, 
 					id="next"
 					className="react-modal__picture button"
 					onClick={nextImage}>Suivant</button>
-				<MdKeyboardArrowRight
+				{hasManyImages && <MdKeyboardArrowRight
 					className="react-modal__picture forward"
 					onClick={() => document.getElementById('next')?.click()}
-				/>
+				/>}
 			</div>
 		</ReactModal>
 	);

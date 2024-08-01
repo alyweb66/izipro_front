@@ -126,21 +126,21 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	useEffect(() => {
 		const handleResize = () => {
 			///if (!isHandleClick) {
-				
-			if (window.innerWidth < 1000 ) {
-	
-				if ( isUserMessageOpen) {
+
+			if (window.innerWidth < 1000) {
+
+				if (isUserMessageOpen) {
 
 					setIsMessageOpen(true);
 					setIsAnswerOpen(false);
 					setIsListOpen(false);
-				} else if ( !isUserMessageOpen ) {
-					
+				} else if (!isUserMessageOpen) {
+
 					setIsMessageOpen(false);
 					setIsAnswerOpen(false);
 					setIsListOpen(true);
-				
-				}else {
+
+				} else {
 					if (isAnswerOpen) {
 						setIsMessageOpen(false);
 						setIsAnswerOpen(true);
@@ -152,18 +152,18 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						setIsListOpen(true);
 					}
 				}
-	
+
 			} else {
-					
+
 				setIsMessageOpen(true);
 				setIsAnswerOpen(true);
 				setIsListOpen(true);
-					
+
 
 			}
 			//}
 		};
-		
+
 		// add event listener to check the size of the window
 		window.addEventListener('resize', handleResize);
 
@@ -172,7 +172,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
-	}, [/* isMessageOpen, isAnswerOpen, isListOpen */]); 
+	}, [/* isMessageOpen, isAnswerOpen, isListOpen */]);
 
 	// useEffect to sort the requests by date and update the subscription
 	useEffect(() => {
@@ -324,14 +324,14 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				const dateB = new Date(b.updated_at).getTime();
 				return dateB - dateA;
 			});
-			
+
 			// take the user id from the conversation
 			const sortedUsers = conversationByDate.map(conversation => {
 				const user = userConvStore.find(user => user.id === (conversation.user_1 !== id ? conversation.user_1 : conversation.user_2));
 				return user;
 			});
-	
-			
+
+
 			const filteredSortedUsers = sortedUsers.filter((user): user is UserDataProps => user !== undefined);
 			// Convert filteredSortedUsers to a Set to remove duplicates, then convert it back to an array
 			const uniqueUsers = Array.from(new Set(filteredSortedUsers.map(user => JSON.stringify(user)))).map(user => JSON.parse(user));
@@ -339,7 +339,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 
 		}
-		
+
 		// if selected
 		if (!selectedRequest || selectedRequest.id !== selectedRequestRef.current?.id) {
 			setSelectedUser(null);
@@ -350,7 +350,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			selectedRequestRef.current = selectedRequest;
 		}
 
-		
+
 
 	}, [userConvStore, selectedRequest]);
 
@@ -359,7 +359,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		if (messageData) {
 
 			const messages: MessageProps[] = messageData.messages;
-			
+
 			// Add the new messages to the store
 
 			// Filter out messages that are already in the store
@@ -419,7 +419,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
 		}, 200);
 
-	}, [messageStore, conversationIdState, isMessageOpen ]);
+	}, [messageStore, conversationIdState, isMessageOpen]);
 
 	//  set selected request at null when the component is unmounted
 	useEffect(() => {
@@ -435,7 +435,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			setIsUserMessageOpen(true);
 		} else {
 			setIsUserMessageOpen(false);
-		
+
 		}
 	}, [selectedUser]);
 
@@ -561,11 +561,11 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	// Function to handle the users viewedIds for the conversation
 	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLDivElement>) => {
 		event?.preventDefault();
-		
+
 		if (!request.conversation) {
-			
+
 			setUserConvState([]);
-			
+
 		} else {
 			// Get the user viewedIds from the conversation
 			const viewedIds = request?.conversation?.map(conversation => {
@@ -707,6 +707,8 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	};
 
+const [hasManyImages, setHasManyImages] = useState(false);
+console.log('hasManyImages', hasManyImages);
 
 	return (
 		<div className="my-request">
@@ -714,7 +716,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				id="scrollableRequest"
 				className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}
 				aria-label="Liste des demandes"
-		
+
 			>
 				{requestLoading && <Spinner />}
 				{!requestByDate ? <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p> : (
@@ -760,25 +762,25 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 									<div className="my-request__list__detail__item__header">
 										<p className="my-request__list__detail__item__header date" >
 											<span className="my-request__list__detail__item__header date-span">
-														Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
+												Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
 										</p>
 										<p className="my-request__list__detail__item__header city" >
 											<span className="my-request__list__detail__item__header city-span">
-														Ville:</span>&nbsp;{request.city}
+												Ville:</span>&nbsp;{request.city}
 										</p>
 										<h2 className="my-request__list__detail__item__header job" >
 											<span className="my-request__list__detail__item__header job-span">
-														Métier:</span>&nbsp;{request.job}
+												Métier:</span>&nbsp;{request.job}
 										</h2>
 										{request.denomination ? (
 											<p className="my-request__list__detail__item__header name" >
 												<span className="my-request__list__detail__item__header name-span">
-															Entreprise:</span>&nbsp;{request.denomination}
+													Entreprise:</span>&nbsp;{request.denomination}
 											</p>
 										) : (
 											<p className="my-request__list__detail__item__header name" >
 												<span className="my-request__list__detail__item__header name-span">
-															Nom:</span>&nbsp;{request.first_name} {request.last_name}
+													Nom:</span>&nbsp;{request.first_name} {request.last_name}
 											</p>
 										)}
 									</div>
@@ -805,6 +807,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 										{(() => {
 											const imageUrls = request.media?.map(media => media.url) || [];
+										
 											return request.media?.map((media, index) => (
 												media ? (
 													media.name.endsWith('.pdf') ? (
@@ -829,12 +832,15 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 															key={media.id}
 															src={media.url}
 															onClick={(event) => {
+																setHasManyImages(false),
 																openModal(imageUrls, index),
-																event.stopPropagation();
+																imageUrls.length > 1 && setHasManyImages(true);
+
+																	event.stopPropagation();
 															}}
 															onError={(event) => {
 																event.currentTarget.src = '/logo/no-picture.jpg';
-															  }}
+															}}
 															alt={`Image associée à la demande ${request.title}`}
 														/>
 													)
@@ -851,7 +857,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 										onClick={(event) => {
 											setDeleteItemModalIsOpen(true);
 											setModalArgs({ requestId: request.id, requestTitle: request.title }),
-											event.stopPropagation();
+												event.stopPropagation();
 										}}
 									>
 									</button>
@@ -859,7 +865,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 										className="my-request__list__detail__item__delete-FaTrashAlt"
 										onClick={(event) => {
 											document.getElementById(`delete-request-${request.id}`)?.click(),
-											event.stopPropagation();
+												event.stopPropagation();
 										}}
 									/>
 								</motion.div>
@@ -896,7 +902,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-						transition={{ duration: 0.1, type: 'tween'}}
+						transition={{ duration: 0.1, type: 'tween' }}
 					>
 						{conversationLoading && <Spinner />}
 						<div className="my-request__answer-list__header">
@@ -921,7 +927,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						</div>
 
 						{userConvState?.length === 0 ? (<p className="my-request__answer-list no-conv">
-						Vous n&apos;avez pas de conversation
+							Vous n&apos;avez pas de conversation
 						</p>
 						) : (
 							<div className="my-request__answer-list__container">
@@ -933,13 +939,13 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							${selectedUser?.id === user.id ? 'selected-user' : ''} 
 							${user.deleted_at ? 'deleted' : ''}
 							${(selectedRequest?.conversation
-											.some(conv => notViewedConversationStore?.some(id => id === conv.id)
-													&& conv.user_1 === user.id || conv.user_2 === user.id)) ? 'not-viewed' : ''}`
+													.some(conv => notViewedConversationStore?.some(id => id === conv.id)
+														&& conv.user_1 === user.id || conv.user_2 === user.id)) ? 'not-viewed' : ''}`
 
 											}
 											key={user.id}
 											onClick={(event) => {
-		
+
 												setSelectedUser(user);
 												handleMessageConversation(user.id, event);
 												if (window.innerWidth < 1000) {
@@ -948,13 +954,9 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 													setTimeout(() => {
 														setIsMessageOpen(true);
 														setIsListOpen(false);
-													},200);
-													//answerListUser();
+													}, 200);	
 												}
-												/* setTimeout(() => {
-													setIsHandleClick(false);
-												}, 400); */
-									
+
 											}}
 											aria-label={`Détails de ${user.first_name} ${user.last_name}`}
 											layout
@@ -962,7 +964,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 											initial={{ opacity: 0, scale: 0.9 }}
 											animate={{ opacity: 1, scale: 1 }}
 											exit={{ opacity: 0, scale: 1.1, transition: { duration: 0.1, type: 'tween' } }}
-											transition={{ duration: 0.1, type: 'tween'}}
+											transition={{ duration: 0.1, type: 'tween' }}
 										>
 
 											<div className="my-request__answer-list__user__header">
@@ -971,7 +973,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 													src={user.image ? user.image : logoProfile}
 													onError={(event) => {
 														event.currentTarget.src = '/logo/no-picture.jpg';
-													  }}
+													}}
 													alt={`Image de profil de ${user.first_name} ${user.last_name}`} />
 												{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
 												{/* <p className="my-request__answer-list__user__header name">{user.first_name}{user.last_name}</p> */}
@@ -981,7 +983,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 													<p className="my-request__answer-list__user__header name">{user.first_name} {user.last_name}</p>
 												)}
 												{user.deleted_at && <p className="my-request__answer-list__user__header deleted" aria-label="Utilisateur supprimé">
-												Utilisateur supprimé</p>}
+													Utilisateur supprimé</p>}
 											</div>
 										</motion.div>
 									))}
@@ -993,13 +995,13 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			</AnimatePresence>
 			<AnimatePresence>
 				{isMessageOpen && (
-					<motion.div 
-						className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`} 
+					<motion.div
+						className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`}
 						aria-label='Liste des messages'
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-						transition={{ duration: 0.1, type: 'tween'}}
+						transition={{ duration: 0.1, type: 'tween' }}
 					>
 						{messageLoading && <Spinner />}
 						<div className="my-request__message-list__user" aria-label="Détails de l'utilisateur" >
@@ -1017,14 +1019,14 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 										className="my-request__message-list__user__header__detail return"
 										onClick={(event) => {
 											if (window.innerWidth < 1000) {
-	
+
 												setIsMessageOpen(false);
 												setTimeout(() => {
 													setIsListOpen(false);
 													setIsAnswerOpen(true);
 												}, 200);
 											}
-									
+
 											setSelectedUser(null);
 											event.stopPropagation();
 										}}
@@ -1035,7 +1037,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 										src={selectedUser?.image ? selectedUser.image : logoProfile}
 										onError={(event) => {
 											event.currentTarget.src = '/logo/no-picture.jpg';
-										  }}
+										}}
 										alt={selectedUser?.denomination ? selectedUser.denomination : `${selectedUser?.first_name} ${selectedUser?.last_name}`} />
 									{selectedUser?.denomination ? (
 										<p className="my-request__message-list__user__header__detail denomination">{selectedUser?.denomination}</p>
@@ -1065,59 +1067,65 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							<div className="my-request__background">
 								<div /* id="scrollableMessage" */ className="my-request__message-list__message" aria-label='Message de la conversation'>
 									{Array.isArray(messageStore) && isUserMessageOpen &&
-								messageStore
-									.filter((message) => message.conversation_id === conversationIdState)
-									.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
-									.map((message, index, array) => (
-										<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
-											{index === array.length - 1 ? <div ref={endOfMessagesRef} aria-label="Dernier message visible" /> : null}
-											<div className={`content ${message.user_id === id ? 'me' : ''}`}>
-												{message.media[0].url && (
-													<div className="my-request__message-list__message__detail__image-container">
-														<div className={`map ${message.content ? 'message' : ''}`}>
-															{(() => {
-																const imageUrls = message.media?.map(media => media.url) || [];
-																return message.media?.map((media, index) => (
-																	media ? (
-																		media.name.endsWith('.pdf') ? (
-																			<a
-																				className="a-pdf"
-																				href={media.url}
-																				key={media.id}
-																				download={media.name}
-																				target="_blank"
-																				rel="noopener noreferrer"
-																				onClick={(event) => { event.stopPropagation(); }} >
-																				<img
-																					className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																					//key={media.id} 
-																					src={pdfLogo}
-																					alt={media.name}
-																				/>
-																			</a>
-																		) : (
-																			<img
-																				className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																				key={media.id}
-																				src={media.url}
-																				onClick={() => openModal(imageUrls, index)}
-																				alt={media.name}
-																				onError={(event) => {
-																					event.currentTarget.src = '/logo/no-picture.jpg';
-																				  }}
-																			/>
-																		)
-																	) : null
-																));
-															})()}
-														</div>
+										messageStore
+											.filter((message) => message.conversation_id === conversationIdState)
+											.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
+											.map((message, index, array) => (
+												<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
+													{index === array.length - 1 ? <div ref={endOfMessagesRef} aria-label="Dernier message visible" /> : null}
+													<div className={`content ${message.user_id === id ? 'me' : ''}`}>
+														{message.media[0].url && (
+															<div className="my-request__message-list__message__detail__image-container">
+																<div className={`map ${message.content ? 'message' : ''}`}>
+																	{(() => {
+																		const imageUrls = message.media?.map(media => media.url) || [];
+																		return message.media?.map((media, index) => (
+																			media ? (
+																				media.name.endsWith('.pdf') ? (
+																					<a
+																						className="a-pdf"
+																						href={media.url}
+																						key={media.id}
+																						download={media.name}
+																						target="_blank"
+																						rel="noopener noreferrer"
+																						onClick={(event) => { event.stopPropagation(); }} >
+																						<img
+																							className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																							//key={media.id} 
+																							src={pdfLogo}
+																							alt={media.name}
+																						/>
+																					</a>
+																				) : (
+																					<img
+																						className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																						key={media.id}
+																						src={media.url}
+																						onClick={(event) => {
+																							setHasManyImages(false),
+																							openModal(imageUrls, index),
+																							imageUrls.length > 1 && setHasManyImages(true);
+							
+																								event.stopPropagation();
+																						}}
+																						alt={media.name}
+																						onError={(event) => {
+																							event.currentTarget.src = '/logo/no-picture.jpg';
+																						}}
+																					/>
+																				)
+																			) : null
+																		));
+																	})()}
+																</div>
+															</div>
+														)}
+														{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
 													</div>
-												)}
-												{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
-											</div>
-											<div className="my-request__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
-										</div>
-									))
+													<div className="my-request__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
+												</div>
+											))
 
 									}
 								</div>
@@ -1154,7 +1162,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 											onClick={() => handleRemove(index)}
 											aria-label='Supprimer le fichier'
 										>
-									X
+											X
 										</div>
 									</div>
 								))}
@@ -1209,7 +1217,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								className="my-request__message-list__form__button"
 								type="submit"
 							>
-						Send
+								Send
 							</button>
 						</form>
 
@@ -1218,6 +1226,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			</AnimatePresence>
 
 			<ImageModal
+				hasManyImages={hasManyImages}
 				modalIsOpen={modalIsOpen}
 				closeModal={closeModal}
 				selectedImage={selectedImage}

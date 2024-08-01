@@ -117,44 +117,59 @@ function SettingAccount() {
 	// function to submit job
 	const handleSubmitJob = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		// Filter wishListJob to get only the jobs whose IDs are not already in jobs
+		const newJobIds = wishListJob
+			.filter((job) => !jobs.some((jobStore) => jobStore.job_id === job.id))
+			.map((job) => job.id);
 
-		let submitJobId = [];
+		console.log('newJobIds', newJobIds);
 
-		if (jobs.length === 0) {
-			submitJobId = wishListJob;
-		} else {
-			// check if the job is already in the store
-			submitJobId = wishListJob.filter((job) => jobs.some((jobStore) => jobStore.job_id !== job.id));
-		}
-		// add job to the selectedJob
-		setSelectedJob([...selectedJob || [], ...submitJobId]);
+		// Add new jobs to selectedJob
+		setSelectedJob([...selectedJob || [], ...wishListJob.filter((job) => newJobIds.includes(job.id))]);
 
-		// get unique job id to submit
-		let uniqueJobId: number[] = [];
-		if (submitJobId !== undefined && submitJobId.length > 0) {
-			uniqueJobId = submitJobId.filter(job => job).map((job) => job.id);
-			// delete duplicate job id
-			uniqueJobId = [...new Set(uniqueJobId)];
-
-		}
+		// Update jobs in the store
+		setJobs([...jobs, ...newJobIds.map((id) => ({ job_id: id }))]);
+		/* 		let submitJobId = [];
+		console.log('jobs', jobs);
+		
+				if (jobs.length === 0) {
+					submitJobId = wishListJob;
+				} else {
+					// check if the job is already in the store
+					submitJobId = wishListJob.filter((job) => jobs.every((jobStore) => jobStore.job_id !== job.id));
+				}
+				console.log('submitJobId', submitJobId);
+				
+				// add job to the selectedJob
+				setSelectedJob([...selectedJob || [], ...submitJobId]);
+		
+				// get unique job id to submit
+				let uniqueJobId: number[] = [];
+				if (submitJobId !== undefined && submitJobId.length > 0) {
+					uniqueJobId = submitJobId.filter(job => job).map((job) => job.id);
+					// delete duplicate job id
+					uniqueJobId = [...new Set(uniqueJobId)];
+		
+				} */
 
 		// update jobs in the store
 		// check if the job is already in the store
-		const newjobs = uniqueJobId?.filter((id) => !jobs.some((job) => job.job_id === id));
+		//const newjobs = uniqueJobId?.filter((id) => !jobs.some((job) => job.job_id === id));
 
-		setJobs([...jobs, ...(newjobs || [])].map((job) => typeof job === 'number' ? { job_id: job } : job));
+		//setJobs([...jobs, ...(newjobs || [])].map((job) => typeof job === 'number' ? { job_id: job } : job));
 
 		// add job to the database
 		createUserJob({
 			variables: {
 				input: {
 					user_id: id,
-					job_id: uniqueJobId || submitJobId
+					job_id: newJobIds
 				}
 			}
 		}).then(() => {
 
 			setWishListJob([]);
+			setSelectedCategory(0);
 
 		});
 
@@ -188,7 +203,6 @@ function SettingAccount() {
 		}
 
 	};
-console.log('radius', radius);
 
 	return (
 		<>

@@ -50,7 +50,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 
 	// State
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
-	//const [isHasMore, setIsHasMore] = useState(true);
+	const [hasManyImages, setHasManyImages] = useState(false);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{requestId: number, requestTitle: string } | null>(null);
 	/* 	const [isLoading, setIsLoading] = useState(false); */
@@ -387,9 +387,12 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 															className="client-request__list__detail__item__picture img"
 															key={media.id}
 															src={media.url}
-															onClick={(event: React.MouseEvent) => {
+															onClick={(event) => {
+																setHasManyImages(false),
 																openModal(imageUrls, index),
-																event.stopPropagation();
+																imageUrls.length > 1 && setHasManyImages(true);
+
+																	event.stopPropagation();
 															}}
 															alt={media.name}
 															onError={(event) => {
@@ -446,6 +449,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 			</div>
 
 			<ImageModal
+				hasManyImages={hasManyImages}
 				modalIsOpen={modalIsOpen}
 				closeModal={closeModal}
 				selectedImage={selectedImage}
