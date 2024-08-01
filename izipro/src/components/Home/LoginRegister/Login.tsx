@@ -158,7 +158,7 @@ function Login() {
 			throw new Error('Bad request');
 		}
 
-		setEmailModal(false);
+		//setEmailModal(false);
 	};
 
 	return (

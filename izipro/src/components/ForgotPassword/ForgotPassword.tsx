@@ -11,6 +11,7 @@ import DOMPurify from 'dompurify';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
+import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 
 // State management and stores
 import { changeForgotPasswordStore } from '../../store/UserData';
@@ -29,6 +30,7 @@ function ForgotPassword() {
 	const [confirmPassword, setConfirmPassword] = useState('');
 	const [error, setError] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [isLogo, setIsLogo] = useState(false);
 
 	// store
@@ -112,8 +114,45 @@ function ForgotPassword() {
 			<form className="forgot-password-container__form" onSubmit={handleSubmitForm}>
 				<h1 className="forgot-password-container__form__title">Réinitialisez votre mot de passe</h1>
 				<h2 className="forgot-password-container__form__subtitle">Veuillez rentrer votre nouveau mot de passe (8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial )</h2>
-
-				<input
+				<div className="show-password">
+							<input
+								type={showPassword ? 'text' : 'password'}
+								name="password"
+								value={password}
+								className="__input"
+								placeholder="Mot de passe"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
+								aria-label="Mot de passe"
+								maxLength={60}
+								required
+							/>
+							<span
+								className="toggle-password-icon"
+								onClick={() => setShowPassword(!showPassword)}
+							>
+								{showPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+							</span>
+						</div>
+						<div className="show-password">
+							<input
+								type={showConfirmPassword ? 'text' : 'password'}
+								name="confirmPassword"
+								value={confirmPassword}
+								className="__input"
+								placeholder="Confirmer mot de passe"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(event.target.value)}
+								aria-label="Confirmer mot de passe"
+								maxLength={60}
+								required
+							/>
+							<span
+								className="toggle-password-icon"
+								onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+							>
+								{showConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+							</span>
+						</div>
+				{/* <input
 					type={showPassword ? 'text' : 'password'}
 					name="password"
 					value={password}
@@ -134,10 +173,10 @@ function ForgotPassword() {
 					aria-label="Confirmer le mot de passe"
 					maxLength={60}
 					required
-				/>
-				<button type="button" className="show-password" onClick={() => setShowPassword(!showPassword)}>
+				/> */}
+				{/* <button type="button" className="show-password" onClick={() => setShowPassword(!showPassword)}>
 					{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
-				</button>
+				</button> */}
 				<div className="message">
 							<Stack sx={{ width: '100%' }} spacing={2}>
 								{error && (

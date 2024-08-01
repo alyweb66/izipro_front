@@ -184,17 +184,30 @@ function Dashboard() {
 	const { logoutSubscription } = useLogoutSubscription();
 
 	// condition if user not logged in
-	let isLogged;
-	const getItem = localStorage.getItem('login');
+	//let isLogged;
 
 	// decode the data
-	const decodeData = atob(getItem || '');
+	const getItem = localStorage.getItem('login');
+	let decodeData: string | { value: string };
+	let isLogged: boolean;
+	try {
+        decodeData = JSON.parse(atob(getItem || ''));
+    } catch (error) {
+        decodeData = atob(getItem || '');
+    }
 
-	if (decodeData === 'session') {
+	if (decodeData &&((typeof decodeData === 'object' && decodeData.value === 'true') || decodeData === 'session')) {
+			isLogged = true
+	}  else {
+		isLogged = false;
+	}
+
+	/* if (decodeData === 'session') {
 		isLogged = { value: true };
 	} else {
 		isLogged = JSON.parse(decodeData || '{}');
-	}
+	} */
+	console.log('decodeData', decodeData);
 
 	// useEffect to check the size of the window
 	useEffect(() => {
@@ -234,26 +247,20 @@ function Dashboard() {
 
 
 		// check if user is logged in
-		if (isLogged !== null && Object.keys(isLogged).length !== 0) {
-			if (new Date().getTime() > isLogged.expiry) {
-				// The data has expired
-				localStorage.clear();
-
-				if (window.location.pathname !== '/') {
-					navigate('/');
-				}
-			}
-		} else {
+		if (isLogged === false) {
+			// The data has expired
+			localStorage.removeItem('login')
 
 			if (window.location.pathname !== '/') {
 				navigate('/');
 			}
 		}
+
 		// clean event listener
 		return () => {
 			window.removeEventListener('beforeunload', handleBeforeUnload);
 		};
-	}, []);
+	}, [decodeData]);
 
 	// set the new request from requestById to myRequestStore 
 	useEffect(() => {

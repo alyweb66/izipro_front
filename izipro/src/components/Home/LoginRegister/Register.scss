@@ -8,20 +8,15 @@
   margin: auto;
 
   &.title {
-    //@include m.border;
     position: relative;
-    //margin: 0 auto;
     text-align: center;
+    margin-top: 2rem;
     font-family: v.$font;
     font-size: 2rem;
     font-weight: 500;
     width: 100%;
-    //max-width: 25%;
     color: v.$color-primary-orange;
-    //border: 1px solid v.$color-primary-blue;
-    //border-radius: 0.8rem;
-    //background-color: rgba(255, 255, 255, 0);
-    //cursor: pointer;
+
 
     span {
       cursor: pointer;
@@ -92,9 +87,9 @@
 
       .show-password {
         @include m.show-password;
-        margin-bottom: 0.5rem;
-        width: 60%;
         & {
+          margin-bottom: 0.5rem;
+          width: 60%;
           .__input {
             margin-bottom: 0;
           }
