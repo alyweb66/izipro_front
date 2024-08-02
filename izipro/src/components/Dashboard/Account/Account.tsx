@@ -50,6 +50,9 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
+import { useQueryGetNotification } from '../../Hook/Query';
+import { UPDATE_NOTIFICATION_MUTATION } from '../../GraphQL/notificationMutation';
+import { useNotificationStore } from '../../../store/Notification';
 //import '../../../styles/spinner.scss';
 
 
@@ -65,6 +68,7 @@ function Account() {
 	const { askPermission, disableNotifications } = serviceWorkerRegistration();
 	// useRef for profile picture
 	const fileInput = useRef<HTMLInputElement>(null);
+	const isGetNotificationRef = useRef(true);
 
 	const [
 		id,
@@ -96,7 +100,7 @@ function Account() {
 			state.setImage,
 			state.postal_code
 		]);
-
+	const [emailNotification, setEmailNotification] = useNotificationStore((state) => [state.email_notification, state.setEmailNotification]);
 
 
 	//state
@@ -122,6 +126,7 @@ function Account() {
 	const [errorPicture, setErrorPicture] = useState('');
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [showOldPassword, setShowOldPassword] = useState(false);
+	const [notification, setNotification] = useState(emailNotification === null ? false : emailNotification);
 	// state for mapBox
 	const [viewState, setViewState] = useState({
 		longitude: typeof lngState === 'number' ? lngState : parseFloat(lngState),
@@ -163,7 +168,10 @@ function Account() {
 	const [changePassword, { loading: changepasswordLoading, error: changePasswordError }] = useMutation(CHANGE_PASSWORD_MUTATION);
 	const [deleteProfilePicture, { error: deleteProfilePictureError }] = useMutation(DELETE_PROFILE_PICTURE_MUTATION);
 	const [deleteAccount, { error: deleteAccountError }] = useMutation(DELETE_ACCOUNT_MUTATION);
+	const [updateNotification, { error: updateNotificationError }] = useMutation(UPDATE_NOTIFICATION_MUTATION);
 
+	// Query 
+	const { loading: notificationLoading, notificationData } = useQueryGetNotification(isGetNotificationRef.current);
 	// Set the new user data to state
 	useEffect(() => {
 		//sanitize the input
@@ -183,6 +191,41 @@ function Account() {
 		setUserData(newUserData);
 	}, [first_nameState, last_nameState, emailState, addressState, postal_codeState, cityState, lngState, latState, siretState, denominationState, descriptionState]);
 
+	// Set the notification state
+	useEffect(() => {
+		if (notificationData && notificationData.user && emailNotification === null) {
+			const emailNotification = notificationData.user.notification?.email_notification;
+
+			setEmailNotification(emailNotification);
+			setNotification(emailNotification);
+
+			isGetNotificationRef.current = true;
+		}
+	}, [notificationData]);
+
+	// handle email notification
+	const handleNotification = (event: React.ChangeEvent<HTMLInputElement>) => {
+		event.preventDefault();
+
+		updateNotification({
+			variables: {
+				input: {
+					user_id: id,
+					email_notification: !notification,
+				},
+			},
+		}).then((response): void => {
+			const { updateNotification } = response.data;
+			if (updateNotification) {
+				setEmailNotification(!notification);
+				setNotification(!notification);
+			}
+		});
+
+		if (updateNotificationError) {
+			throw new Error('Error while updating notification');
+		}
+	}
 
 	// Handle the account submit
 	const handleAccountSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -272,7 +315,6 @@ function Account() {
 			}).then((response): void => {
 
 				const { updateUser } = response.data;
-				console.log('updateUser', updateUser);
 
 				// Set the new user data to the store
 				setAccount(updateUser);
@@ -438,8 +480,13 @@ function Account() {
 
 	};
 
-	// useEffect for notification push
+	// useEffect for notification 
 	useEffect(() => {
+
+		if (emailNotification === null) {
+			isGetNotificationRef.current = false;
+		}
+
 		const checkNotificationStatus = async () => {
 			// set the state of the notification
 			// check if the user is already subscribed to push notifications
@@ -453,7 +500,7 @@ function Account() {
 
 			// verify if the browser supports notifications push and service workers
 			const permission = document.getElementById('push-permission');
-			console.log('permission', permission);
+
 			if (
 				!permission &&
 				!('serviceWorker' in navigator) ||
@@ -499,6 +546,7 @@ function Account() {
 					exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 					transition={{ duration: 0.1, type: 'tween' }}
 				>
+
 					<div className="account__picture" >
 						<img
 							className="account__profile__picture__img"
@@ -529,24 +577,41 @@ function Account() {
 						</div>
 						<button className="account__profile__picture__delete" type='button' onClick={handleDeletePicture}>Supprimer</button>
 					</div >
-
+					<div className="notification-container">
+					{(notification === null || notificationLoading) && <Spinner delay={0}/>}
+						<div className="notification">
+							<FormGroup>
+								<FormControlLabel
+									control={<Switch
+										color="warning"
+										checked={isNotificationEnabled}
+										onChange={handleSwitchChange}
+										inputProps={{ 'aria-label': 'Notifications push' }}
+									/>}
+									label="Notifications push"
+									labelPlacement="start"
+									classes={{ label: 'custom-label' }}
+								/>
+							</FormGroup>
+						</div>
+						<div className="notification">
+							<FormGroup>
+								<FormControlLabel
+									control={<Switch
+										color="warning"
+										checked={notification}
+										onChange={handleNotification}
+										inputProps={{ 'aria-label': 'Notifications par email' }}
+									/>}
+									label="Notifications par email"
+									labelPlacement="start"
+									classes={{ label: 'custom-label' }}
+								/>
+							</FormGroup>
+						</div>
+					</div>
 					<div className="account_profile_container">
 						<form className={`account__profile__form ${updateUserLoading ? 'loading' : ''}`} onSubmit={handleAccountSubmit} >
-							<div id="push-permission">
-								<FormGroup>
-									<FormControlLabel
-										control={<Switch
-											color="warning"
-											checked={isNotificationEnabled}
-											onChange={handleSwitchChange}
-											inputProps={{ 'aria-label': 'Activer les notifications' }}
-										/>}
-										label="Activer les notifications"
-										labelPlacement="start"
-										classes={{ label: 'custom-label' }}
-									/>
-								</FormGroup>
-							</div>
 							{updateUserLoading && <Spinner />}
 							<h1 className="account__profile__form__title">Mes informations:</h1>
 							<div></div>
@@ -742,7 +807,7 @@ function Account() {
 								{changepasswordLoading && <Spinner />}
 								<h1 className="__title">Changer le mot de passe:</h1>
 								<label className="__label"> Ancien mot de passe:
-								<div className="show-password">
+									<div className="show-password">
 										<input
 											type={showOldPassword ? 'text' : 'password'}
 											name="oldPassword"
@@ -756,7 +821,7 @@ function Account() {
 										/>
 										<span
 											className="toggle-password-icon"
-											onClick={(event) => {setShowOldPassword(!showOldPassword), event.preventDefault()}}
+											onClick={(event) => { setShowOldPassword(!showOldPassword), event.preventDefault() }}
 										>
 											{showOldPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 										</span>
@@ -788,7 +853,7 @@ function Account() {
 										/>
 										<span
 											className="toggle-password-icon"
-											onClick={(event) => {setShowPassword(!showPassword),  event.preventDefault()}}
+											onClick={(event) => { setShowPassword(!showPassword), event.preventDefault() }}
 										>
 											{showPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 										</span>
@@ -820,7 +885,7 @@ function Account() {
 										/>
 										<span
 											className="toggle-password-icon"
-											onClick={(event) => {setShowConfirmPassword(!showConfirmPassword),  event.preventDefault()}}
+											onClick={(event) => { setShowConfirmPassword(!showConfirmPassword), event.preventDefault() }}
 										>
 											{showConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 										</span>

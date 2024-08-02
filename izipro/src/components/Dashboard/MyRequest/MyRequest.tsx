@@ -708,7 +708,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	};
 
 const [hasManyImages, setHasManyImages] = useState(false);
-console.log('hasManyImages', hasManyImages);
 
 	return (
 		<div className="my-request">

@@ -20,6 +20,27 @@
         flex-wrap: wrap;
         justify-content: center;
 
+        .notification-container {
+            position: relative;
+            width: 100%;
+           // display: flex;
+            //flex-wrap: wrap;
+           // justify-content: center;
+            gap: 2rem;
+
+            .notification {
+                display: flex;
+                justify-content: center;
+
+                .custom-label {
+                    color: v.$color-primary-blue;
+                    font-family: v.$font;
+                    font-size: 1rem;
+                    font-weight: 500;
+                }
+            }
+        }
+
         &.loading {
             height: 100vh;
         }
@@ -83,17 +104,7 @@
                 padding: 0 2rem 2rem 2rem;
                 border-radius: 0.5rem;
 
-                #push-permission {
-                    display: flex;
-                    justify-content: center;
 
-                    .custom-label {
-                        color: v.$color-primary-blue;
-                        font-family: v.$font;
-                        font-size: 1rem;
-                        font-weight: 500;
-                    }
-                }
 
                 &.password {
                     width: 100%;

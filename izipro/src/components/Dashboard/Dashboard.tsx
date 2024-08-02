@@ -202,13 +202,6 @@ function Dashboard() {
 		isLogged = false;
 	}
 
-	/* if (decodeData === 'session') {
-		isLogged = { value: true };
-	} else {
-		isLogged = JSON.parse(decodeData || '{}');
-	} */
-	console.log('decodeData', decodeData);
-
 	// useEffect to check the size of the window
 	useEffect(() => {
 

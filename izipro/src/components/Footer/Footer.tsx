@@ -46,16 +46,14 @@ function Footer() {
 	
 	//useRef
 	const isGetRulesRef = useRef<boolean>(false);
-	const isGetCookieConsentsRef = useRef<boolean>(false);
+	const isGetCookieConsentsRef = useRef<boolean>(true);
 
 	//store
 	const [id, CGU] = userDataStore((state) => [state.id, state.CGU]);
 	const [CGUStore, cookieStore] = rulesStore((state) => [state.CGU, state.cookies]);
 	const [cookieConsentsId, cookiesNecessaryStore] = cookieConsents((state) => [state.id, state.cookies_necessary]);
-console.log('cookieConsentsId', cookieConsentsId);
-console.log('isGetCookieConsentsRef', isGetCookieConsentsRef.current);
 
-
+	//custom hooks Logout
 	const handleLogout = useHandleLogout();
 
 	//Query
@@ -67,6 +65,10 @@ console.log('isGetCookieConsentsRef', isGetCookieConsentsRef.current);
 	const [updateCookieConsents, { loading: updateCookieConsentsLoading, error: updateCookieConsentsError }] = useMutation(UPDATE_COOKIE_CONSENTS_MUTATION);
 	const [updateUser, { loading: updateUserLoading, error: updateUserError }] = useMutation(UPDATE_USER_MUTATION);
 
+
+	if (window.location.pathname === '/dashboard' && !cookiesNecessaryStore) {
+		isGetCookieConsentsRef.current = false;
+	}
 	// function to transform the result to match ResponseCookieConsents structure of response data
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	function transformResultToResponseCookieConsents(result: FetchResult<any>): ResponseCookieConsents {
@@ -165,7 +167,6 @@ console.log('isGetCookieConsentsRef', isGetCookieConsentsRef.current);
 	// set the cookie consents to the store and database
 	useEffect(() => {
 		if (!getCookieConsentsLoading) {
-			console.log('cookieData', cookieData);
 			
 			if (cookieData && cookieData.user.cookieConsents && cookieData.user.cookieConsents.user_id === id) {
 			// set cookie consents to the store

@@ -122,8 +122,6 @@ function SettingAccount() {
 			.filter((job) => !jobs.some((jobStore) => jobStore.job_id === job.id))
 			.map((job) => job.id);
 
-		console.log('newJobIds', newJobIds);
-
 		// Add new jobs to selectedJob
 		setSelectedJob([...selectedJob || [], ...wishListJob.filter((job) => newJobIds.includes(job.id))]);
 
