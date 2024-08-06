@@ -709,6 +709,16 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 const [hasManyImages, setHasManyImages] = useState(false);
 
+const [showButton, setShowButton] = useState(false);
+
+useEffect(() => {
+	const timer = setTimeout(() => {
+		setShowButton(true);
+	}, 1000); // Délai de 1 seconde
+
+	return () => clearTimeout(timer); // Nettoyage du timer
+}, []);
+
 	return (
 		<div className="my-request">
 			<div
@@ -874,7 +884,7 @@ const [hasManyImages, setHasManyImages] = useState(false);
 					</div>
 				)}
 
-				<div className="my-request__list__fetch-button">
+				{showButton && <div className="my-request__list__fetch-button">
 					{isHasMore ? (<button
 						className="Btn"
 						onClick={(event) => {
@@ -890,7 +900,7 @@ const [hasManyImages, setHasManyImages] = useState(false);
 					) : (
 						<p className="my-request__list no-req">Fin des résultats</p>
 					)}
-				</div>
+				</div>}
 			</div>
 
 			<AnimatePresence>

@@ -46,7 +46,7 @@ function Register() {
 	const [createProUser, { error: proUserError }] = useMutation(REGISTER_PRO_USER_MUTATION);
 
 	// function to handle the registration of a pro user
-	const handleProRegister = (event: React.FormEvent<HTMLFormElement>) => {
+	const handleProRegister = async (event: React.FormEvent<HTMLFormElement>) => {
 		// reset the state
 		setUserCreated(false);
 		setError('');
@@ -90,15 +90,16 @@ function Register() {
 			return;
 		}
 
-		createProUser({
-			variables: {
-				input: {
-					email: DOMPurify.sanitize(proEmail),
-					password: DOMPurify.sanitize(proPassword),
-					siret: Number(DOMPurify.sanitize(siret))
+		try {
+			const response = await createProUser({
+				variables: {
+					input: {
+						email: DOMPurify.sanitize(proEmail),
+						password: DOMPurify.sanitize(proPassword),
+						siret: Number(DOMPurify.sanitize(siret))
+					}
 				}
-			}
-		}).then((response) => {
+			})
 
 			if (response.data.createProUser.id) {
 				setProCreated(true);
@@ -108,10 +109,10 @@ function Register() {
 			setProConfirmPassword('');
 			setSiret('');
 			setIsProError('');
-		});
 
-		// handle errors
-		if (proUserError) {
+
+		} catch (error) {
+			// handle errors
 			setIsProError('Erreur lors de la création de l\'utilisateur');
 			throw new Error('Submission error!');
 		}
@@ -119,7 +120,7 @@ function Register() {
 	};
 
 	// function to handle the registration of a user
-	const handleRegister = (event: React.FormEvent<HTMLFormElement>) => {
+	const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
 		// reset the state
 		setUserCreated(false);
 		setError('');
@@ -154,14 +155,15 @@ function Register() {
 			return;
 		}
 
-		createUser({
-			variables: {
-				input: {
-					email: DOMPurify.sanitize(email),
-					password: DOMPurify.sanitize(password)
+		try {
+			const response = await createUser({
+				variables: {
+					input: {
+						email: DOMPurify.sanitize(email),
+						password: DOMPurify.sanitize(password)
+					}
 				}
-			}
-		}).then((response) => {
+			});
 
 			if (response.data.createUser.id) {
 				setUserCreated(true);
@@ -170,14 +172,13 @@ function Register() {
 			setPassword('');
 			setConfirmPassword('');
 			setError('');
-		});
-
-		// handle errors
-		if (userError) {
+		} catch (error) {
+			console.log('useError', error);
 			setError('Erreur lors de la création de l\'utilisateur');
-			throw new Error('Submission error!');
+			setTimeout(() => {
+				setError('');
+			}, 15000);
 		}
-
 	};
 
 	return (
@@ -236,28 +237,7 @@ function Register() {
 								{showConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 							</span>
 						</div>
-						{/* <input
-							type="password"
-							name="password"
-							value={password}
-							className="register-container__form__form input"
-							placeholder="Mot de passe"
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
-							aria-label="Mot de passe"
-							maxLength={60}
-							required
-						/>
-						<input
-							type="password"
-							name="confirmPassword"
-							value={confirmPassword}
-							className="register-container__form__form input"
-							placeholder="Confirmer mot de passe"
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(event.target.value)}
-							aria-label="Confirmer mot de passe"
-							maxLength={60}
-							required
-						/> */}
+
 						<div className="message">
 							<Stack sx={{ width: '100%' }} spacing={2}>
 								{error && (
@@ -290,17 +270,7 @@ function Register() {
 							maxLength={50}
 							required
 						/>
-						{/* <input
-							type="password"
-							name="password"
-							value={proPassword}
-							className="register-container__form__form input"
-							placeholder="Mot de passe"
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProPassword(event.target.value)}
-							aria-label="Mot de passe"
-							maxLength={60}
-							required
-						/> */}
+
 						<div className="show-password">
 							<input
 								type={showProPassword ? 'text' : 'password'}
@@ -339,17 +309,6 @@ function Register() {
 								{showProConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 							</span>
 						</div>
-						{/* <input
-							type="password"
-							name="confirmPassword"
-							value={proConfirmPassword}
-							className="register-container__form__form input"
-							placeholder="Confirmer mot de passe"
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProConfirmPassword(event.target.value)}
-							aria-label="Confirmer mot de passe"
-							maxLength={60}
-							required
-						/> */}
 						<input
 							type="siret"
 							name="siret"

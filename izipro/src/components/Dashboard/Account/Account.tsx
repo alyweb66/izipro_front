@@ -535,6 +535,7 @@ function Account() {
 		});
 	}, [lng, lat, lngState, latState]);
 
+	const [isImgLoading, setIsImgLoading] = useState(true);
 	return (
 		<div className="account">
 			<AnimatePresence>
@@ -548,13 +549,16 @@ function Account() {
 				>
 
 					<div className="account__picture" >
+						{isImgLoading && <Spinner delay={0} />}
 						<img
 							className="account__profile__picture__img"
 							src={image || profileLogo}
 							alt="Profile"
 							onClick={() => fileInput.current?.click()}
+							onLoad={() => setIsImgLoading(false)}
 							onError={(event) => {
 								event.currentTarget.src = '/logo/no-picture.jpg';
+								setIsImgLoading(false);
 							}}
 							style={{ cursor: 'pointer' }}
 						/>

@@ -74,7 +74,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
-
+	const [request] = requestDataStore((state) => [state.request, state.setRequest]);
 	//state
 	const [messageValue, setMessageValue] = useState('');
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
@@ -98,7 +98,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	//store
 	const id = userDataStore((state) => state.id);
-	const [request] = requestDataStore((state) => [state.request, state.setRequest]);
+
 	const resetRequest = requestDataStore((state) => state.resetRequest);
 	const [requestsConversationStore, setRequestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 	const [messageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
@@ -455,9 +455,45 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	};
 
+	// useEffect to check the size of the window
+	useEffect(() => {
+		const handleResize = () => {
+			if (window.innerWidth < 780) {
+				if (selectedRequest && selectedRequest.id > 0) {
+					setIsListOpen(false);
+					setIsMessageOpen(true);
+
+				} else {
+					setIsMessageOpen(false);
+					setIsListOpen(true);
+				}
+
+			} else {
+				setIsMessageOpen(true);
+				setIsListOpen(true);
+			}
+		};
+
+		// add event listener to check the size of the window
+		window.addEventListener('resize', handleResize);
+
+		// 	call the function to check the size of the window
+		handleResize();
+
+		// remove the event listener when the component unmount
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
+
 	// useEffect to set the new selected request
 	useEffect(() => {
-		if (request) {
+		if (request && window.innerWidth < 780) {
+			console.log('under 480');
+
+			setSelectedRequest(request);
+			setIsListOpen(false);
+			setIsMessageOpen(true);
+		} else if (request && window.innerWidth > 780) {
+			console.log('over 480');
 			setSelectedRequest(request);
 		}
 	}, []);
@@ -600,34 +636,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		}, 200);
 	}, [messageStore, isMessageOpen, selectedRequest]);
 
-	// useEffect to check the size of the window
-	useEffect(() => {
-		const handleResize = () => {
-			if (window.innerWidth < 780) {
-				if (selectedRequest && selectedRequest.id > 0) {
-					setIsListOpen(false);
-					setIsMessageOpen(true);
 
-				} else {
-					setIsMessageOpen(false);
-					setIsListOpen(true);
-				}
-
-			} else {
-				setIsMessageOpen(true);
-				setIsListOpen(true);
-			}
-		};
-
-		// add event listener to check the size of the window
-		window.addEventListener('resize', handleResize);
-
-		// 	call the function to check the size of the window
-		handleResize();
-
-		// remove the event listener when the component unmount
-		return () => window.removeEventListener('resize', handleResize);
-	}, []);
 
 
 	return (

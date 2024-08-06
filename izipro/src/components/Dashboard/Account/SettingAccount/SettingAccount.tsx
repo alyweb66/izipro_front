@@ -46,8 +46,6 @@ function SettingAccount() {
 	const [categoriesState, setCategoriesState] = useState<CategoryPros[]>([]);
 	const [jobsState, setJobsState] = useState<JobProps[]>([]);
 
-
-
 	// query
 	const { loading: categoryLoading, categoriesData } = useQueryCategory();
 	const { loading: jobLoading, jobData } = useQueryJobs(selectedCategory);
@@ -127,34 +125,6 @@ function SettingAccount() {
 
 		// Update jobs in the store
 		setJobs([...jobs, ...newJobIds.map((id) => ({ job_id: id }))]);
-		/* 		let submitJobId = [];
-		console.log('jobs', jobs);
-		
-				if (jobs.length === 0) {
-					submitJobId = wishListJob;
-				} else {
-					// check if the job is already in the store
-					submitJobId = wishListJob.filter((job) => jobs.every((jobStore) => jobStore.job_id !== job.id));
-				}
-				console.log('submitJobId', submitJobId);
-				
-				// add job to the selectedJob
-				setSelectedJob([...selectedJob || [], ...submitJobId]);
-		
-				// get unique job id to submit
-				let uniqueJobId: number[] = [];
-				if (submitJobId !== undefined && submitJobId.length > 0) {
-					uniqueJobId = submitJobId.filter(job => job).map((job) => job.id);
-					// delete duplicate job id
-					uniqueJobId = [...new Set(uniqueJobId)];
-		
-				} */
-
-		// update jobs in the store
-		// check if the job is already in the store
-		//const newjobs = uniqueJobId?.filter((id) => !jobs.some((job) => job.job_id === id));
-
-		//setJobs([...jobs, ...(newjobs || [])].map((job) => typeof job === 'number' ? { job_id: job } : job));
 
 		// add job to the database
 		createUserJob({
@@ -259,7 +229,7 @@ function SettingAccount() {
 							</ul>
 							<button className="setting-account__form__button" type='submit'>valider les métiers</button>
 							<ul className={`setting-account__form__list job ${(userJobLoading || deleteJobLoading || categoryLoading) ? 'loading' : ''}`}>
-								{(userJobLoading || categoryLoading) && <Spinner />}
+								{(userJobLoading || categoryLoading) && <Spinner className="small-spinner"/>}
 
 								<h2 className="setting-account__subtitle">Métiers actuel:</h2>
 								<AnimatePresence>
