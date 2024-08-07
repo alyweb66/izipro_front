@@ -66,6 +66,7 @@ function Request() {
 	const [categoriesState, setCategoriesState] = useState<CategoryPros[]>([]);
 	const [jobsState, setJobsState] = useState<JobProps[]>([]);
 	const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 450px)').matches);
+	const [isLoading, setIsLoading] = useState(true);
 
 	// file upload
 	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
@@ -99,6 +100,9 @@ function Request() {
 	// Submit request
 	const handleSubmitRequest = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+
+		setErrorMessage('');
+		setSuccessMessage('');
 
 		// check if all fields are filled
 		let timer: number | undefined;
@@ -201,7 +205,7 @@ function Request() {
 
 	// Get map instance
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const [isLoading, setIsLoading] = useState(true);
+
 	const handleMapLoaded = () => {
 		setIsLoading(false);
 	};
@@ -562,10 +566,16 @@ function Request() {
 										<Alert variant="filled" severity="error">{fileError}</Alert>
 									</Fade>
 								)}
+						{createLoading && <Spinner className="small-spinner" />}
 							</Stack>
 						</div>
-						{createLoading && <Spinner />}
-						<button className="request__form__button" type="submit" disabled={createLoading}>Envoyer</button>
+						<button
+							className="request__form__button"
+							type="submit"
+							disabled={createLoading}
+							>
+							Envoyer
+						</button>
 					</motion.form>
 				)}
 			</AnimatePresence>

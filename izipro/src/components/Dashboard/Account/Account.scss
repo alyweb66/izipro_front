@@ -23,9 +23,9 @@
         .notification-container {
             position: relative;
             width: 100%;
-           // display: flex;
+            // display: flex;
             //flex-wrap: wrap;
-           // justify-content: center;
+            // justify-content: center;
             gap: 2rem;
 
             .notification {
@@ -191,7 +191,7 @@
                     }
 
                     .request__form__map__map {
-
+                        position: relative;
                         margin: 0 auto;
                         width: 100%;
                         max-width: 90%;

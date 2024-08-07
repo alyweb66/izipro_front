@@ -256,7 +256,7 @@
 
 
         .my-request__answer-list__header {
-          
+
             &.title {
                 position: relative;
                 margin: 0.5rem 0 0.5rem 0;
@@ -266,7 +266,7 @@
                 color: v.$color-primary-blue;
                 font-size: 1.2rem;
                 font-weight: 500;
-                
+
 
             }
 
@@ -369,7 +369,7 @@
                         font-weight: 500;
                         width: 100%;
                         max-width: 75%;
-                        
+
 
                     }
 
@@ -597,28 +597,26 @@
                         background-color: v.$color-chat-blue;
                         border-radius: 0 1rem 1rem 1rem;
                         margin-top: 1rem;
-                        max-width: 70%;
-                        width: fit-content;
-                        
-                        
+                        width: 80%;
+                        max-width: fit-content;
+
+
                         &.me {
                             border-radius: 1rem 1rem 0rem 1rem;
                             align-self: flex-end;
                             background-color: v.$color-chat-orange;
                             margin-top: 1rem;
-                            
-                           /*  .my-request__message-list__message__detail__image-container {
-                                
-                               // margin: auto;
+
+                            .my-request__message-list__message__detail__image-container {
+
+                                display: flex;
+                                justify-content: flex-end;
+
                                 .map {
-                                   // display: flex;
-                                    //flex-wrap: wrap;
-                                   // justify-content: flex-end;
-                                    
-                                    
+                                    justify-content: flex-end;
 
                                 }
-                            } */
+                            }
 
                             .my-request__message-list__message__detail__texte {
                                 word-wrap: break-word;
@@ -628,6 +626,8 @@
                         }
 
                         .my-request__message-list__message__detail__image-container {
+                            width: 100%;
+                            max-width: fit-content;
 
                             .map {
                                 display: flex;
@@ -636,29 +636,60 @@
                                 gap: 0.3rem;
                                 margin: 0.5rem 0.5rem;
                                 justify-content: flex-start;
+                                max-width: fit-content;
 
                                 .a-pdf {
                                     display: flex;
                                     justify-content: end;
                                     width: auto;
+                                    border-radius: 0.5rem;
 
                                     .my-request__message-list__message__detail__image-pdf {
-                                        width: 5rem;
+                                        border-radius: 0.5rem;
+                                        cursor: pointer;
+                                        object-fit: cover;
+                                        flex: 1;
+                                        width: auto;
+                                        min-width: 5rem;
+                                        height: auto;
+
+                                        &.single {
+                                            width: fit-content;
+                                            max-width: 5rem;
+                                            height: auto;
+                                            border-radius: 0.5rem;
+                                        }
+
+                                        &.multiple {
+                                            width: 5rem;
+                                            height: auto;
+                                            object-fit: cover;
+                                        }
+
+                                        &.loading {
+                                            position: relative;
+                                        }
                                     }
                                 }
 
                                 .my-request__message-list__message__detail__image {
                                     border-radius: 0.5rem;
                                     cursor: pointer;
-                                   // margin: 0.2rem;
+                                    object-fit: cover;
+                                    flex: 1;
+                                    width: auto;
+                                    min-width: 5rem;
+                                    height: auto;
 
                                     &.single {
-                                        width: auto;
+                                        width: fit-content;
 
                                     }
 
                                     &.multiple {
-                                        width: 6rem;
+                                        width: 5rem;
+                                        height: 5rem;
+                                        object-fit: cover;
                                     }
 
                                     &.loading {
@@ -804,7 +835,7 @@
                 }
 
                 &:focus {
-                   outline: none;
+                    outline: none;
                 }
             }
 

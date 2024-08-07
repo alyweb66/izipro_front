@@ -863,7 +863,7 @@ function Dashboard() {
 				<nav className="__nav">
 					<div className="__burger" >
 						<div className="__container">
-							<img className="__logo" src="/izipro-logo.svg" alt="Izipro logo" />
+							<img className="__logo" src="/izipro-logo.svg" alt="Izipro logo" onClick={() => window.location.reload()} />
 							<button className="__menu" onClick={toggleMenu}>
 								<div className='burger-icon'>
 									<div className="burger-icon__line"></div>

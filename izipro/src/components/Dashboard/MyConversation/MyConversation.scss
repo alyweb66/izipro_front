@@ -460,19 +460,113 @@
                         background-color: v.$color-chat-blue;
                         border-radius: 0 1rem 1rem 1rem;
                         margin-top: 1rem;
-                        max-width: 70%;
+                        width: 80%;
+                        max-width: fit-content;
+
+
+
+
+                        .my-conversation__message-list__message__detail__image-container {
+                            width: 100%;
+                            max-width: fit-content;
+
+                            .map {
+                                display: flex;
+                                flex-wrap: wrap;
+                                background-color: transparent;
+                                gap: 0.3rem;
+                                margin: 0.5rem 0.5rem;
+                                justify-content: flex-start;
+                                max-width: fit-content;
+
+                                .a-pdf {
+                                    display: flex;
+                                    justify-content: end;
+                                    width: auto;
+                                    border-radius: 0.5rem;
+
+                                    .my-conversation__message-list__message__detail__image-pdf {
+                                        border-radius: 0.5rem;
+                                        cursor: pointer;
+                                        object-fit: cover;
+                                        flex: 1;
+                                        width: auto;
+                                        min-width: 5rem;
+                                        height: auto;
+
+                                        &.single {
+                                            width: fit-content;
+                                            max-width: 5rem;
+                                            height: auto;
+                                            border-radius: 0.5rem;
+                                        }
+
+                                        &.multiple {
+                                            width: 5rem;
+                                            height: auto;
+                                            object-fit: cover;
+                                        }
+
+                                        &.loading {
+                                            position: relative;
+                                        }
+
+
+                                    }
+                                }
+
+                                .my-conversation__message-list__message__detail__image {
+                                    border-radius: 0.5rem;
+                                    cursor: pointer;
+                                    object-fit: cover;
+                                    flex: 1;
+                                    width: auto;
+                                    min-width: 5rem;
+                                    height: auto;
+
+
+                                    &.single {
+                                        width: fit-content;
+                                        max-width: 100%;
+                                        height: auto;
+                                        border-radius: 0.5rem;
+                                    }
+
+                                    &.multiple {
+                                        width: 5rem;
+                                        height: 5rem;
+                                        object-fit: cover;
+                                    }
+
+                                    &.loading {
+                                        position: relative;
+                                    }
+                                }
+
+
+                                &.message {
+                                    margin-bottom: 0;
+                                }
+
+                            }
+
+                        }
 
                         &.me {
                             border-radius: 1rem 1rem 0rem 1rem;
                             align-self: flex-end;
+                            background-color: black;
                             background-color: v.$color-chat-orange;
                             margin-top: 1rem;
 
+
                             .my-conversation__message-list__message__detail__image-container {
+                                // background-color: red;
+                                display: flex;
+                                justify-content: flex-end;
 
                                 .map {
-                                    display: flex;
-                                    flex-wrap: wrap;
+   
                                     justify-content: flex-end;
 
                                 }
@@ -483,52 +577,6 @@
                                 overflow-wrap: break-word;
 
                             }
-                        }
-
-                        .my-conversation__message-list__message__detail__image-container {
-
-                            .map {
-                                display: flex;
-                                flex-wrap: wrap;
-                                background-color: transparent;
-                                gap: 0.3rem;
-                                margin: 0.5rem 0.5rem;
-                                justify-content: flex-start;
-
-                                .a-pdf {
-                                    display: flex;
-                                    justify-content: end;
-                                    width: auto;
-
-                                    .my-conversation__message-list__message__detail__image-pdf {
-                                        width: 5rem;
-                                    }
-                                }
-
-                                .my-conversation__message-list__message__detail__image {
-                                    border-radius: 0.5rem;
-                                    cursor: pointer;
-
-                                    &.single {
-                                        width: auto;
-
-                                    }
-
-                                    &.multiple {
-                                        width: 6rem;
-                                    }
-
-                                    &.loading {
-                                        position: relative;
-                                    }
-                                }
-
-                                &.message {
-                                    margin-bottom: 0;
-                                }
-
-                            }
-
                         }
 
                         .my-conversation__message-list__message__detail__texte {

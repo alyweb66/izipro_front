@@ -126,6 +126,7 @@ function Account() {
 	const [errorPicture, setErrorPicture] = useState('');
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [showOldPassword, setShowOldPassword] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 	const [notification, setNotification] = useState(emailNotification === null ? false : emailNotification);
 	// state for mapBox
 	const [viewState, setViewState] = useState({
@@ -526,6 +527,11 @@ function Account() {
 		setIsNotificationEnabled(!isNotificationEnabled);
 	};
 
+
+	const handleMapLoaded = () => {
+		setIsLoading(false);
+	};
+
 	// useEffect for mapBox lng lat
 	useEffect(() => {
 		setViewState({
@@ -776,18 +782,19 @@ function Account() {
 							<div className="request__form__map">
 								<p className="request__title-map">Vérifiez votre adresse sur la carte (validez pour actualiser):</p>
 								<div className="request__form__map__map">
+								{isLoading && <Spinner />}
 									<Map
 										reuseMaps
 										mapboxAccessToken={mapboxAccessToken}
 										{...viewState}
 										onMove={evt => setViewState(evt.viewState)}
-										//zoom={zoom}
 										scrollZoom={true}
 										maxZoom={15}
 										minZoom={10}
 										mapStyle="mapbox://styles/mapbox/streets-v12"
 										dragRotate={false}
 										dragPan={false}
+										onLoad={handleMapLoaded}
 									>
 										<Marker
 											longitude={typeof lngState === 'number' ? lngState : parseFloat(lngState)}
