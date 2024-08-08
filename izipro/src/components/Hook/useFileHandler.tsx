@@ -18,10 +18,24 @@ export function useFileHandler() {
 		const maxFileSize = 1048576; // 1MB in bytes
 		// filter pdf files that are too large
 		const validFiles = Array.from(files!).filter(file => {
+
+				const extension = file.name.split('.').pop()?.toLowerCase();
+				if (extension && !['jpg', 'jpeg', 'png', 'pdf'].includes(extension)) {
+					setFileError(`Fichier ${file.name} n'est pas un fichier valide, fichiers acceptés .jpg, .jpeg .png ou .pdf.`);
+					
+					setTimeout(() => {
+						setFileError('');
+					}, 15000);
+					return false;
+				}
+
 			if (file.name.endsWith('.pdf')) {
 				if (file.size > maxFileSize) {
 					setFileError(`Fichier ${file.name} est trop grand, veuillez choisir un fichier de moins de 1MB.`);
-
+					setTimeout(() => {
+						setFileError('');
+					}, 15000);
+					return false;
 					return false;
 				}
 				return true;

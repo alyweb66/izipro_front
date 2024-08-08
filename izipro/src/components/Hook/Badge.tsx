@@ -24,18 +24,3 @@ export const Badge = ({ count }: { count: number }) => {
 	);
 };
 
-/* export const ClientMessageBadge = ({ count }: { count: number }) => {
-	return (
-		<div className="notification-badge">
-			{count > 0 ? count : null}
-		</div>
-	);
-};
-
-export const MyRequestBadge = ({ count }: { count: number }) => {
-	return (
-		<div className="notification-badge">
-			{count > 0 ? count : null}
-		</div>
-	);
-}; */

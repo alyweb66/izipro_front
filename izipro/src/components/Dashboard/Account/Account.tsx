@@ -46,6 +46,13 @@ import { IoLocationSharp } from "react-icons/io5";
 import Switch from '@mui/material/Switch';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
+import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
+import { useQueryGetNotification } from '../../Hook/Query';
+import { UPDATE_NOTIFICATION_MUTATION } from '../../GraphQL/notificationMutation';
+import { useNotificationStore } from '../../../store/Notification';
 //import '../../../styles/spinner.scss';
 
 
@@ -61,21 +68,23 @@ function Account() {
 	const { askPermission, disableNotifications } = serviceWorkerRegistration();
 	// useRef for profile picture
 	const fileInput = useRef<HTMLInputElement>(null);
+	const isGetNotificationRef = useRef(true);
 
 	const [
 		id,
-		emailStore,
-		addressStore,
+		email,
+		address,
 		cityStore,
-		first_nameStore,
-		last_nameStore,
-		lngStore,
-		siretStore,
-		denominationStore,
-		imageStore,
-		descriptionStore,
-		latStore,
-		postal_codeStore] = userDataStore((state) => [
+		first_name,
+		last_name,
+		lng,
+		siret,
+		denomination,
+		image,
+		description,
+		lat,
+		setImage,
+		postal_code] = userDataStore((state) => [
 			state.id,
 			state.email,
 			state.address,
@@ -88,24 +97,25 @@ function Account() {
 			state.image,
 			state.description,
 			state.lat,
+			state.setImage,
 			state.postal_code
 		]);
-
+	const [emailNotification, setEmailNotification] = useNotificationStore((state) => [state.email_notification, state.setEmailNotification]);
 
 
 	//state
-	const [first_name, setFirstName] = useState(first_nameStore || '');
-	const [last_name, setLastName] = useState(last_nameStore || '');
-	const [email, setEmail] = useState(emailStore || '');
-	const [address, setAddress] = useState(addressStore || '');
-	const [postal_code, setPostalCode] = useState(postal_codeStore || '');
-	const [city, setCity] = useState(cityStore || '');
-	const [lng, setLng] = useState(lngStore || '');
-	const [lat, setLat] = useState(latStore || '');
-	const [siret, setSiret] = useState(siretStore || '');
-	const [denomination, setDenomination] = useState(denominationStore || '');
-	const [description, setDescription] = useState(descriptionStore || '');
-	const [picture, setPicture] = useState(imageStore || '');
+	const [first_nameState, setFirstNameState] = useState(first_name || '');
+	const [last_nameState, setLastNameState] = useState(last_name || '');
+	const [emailState, setEmailState] = useState(email || '');
+	const [addressState, setAddressState] = useState(address || '');
+	const [postal_codeState, setPostalCodeState] = useState(postal_code || '');
+	const [cityState, setCityState] = useState(cityStore || '');
+	const [lngState, setLngState] = useState(lng || '');
+	const [latState, setLatState] = useState(lat || '');
+	const [siretState, setSiretState] = useState(siret || '');
+	const [denominationState, setDenominationState] = useState(denomination || '');
+	const [descriptionState, setDescriptionState] = useState(description || '');
+	const [pictureState, setPictureState] = useState(image || '');
 	const [oldPassword, setOldPassword] = useState('');
 	const [newPassword, setNewPassword] = useState('');
 	const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -113,10 +123,15 @@ function Account() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [ChangeEmail, setChangeEmail] = useState('');
 	const [isNotificationEnabled, setIsNotificationEnabled] = useState(Notification.permission === 'granted');
+	const [errorPicture, setErrorPicture] = useState('');
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const [showOldPassword, setShowOldPassword] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
+	const [notification, setNotification] = useState(emailNotification === null ? false : emailNotification);
 	// state for mapBox
 	const [viewState, setViewState] = useState({
-		longitude: typeof lng === 'number' ? lng : parseFloat(lng),
-		latitude: typeof lat === 'number' ? lat : parseFloat(lat),
+		longitude: typeof lngState === 'number' ? lngState : parseFloat(lngState),
+		latitude: typeof latState === 'number' ? latState : parseFloat(latState),
 		zoom: 12,
 	});
 
@@ -135,7 +150,7 @@ function Account() {
 	// Store data
 	const setAccount = userDataStore((state) => state.setAccount);
 	const role = userDataStore((state) => state.role);
-	const [image, setImage] = userDataStore((state) => [state.image, state.setImage]);
+	//const [image, setImage] = userDataStore((state) => [state.image, state.setImage]);
 	const resetUserData = userDataStore((state) => state.resetUserData);
 
 	// Mutation to update the user data
@@ -154,61 +169,111 @@ function Account() {
 	const [changePassword, { loading: changepasswordLoading, error: changePasswordError }] = useMutation(CHANGE_PASSWORD_MUTATION);
 	const [deleteProfilePicture, { error: deleteProfilePictureError }] = useMutation(DELETE_PROFILE_PICTURE_MUTATION);
 	const [deleteAccount, { error: deleteAccountError }] = useMutation(DELETE_ACCOUNT_MUTATION);
+	const [updateNotification, { error: updateNotificationError }] = useMutation(UPDATE_NOTIFICATION_MUTATION);
 
+	// Query 
+	const { loading: notificationLoading, notificationData } = useQueryGetNotification(isGetNotificationRef.current);
 	// Set the new user data to state
 	useEffect(() => {
 		//sanitize the input
 		const newUserData = {
-			first_name: DOMPurify.sanitize(first_name),
-			last_name: DOMPurify.sanitize(last_name),
-			email: DOMPurify.sanitize(email),
-			address: DOMPurify.sanitize(address),
-			postal_code: DOMPurify.sanitize(postal_code),
-			city: DOMPurify.sanitize(city),
-			siret: DOMPurify.sanitize(siret),
-			denomination: DOMPurify.sanitize(denomination),
-			description: DOMPurify.sanitize(description),
-			image: DOMPurify.sanitize(picture),
+			first_name: DOMPurify.sanitize(first_nameState),
+			last_name: DOMPurify.sanitize(last_nameState),
+			email: DOMPurify.sanitize(emailState),
+			address: DOMPurify.sanitize(addressState),
+			postal_code: DOMPurify.sanitize(postal_codeState),
+			city: DOMPurify.sanitize(cityState),
+			siret: DOMPurify.sanitize(siretState),
+			denomination: DOMPurify.sanitize(denominationState),
+			description: DOMPurify.sanitize(descriptionState),
+			image: DOMPurify.sanitize(pictureState),
 		};
 
 		setUserData(newUserData);
-	}, [first_name, last_name, email, address, postal_code, city, lng, lat, siret, denomination, description]);
+	}, [first_nameState, last_nameState, emailState, addressState, postal_codeState, cityState, lngState, latState, siretState, denominationState, descriptionState]);
 
+	// Set the notification state
+	useEffect(() => {
+		if (notificationData && notificationData.user && emailNotification === null) {
+			const emailNotification = notificationData.user.notification?.email_notification;
+
+			setEmailNotification(emailNotification);
+			setNotification(emailNotification);
+
+			isGetNotificationRef.current = true;
+		}
+	}, [notificationData]);
+
+	// handle email notification
+	const handleNotification = (event: React.ChangeEvent<HTMLInputElement>) => {
+		event.preventDefault();
+
+		updateNotification({
+			variables: {
+				input: {
+					user_id: id,
+					email_notification: !notification,
+				},
+			},
+		}).then((response): void => {
+			const { updateNotification } = response.data;
+			if (updateNotification) {
+				setEmailNotification(!notification);
+				setNotification(!notification);
+			}
+		});
+
+		if (updateNotificationError) {
+			throw new Error('Error while updating notification');
+		}
+	}
 
 	// Handle the account submit
 	const handleAccountSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
-		// fetch the location
-		let newUserData = {} as UserAccountDataProps;;
-		if (address && city && postal_code) {
-			const location = await Localization(address, city, postal_code);
-			// Add lng and lat to userData
-			// Create a copy of userData
-			newUserData = { ...userData };
-			newUserData.lng = location?.lng;
-			newUserData.lat = location?.lat;
-			setLng(location?.lng);
-			setLat(location?.lat);
+		setErrorAccount('');
+		setMessageAccount('');
+		setChangeEmail('');
+
+		let newUserData = {} as UserAccountDataProps;
+		if (address !== addressState || cityStore !== cityState || postal_code !== postal_codeState) {
+			// fetch the location
+			//let newUserData = {} as UserAccountDataProps;;
+			if (addressState && cityState && postal_codeState) {
+				const location = await Localization(addressState, cityState, postal_codeState, setErrorAccount);
+
+				if (!location) {
+					return;
+				}
+				// Add lng and lat to userData
+				// Create a copy of userData
+				newUserData = { ...userData };
+				newUserData.lng = location?.lng;
+				newUserData.lat = location?.lat;
+				setLngState(location?.lng);
+				setLatState(location?.lat);
+			}
 		}
 
 		// Compare the initial data with the new data and get the changed fields
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const changedFields = (Object.keys(userDataStore.getState()) as Array<keyof UserDataProps>).reduce((result: any, key: keyof UserDataProps) => {
 
-			if (userDataStore.getState()[key] !== newUserData[key]) {
-				result[key] = newUserData[key];
+			if (userDataStore.getState()[key] !== userData[key]) {
+				result[key] = userData[key];
 			}
 
 			return result;
 		}, {});
+
 
 		if (changedFields.siret && changedFields.siret.length !== 14) {
 			setErrorAccount('Siret invalide');
 			setTimeout(() => {
 				setErrorAccount('');
 
-			}, 5000);
+			}, 15000);
 			return;
 		}
 
@@ -218,10 +283,21 @@ function Account() {
 				setTimeout(() => {
 					setErrorAccount('');
 
-				}, 5000);
+				}, 15000);
 				return;
 			}
 
+		}
+
+		if (changedFields.postal_code) {
+			if (!validator.isPostalCode(changedFields.postal_code, 'FR')) {
+				setErrorAccount('Code postal invalide');
+				setTimeout(() => {
+					setErrorAccount('');
+
+				}, 15000);
+				return;
+			}
 		}
 
 		// Delete the role and id fields
@@ -240,7 +316,6 @@ function Account() {
 			}).then((response): void => {
 
 				const { updateUser } = response.data;
-				console.log('updateUser', updateUser);
 
 				// Set the new user data to the store
 				setAccount(updateUser);
@@ -317,6 +392,18 @@ function Account() {
 
 		const file = event.target.files;
 
+		// Check if the file is .jpg, .jpeg or .png
+		if (file && file[0]) {
+			const extension = file[0].name.split('.').pop()?.toLowerCase();
+			if (extension && !['jpg', 'jpeg', 'png'].includes(extension)) {
+				setErrorPicture('Seuls les fichiers .jpg, .jpeg et .png sont autorisés');
+				setTimeout(() => {
+					setErrorAccount('');
+				}, 3000);
+				return;
+			}
+		}
+
 		if ((file?.length ?? 0) > 0) {
 
 			updateUser({
@@ -331,6 +418,7 @@ function Account() {
 				const { updateUser } = response.data;
 				// Set the new user data to the store
 				setAccount(updateUser);
+				setErrorPicture('');
 			});
 		}
 
@@ -347,7 +435,7 @@ function Account() {
 		}).then((response): void => {
 
 			if (response.data?.deleteProfilePicture) {
-				setPicture('');
+				setPictureState('');
 				setImage('');
 			}
 		});
@@ -393,56 +481,67 @@ function Account() {
 
 	};
 
-	// useEffect for notification push
+	// useEffect for notification 
 	useEffect(() => {
+
+		if (emailNotification === null) {
+			isGetNotificationRef.current = false;
+		}
+
 		const checkNotificationStatus = async () => {
-            // set the state of the notification
+			// set the state of the notification
 			// check if the user is already subscribed to push notifications
-            const registration = await navigator.serviceWorker.getRegistration();
-            if (registration) {
-                const subscription = await registration.pushManager.getSubscription();
-                setIsNotificationEnabled(!!subscription);
-            } else {
-                setIsNotificationEnabled(false);
-            }
+			const registration = await navigator.serviceWorker.getRegistration();
+			if (registration) {
+				const subscription = await registration.pushManager.getSubscription();
+				setIsNotificationEnabled(!!subscription);
+			} else {
+				setIsNotificationEnabled(false);
+			}
 
-            // verify if the browser supports notifications push and service workers
-            const permission = document.getElementById('push-permission');
-            console.log('permission', permission);
-            if (
-                !permission &&
-                !('serviceWorker' in navigator) ||
-                !('Notification' in window)
-            ) {
-                if (permission) {
-                    permission.style.display = 'none';
-                }
-                return;
-            }
-        };
+			// verify if the browser supports notifications push and service workers
+			const permission = document.getElementById('push-permission');
 
-        checkNotificationStatus();
+			if (
+				!permission &&
+				!('serviceWorker' in navigator) ||
+				!('Notification' in window)
+			) {
+				if (permission) {
+					permission.style.display = 'none';
+				}
+				return;
+			}
+		};
+
+		checkNotificationStatus();
 	}, []);
 
 	// handle the switch change for notification
 	const handleSwitchChange = () => {
-        if (isNotificationEnabled) {
-            disableNotifications();
-        } else {
-            askPermission();
-        }
-        setIsNotificationEnabled(!isNotificationEnabled);
-    };
+		if (isNotificationEnabled) {
+			disableNotifications();
+		} else {
+			askPermission();
+		}
+		setIsNotificationEnabled(!isNotificationEnabled);
+	};
+
+
+	const handleMapLoaded = () => {
+		setIsLoading(false);
+	};
 
 	// useEffect for mapBox lng lat
 	useEffect(() => {
 		setViewState({
-			longitude: typeof lng === 'number' ? lng : parseFloat(lng),
-			latitude: typeof lat === 'number' ? lat : parseFloat(lat),
+			longitude: typeof lngState === 'number' ? lngState : parseFloat(lngState),
+			latitude: typeof latState === 'number' ? latState : parseFloat(latState),
 			zoom: 12,
 		});
-	}, [lngStore, latStore, lng, lat]);
+	}, [lng, lat, lngState, latState]);
 
+	const [isImgLoading, setIsImgLoading] = useState(true);
 	return (
 		<div className="account">
 			<AnimatePresence>
@@ -454,12 +553,19 @@ function Account() {
 					exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 					transition={{ duration: 0.1, type: 'tween' }}
 				>
+
 					<div className="account__picture" >
+						{isImgLoading && <Spinner delay={0} />}
 						<img
 							className="account__profile__picture__img"
 							src={image || profileLogo}
 							alt="Profile"
 							onClick={() => fileInput.current?.click()}
+							onLoad={() => setIsImgLoading(false)}
+							onError={(event) => {
+								event.currentTarget.src = '/logo/no-picture.jpg';
+								setIsImgLoading(false);
+							}}
 							style={{ cursor: 'pointer' }}
 						/>
 						<input
@@ -470,261 +576,373 @@ function Account() {
 							style={{ display: 'none' }}
 							accept=".jpg,.jpeg,.png"
 						/>
+						<div className="message">
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{errorPicture && (
+									<Fade in={!!errorPicture} timeout={300}>
+										<Alert variant="filled" severity="error">{errorPicture}</Alert>
+									</Fade>
+								)}
+							</Stack>
+						</div>
 						<button className="account__profile__picture__delete" type='button' onClick={handleDeletePicture}>Supprimer</button>
 					</div >
-					<form className={`account__profile__form ${updateUserLoading ? 'loading' : ''}`} onSubmit={handleAccountSubmit} >
-						<div id="push-permission">
+					<div className="notification-container">
+					{(notification === null || notificationLoading) && <Spinner delay={0}/>}
+						<div className="notification">
 							<FormGroup>
 								<FormControlLabel
 									control={<Switch
 										color="warning"
 										checked={isNotificationEnabled}
 										onChange={handleSwitchChange}
-										inputProps={{ 'aria-label': 'Activer les notifications' }}
+										inputProps={{ 'aria-label': 'Notifications push' }}
 									/>}
-									label="Activer les notifications"
+									label="Notifications push"
 									labelPlacement="start"
 									classes={{ label: 'custom-label' }}
 								/>
 							</FormGroup>
 						</div>
-						{updateUserLoading && <Spinner />}
-						<h1 className="account__profile__form__title">Mes informations:</h1>
-						<div></div>
-						<label className="account__profile__form__label">
-							Prénom:
-							<input
-								className="account__profile__form__label__input"
-								type="text"
-								name="first_name"
-								value={first_name || ''}
-								placeholder={first_name || ''}
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)}
-								aria-label="Prénom"
-								maxLength={50}
-								autoComplete='first_name'
-							/>
-						</label>
-						<label className="account__profile__form__label">
-							Nom:
-							<input
-								className="account__profile__form__label__input"
-								type="text"
-								name="last_name"
-								value={last_name || ''}
-								placeholder={last_name || ''}
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
-								aria-label="Nom"
-								maxLength={50}
-								autoComplete='last_name'
-							/>
-						</label>
-						<label className="account__profile__form__label">
-							Email:
-							<input
-								className="account__profile__form__label__input"
-								type="text"
-								name="email"
-								value={email || ''}
-								placeholder={email || ''}
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
-								aria-label="Email"
-								maxLength={50}
-								autoComplete='email'
-							/>
-						</label>
-						<label className="account__profile__form__label">
-							Adresse:
-							<input
-								className="account__profile__form__label__input"
-								type="text"
-								name="address"
-								value={address || ''}
-								placeholder={address || ''}
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddress(event.target.value)}
-								aria-label="Adresse"
-								maxLength={100}
-								autoComplete='address'
-								required
-							/>
-						</label>
-						<label className="account__profile__form__label">
-							Code postal:
-							<input
-								className="account__profile__form__label__input"
-								type="text"
-								name="postal_code"
-								value={postal_code || ''}
-								placeholder={postal_code || ''}
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCode(event.target.value)}
-								aria-label="Code postal"
-								autoComplete='postal_code'
-								maxLength={10}
-								required
-							/>
-						</label>
-						<label className="account__profile__form__label">
-							Ville:
-							<input
-								className="account__profile__form__label__input"
-								type="text"
-								name="city"
-								value={city || ''}
-								placeholder={city || ''}
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCity(event.target.value)}
-								aria-label="Ville"
-								autoComplete='city'
-								maxLength={20}
-								required
-							/>
-						</label>
-						{role === 'pro' && (
-							<>
-								<label className="account__profile__form__label">
-									Siret:
-									<input
-										className="account__profile__form__label__input"
-										type="text"
-										name="siret"
-										value={siret || ''}
-										placeholder={siret || ''}
-										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
-										aria-label="Siret"
-										autoComplete='siret'
-										maxLength={14}
-									/>
-								</label>
-								<label className="account__profile__form__label">
-									Dénomination:
-									<input
-										className="account__profile__form__label__input"
-										type="text"
-										name="denomination"
-										value={denomination || ''}
-										placeholder={denomination || ''}
-										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenomination(event.target.value)}
-										aria-label="Dénomination"
-										autoComplete='denomination'
-										maxLength={50}
-									/>
-								</label>
-								<label className="account__profile__form__label">
-									Description:
-									<textarea
-										className="account__profile__form__label__input textarea"
-										name="description"
-										id="description"
-										placeholder="Exprimez-vous 200 caractères maximum"
-										value={description}
-										onChange={(event) => setDescription(event.target.value)}
-										aria-label="Exprimez-vous 200 caractères maximum"
-										maxLength={200}
+						<div className="notification">
+							<FormGroup>
+								<FormControlLabel
+									control={<Switch
+										color="warning"
+										checked={notification}
+										onChange={handleNotification}
+										inputProps={{ 'aria-label': 'Notifications par email' }}
+									/>}
+									label="Notifications par email"
+									labelPlacement="start"
+									classes={{ label: 'custom-label' }}
+								/>
+							</FormGroup>
+						</div>
+					</div>
+					<div className="account_profile_container">
+						<form className={`account__profile__form ${updateUserLoading ? 'loading' : ''}`} onSubmit={handleAccountSubmit} >
+							{updateUserLoading && <Spinner />}
+							<h1 className="account__profile__form__title">Mes informations:</h1>
+							<div></div>
+							<label className="account__profile__form__label">
+								Prénom:
+								<input
+									className="account__profile__form__label__input"
+									type="text"
+									name="first_name"
+									value={first_nameState || ''}
+									placeholder={first_nameState || ''}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstNameState(event.target.value)}
+									aria-label="Prénom"
+									maxLength={50}
+									autoComplete='first_name'
+								/>
+							</label>
+							<label className="account__profile__form__label">
+								Nom:
+								<input
+									className="account__profile__form__label__input"
+									type="text"
+									name="last_name"
+									value={last_nameState || ''}
+									placeholder={last_nameState || ''}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastNameState(event.target.value)}
+									aria-label="Nom"
+									maxLength={50}
+									autoComplete='last_name'
+								/>
+							</label>
+							<label className="account__profile__form__label">
+								Email:
+								<input
+									className="account__profile__form__label__input"
+									type="text"
+									name="email"
+									value={emailState || ''}
+									placeholder={emailState || ''}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmailState(event.target.value)}
+									aria-label="Email"
+									maxLength={50}
+									autoComplete='email'
+								/>
+							</label>
+							<label className="account__profile__form__label">
+								Adresse:StateState
+								<input
+									className="account__profile__form__label__input"
+									type="text"
+									name="address"
+									value={addressState || ''}
+									placeholder={addressState || ''}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddressState(event.target.value)}
+									aria-label="Adresse"
+									maxLength={100}
+									autoComplete='address'
+									required
+								/>
+							</label>
+							<label className="account__profile__form__label">
+								Code postal:
+								<input
+									className="account__profile__form__label__input"
+									type="text"
+									name="postal_code"
+									value={postal_codeState || ''}
+									placeholder={postal_codeState || ''}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCodeState(event.target.value)}
+									aria-label="Code postal"
+									autoComplete='postal_code'
+									maxLength={10}
+									required
+								/>
+							</label>
+							<label className="account__profile__form__label">
+								Ville:
+								<input
+									className="account__profile__form__label__input"
+									type="text"
+									name="city"
+									value={cityState || ''}
+									placeholder={cityState || ''}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCityState(event.target.value)}
+									aria-label="Ville"
+									autoComplete='city'
+									maxLength={20}
+									required
+								/>
+							</label>
+							{role === 'pro' && (
+								<>
+									<label className="account__profile__form__label">
+										Siret:
+										<input
+											className="account__profile__form__label__input"
+											type="text"
+											name="siret"
+											value={siretState || ''}
+											placeholder={siretState || ''}
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiretState(event.target.value)}
+											aria-label="Siret"
+											autoComplete='siret'
+											maxLength={14}
+										/>
+									</label>
+									<label className="account__profile__form__label">
+										Dénomination:
+										<input
+											className="account__profile__form__label__input"
+											type="text"
+											name="denomination"
+											value={denominationState || ''}
+											placeholder={denominationState || ''}
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenominationState(event.target.value)}
+											aria-label="Dénomination"
+											autoComplete='denomination'
+											maxLength={50}
+										/>
+									</label>
+									<label className="account__profile__form__label">
+										Description:
+										<textarea
+											className="account__profile__form__label__input textarea"
+											name="description"
+											id="description"
+											placeholder="Exprimez-vous 200 caractères maximum"
+											value={descriptionState}
+											onChange={(event) => setDescriptionState(event.target.value)}
+											aria-label="Exprimez-vous 200 caractères maximum"
+											maxLength={200}
+										>
+										</textarea>
+										<p>{descriptionState?.length}/200</p>
+									</label>
+								</>
+							)}
+							<div className="message">
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{messageAccount && (
+										<Fade in={!!messageAccount} timeout={300}>
+											<Alert variant="filled" severity="success">{messageAccount}</Alert>
+										</Fade>
+									)}
+									{errorAccount && (
+										<Fade in={!!errorAccount} timeout={300}>
+											<Alert variant="filled" severity="error">{errorAccount}</Alert>
+										</Fade>
+									)}
+									{ChangeEmail && (
+										<Fade in={!!ChangeEmail} timeout={300}>
+											<Alert variant="filled" severity="success">{ChangeEmail}</Alert>
+										</Fade>
+									)}
+								</Stack>
+							</div>
+							<button className="account__profile__button" type="submit">Valider</button>
+							<div className="request__form__map">
+								<p className="request__title-map">Vérifiez votre adresse sur la carte (validez pour actualiser):</p>
+								<div className="request__form__map__map">
+								{isLoading && <Spinner />}
+									<Map
+										reuseMaps
+										mapboxAccessToken={mapboxAccessToken}
+										{...viewState}
+										onMove={evt => setViewState(evt.viewState)}
+										scrollZoom={true}
+										maxZoom={15}
+										minZoom={10}
+										mapStyle="mapbox://styles/mapbox/streets-v12"
+										dragRotate={false}
+										dragPan={false}
+										onLoad={handleMapLoaded}
 									>
-									</textarea>
-									<p>{description?.length}/200</p>
-								</label>
-							</>
-
-						)}
-						<div className="request__form__map">
-							<p className="request__title-map">Vérifiez votre adresse sur la carte (validez pour actualiser):</p>
-							<div className="request__form__map__map">
-								<Map
-									reuseMaps
-									mapboxAccessToken={mapboxAccessToken}
-									{...viewState}
-									onMove={evt => setViewState(evt.viewState)}
-									//zoom={zoom}
-									scrollZoom={true}
-									maxZoom={15}
-									minZoom={10}
-									mapStyle="mapbox://styles/mapbox/streets-v12"
-									dragRotate={false}
-									dragPan={false}
-
-								>
-									<Marker
-										longitude={typeof lng === 'number' ? lng : parseFloat(lng)}
-										latitude={typeof lat === 'number' ? lat : parseFloat(lat)}
-									>
-										<div className="map-marker">
-											<IoLocationSharp className="map-marker__icon" />
-										</div>
-									</Marker>
-								</Map>
+										<Marker
+											longitude={typeof lngState === 'number' ? lngState : parseFloat(lngState)}
+											latitude={typeof latState === 'number' ? latState : parseFloat(latState)}
+										>
+											<div className="map-marker">
+												<IoLocationSharp className="map-marker__icon" />
+											</div>
+										</Marker>
+									</Map>
+								</div>
 							</div>
 
+						</form>
+
+						<div className="account-profile__setting-password">
+							<SettingAccount />
+							<form
+								className={`__password ${changepasswordLoading ? 'loading' : ''}`}
+								onSubmit={handleSubmitNewPassword}>
+								{changepasswordLoading && <Spinner />}
+								<h1 className="__title">Changer le mot de passe:</h1>
+								<label className="__label"> Ancien mot de passe:
+									<div className="show-password">
+										<input
+											type={showOldPassword ? 'text' : 'password'}
+											name="oldPassword"
+											value={oldPassword}
+											className="__input"
+											placeholder="Ancien mot de passe"
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setOldPassword(event.target.value)}
+											aria-label="Ancien mot de passe"
+											maxLength={60}
+											required
+										/>
+										<span
+											className="toggle-password-icon"
+											onClick={(event) => { setShowOldPassword(!showOldPassword), event.preventDefault() }}
+										>
+											{showOldPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+										</span>
+									</div>
+									{/* <input
+										className="__input"
+										type={showPassword ? 'text' : 'password'}
+										name="oldPassword"
+										value={oldPassword}
+										placeholder="Ancien mot de passe"
+										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setOldPassword(event.target.value)}
+										aria-label="Ancien mot de passe"
+										maxLength={60}
+										required
+									/> */}
+								</label>
+								<label className="__label">Nouveau mot de passe:
+									<div className="show-password">
+										<input
+											type={showPassword ? 'text' : 'password'}
+											name="newPassword"
+											value={newPassword}
+											className="__input"
+											placeholder="Nouveau mot de passe"
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewPassword(event.target.value)}
+											aria-label="Nouveau mot de passe"
+											maxLength={60}
+											required
+										/>
+										<span
+											className="toggle-password-icon"
+											onClick={(event) => { setShowPassword(!showPassword), event.preventDefault() }}
+										>
+											{showPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+										</span>
+									</div>
+									{/* <input
+										className="__input"
+										type={showPassword ? 'text' : 'password'}
+										name="newPassword"
+										value={newPassword}
+										placeholder="Nouveau mot de passe"
+										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewPassword(event.target.value)}
+										aria-label="Nouveau mot de passe"
+										maxLength={60}
+										required
+									/> */}
+								</label>
+								<label className="__label">Confirmer le nouveau mot de passe:
+									<div className="show-password">
+										<input
+											type={showConfirmPassword ? 'text' : 'password'}
+											name="confirmPassword"
+											value={confirmNewPassword}
+											className="__input"
+											placeholder="Confirmer mot de passe"
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(event.target.value)}
+											aria-label="Confirmer mot de passe"
+											maxLength={60}
+											required
+										/>
+										<span
+											className="toggle-password-icon"
+											onClick={(event) => { setShowConfirmPassword(!showConfirmPassword), event.preventDefault() }}
+										>
+											{showConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+										</span>
+									</div>
+									{/* <input
+										className="__input"
+										type={showPassword ? 'text' : 'password'}
+										name="confirmNewPassword"
+										value={confirmNewPassword}
+										placeholder="Confirmer le nouveau mot de passe"
+										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(event.target.value)}
+										aria-label="Confirmer le nouveau mot de passe"
+										maxLength={60}
+										required
+									/> */}
+								</label>
+								<div className="message">
+									<Stack sx={{ width: '100%' }} spacing={2}>
+										{messagePassword && (
+											<Fade in={!!messagePassword} timeout={300}>
+												<Alert variant="filled" severity="success">{messagePassword}</Alert>
+											</Fade>
+										)}
+										{errorPassword && (
+											<Fade in={!!errorPassword} timeout={300}>
+												<Alert variant="filled" severity="error">{errorPassword}</Alert>
+											</Fade>
+										)}
+									</Stack>
+								</div>
+								{/* <button className="show-password" onClick={() => setShowPassword(!showPassword)}>
+									{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
+								</button> */}
+								<button
+									className="account__profile__button"
+									type="submit">
+									Valider
+								</button>
+							</form>
+							<button
+								className="account__profile__delete"
+								type='button'
+								onClick={() => setModalIsOpen(!modalIsOpen)}>supprimer mon compte
+							</button>
 						</div>
-						{errorAccount && <p className="account__profile__modification-error">{errorAccount}</p>}
-						{messageAccount && <p className="account__profile__modification-message">{messageAccount}</p>}
-						{ChangeEmail && <p className="account__profile__modification-message">{ChangeEmail}</p>}
-						<button className="account__profile__button" type="submit">Valider</button>
-					</form>
-					<SettingAccount />
-					<form
-						className={`account__profile__form password ${changepasswordLoading ? 'loading' : ''}`}
-						onSubmit={handleSubmitNewPassword}>
-						{changepasswordLoading && <Spinner />}
-
-						<h1 className="account__profile__form__title">Changer le mot de passe:</h1>
-						<label className="account__profile__form__label">
-
-							<input
-								className="account__profile__form__label__input"
-								type={showPassword ? 'text' : 'password'}
-								name="oldPassword"
-								value={oldPassword}
-								placeholder="Ancien mot de passe"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setOldPassword(event.target.value)}
-								aria-label="Ancien mot de passe"
-								maxLength={60}
-								required
-							/>
-						</label>
-						<label className="account__profile__form__label">
-							<input
-								className="account__profile__form__label__input"
-								type={showPassword ? 'text' : 'password'}
-								name="newPassword"
-								value={newPassword}
-								placeholder="Nouveau mot de passe"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewPassword(event.target.value)}
-								aria-label="Nouveau mot de passe"
-								maxLength={60}
-								required
-							/>
-						</label>
-						<label className="account__profile__form__label">
-							<input
-								className="account__profile__form__label__input"
-								type={showPassword ? 'text' : 'password'}
-								name="confirmNewPassword"
-								value={confirmNewPassword}
-								placeholder="Confirmer le nouveau mot de passe"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(event.target.value)}
-								aria-label="Confirmer le nouveau mot de passe"
-								maxLength={60}
-								required
-							/>
-						</label>
-						{errorPassword && <p className="account__profile__modification-error">{errorPassword}</p>}
-						{messagePassword && <p className="account__profile__modification-message">{messagePassword}</p>}
-						<button className="show-password" onClick={() => setShowPassword(!showPassword)}>
-							{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
-						</button>
-						<button
-							className="account__profile__button"
-							type="submit">
-							Valider
-						</button>
-
-
-					</form>
-					<button
-						className="account__profile__delete"
-						type='button'
-						onClick={() => setModalIsOpen(!modalIsOpen)}>supprimer mon compte
-					</button>
+					</div>
 				</motion.div >
 			</AnimatePresence>
 

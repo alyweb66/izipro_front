@@ -24,10 +24,10 @@ import {
 	useQueryUserRequests,
 	useQueryUserSubscriptions
 } from '../Hook/Query';
-import { useMyRequestMessageSubscriptions } from '../Hook/MyRequestSubscription';
-import { useClientRequestSubscriptions } from '../Hook/ClientRequestSubscription';
-import { useMyConversationSubscriptions } from '../Hook/MyConversationSubscription';
-import { useLogoutSubscription } from '../Hook/LogoutSubscription';
+import { useMyRequestMessageSubscriptions } from '../GraphQL/MyRequestSubscription';
+import { useClientRequestSubscriptions } from '../GraphQL/ClientRequestSubscription';
+import { useMyConversationSubscriptions } from '../GraphQL/MyConversationSubscription';
+import { useLogoutSubscription } from '../GraphQL/LogoutSubscription';
 import useHandleLogout from '../Hook/HandleLogout';
 
 // Mutation
@@ -105,7 +105,7 @@ function Dashboard() {
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
-	
+
 	//*state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [conversationIdState, setConversationIdState] = useState<number>(0);
@@ -116,7 +116,7 @@ function Dashboard() {
 	const [myConversationIdState, setMyConversationIdState] = useState<number>(0);
 	const [isMyConversationHasMore, setIsMyConversationHasMore] = useState<boolean>(true);
 	const [isForMyConversation, setIsForMyConversation] = useState<boolean>(false);
-	
+
 	//*state for clientRequest
 	const [isCLientRequestHasMore, setIsClientRequestHasMore] = useState<boolean>(true);
 	const [isSkipClientRequest, setIsSkipClientRequest] = useState<boolean>(true);
@@ -169,7 +169,7 @@ function Dashboard() {
 
 
 	//*Query for ClientRequest
-	const { getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequest || clientRequestsStore.length > 0));
+	const { loading: getRequestByJobLoading, getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequest || clientRequestsStore.length > 0));
 
 	//*Query for MyConversation
 	const { loading: requestMyConversationLoading, data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, (role === 'pro' ? requestsConversationStore.length > 0 : true)) as unknown as useQueryUserConversationsProps;
@@ -184,16 +184,22 @@ function Dashboard() {
 	const { logoutSubscription } = useLogoutSubscription();
 
 	// condition if user not logged in
-	let isLogged;
-	const getItem = localStorage.getItem('login');
+	//let isLogged;
 
 	// decode the data
-	const decodeData = atob(getItem || '');
+	const getItem = localStorage.getItem('login');
+	let decodeData: string | { value: string };
+	let isLogged: boolean;
+	try {
+        decodeData = JSON.parse(atob(getItem || ''));
+    } catch (error) {
+        decodeData = atob(getItem || '');
+    }
 
-	if (decodeData === 'session') {
-		isLogged = { value: true };
-	} else {
-		isLogged = JSON.parse(decodeData || '{}');
+	if (decodeData &&((typeof decodeData === 'object' && decodeData.value === 'true') || decodeData === 'session')) {
+			isLogged = true
+	}  else {
+		isLogged = false;
 	}
 
 	// useEffect to check the size of the window
@@ -234,26 +240,20 @@ function Dashboard() {
 
 
 		// check if user is logged in
-		if (isLogged !== null && Object.keys(isLogged).length !== 0) {
-			if (new Date().getTime() > isLogged.expiry) {
-				// The data has expired
-				localStorage.clear();
-
-				if (window.location.pathname !== '/') {
-					navigate('/');
-				}
-			}
-		} else {
+		if (isLogged === false) {
+			// The data has expired
+			localStorage.removeItem('login')
 
 			if (window.location.pathname !== '/') {
 				navigate('/');
 			}
 		}
+
 		// clean event listener
 		return () => {
 			window.removeEventListener('beforeunload', handleBeforeUnload);
 		};
-	}, []);
+	}, [decodeData]);
 
 	// set the new request from requestById to myRequestStore 
 	useEffect(() => {
@@ -863,7 +863,7 @@ function Dashboard() {
 				<nav className="__nav">
 					<div className="__burger" >
 						<div className="__container">
-							<img className="__logo" src="/izipro-logo.svg" alt="Izipro logo" />
+							<img className="__logo" src="/izipro-logo.svg" alt="Izipro logo" onClick={() => window.location.reload()} />
 							<button className="__menu" onClick={toggleMenu}>
 								<div className='burger-icon'>
 									<div className="burger-icon__line"></div>
@@ -960,6 +960,7 @@ function Dashboard() {
 						</ErrorBoundary>
 						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
 							{selectedTab === 'Client request' && <ClientRequest
+								loading={getRequestByJobLoading}
 								offsetRef={clientRequestOffset}
 								setIsHasMore={setIsClientRequestHasMore}
 								isHasMore={isCLientRequestHasMore}
@@ -976,10 +977,7 @@ function Dashboard() {
 					deleteItemModalIsOpen={isExpiredSession}
 					handleDeleteItem={RedirectExpiredSession}
 				/>
-
-				{isFooter && <Footer />}
 			</div>
-			{/* {selectedTab === 'My profile' && <Footer />} */}
 		</>
 
 	);

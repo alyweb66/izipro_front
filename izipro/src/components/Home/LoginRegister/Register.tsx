@@ -7,6 +7,10 @@ import { REGISTER_USER_MUTATION, REGISTER_PRO_USER_MUTATION } from '../../GraphQ
 // External libraries
 import validator from 'validator';
 import DOMPurify from 'dompurify';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
+import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 
 // Styles
 import './Register.scss';
@@ -14,6 +18,7 @@ import './Register.scss';
 
 
 function Register() {
+	// State
 	const [email, setEmail] = useState('');
 	const [proEmail, setProEmail] = useState('');
 	const [password, setPassword] = useState('');
@@ -26,7 +31,11 @@ function Register() {
 	const [userCreated, setUserCreated] = useState(false);
 	const [isProError, setIsProError] = useState('');
 	const [proCreated, setProCreated] = useState(false);
-  
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const [showProPassword, setShowProPassword] = useState(false);
+	const [showProConfirmPassword, setShowProConfirmPassword] = useState(false);
+
 	// function to toggle the visibility of the register form
 	const toggleRegisterVisibility = () => {
 		setIsRegisterVisible(!isRegisterVisible);
@@ -34,123 +43,147 @@ function Register() {
 
 	// Mutation to register a user
 	const [createUser, { error: userError }] = useMutation(REGISTER_USER_MUTATION);
-	const [createProUser, { error: proUserError}] = useMutation(REGISTER_PRO_USER_MUTATION);
+	const [createProUser, { error: proUserError }] = useMutation(REGISTER_PRO_USER_MUTATION);
 
 	// function to handle the registration of a pro user
-	const handleProRegister = (event: React.FormEvent<HTMLFormElement>) => {
+	const handleProRegister = async (event: React.FormEvent<HTMLFormElement>) => {
 		// reset the state
 		setUserCreated(false);
 		setError('');
+		setIsProError('');
 
 		event.preventDefault();
 
 		// Check if the email is valid
 		if (proEmail && !validator.isEmail(proEmail)) {
 			setIsProError('Adresse e-mail invalide');
-			return;
-		}
-    
-		// Check if the password and confirm password are the same
-		if (proPassword && (proPassword !== proConfirmPassword)) {
-			setIsProError('Les mots de passe ne correspondent pas');
-			return;
-		}
-    
-		// Check if the password is strong
-		if (proPassword && !validator.isStrongPassword(proPassword)) {
-			setIsProError('Mot de passe faible, doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial');
-			return;
-		}
- 
-		// Check if the siret is valid
-		if (siret && siret.length !== 14) {
-			setIsProError('Siret invalide');
+			setTimeout(() => {
+				setIsProError('');
+			}, 15000);
 			return;
 		}
 
-		createProUser({
-			variables: {
-				input: {
-					email: DOMPurify.sanitize(proEmail),
-					password: DOMPurify.sanitize(proPassword),
-					siret: Number(DOMPurify.sanitize(siret))
+		// Check if the password and confirm password are the same
+		if (proPassword && (proPassword !== proConfirmPassword)) {
+			setIsProError('Les mots de passe ne correspondent pas');
+			setTimeout(() => {
+				setIsProError('');
+			}, 15000);
+			return;
+		}
+
+		// Check if the password is strong
+		if (proPassword && !validator.isStrongPassword(proPassword)) {
+			setIsProError('Mot de passe faible, doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial');
+			setTimeout(() => {
+				setIsProError('');
+			}, 15000);
+			return;
+		}
+
+		// Check if the siret is valid
+		if (siret && siret.length !== 14) {
+			setIsProError('Siret invalide');
+			setTimeout(() => {
+				setIsProError('');
+			}, 15000);
+			return;
+		}
+
+		try {
+			const response = await createProUser({
+				variables: {
+					input: {
+						email: DOMPurify.sanitize(proEmail),
+						password: DOMPurify.sanitize(proPassword),
+						siret: Number(DOMPurify.sanitize(siret))
+					}
 				}
-			}
-		}).then((response) => {
-			
+			})
+
 			if (response.data.createProUser.id) {
 				setProCreated(true);
-			} 
+			}
 			setProEmail('');
 			setProPassword('');
 			setProConfirmPassword('');
 			setSiret('');
 			setIsProError('');
-		});
 
-		// handle errors
-		if (proUserError) {
+
+		} catch (error) {
+			// handle errors
 			setIsProError('Erreur lors de la création de l\'utilisateur');
 			throw new Error('Submission error!');
 		}
-   
+
 	};
 
 	// function to handle the registration of a user
-	const handleRegister = (event: React.FormEvent<HTMLFormElement>) => {
+	const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
 		// reset the state
 		setUserCreated(false);
 		setError('');
+		setIsProError('');
 
 		event.preventDefault();
 
 		// Check if the email is valid
 		if (email && !validator.isEmail(email)) {
 			setError('Adresse e-mail invalide');
+			setTimeout(() => {
+				setError('');
+			}, 15000);
 			return;
 		}
-    
+
 		// Check if the password and confirm password are the same
 		if (password !== confirmPassword) {
 			setError('Les mots de passe ne correspondent pas');
+			setTimeout(() => {
+				setError('');
+			}, 15000);
 			return;
 		}
 
 		// Check if the password is strong
 		if (password && !validator.isStrongPassword(password)) {
 			setError('Mot de passe faible, doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial');
+			setTimeout(() => {
+				setError('');
+			}, 15000);
 			return;
 		}
- 
-		createUser({ 
-			variables: {
-				input: {
-					email: DOMPurify.sanitize(email),
-					password: DOMPurify.sanitize(password)
+
+		try {
+			const response = await createUser({
+				variables: {
+					input: {
+						email: DOMPurify.sanitize(email),
+						password: DOMPurify.sanitize(password)
+					}
 				}
-			}
-		}).then((response) => {
+			});
 
 			if (response.data.createUser.id) {
 				setUserCreated(true);
-			} 
+			}
 			setEmail('');
 			setPassword('');
 			setConfirmPassword('');
 			setError('');
-		});
-					
-		// handle errors
-		if (userError) {
+		} catch (error) {
+			console.log('useError', error);
 			setError('Erreur lors de la création de l\'utilisateur');
-			throw new Error('Submission error!');
-		} 
-   
+			setTimeout(() => {
+				setError('');
+			}, 15000);
+		}
 	};
 
 	return (
 		<div className="register-container" >
-			<p className="register-container title" ><span onClick={toggleRegisterVisibility}><span>&rarr;</span> Créer un compte <span>&larr;</span></span></p>
+			<p className="register-container title" ><span onClick={toggleRegisterVisibility}> Créer un compte </span></p>
 			{isRegisterVisible && (
 				<div className="register-container__form">
 					<form className="register-container__form__form" onSubmit={(event) => handleRegister(event)}>
@@ -166,30 +199,62 @@ function Register() {
 							maxLength={50}
 							required
 						/>
-						<input
-							type="password"
-							name="password"
-							value={password}
-							className="register-container__form__form input"
-							placeholder="Mot de passe"
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
-							aria-label="Mot de passe"
-							maxLength={60}
-							required
-						/>
-						<input
-							type="password"
-							name="confirmPassword"
-							value={confirmPassword}
-							className="register-container__form__form input"
-							placeholder="Confirmer mot de passe"
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(event.target.value)}
-							aria-label="Confirmer mot de passe"
-							maxLength={60}
-							required
-						/>
-						{userCreated && <p className="success">Utilisateur créé avec succès, un email de validation vous a été envoyé </p>}
-						{error && <p className="error">{error}</p>}
+						<div className="show-password">
+							<input
+								type={showPassword ? 'text' : 'password'}
+								name="password"
+								value={password}
+								className="__input"
+								placeholder="Mot de passe"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
+								aria-label="Mot de passe"
+								maxLength={60}
+								required
+							/>
+							<span
+								className="toggle-password-icon"
+								onClick={() => setShowPassword(!showPassword)}
+							>
+								{showPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+							</span>
+						</div>
+						<div className="show-password">
+							<input
+								type={showConfirmPassword ? 'text' : 'password'}
+								name="confirmPassword"
+								value={confirmPassword}
+								className="__input"
+								placeholder="Confirmer mot de passe"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(event.target.value)}
+								aria-label="Confirmer mot de passe"
+								maxLength={60}
+								required
+							/>
+							<span
+								className="toggle-password-icon"
+								onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+							>
+								{showConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+							</span>
+						</div>
+
+						<div className="message">
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{error && (
+									<Fade in={!!error} timeout={300}>
+										<Alert variant="filled" severity="error">{error}</Alert>
+									</Fade>
+								)}
+							</Stack>
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{userCreated && (
+									<Fade in={!!userCreated} timeout={300}>
+										<Alert variant="filled" severity="success">Utilisateur créé avec succès, un email de validation vous a été envoyé</Alert>
+									</Fade>
+								)}
+							</Stack>
+						</div>
+
 						<button type="submit" className="register-container__form__form button">Enregistrer</button>
 					</form>
 					<form className="register-container__form__form" onSubmit={(event) => handleProRegister(event)}>
@@ -205,28 +270,45 @@ function Register() {
 							maxLength={50}
 							required
 						/>
-						<input
-							type="password"
-							name="password"
-							value={proPassword}
-							className="register-container__form__form input"
-							placeholder="Mot de passe"
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProPassword(event.target.value)}
-							aria-label="Mot de passe"
-							maxLength={60}
-							required
-						/>
-						<input
-							type="password"
-							name="confirmPassword"
-							value={proConfirmPassword}
-							className="register-container__form__form input"
-							placeholder="Confirmer mot de passe"
-							onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProConfirmPassword(event.target.value)}
-							aria-label="Confirmer mot de passe"
-							maxLength={60}
-							required
-						/>
+
+						<div className="show-password">
+							<input
+								type={showProPassword ? 'text' : 'password'}
+								name="password"
+								value={proPassword}
+								className="__input"
+								placeholder="Mot de passe"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProPassword(event.target.value)}
+								aria-label="Mot de passe"
+								maxLength={60}
+								required
+							/>
+							<span
+								className="toggle-password-icon"
+								onClick={() => setShowProPassword(!showProPassword)}
+							>
+								{showProPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+							</span>
+						</div>
+						<div className="show-password">
+							<input
+								type={showProConfirmPassword ? 'text' : 'password'}
+								name="confirmPassword"
+								value={proConfirmPassword}
+								className="__input"
+								placeholder="Confirmer mot de passe"
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProConfirmPassword(event.target.value)}
+								aria-label="Confirmer mot de passe"
+								maxLength={60}
+								required
+							/>
+							<span
+								className="toggle-password-icon"
+								onClick={() => setShowProConfirmPassword(!showProConfirmPassword)}
+							>
+								{showProConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+							</span>
+						</div>
 						<input
 							type="siret"
 							name="siret"
@@ -238,9 +320,23 @@ function Register() {
 							maxLength={14}
 							required
 						/>
-						{proCreated && <p className="success">Utilisateur créé avec succès, un email de validation vous a été envoyé </p>}
-						{isProError && <p className="error">{isProError}</p>}
-						<button type="submit" className="register-container__form__form button">Enregistrer</button>
+						<div className="message" style={{ marginBottom: '1rem' }}>
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{isProError && (
+									<Fade in={!!isProError} timeout={300}>
+										<Alert variant="filled" severity="error">{isProError}</Alert>
+									</Fade>
+								)}
+							</Stack>
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{proCreated && (
+									<Fade in={!!proCreated} timeout={300}>
+										<Alert variant="filled" severity="success">Utilisateur créé avec succès, un email de validation vous a été envoyé</Alert>
+									</Fade>
+								)}
+							</Stack>
+						</div>
+						<button type="submit" className="register-container__form__form button pro">Enregistrer</button>
 					</form>
 				</div>
 			)}

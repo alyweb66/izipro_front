@@ -48,6 +48,9 @@ import { MdAttachFile, MdKeyboardArrowLeft, MdSend, MdKeyboardArrowRight, MdKeyb
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import { AnimatePresence, motion } from 'framer-motion';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
 
 
 type useQueryUserConversationsProps = {
@@ -71,7 +74,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
-
+	const [request] = requestDataStore((state) => [state.request, state.setRequest]);
 	//state
 	const [messageValue, setMessageValue] = useState('');
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
@@ -84,7 +87,8 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [isSkipMessage, setIsSkipMessage] = useState(true);
 	const [fetchConvIdState, setFetchConvIdState] = useState(0);
-	
+	const [hasManyImages, setHasManyImages] = useState(false);
+
 
 	const limit = 4;
 
@@ -94,7 +98,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	//store
 	const id = userDataStore((state) => state.id);
-	const [request] = requestDataStore((state) => [state.request, state.setRequest]);
+
 	const resetRequest = requestDataStore((state) => state.resetRequest);
 	const [requestsConversationStore, setRequestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 	const [messageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
@@ -126,13 +130,13 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		} else if (newClientRequest) {
 			conversationId = conversationIdRef.current;
 		}
-	
+
 		// map file to send to graphql
 		const sendFile = file.map(file => ({
 			file,
 		}));
-			// create message
-			// if the message is not empty or the file is not empty
+		// create message
+		// if the message is not empty or the file is not empty
 		if (conversationId ?? 0 > 0) {
 			if (messageValue.trim() !== '' || sendFile.length > 0) {
 				message({
@@ -146,18 +150,18 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 						}
 					}
 				}).then(() => {
-	
+
 					setMessageValue('');
 					conversationIdRef.current = 0;
 					// if the request is a new client request, add the request to the requestsConversationStore
 					if (newClientRequest) {
 						if (!updatedRequest) return;
-	
+
 						const addNewRequestConversation = [updatedRequest, ...requestsConversationStore];
 						requestConversationStore.setState({ requests: addNewRequestConversation });
 						//setRequestsConversationStore(addNewRequestConversation);
 					}
-	
+
 					// remove request from clientRequestStore
 					setClientRequestsStore(clientRequestsStore.filter(clientRequest => clientRequest.id !== request.id));
 					// remove file from the file list and request
@@ -171,7 +175,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 			throw new Error('Error creating message');
 		}
 	}
-	
+
 	// Function to send message and create conversation
 	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>, requestId: number) => {
 		event.preventDefault();
@@ -180,10 +184,10 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 			setUrlFile([]);
 			setFileError('');
 		}
-		
+
 		// create conversation 
 		if (request.id === requestId && role === 'pro') {
-	
+
 			conversation({
 				variables: {
 					id: id,
@@ -193,30 +197,30 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 						request_id: requestId,
 					}
 				}
-	
+
 			}).then((response) => {
 				let updateRequest: RequestProps;
 				if (response.data.createConversation) {
-	
+
 					const conversation: RequestProps['conversation'] = [response.data.createConversation];
 					conversationIdRef.current = conversation[0].id;
-	
+
 					// put the conversation data in the request
 					updateRequest = { ...request, conversation: conversation };
-	
+
 					requestDataStore.setState((prevState) => ({
 						...prevState,
 						request: updateRequest
 					})),
-					//setRequest(updateRequest);
-					setSelectedRequest(updateRequest);
-	
+						//setRequest(updateRequest);
+						setSelectedRequest(updateRequest);
+
 				}
-	
+
 				// update the subscription store
 				// replace the old subscription with the new one
 				if (!subscriptionStore.some(subscription => subscription.subscriber === 'clientConversation')) {
-	
+
 					subscriptionMutation({
 						variables: {
 							input: {
@@ -225,7 +229,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 								subscriber_id: [conversationIdRef.current]
 							}
 						}
-	
+
 					}).then((response) => {
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
@@ -233,35 +237,35 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 						const messageRequestSubscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
 						// If there are no subscriptions, add the new conversation id in the array of subscription.subscriber_id
 						if (!messageRequestSubscription) {
-	
-	
+
+
 							const currentSubscriptions = subscriptionDataStore.getState().subscription;
 							const newSubscriptions = [...currentSubscriptions, subscriptionWithoutTimestamps];
 							subscriptionDataStore.getState().setSubscription(newSubscriptions);
-	
+
 						} else {
 							// replace the old subscription with the new one
 							subscriptionStore.map((subscription: SubscriptionProps) =>
 								subscription.subscriber === 'clientConversation' ? subscriptionWithoutTimestamps : subscription
 							);
 						}
-	
+
 						const newClientRequest = true;
 						sendMessage(updateRequest, newClientRequest);
 					});
-	
+
 					if (subscriptionError) {
 						throw new Error('Error while subscribing to conversation');
 					}
 				} else if (subscriptionStore.some(subscription => subscription.subscriber === 'clientConversation')) {
-	
+
 					// recover the old subscription and add the new conversation id in the array of subscription.subscriber_id
 					let newSubscriptionIds;
 					const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
 					if (conversation && Array.isArray(conversation.subscriber_id)) {
 						newSubscriptionIds = [...conversation.subscriber_id, conversationIdRef.current];
 					}
-	
+
 					subscriptionMutation({
 						variables: {
 							input: {
@@ -270,7 +274,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 								subscriber_id: newSubscriptionIds
 							}
 						}
-	
+
 					}).then((response) => {
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
@@ -278,65 +282,65 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 						const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
 							subscription.subscriber === 'clientConversation' ? subscriptionWithoutTimestamps : subscription
 						);
-	
+
 						if (addSubscriptionStore) {
 							setSubscriptionStore(addSubscriptionStore);
 						}
-	
+
 						const newClientRequest = true;
 						sendMessage(updateRequest, newClientRequest);
 					});
 				}
-	
-	
+
+
 			});
-	
+
 			if (createConversationError) {
 				throw new Error('Error creating conversation',);
 			}
 		}
-	
+
 		sendMessage();
 	};
-	
+
 	// Function to load more requests with infinite scroll
 	function addRequest() {
 		if (fetchMore) {
-	
+
 			fetchMore({
 				variables: {
 					offset: offsetRef.current, // Next offset
 				},
 				// @ts-expect-error no promess here
 			}).then((fetchMoreResult: { data: { user: { requestsConversations: RequestProps[] } } }) => {
-	
+
 				const request = fetchMoreResult.data.user.requestsConversations;
-	
+
 				//get all request who are not in the store
 				const newRequests = request.filter((request: RequestProps) => requestsConversationStore?.every(prevRequest => prevRequest.id !== request.id));
-	
+
 				if (!fetchMoreResult.data) return;
 				// add the new request to the requestsConversationStore
 				if (newRequests) {
 					const addRequest = [...(requestsConversationStore || []), ...newRequests];
 					setRequestsConversationStore(addRequest);
 				}
-	
+
 				// if there is no more request to fetch
 				if (request.length < limit) {
 					setIsHasMore(false);
 				}
-	
+
 				offsetRef.current = offsetRef.current + request.length;
-	
+
 			});
 		}
 	}
-	
+
 	// Function to hide a client request
 	const handleHideRequest = (requestId?: number) => {
 		//event.preventDefault();
-	
+
 		hideRequest({
 			variables: {
 				input: {
@@ -345,19 +349,19 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 				}
 			}
 		}).then((response) => {
-	
+
 			// find conversation id from request to remove it from the subscription
 			const requestConversation = requestsConversationStore.find(request => request.id === requestId);
 			const conversationId = requestConversation?.conversation.find(conversation => conversation.user_1 === id || conversation.user_2 === id)?.id;
-	
+
 			if (response.data.createHiddenClientRequest) {
 				setRequestsConversationStore(requestsConversationStore.filter(request => request.id !== requestId));
 			}
-	
+
 			// remove subscription for this conversation
 			const subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
 			const newSubscriptionIds = Array.isArray(subscription?.subscriber_id) ? subscription.subscriber_id.filter((id: number) => id !== conversationId) : [];
-	
+
 			subscriptionMutation({
 				variables: {
 					input: {
@@ -371,21 +375,21 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 					// update the subscription store
 					// eslint-disable-next-line @typescript-eslint/no-unused-vars
 					const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-	
+
 					subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
 						...prevState,
 						subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
 							subscription.subscriber === 'clientConversation' ? subscriptionWithoutTimestamps : subscription
 						)
 					}));
-	
+
 					messageDataStore.setState((prevState) => ({
 						...prevState,
 						messages: prevState.messages.filter((message: MessageStoreProps) => message.conversation_id !== conversationId)
 					}));
-	
+
 				}
-	
+
 				// delete the conversation from the notViewedConversationStore and database
 				deleteNotViewedConversation({
 					variables: {
@@ -398,39 +402,39 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 					// remove the conversation id from the notViewedConversationStore
 					setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
 				});
-	
+
 				if (deleteNotViewedConversationError) {
 					throw new Error('Error updating conversation');
 				}
 			});
-	
+
 			if (subscriptionError) {
 				throw new Error('Error while updating conversation subscription');
 			}
-	
+
 		});
 		if (hideRequestError) {
 			throw new Error('Error while hiding request');
 		}
 	};
-	
+
 	// remove file
 	const handleRemove = (index: number) => {
-	
+
 		const newFiles = [...file];
 		newFiles.splice(index, 1);
 		setFile(newFiles);
-	
+
 		const newUrlFileList = [...urlFile];
 		newUrlFileList.splice(index, 1);
 		setUrlFile(newUrlFileList);
 	};
-	
+
 	// Function to remove viewed conversation
 	const handleViewedMessage = (convId: number) => {
-	
+
 		if (selectedRequest && notViewedConversationStore?.some(id => id === convId)) {
-	
+
 			deleteNotViewedConversation({
 				variables: {
 					input: {
@@ -439,21 +443,57 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 					}
 				}
 			}).then(() => {
-	
+
 				// remove the conversation id from the notViewedConversationStore
 				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== convId));
-	
+
 				if (deleteNotViewedConversationError) {
 					throw new Error('Error updating conversation');
 				}
 			});
 		}
-	
+
 	};
-		
+
+	// useEffect to check the size of the window
+	useEffect(() => {
+		const handleResize = () => {
+			if (window.innerWidth < 780) {
+				if (selectedRequest && selectedRequest.id > 0) {
+					setIsListOpen(false);
+					setIsMessageOpen(true);
+
+				} else {
+					setIsMessageOpen(false);
+					setIsListOpen(true);
+				}
+
+			} else {
+				setIsMessageOpen(true);
+				setIsListOpen(true);
+			}
+		};
+
+		// add event listener to check the size of the window
+		window.addEventListener('resize', handleResize);
+
+		// 	call the function to check the size of the window
+		handleResize();
+
+		// remove the event listener when the component unmount
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
+
 	// useEffect to set the new selected request
 	useEffect(() => {
-		if (request) {
+		if (request && window.innerWidth < 780) {
+			console.log('under 480');
+
+			setSelectedRequest(request);
+			setIsListOpen(false);
+			setIsMessageOpen(true);
+		} else if (request && window.innerWidth > 780) {
+			console.log('over 480');
 			setSelectedRequest(request);
 		}
 	}, []);
@@ -596,34 +636,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		}, 200);
 	}, [messageStore, isMessageOpen, selectedRequest]);
 
-	// useEffect to check the size of the window
-	useEffect(() => {
-		const handleResize = () => {
-			if (window.innerWidth < 780) {
-				if (selectedRequest && selectedRequest.id > 0) {
-					setIsListOpen(false);
-					setIsMessageOpen(true);
-					
-				} else {
-					setIsMessageOpen(false);
-					setIsListOpen(true);
-				}
 
-			} else {
-				setIsMessageOpen(true);
-				setIsListOpen(true);				
-			}
-		};
-
-		// add event listener to check the size of the window
-		window.addEventListener('resize', handleResize);
-
-		// 	call the function to check the size of the window
-		handleResize();
-
-		// remove the event listener when the component unmount
-		return () => window.removeEventListener('resize', handleResize);
-	}, []); 
 
 
 	return (
@@ -635,6 +648,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 						<AnimatePresence>
 							{isListOpen && request && request.id > 0 &&
 								<RequestItem
+									setHasManyImages={setHasManyImages}
 									request={request}
 									notViewedConversationStore={notViewedConversationStore}
 									handleViewedMessage={handleViewedMessage}
@@ -654,6 +668,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 						<AnimatePresence>
 							{isListOpen && requestByDate.map((requestByDate, index) => (
 								<RequestItem
+									setHasManyImages={setHasManyImages}
 									key={requestByDate.id}
 									index={index}
 									notViewedConversationStore={notViewedConversationStore}
@@ -729,6 +744,9 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 										<img
 											className="my-conversation__message-list__user__header__detail img"
 											src={selectedRequest.image ? selectedRequest.image : logoProfile}
+											onError={(event) => {
+												event.currentTarget.src = '/logo/no-picture.jpg';
+											}}
 											alt="" />
 										{selectedRequest.denomination ? (
 											<p className="my-conversation__message-list__user__header__detail name" >
@@ -802,8 +820,17 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 																						className={`my-conversation__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
 																						key={media.id}
 																						src={media.url}
-																						onClick={() => openModal(imageUrls, index)}
+																						onClick={(event) => {
+																							setHasManyImages(false),
+																								openModal(imageUrls, index),
+																								imageUrls.length > 1 && setHasManyImages(true);
+
+																							event.stopPropagation();
+																						}}
 																						alt={media.name}
+																						onError={(event) => {
+																							event.currentTarget.src = '/logo/no-picture.jpg';
+																						}}
 																					/>
 																				)
 
@@ -830,7 +857,16 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 								handleMessageSubmit(event, selectedRequest.id);
 							}
 						}}>
-							{fileError && <p className="error">{fileError}</p>}
+
+							<div className="message">
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{fileError && (
+										<Fade in={!!fileError} timeout={300}>
+											<Alert variant="filled" severity="error">{fileError}</Alert>
+										</Fade>
+									)}
+								</Stack>
+							</div>
 							{urlFile.length > 0 && <div className="my-conversation__message-list__form__preview">
 								{urlFile.map((file, index) => (
 									<div className="my-conversation__message-list__form__preview__container" key={index}>
@@ -865,6 +901,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 									placeholder="Tapez votre message ici..."
 									maxLength={500}
 									minRows={1}
+									readOnly={selectedRequest && selectedRequest?.id > 0 ? false : true}
 								/>
 								<MdSend
 									className="my-conversation__message-list__form__label__send"
@@ -901,6 +938,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 			</AnimatePresence>
 
 			<ImageModal
+				hasManyImages={hasManyImages}
 				modalIsOpen={modalIsOpen}
 				closeModal={closeModal}
 				selectedImage={selectedImage}

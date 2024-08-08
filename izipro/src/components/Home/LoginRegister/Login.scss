@@ -11,8 +11,18 @@
   font-family: v.$font;
   border-radius: 10px;
   background: #ffffff;
-  box-shadow: 5px 5px 10px #dfdfdf,
-    -5px -5px 10px #ffffff;
+  box-shadow: -5px 0 10px #66666610,
+    -5px 0 10px #ffffff05,
+    5px 0 10px #6666660e;
+
+/*   .show-password {
+    @include m.show-password;
+
+    & {
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+  } */
 
   .login-container__logo {
     display: flex;
@@ -50,35 +60,65 @@
 
   .login-container__form {
     padding: 0 1rem;
-    margin: 0.5rem 1rem;
+    margin: 0.5rem 1rem 0 0rem;
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
 
+    .show-password {
+      @include m.show-password;
+      & {
+        width: 100%;
+        .__input {
+          margin-bottom: 0;
+        }
+      }
+
+
+    }
+    /* .login-container__form__password {
+      width: 100%;
+      margin-right: 2rem;
+      position: relative;
+
+      .toggle-password-icon {
+        font-size: 1.5rem;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #555;
+      }
+    } */
+   
     .input {
       width: 100%;
-      height: 40px;
-      margin-bottom: 10px;
+      height: 2.5rem;
+      margin-bottom: 0.5rem;
       margin-left: 1rem;
       margin-right: 1rem;
       padding: 10px;
       border: 1px solid #ccc;
-      border-radius: 12px;
+      border-radius: 0.8rem;
 
       &:focus {
         @include m.border;
       }
     }
 
-
     .button {
       @include m.orange-button;
 
       & {
-        margin-top: 0;
-        margin-right: 1rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        // margin-top: 0;
+        //margin-right: 1rem;
         max-width: 20%;
+
       }
 
     }
@@ -92,6 +132,11 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+
+      .show-password {
+        width: 70%;
+        margin-bottom: 0.5rem;
+      }
 
       &.input {
         max-width: 70%;
@@ -118,7 +163,7 @@
     gap: 0.5rem;
     position: relative;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 18px;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 
@@ -132,6 +177,10 @@
       background-color: #2196F300;
       border-radius: 0.25em;
       transition: all 0.25s;
+    }
+
+    .active-session {
+      font-size: 1rem;
     }
 
   }
@@ -158,8 +207,8 @@
 
   /* Show the checkmark when checked */
   .checkbox-session-container input:checked~.checkmark:after {
-    left: 0.43em;
-    top: 0.25em;
+    left: 0.43rem;
+    top: 0.25rem;
     width: 0.25em;
     height: 0.5em;
     border-color: #fff0 white white #fff0;
@@ -223,12 +272,36 @@
         }
 
         &.button {
-          margin: auto;
-          max-width: 50%;
+          // margin: auto;
+          //max-width: 50%;
           width: 50%;
+          //width: inherit;
         }
 
       }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    margin-top: 0;
+    padding-top: 0.5rem;
+
+    .login-container__form{
+
+      .show-password {
+        width: 100%;
+        max-width: 90%;
+        margin-bottom: 0.5rem;
+      }
+      .input {
+        width: 100%;
+        max-width: 90%;
+       margin-left: 0;
+       margin-right: 0;
+      }
+      
     }
   }
 }

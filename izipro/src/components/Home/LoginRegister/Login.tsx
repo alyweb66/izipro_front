@@ -10,6 +10,11 @@ import { FORGOT_PASSWORD_MUTATION, LOGIN_USER_MUTATION } from '../../GraphQL/Use
 // External libraries
 import DOMPurify from 'dompurify';
 import validator from 'validator';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
+import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
+
 
 // State management and stores
 import { confirmEmailStore } from '../../../store/LoginRegister';
@@ -32,6 +37,7 @@ function Login() {
 	const [message, setMessage] = useState('');
 	const [emailModal, setEmailModal] = useState(false);
 	const [isLogo, setIsLogo] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
 
 	// Store
 	const [isEmailConfirmed, setIsEmailConfirmed] = confirmEmailStore((state) => [state.isEmailConfirmed, state.setIsEmailConfirmed]);
@@ -47,9 +53,9 @@ function Login() {
 		let timer: number | undefined;
 		if (error) {
 			setMessageError('Adresse e-mail ou mot de passe incorrect');
-			timer = setTimeout(() => {
+			setTimeout(() => {
 				setMessageError('');
-			}, 5000); // 5000ms = 5s
+			}, 15000);
 		}
 		return () => {
 			clearTimeout(timer);
@@ -85,10 +91,10 @@ function Login() {
 
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
-	}, []); 
-	
+	}, []);
+
 	// send login request
-	const handleLogin = (event: FormEvent<HTMLFormElement>) =>{
+	const handleLogin = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
 		login({
@@ -116,7 +122,7 @@ function Login() {
 				setIsChangePassword(false);
 				setIsEmailConfirmed(false);
 				navigate('/dashboard');
-			} 
+			}
 		});
 
 	};
@@ -128,6 +134,10 @@ function Login() {
 		//check if the email is valid
 		if (!validator.isEmail(forgotPasswordEmail)) {
 			setMessageError('Adresse e-mail invalide');
+
+			setTimeout(() => {
+				setMessageError('');
+			}, 15000);
 			return;
 		}
 
@@ -148,19 +158,39 @@ function Login() {
 			throw new Error('Bad request');
 		}
 
-		setEmailModal(false);
+		//setEmailModal(false);
 	};
 
 	return (
 		<div className="login-container">
 			{isLogo && <div className="login-container__logo">
 				<img className='__image' src="/izipro-logo.svg" alt="Izipro logo" />
-				<h1 className="__title">Izipro</h1>
+				<h1 className="__title">POP</h1>
 			</div>}
 			<p className="login-container__title"> Se connecter</p>
-			{message && <p className="success">{message}</p>}
-			{isChangePassword && <p className="success">Votre mot de passe a été modifié, vous pouvez maintenant vous connecter</p>}
-			{isEmailConfirmed && <p className="success">Votre adresse e-mail a été confirmée, vous pouvez maintenant vous connecter</p>}
+			<div className="message">
+				<Stack sx={{ width: '100%' }} spacing={2}>
+					{message && (
+						<Fade in={!!message} timeout={300}>
+							<Alert variant="filled" severity="info">{message}</Alert>
+						</Fade>
+					)}
+				</Stack>
+				<Stack sx={{ width: '100%' }} spacing={2}>
+					{isChangePassword && (
+						<Fade in={!!isChangePassword} timeout={300}>
+							<Alert variant="filled" severity="success">Votre mot de passe a été modifié, vous pouvez maintenant vous connecter</Alert>
+						</Fade>
+					)}
+				</Stack>
+				<Stack sx={{ width: '100%' }} spacing={2}>
+					{isEmailConfirmed && (
+						<Fade in={!!isEmailConfirmed} timeout={300}>
+							<Alert variant="filled" severity="success">Votre adresse e-mail a été confirmée, vous pouvez maintenant vous connecter</Alert>
+						</Fade>
+					)}
+				</Stack>
+			</div>
 			<form className="login-container__form" onSubmit={handleLogin}>
 				<input
 					type="email"
@@ -173,32 +203,79 @@ function Login() {
 					maxLength={50}
 					required
 				/>
-				<input
-					type="password"
-					name="password"
-					value={password}
-					className="login-container__form input"
-					placeholder="Mot de passe"
-					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
-					aria-label="Mot de passe"
-					maxLength={60}
-					required
-				/>
+				<div className="show-password">
+					<input
+						type={showPassword ? 'text' : 'password'}
+						name="password"
+						value={password}
+						className="__input"
+						placeholder="Mot de passe"
+						onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
+						aria-label="Mot de passe"
+						maxLength={60}
+						required
+					/>
+					<span
+						className="toggle-password-icon"
+						onClick={() => setShowPassword(!showPassword)}
+					>
+						{showPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+					</span>
+				</div>
+
+				{/* <TextField
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={password}
+                    className="custom-input"
+                    placeholder="Mot de passe"
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
+                    aria-label="Mot de passe"
+                    //maxLength={60}
+                    required
+                    fullWidth
+                    margin="normal"
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    edge="end"
+                                >
+                                    {showPassword ? <MdOutlineVisibilityOff />: <MdOutlineVisibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
+					
+                /> */}
 				<button type="submit" className='login-container__form button'>Se connecter</button>
 			</form>
-			{messageError && <p className="error">{messageError}</p>}
+		{/* 	<button className="show-password" onClick={() => setShowPassword(!showPassword)}>
+				{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
+			</button> */}
+			<div className="message">
+				<Stack sx={{ width: '100%' }} spacing={2}>
+					{messageError && (
+						<Fade in={!!messageError} timeout={300}>
+							<Alert variant="filled" severity="error">{messageError}</Alert>
+						</Fade>
+					)}
+				</Stack>
+			</div>
 			<label className="checkbox-session-container">
-				<input 
+				<input
 					className="input-checkbox-session"
-					checked={activeSession} 
+					checked={activeSession}
 					type="checkbox"
 					onChange={() => setActiveSession(!activeSession)}
 				/>
 				<div className="checkmark"></div>
-				<span>Garder ma session active</span>
+				<span className="active-session">Garder ma session active</span>
 			</label>
-			<span 
-				className="link" 
+			<span
+				className="link"
 				onClick={() => setEmailModal(!emailModal)}
 			>
 				Mot de passe oublié?</span>

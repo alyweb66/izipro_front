@@ -18,14 +18,7 @@ export default function useHandleLogout() {
 			// reset the user data
 			resetUserData();
 
-			// clear local storage and session storage
-			/* const getItem = localStorage.getItem('login');
-			const decodeData = atob(getItem || '');
-			if (decodeData === 'session') { */
 			localStorage.removeItem('login')
-			//} 
-
-			sessionStorage.clear();
 
 			// clear the cookie
 			if (document.cookie) {

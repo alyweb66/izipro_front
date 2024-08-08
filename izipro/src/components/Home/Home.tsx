@@ -11,12 +11,13 @@ import { useNavigate } from 'react-router-dom';
 import './Home.scss';
 
 // Hooks React
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 
 
 function Home() {
 	const navigate = useNavigate();
+	const [isFooter, setIsFooter] = useState(false);
 
 	// check if user is logged in and if cookie consents are accepted
 	useEffect(() => {
@@ -39,12 +40,35 @@ function Home() {
 		
 	},[]);
 
+
+	// useEffect to check the size of the window
+	useEffect(() => {
+
+		// function to check the size of the window
+		const handleResize = () => {
+			if (window.innerWidth < 480) {
+				setIsFooter(true);
+			} else {
+				setIsFooter(false);
+			}
+		};
+
+		// add event listener to check the size of the window
+		window.addEventListener('resize', handleResize);
+
+		// 	call the function to check the size of the window
+		handleResize();
+
+		// remove the event listener when the component unmount
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
+
 	return (
 		<div className="home">
 			<Login />
 			<Register />
 			<Presentation />
-			<Footer />
+			{isFooter && <Footer />}
 		</div>
 	);
 }

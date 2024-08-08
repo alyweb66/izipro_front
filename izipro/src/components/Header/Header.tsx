@@ -28,19 +28,22 @@ function Header() {
 		if (location.pathname === '/dashboard' && isLoggedValue) {
 			const newIsLogged = isLoggedValue.value === 'true' ? true : false;
 			
-			
 			setIsLogged(newIsLogged );
 		} else {
 			setIsLogged(false);
 		}
 	}, [location.pathname]);
 
-
 	return (
 		<header className="header" id="header">
 			<div className="header__container">
-				<img className='header__container image' src="/izipro-logo.svg" alt="Izipro logo" />
-				<h1 className="header__container title">Izipro</h1>
+				<img 
+				className='header__container image' 
+				src="/izipro-logo.svg" 
+				alt="Izipro logo"
+				onClick={() => window.location.reload()} 
+				/>
+				<h1 className="header__container title">POP</h1>
 			</div>
 			{isLogged && <Logout />}
 		</header>

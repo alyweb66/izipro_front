@@ -3,6 +3,7 @@
 .footer {
   width: 100%;
   position: relative;
+  height: 5vh;
   //background-color: rgba(224, 132, 11, 0.192);
   //background-image: linear-gradient(to right, transparent 0%, rgba(224, 132, 11, 0.26) 10%, rgba(224, 132, 11, 0.26) 90%, transparent 100%);
   //border-top: 2px solid v.$color-primary-orange;
@@ -15,12 +16,13 @@
     font-size: 1rem;
     bottom: 0;
     width: 100%;
+    background-color: transparent;
 
     .footer-container__link {
       color: v.$color-primary-blue;
       font-size: 0.9rem;
       font-weight: 400;
-
+      background-color: transparent;
     }
   }
 }

@@ -43,29 +43,29 @@ function Footer() {
 	const [clickCookie, setClickCookie] = useState<boolean>(false);
 	const [CGUModal, setCGUModal] = useState<boolean>(false);
 	const [contactModal, setContactModal] = useState<boolean>(false);
+	const [renderForce, setRenderForce] = useState<boolean>(true);
 	
 	//useRef
 	const isGetRulesRef = useRef<boolean>(false);
-	const isGetCookieConsentsRef = useRef<boolean>(false);
+	const isGetCookieConsentsRef = useRef<boolean>(true);
 
 	//store
 	const [id, CGU] = userDataStore((state) => [state.id, state.CGU]);
 	const [CGUStore, cookieStore] = rulesStore((state) => [state.CGU, state.cookies]);
 	const [cookieConsentsId, cookiesNecessaryStore] = cookieConsents((state) => [state.id, state.cookies_necessary]);
-console.log('cookieConsentsId', cookieConsentsId);
-console.log('isGetCookieConsentsRef', isGetCookieConsentsRef.current);
 
-
+	//custom hooks Logout
 	const handleLogout = useHandleLogout();
 
 	//Query
 	const { loading: rulesLoading, rulesData } = useQueryRules(isGetRulesRef.current);
-	const { loading: getCookieConsentsLoading, cookieData } = useQueryCookieConsents(isGetCookieConsentsRef.current);
+	const { loading: getCookieConsentsLoading, cookieData } = useQueryCookieConsents(renderForce);
 
 	//Mutation
 	const [createCookieConsents, { loading: createCookieConsentsLoading, error: createCookieConsentsError }] = useMutation(COOKIE_CONSENTS_MUTATION);
 	const [updateCookieConsents, { loading: updateCookieConsentsLoading, error: updateCookieConsentsError }] = useMutation(UPDATE_COOKIE_CONSENTS_MUTATION);
 	const [updateUser, { loading: updateUserLoading, error: updateUserError }] = useMutation(UPDATE_USER_MUTATION);
+
 
 	// function to transform the result to match ResponseCookieConsents structure of response data
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -162,12 +162,12 @@ console.log('isGetCookieConsentsRef', isGetCookieConsentsRef.current);
 		}
 	};
 
+
 	// set the cookie consents to the store and database
 	useEffect(() => {
-		if (!getCookieConsentsLoading) {
-			console.log('cookieData', cookieData);
+		if (cookieData) {
 			
-			if (cookieData && cookieData.user.cookieConsents && cookieData.user.cookieConsents.user_id === id) {
+			if (cookieData.user.cookieConsents && cookieData.user.cookieConsents.user_id === id) {
 			// set cookie consents to the store
 				const { id, cookies_analytics, cookies_marketing, cookies_necessary } = cookieData.user.cookieConsents;
 				cookieConsents.setState({
@@ -178,19 +178,18 @@ console.log('isGetCookieConsentsRef', isGetCookieConsentsRef.current);
 					cookies_necessary
 				});
 
-				isGetCookieConsentsRef.current = true;
+				setRenderForce(true);
 			} else {
 			// set cookie consents to the database and store
 				const localConsents = localStorage.getItem('cookieConsents');
 
 				if (id !== 0 && (localConsents === 'all' || localConsents === 'necessary') && !cookiesNecessaryStore && !isGetCookieConsentsRef.current) {
 					handleAcceptCookies(localConsents);
-
-					isGetCookieConsentsRef.current = true;
+					setRenderForce(true);
 				}
 			}
 		}
-	}, [cookieData, id]);
+	}, [cookieData, renderForce]);
 
 	// get rules data and set it to the store
 	useEffect(() => {
@@ -203,10 +202,11 @@ console.log('isGetCookieConsentsRef', isGetCookieConsentsRef.current);
 	}, [rulesData]);
 
 	useEffect(() => {
-		if (id) {
-			isGetCookieConsentsRef.current = true;;
+		if (window.location.pathname === '/dashboard' && cookiesNecessaryStore === null && id > 0) {
+			setRenderForce(false);
 		}
 	}, [id]);
+
 
 	// check if cookie consents are accepted
 	useEffect(() => {

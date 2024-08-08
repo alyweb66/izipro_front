@@ -3,15 +3,20 @@
 
 
 .register-container {
-
+  width: 100%;
+  max-width: 100%;
+  margin: auto;
 
   &.title {
+    position: relative;
     text-align: center;
+    margin-top: 2rem;
     font-family: v.$font;
     font-size: 2rem;
     font-weight: 500;
+    width: 100%;
     color: v.$color-primary-orange;
-    //cursor: pointer;
+
 
     span {
       cursor: pointer;
@@ -20,6 +25,27 @@
     span:hover {
       color: v.$color-primary-blue;
     }
+  }
+
+  &.title::before,
+  &.title::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20rem;
+    height: 2px;
+    background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
+  }
+
+  &.title::before {
+    top: 0;
+    z-index: 2;
+  }
+
+  &.title::after {
+    bottom: 0;
+    z-index: 2;
   }
 
   &.error {
@@ -51,17 +77,25 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: space-around;
       font-family: v.$font;
       border-radius: 10px;
       background: #ffffff;
-      // box-shadow:  22px 22px 44px #d4d4d4,
-      //   -10px -2px 44px #ffffff;
-      /*    box-shadow:  5px 5px 10px #b4b4b4,
-      -5px -5px 10px #ffffff; */
-      box-shadow: 5px 5px 10px #dfdfdf,
-        -5px -5px 10px #ffffff;
-   
+      box-shadow: -5px 0 10px #66666610,
+        -5px 0 10px #ffffff05,
+        5px 0 10px #6666660e;
+
+      .show-password {
+        @include m.show-password;
+        & {
+          margin-bottom: 0.5rem;
+          width: 60%;
+          .__input {
+            margin-bottom: 0;
+          }
+        }
+       
+      }
 
       &.category {
         box-shadow: none;
@@ -73,9 +107,8 @@
 
       &.input {
         width: 60%;
-        //width: 100%;
         height: 40px;
-        margin-bottom: 10px;
+        margin-bottom: 0.5rem;
         margin-left: 1rem;
         margin-right: 1rem;
         padding: 10px;
@@ -92,6 +125,9 @@
       &.button {
         @include m.orange-button;
 
+        &.pro {
+          margin-bottom: 0.5rem;
+        }
       }
 
     }
@@ -110,6 +146,11 @@
         max-width: 100%;
         width: 100%;
 
+        .show-password {
+          max-width: 70%;
+          width: 70%;
+        }
+
         &.category {
           margin-bottom: 0;
         }
@@ -122,6 +163,26 @@
         &.button {
           max-width: 50%;
           width: 50%;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .register-container {
+    .register-container__form {
+      .register-container__form__form {
+        .show-password {
+          width: 100%;
+          max-width: 90%;
+          margin-bottom: 0.5rem;
+        }
+        .input {
+          width: 100%;
+          max-width: 90%;
+          margin-left: 0;
+          margin-right: 0;
         }
       }
     }

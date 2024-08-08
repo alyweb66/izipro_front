@@ -18,8 +18,8 @@ type UserDataStore = UserDataProps & {
 	setImage: (image: string | '') => void;
 	setDescription: (description: string | '') => void;
 	setRole: (role: string | '') => void;
-	initialData: UserDataProps;
-	setInitialData: (data: UserDataProps) => void;
+	//initialData: UserDataProps;
+	//setInitialData: (data: UserDataProps) => void;
 	setAll: (data: UserDataProps) => void;
 	setAccount: (data: UserDataProps) => void;
 	setJobs: (jobs: Array<{ job_id: number}>) => void;
@@ -71,7 +71,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	settings: [{range: 0}],
 	deleted_at: '',
 
-	initialData: {
+	/* initialData: {
 		id: 0,
 		first_name: '',
 		last_name: '',
@@ -90,7 +90,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 		jobs: [],
 		settings: [{range: 0}],
 		deleted_at: '',
-	},
+	}, */
 
 	setAccount: (data) => {
 		if (data) {
@@ -135,7 +135,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 			}));
 		}
 	},
-	setInitialData: (data) => set({ initialData: data }),
+	//setInitialData: (data) => set({ initialData: data }),
 	setId: (id) => set({ id }),
 	setFirstName: (first_name) => set({ first_name }),
 	setLastName: (last_name) => set({ last_name }),

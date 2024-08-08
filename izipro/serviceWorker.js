@@ -11,15 +11,12 @@ if ('serviceWorker' in navigator) {
 
 // organize push event
 self.addEventListener('install', () => {
-    console.log('Service Worker installed');
     self.skipWaiting();
 });
 
 // listen for push event and show notification
 self.addEventListener('push', (event) => {
-    console.log('Push event received');
     const data = event.data ? event.data.json() : {};
-    console.log('Push event received', data);
     event.waitUntil(
         self.registration.showNotification(data.title, {
             body: data.message,

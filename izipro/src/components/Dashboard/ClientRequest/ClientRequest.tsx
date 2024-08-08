@@ -35,6 +35,7 @@ type ExpandedState = {
 };
 
 type clientRequestProps = {
+	loading?: boolean;
 	offsetRef: React.MutableRefObject<number>;
 	isHasMore: boolean;
 	setIsHasMore: (value: boolean) => void;
@@ -42,14 +43,14 @@ type clientRequestProps = {
 	RangeFilter: (requests: RequestProps[], fromSubscribeToMore?: boolean) => void;
 };
 
-function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, offsetRef }: clientRequestProps) {
+function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, offsetRef, loading }: clientRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
 
 	// State
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
-	//const [isHasMore, setIsHasMore] = useState(true);
+	const [hasManyImages, setHasManyImages] = useState(false);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{requestId: number, requestTitle: string } | null>(null);
 	/* 	const [isLoading, setIsLoading] = useState(false); */
@@ -288,7 +289,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	return (
 		<div className="client-request">
 			<div id="scrollableClientRequest" className="client-request__list">
-				{(requestJobLoading || subscribeLoading) && <Spinner />}
+				{(requestJobLoading || subscribeLoading || loading) && <Spinner />}
 				{(!address && !city && !postal_code && !first_name && !last_name) &&
 					(<p className="request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>)}
 				{/* {!clientRequestsStore?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>} */}
@@ -386,11 +387,17 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 															className="client-request__list__detail__item__picture img"
 															key={media.id}
 															src={media.url}
-															onClick={(event: React.MouseEvent) => {
+															onClick={(event) => {
+																setHasManyImages(false),
 																openModal(imageUrls, index),
-																event.stopPropagation();
+																imageUrls.length > 1 && setHasManyImages(true);
+
+																	event.stopPropagation();
 															}}
 															alt={media.name}
+															onError={(event) => {
+																event.currentTarget.src = '/logo/no-picture.jpg';
+															  }}
 														/>
 													)
 												) : null
@@ -442,6 +449,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 			</div>
 
 			<ImageModal
+				hasManyImages={hasManyImages}
 				modalIsOpen={modalIsOpen}
 				closeModal={closeModal}
 				selectedImage={selectedImage}

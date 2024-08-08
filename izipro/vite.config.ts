@@ -16,11 +16,12 @@ export default defineConfig({
 		  '@': '/src',
 		},
 	  },
-	server: {
+	  //*HTTPS server
+	/* server: {
 		https: {
 		  key: fs.readFileSync(path.resolve(__dirname, 'key.pem')),
 		  cert: fs.readFileSync(path.resolve(__dirname, 'cert.pem')),
 		},
-	  },
+	  }, */
 });
 

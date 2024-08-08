@@ -1,5 +1,5 @@
 import { useSubscription } from '@apollo/client';
-import { REQUEST_SUBSCRIPTION } from '../GraphQL/Subscription';
+import { REQUEST_SUBSCRIPTION } from './Subscription';
 import { userDataStore } from '../../store/UserData';
 import { RequestProps } from '../../Type/Request';
 

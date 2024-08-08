@@ -1,5 +1,5 @@
 import { useMutation } from "@apollo/client";
-import { CREATE_NOTIFICATION_MUTATION, DELETE_NOTIFICATION_MUTATION } from "../GraphQL/notificationMutation";
+import { CREATE_NOTIFICATION_PUSH_MUTATION, DELETE_NOTIFICATION_PUSH_MUTATION } from "../GraphQL/notificationMutation";
 import { useQueryVAPIDKey } from "./Query";
 import { userDataStore } from "../../store/UserData";
 
@@ -17,8 +17,8 @@ const serviceWorkerRegistration = () => {
     // Store
     const id = userDataStore((state) => state.id);
     // Mutation
-    const [createNotification, { error: notificationError }] = useMutation(CREATE_NOTIFICATION_MUTATION);
-    const [deleteNotification, { error: deleteNotificationError }] = useMutation(DELETE_NOTIFICATION_MUTATION);
+    const [createNotification, { error: notificationError }] = useMutation(CREATE_NOTIFICATION_PUSH_MUTATION);
+    const [deleteNotification, { error: deleteNotificationError }] = useMutation(DELETE_NOTIFICATION_PUSH_MUTATION);
 
 
     // Ask for permission to send notifications
@@ -94,7 +94,6 @@ const serviceWorkerRegistration = () => {
     // Delete subscription from server
     async function deleteSubscription(subscription: PushSubscription) {
         const subscriptionData: SubscriptionData = JSON.parse(JSON.stringify(subscription));
-        console.log('subscriptionData', subscriptionData);
 
         if (id > 0) {
             deleteNotification({

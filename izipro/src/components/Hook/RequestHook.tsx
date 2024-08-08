@@ -26,7 +26,8 @@ const RequestItem = ({
 	setIsMessageExpanded,
 	setIsListOpen,
 	setModalArgs,
-	openModal
+	openModal,
+	setHasManyImages
 }: {
 	index?: number,
 	requestByDate?: RequestProps,
@@ -34,7 +35,7 @@ const RequestItem = ({
 	notViewedConversationStore?: number[],
 	setIsMessageOpen?: Function,
 	request?: RequestProps,
-	resetRequest?: Function, 
+	resetRequest?: Function,
 	selectedRequest?: RequestProps,
 	setSelectedRequest?: Function,
 	setDeleteItemModalIsOpen: React.Dispatch<React.SetStateAction<boolean>>,
@@ -43,10 +44,12 @@ const RequestItem = ({
 	setIsListOpen?: Function,
 	setModalArgs: React.Dispatch<React.SetStateAction<{ requestId: number, requestTitle: string } | null>>,
 	openModal?: Function
+	setHasManyImages: Function
 }) => {
 	const idRef = useRef<number>(0);
 	//store
 	const id = userDataStore((state) => state.id);
+
 	return (
 		<motion.div
 			id={index === 0 ? 'first-user' : undefined}
@@ -153,10 +156,16 @@ const RequestItem = ({
 									key={media.id}
 									src={media.url}
 									onClick={(event) => {
-										openModal && openModal(imageUrls, index),
+										setHasManyImages && setHasManyImages(false),
+											openModal && openModal(imageUrls, index),
+											imageUrls.length > 1 && setHasManyImages(true);
+
 										event.stopPropagation();
 									}}
 									alt={media.name}
+									onError={(event) => {
+										event.currentTarget.src = '/logo/no-picture.jpg';
+									}}
 								/>
 							)
 						) : null
@@ -189,7 +198,7 @@ const RequestItem = ({
 					document.getElementById(`delete-request-${(request || requestByDate)?.id}`)?.click(),
 
 
-					event.stopPropagation();
+						event.stopPropagation();
 				}}
 			/>
 		</motion.div>

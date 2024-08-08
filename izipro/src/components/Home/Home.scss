@@ -1,6 +1,8 @@
 @use '../../styles/variables' as v;
 
-
+.home {
+    height: auto;
+}
 
 .create-account {
     font-family: v.$font;

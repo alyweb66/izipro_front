@@ -137,3 +137,15 @@ export const VAPID_PUBLIC_KEY = gql`
     }
   }
 `;
+
+export const GET_USER_NOTIFICATION = gql`
+  query Notifications {
+    user {
+      notification {
+        id
+        user_id
+        email_notification
+      }
+    }
+  }
+`;

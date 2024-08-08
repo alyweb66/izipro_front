@@ -31,6 +31,11 @@ import SelectBox from '../../Hook/SelectBox';
 import { subscriptionDataStore } from '../../../store/subscription';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IoLocationSharp } from "react-icons/io5";
+import Box from '@mui/material/Box';
+import Slider from '@mui/material/Slider';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Fade from '@mui/material/Fade';
 
 
 
@@ -58,9 +63,10 @@ function Request() {
 	const [errorMessage, setErrorMessage] = useState('');
 	const [successMessage, setSuccessMessage] = useState('');
 	const [uploadFileError, setUploadFileError] = useState('');
-	//const [description, setDescription] = useState('');
 	const [categoriesState, setCategoriesState] = useState<CategoryPros[]>([]);
 	const [jobsState, setJobsState] = useState<JobProps[]>([]);
+	const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 450px)').matches);
+	const [isLoading, setIsLoading] = useState(true);
 
 	// file upload
 	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
@@ -95,13 +101,16 @@ function Request() {
 	const handleSubmitRequest = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
+		setErrorMessage('');
+		setSuccessMessage('');
+
 		// check if all fields are filled
 		let timer: number | undefined;
 		if (!titleRequest || !descriptionRequest || !selectedJob) {
 			setErrorMessage('Veuillez remplir tous les champs');
 			setTimeout(() => {
 				setErrorMessage('');
-			}, 5000); // 5000ms = 5s
+			}, 10000); // 10000ms = 10s
 
 		} else {
 			clearTimeout(timer);
@@ -155,9 +164,9 @@ function Request() {
 					}
 
 					setSuccessMessage('Demande envoyée avec succès');
-					 setTimeout(() => {
+					setTimeout(() => {
 						setSuccessMessage('');
-					}, 5000); // 5000ms = 5s
+					}, 10000); // 5000ms = 5s
 
 					// Clear fields
 					setTitleRequest('');
@@ -194,48 +203,9 @@ function Request() {
 		}
 	}, [categoriesData]);
 
-	// radius on map
-	/* useEffect(() => {
-		if (map && lat && lng) {
-			// Remove existing circles
-			if (map.getLayer('radius-circle') && map.getSource('radius-circle')) {
-				map.removeLayer('radius-circle');
-				map.removeSource('radius-circle');
-			}
-
-			// Add circle layer
-			map.addLayer({
-				id: 'radius-circle',
-				type: 'circle',
-				source: {
-					type: 'geojson',
-					data: {
-						type: 'Feature',
-						geometry: {
-							type: 'Point',
-							coordinates: [lng, lat]
-						},
-						properties: {} // Add an empty properties object
-					}
-				},
-				paint: {
-					'circle-radius': {
-						stops: [
-							[0, 0],
-							[15.8, radius] // Adjust the multiplier for scaling
-						],
-						base: 2
-					},
-					'circle-color': 'orange',
-					'circle-opacity': 0.3
-				}
-			});
-		}
-	}, [map, lng, lat, radius]); */
-
 	// Get map instance
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const [isLoading, setIsLoading] = useState(true);
+
 	const handleMapLoaded = () => {
 		setIsLoading(false);
 	};
@@ -280,63 +250,6 @@ function Request() {
 		}
 	};
 
-	// Update zoom level when radius changes
-	useEffect(() => {
-		const mediaQuery = window.matchMedia('(max-width: 450px)');
-
-		if (mediaQuery.matches) {
-			if (radius <= 5000) {
-				setZoom(10.5);
-			} else if (radius <= 10000) {
-				setZoom(9.5);
-			} else if (radius <= 15000) {
-				setZoom(9);
-			} else if (radius <= 20000) {
-				setZoom(8.5);
-			} else if (radius <= 25000) {
-				setZoom(8.2);
-			} else if (radius <= 35000) {
-				setZoom(7.9);
-			} else if (radius <= 40000) {
-				setZoom(7.7);
-			} else if (radius <= 45000) {
-				setZoom(7.5);
-			} else if (radius <= 50000) {
-				setZoom(7.4);
-			} else if (radius <= 60000) {
-				setZoom(6.9);
-			} else if (radius <= 100000) {
-				setZoom(6.4);
-			} else {
-				setZoom(6);
-			}
-		} else {
-			if (radius <= 5000) {
-				setZoom(11);
-			} else if (radius <= 10000) {
-				setZoom(10);
-			} else if (radius <= 15000) {
-				setZoom(9.5);
-			} else if (radius <= 20000) {
-				setZoom(9);
-			} else if (radius <= 25000) {
-				setZoom(8.5);
-			} else if (radius <= 35000) {
-				setZoom(8);
-			} else if (radius <= 40000) {
-				setZoom(8);
-			} else if (radius <= 45000) {
-				setZoom(7.7);
-			} else if (radius <= 60000) {
-				setZoom(7);
-			} else if (radius <= 100000) {
-				setZoom(6.8);
-			} else {
-				setZoom(7);
-			}
-		}
-	}, [radius]);
-
 	// reset selected job when category changes
 	useEffect(() => {
 		if (selectedCategory) {
@@ -345,9 +258,50 @@ function Request() {
 	}, [selectedCategory]);
 
 
+	//* Mapping radius to zoom level
+	const radiusToZoomMapping = [
+		{ maxRadius: 5000, zoomMobile: 10.5, zoomDesktop: 11 },
+		{ maxRadius: 10000, zoomMobile: 9.5, zoomDesktop: 10 },
+		{ maxRadius: 15000, zoomMobile: 9, zoomDesktop: 9.5 },
+		{ maxRadius: 20000, zoomMobile: 8.5, zoomDesktop: 9 },
+		{ maxRadius: 25000, zoomMobile: 8.2, zoomDesktop: 8.5 },
+		{ maxRadius: 35000, zoomMobile: 7.9, zoomDesktop: 8 },
+		{ maxRadius: 40000, zoomMobile: 7.7, zoomDesktop: 8 },
+		{ maxRadius: 45000, zoomMobile: 7.5, zoomDesktop: 7.7 },
+		{ maxRadius: 50000, zoomMobile: 7.4, zoomDesktop: 7.5 },
+		{ maxRadius: 60000, zoomMobile: 6.9, zoomDesktop: 7 },
+		{ maxRadius: 100000, zoomMobile: 6.4, zoomDesktop: 6.8 },
+		{ maxRadius: Infinity, zoomMobile: 6, zoomDesktop: 7 }
+	];
+
+	// Calculate the zoom level based on the radius
+	const calculateZoomLevel = (radius: number, isMobile: boolean) => {
+		for (const { maxRadius, zoomMobile, zoomDesktop } of radiusToZoomMapping) {
+			if (radius <= maxRadius) {
+				return isMobile ? zoomMobile : zoomDesktop;
+			}
+		}
+	};
+
+	// Update the zoom level based on the radius and screen size
+	useEffect(() => {
+		const handleResize = () => setIsMobile(window.matchMedia('(max-width: 450px)').matches);
+		window.addEventListener('resize', handleResize);
+
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
+
+	// Update the zoom level when the radius or screen size changes
+	useEffect(() => {
+		const newZoom = calculateZoomLevel(radius, isMobile);
+		newZoom && setZoom(newZoom);
+	}, [radius, isMobile]);
+	//* end Mapping radius to zoom level
+
+
 	return (
 		<div className="request">
-			{categoryLoading || JobDataLoading || createLoading && <Spinner />}
+			{categoryLoading || JobDataLoading && <Spinner />}
 
 			{(!address && !city && !postal_code && !first_name && !last_name) &&
 				(<p className="request no-req">Veuillez renseigner les champs de &quot;Mes informations&quot; dans votre compte pour faire une demande</p>)}
@@ -394,17 +348,20 @@ function Request() {
 								<label className="request__form__label-radius" htmlFor="radius">
 									{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
 								</label>
-								<input
-									className="request__form__input-radius"
-									id="radius"
-									type="range"
-									min="0"
-									max="100000"
-									step="5000"
-									value={radius}
-									onChange={e => setRadius(Number(e.target.value))}
-								/>
-
+								<Box className="request__slider-container" sx={{ width: 250 }}>
+									<Slider
+										defaultValue={105}
+										aria-label="Distance d'action"
+										valueLabelDisplay="auto"
+										value={radius === 0 ? 105 : radius / 1000}
+										step={5}
+										marks
+										min={5}
+										max={105}
+										onChange={(_, value) => setRadius((value as number) === 105 ? 0 : (value as number) * 1000)}
+										valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
+									/>
+								</Box>
 								<div className="request__form__map">
 
 									<div className="request__form__map__map">
@@ -593,11 +550,32 @@ function Request() {
 						/>
 
 						<div className="message">
-							{errorMessage && <p className="message__error">{errorMessage}</p>}
-							{successMessage && <p className="message__success">{successMessage}</p>}
-							{fileError && <p className="message__error">{fileError}</p>}
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{successMessage && (
+									<Fade in={!!successMessage} timeout={300}>
+										<Alert variant="filled" severity="success">{successMessage}</Alert>
+									</Fade>
+								)}
+								{errorMessage && (
+									<Fade in={!!errorMessage} timeout={300}>
+										<Alert variant="filled" severity="error">{errorMessage}</Alert>
+									</Fade>
+								)}
+								{fileError && (
+									<Fade in={!!fileError} timeout={300}>
+										<Alert variant="filled" severity="error">{fileError}</Alert>
+									</Fade>
+								)}
+						{createLoading && <Spinner className="small-spinner" />}
+							</Stack>
 						</div>
-						<button className="request__form__button" type="submit">Envoyer</button>
+						<button
+							className="request__form__button"
+							type="submit"
+							disabled={createLoading}
+							>
+							Envoyer
+						</button>
 					</motion.form>
 				)}
 			</AnimatePresence>
