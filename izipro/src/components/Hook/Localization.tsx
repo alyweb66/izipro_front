@@ -3,13 +3,14 @@
 export const Localization = async (address: string, city: string, postal_code: string, setError: Function) => {
 	const mapboxAccessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 	const mapboxUrl = import.meta.env.VITE_MAPBOX_URL;
+	// to use in local not in production
 
 	if (address && city && postal_code) {
 		// transform address to coordinates with Mapbox API
 
 		const formattedAddress = `country=fr&address_line1=${encodeURIComponent(address)}&postcode=${encodeURIComponent(postal_code)}&place=${encodeURIComponent(city)}`;
 		const url = `${mapboxUrl}${formattedAddress}&access_token=${mapboxAccessToken}`;
-
+		
 		const response = await fetch(url);
 		const data = await response.json();
 
