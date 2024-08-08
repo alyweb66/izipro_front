@@ -1,0 +1,109 @@
+@use '../../../styles/variables' as v;
+
+.logout {
+    display: flex;
+    align-items: center;
+
+    .logout__icon {
+        display: none;
+    }
+
+    .logout__button {
+        margin-top: 0.5rem;
+        font-family: v.$font;
+        position: relative;
+        padding: 5px 10px;
+        border-radius: 7px;
+        border: none;
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 2px;
+        background-color: v.$color-primary-orange;
+        color: white;
+        overflow: hidden;
+        box-shadow: 0 0 0 0 transparent;
+        -webkit-transition: all 0.2s ease-in;
+        transition: all 0.2s ease-in;
+    }
+
+    .logout__button:hover {
+        background: v.$color-primary-blue;
+       -webkit-transition: all 0.2s ease-out;
+        transition: all 0.2s ease-out;
+        border: none;
+        color: white;
+    }
+
+    .logout__button:hover::before {
+        -webkit-animation: sh02 0.5s 0s linear;
+        -moz-animation: sh02 0.5s 0s linear;
+        animation: sh02 0.5s 0s linear;
+    }
+
+    .logout__button::before {
+        content: '';
+        display: block;
+        width: 0px;
+        height: 86%;
+        position: absolute;
+        top: 7%;
+        left: 0%;
+        opacity: 0;
+        background: #fff;
+        box-shadow: 0 0 50px 30px #fff;
+        -webkit-transform: skewX(-20deg);
+        -o-transform: skewX(-20deg);
+        transform: skewX(-20deg);
+    }
+
+}
+
+@media (max-width: 481px) {
+    .logout {
+        margin-top: 0;
+
+        .logout__icon {
+            display: block;
+            font-size: 3.5rem;
+            color: v.$color-primary-orange;
+            margin-right: 1rem;
+        }
+
+        .logout__button {
+            display: none;
+        }
+    }
+
+}
+
+@keyframes sh02 {
+    from {
+        opacity: 0;
+        left: 0%;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+        left: 100%;
+    }
+}
+
+.logout__button:active {
+    box-shadow: 0 0 0 0 transparent;
+    -webkit-transition: box-shadow 0.2s ease-in;
+    transition: box-shadow 0.2s ease-in;
+}
+
+@media (max-height: 400px) {
+    .logout {
+        
+        .logout__button {
+            font-size: 9px;
+            margin-top: 0.1rem;
+        }
+    }
+}

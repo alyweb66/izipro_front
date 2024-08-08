@@ -1,0 +1,1063 @@
+@use '../../../styles/variables' as v;
+@use '../../../styles/mixins' as m;
+
+.my-request {
+    width: 100%;
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+    overflow: hidden;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+        /* For Chrome, Safari and Opera */
+    }
+
+    .my-request__list {
+        overflow-y: auto;
+        scrollbar-width: none;
+        width: 100%;
+        max-width: 30%;
+        margin: 1rem 0.1rem 0 0.1rem;
+
+        &::-webkit-scrollbar {
+            display: none;
+            /* For Chrome, Safari and Opera */
+        }
+
+        &.no-req {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 0.5rem auto;
+            border-radius: 0.5rem;
+            box-shadow: none;
+            max-width: 90%;
+            color: v.$color-primary-orange;
+            text-align: center;
+
+        }
+
+        &.loading {
+
+            position: relative;
+        }
+
+        .my-request__list__fetch-button {
+            @include m.fetch-button;
+
+            & {
+                display: flex;
+                justify-content: center;
+            }
+        }
+
+
+        .my-request__list__detail {
+            overflow: hidden;
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar {
+                display: none;
+                /* For Chrome, Safari and Opera */
+            }
+
+            .my-request__list__detail__item {
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                scrollbar-width: none;
+                margin: 1rem;
+                background-color: white;
+                border-radius: 0.5rem;
+                box-shadow: -5px 0 10px #6666661c,
+                    -5px 0 10px #ffffff17,
+                    5px 0 10px #6666661c;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                    /* For Chrome, Safari and Opera */
+                }
+
+                &.true {
+                    @include m.urgent-item;
+                }
+
+                &.urgent {
+                    border: none;
+                    margin: auto;
+                    background-color: transparent;
+                    box-shadow: none;
+                    color: red;
+
+                }
+
+                &.not-viewed {
+                    @include m.not-viewed;
+                }
+
+
+
+                .my-request__list__detail__item__header {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: baseline;
+
+
+                    &.city {
+                        display: flex;
+                        flex-direction: row;
+                        margin-left: 0.3rem;
+                        font-size: 1rem;
+                        font-weight: 400;
+                    }
+
+                    &.city-span {
+                        color: v.$color-primary-orange;
+                        font-weight: 500;
+                    }
+
+                    &.job {
+                        display: flex;
+                        flex-direction: row;
+                        margin-left: 0.3rem;
+                        font-size: 1rem;
+                        font-weight: 400;
+                        color: black
+                    }
+
+                    &.job-span {
+                        color: v.$color-primary-orange;
+                        font-weight: 500;
+                    }
+
+                    &.name {
+                        display: flex;
+                        flex-direction: row;
+
+                        margin: 0 0.3rem 0 0.3rem;
+                        font-size: 1rem;
+                        font-weight: 400;
+
+                    }
+
+                    &.name-span {
+                        color: v.$color-primary-orange;
+                        font-weight: 500;
+                    }
+
+                    &.date {
+                        display: flex;
+                        flex-direction: row;
+                        margin-top: 0.5rem;
+                        margin-left: 0.3rem;
+                        font-size: 0.9rem;
+                        font-weight: 400;
+                    }
+
+                    &.date-span {
+                        color: v.$color-primary-orange;
+                        font-weight: 500;
+                    }
+                }
+
+                &.title {
+                    border: none;
+                    background-color: transparent;
+                    box-shadow: none;
+                    margin: 0.5rem auto 0.2rem 0.2rem;
+                    font-size: 1.2rem;
+                    font-weight: 500;
+                    color: v.$color-primary-blue;
+                }
+
+                &.message {
+                    display: block;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    cursor: pointer;
+                    width: inherit;
+                    border: none;
+                    padding-left: 0.3rem;
+                    padding-right: 0.3rem;
+                    background-color: transparent;
+                    box-shadow: none;
+                    border-radius: 0;
+                    margin: 0;
+                    font-size: 1rem;
+                    font-weight: 400;
+                    background-color: v.$color-light-blue;
+                }
+
+                &.expanded {
+                    white-space: normal;
+                    max-width: none;
+                }
+
+                .my-request__list__detail__item__footer {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: baseline;
+                    margin-top: 0.5rem;
+
+
+
+                }
+
+                .my-request__list__detail__item__picture {
+                    display: flex;
+                    flex-wrap: wrap;
+                    z-index: 1;
+
+                    &.img {
+                        margin: 1rem 0.5rem 0 0.5rem;
+                        border-radius: 0.5rem;
+                        width: 70px;
+                        height: 70px;
+                        cursor: pointer;
+
+
+                    }
+                }
+
+                .my-request__list__detail__item__delete {
+                    display: none;
+                }
+
+                .my-request__list__detail__item__delete-FaTrashAlt {
+                    font-size: 1.5rem;
+                    margin: 1rem 1rem 1rem auto;
+                    color: v.$color-error;
+                    cursor: pointer;
+                    z-index: 2;
+                }
+            }
+        }
+
+        .my-request__list__detail__item.false.selected {
+            @include m.selected;
+
+        }
+
+        .my-request__list__detail__item.true.selected {
+            @include m.selected;
+        }
+
+    }
+
+    .my-request__answer-list {
+        margin: 0.5rem 0;
+        width: 30%;
+        max-width: 30%;
+        //height: 100%;
+
+
+        .my-request__answer-list__header {
+
+            &.title {
+                position: relative;
+                margin: 0.5rem 0 0.5rem 0;
+                width: 100%;
+                box-shadow: none;
+                padding: 0 0.8rem 0.8rem 0.8rem;
+                color: v.$color-primary-blue;
+                font-size: 1.2rem;
+                font-weight: 500;
+
+
+            }
+
+            &.title::before {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 1px;
+                background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
+            }
+
+            &.return {
+                display: none;
+            }
+        }
+
+        &.loading {
+            position: relative;
+        }
+
+        &.no-conv {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 0.5rem auto;
+            border-radius: 0.5rem;
+            box-shadow: none;
+            max-width: 90%;
+            color: v.$color-primary-orange;
+            text-align: center;
+        }
+
+
+        .my-request__answer-list__container {
+            overflow-y: auto;
+            scrollbar-width: none;
+            height: 93%;
+
+            &::-webkit-scrollbar {
+                display: none;
+                /* For Chrome, Safari and Opera */
+            }
+
+            .my-request__answer-list__user {
+                overflow: hidden;
+                scrollbar-width: none;
+                display: flex;
+                flex-direction: column;
+                margin: 0.5rem;
+                border-radius: 0.5rem;
+                background-color: white;
+                box-shadow: -5px 0 10px #6666661c,
+                    -5px 0 10px #ffffff17,
+                    5px 0 10px #6666661c;
+                height: 4rem;
+                cursor: pointer;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                    /* For Chrome, Safari and Opera */
+                }
+
+                &.deleted {
+                    @include m.deleted;
+
+                }
+
+
+                &.selected-user {
+                    @include m.selected-user;
+
+                }
+
+                &.not-viewed {
+                    @include m.not-viewed
+                }
+
+
+                .my-request__answer-list__user__header {
+                    display: flex;
+                    overflow: hidden;
+
+                    &.img {
+                        margin: 0.4rem;
+                        border-radius: 0.5rem;
+                        width: 50px;
+                        min-width: 50px;
+                        height: 50px;
+                        z-index: 2;
+
+                    }
+
+                    &.name {
+                        word-break: break-all;
+                        margin: auto 0.3rem auto 0;
+                        background-color: transparent;
+                        font-size: 0.8rem;
+                        font-weight: 500;
+                        width: 100%;
+                        max-width: 75%;
+
+
+                    }
+
+                    &.denomination {
+                        word-break: break-all;
+                        margin: auto 0.3rem auto 0;
+                        background-color: transparent;
+                        font-size: 0.8rem;
+                        font-weight: 500;
+                        width: 100%;
+                        max-width: 75%;
+                    }
+
+                    &.deleted {
+                        color: v.$color-error;
+                        margin: auto 0.3rem auto 0;
+                        font-size: 1rem;
+                        font-weight: 500;
+                        word-break: break-all;
+                    }
+
+
+                }
+
+            }
+        }
+    }
+
+
+
+    .my-request__message-list {
+        display: flex;
+        flex-direction: column;
+        margin: 0.5rem 1rem 0 1rem;
+        width: 40%;
+        min-width: 40%;
+        max-width: 40%;
+
+        &.loading {
+            position: relative;
+        }
+
+        .my-request__message-list__user {
+
+            .my-request__message-list__user__header {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                box-shadow: 0 1px 6px -2px rgba(0, 0, 0, 0.2);
+                cursor: pointer;
+                position: relative;
+                background-color: white;
+                border-radius: 0.3rem 0.3rem 0 0;
+
+
+                .my-request__message-list__user__header__detail {
+                    display: flex;
+                    align-items: center;
+                    background-color: white;
+                    border-radius: 8px 8px 0 0;
+
+                    &.return {
+                        display: none;
+                    }
+
+                    &.img {
+                        @include m.border;
+                        margin: 0.5rem 1rem;
+                        border-radius: 0.5rem;
+                        width: 50px;
+                        height: 50px;
+                        box-shadow: 5px 5px 10px #ebebeb,
+                            -5px -5px 10px #ffffff;
+                        object-fit: cover;
+                    }
+
+                    &.name {
+                        box-shadow: none;
+                        margin: 0.5rem 0.3rem;
+                        font-size: 1rem;
+                        font-weight: 500;
+                    }
+
+                    &.denomination {
+                        display: block;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        width: inherit;
+                        box-shadow: none;
+                        margin: auto 0.3rem auto 0;
+                        background-color: transparent;
+                        font-size: 1rem;
+                        font-weight: 500;
+
+                    }
+
+                    &.deploy-arrow {
+                        color: v.$color-primary-blue;
+                        font-size: 2.5rem;
+                        font-weight: 600;
+                        margin-left: 0.5rem;
+                        margin-right: 0.5rem;
+
+                    }
+
+                    &.deleted {
+                        color: v.$color-error;
+                        margin: auto 0.3rem auto 0;
+                        font-size: 1rem;
+                        font-weight: 500;
+                    }
+
+                    &.deployed {
+                        font-size: 0.8rem;
+                        padding: 0 1rem;
+                        display: b lock;
+                        overflow: hidden;
+                        text-overflow: none;
+                        white-space: normal;
+                    }
+                }
+
+                &.description {
+                    width: 98%;
+                    padding: 0.5rem;
+                    box-shadow: none;
+                    margin: 0 0.5rem;
+                    background-color: white;
+                    color: v.$color-primary-blue;
+                    font-size: 0.8rem;
+                    font-weight: 500;
+
+
+                }
+            }
+
+        }
+
+
+        .my-request__container {
+
+            position: relative;
+            width: 100%;
+            flex-grow: 1;
+            overflow: auto;
+            // height: 100%;
+
+            .my-request__background {
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 0;
+
+            }
+
+            .my-request__background::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: url('/izipro-logo.svg') no-repeat center center;
+                background-size: contain;
+                opacity: 0.1;
+                z-index: -1;
+            }
+
+            .my-request__message-list__message {
+                display: flex;
+                flex-direction: column;
+                margin: 0rem;
+                padding: 0 1rem;
+                overflow-y: auto;
+                scrollbar-width: none;
+                flex-grow: 1;
+                position: relative;
+                z-index: 1;
+                background: transparent;
+                height: 100%;
+                width: 100%;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                    /* For Chrome, Safari and Opera */
+                }
+
+                .my-request__message-list__message__detail {
+                    display: flex;
+                    flex-direction: column;
+                    margin: 0.5rem 0;
+                    background: transparent;
+                    width: 100%;
+
+                    &.me {
+                        justify-content: flex-end;
+
+                        .my-request__message-list__message__detail__date {
+                            display: flex;
+                            justify-content: flex-end;
+                            margin-right: 0.5rem;
+                            font-size: 0.8rem;
+                            font-weight: 500;
+                            color: v.$color-primary-orange;
+                        }
+                    }
+
+
+
+                    .my-request__message-list__message__detail__date {
+                        display: flex;
+                        justify-content: flex-start;
+                        margin-left: 0.5rem;
+                        font-size: 0.8rem;
+                        font-weight: 500;
+                        color: v.$color-primary-blue;
+                    }
+
+                    .content {
+                        display: flex;
+                        align-self: flex-start;
+                        flex-direction: column;
+                        background-color: v.$color-chat-blue;
+                        border-radius: 0 1rem 1rem 1rem;
+                        margin-top: 1rem;
+                        width: 80%;
+                        max-width: fit-content;
+
+
+                        &.me {
+                            border-radius: 1rem 1rem 0rem 1rem;
+                            align-self: flex-end;
+                            background-color: v.$color-chat-orange;
+                            margin-top: 1rem;
+
+                            .my-request__message-list__message__detail__image-container {
+
+                                display: flex;
+                                justify-content: flex-end;
+
+                                .map {
+                                    justify-content: flex-end;
+
+                                }
+                            }
+
+                            .my-request__message-list__message__detail__texte {
+                                word-wrap: break-word;
+                                overflow-wrap: break-word;
+
+                            }
+                        }
+
+                        .my-request__message-list__message__detail__image-container {
+                            width: 100%;
+                            max-width: fit-content;
+
+                            .map {
+                                display: flex;
+                                flex-wrap: wrap;
+                                background-color: transparent;
+                                gap: 0.3rem;
+                                margin: 0.5rem 0.5rem;
+                                justify-content: flex-start;
+                                max-width: fit-content;
+
+                                .a-pdf {
+                                    display: flex;
+                                    justify-content: end;
+                                    width: auto;
+                                    border-radius: 0.5rem;
+
+                                    .my-request__message-list__message__detail__image-pdf {
+                                        border-radius: 0.5rem;
+                                        cursor: pointer;
+                                        object-fit: cover;
+                                        flex: 1;
+                                        width: auto;
+                                        min-width: 5rem;
+                                        height: auto;
+
+                                        &.single {
+                                            width: fit-content;
+                                            max-width: 5rem;
+                                            height: auto;
+                                            border-radius: 0.5rem;
+                                        }
+
+                                        &.multiple {
+                                            width: 5rem;
+                                            height: auto;
+                                            object-fit: cover;
+                                        }
+
+                                        &.loading {
+                                            position: relative;
+                                        }
+                                    }
+                                }
+
+                                .my-request__message-list__message__detail__image {
+                                    border-radius: 0.5rem;
+                                    cursor: pointer;
+                                    object-fit: cover;
+                                    flex: 1;
+                                    width: auto;
+                                    min-width: 5rem;
+                                    height: auto;
+
+                                    &.single {
+                                        width: fit-content;
+
+                                    }
+
+                                    &.multiple {
+                                        width: 5rem;
+                                        height: 5rem;
+                                        object-fit: cover;
+                                    }
+
+                                    &.loading {
+                                        position: relative;
+                                    }
+                                }
+
+                                &.message {
+                                    margin-bottom: 0;
+                                }
+
+                            }
+
+                        }
+
+                        .my-request__message-list__message__detail__texte {
+                            padding: 0.2rem 0.5rem;
+                            word-wrap: break-word;
+                            overflow-wrap: break-word;
+
+                        }
+                    }
+                }
+            }
+        }
+
+        .my-request__container::before,
+        .my-request__container::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
+        }
+
+        .my-request__container::before {
+            top: 0;
+            z-index: 2;
+        }
+
+        .my-request__container::after {
+            bottom: 0;
+            z-index: 2;
+        }
+
+        .my-request__message-list__form {
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            bottom: 0;
+            width: 100%;
+
+            .my-request__message-list__form__preview {
+                max-width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                background-color: transparent;
+                margin: 0;
+                padding: 0.5rem;
+                gap: 1rem;
+                background-color: transparent;
+
+                .my-request__message-list__form__preview__container {
+                    display: flex;
+                    flex-wrap: wrap;
+
+
+                    .my-request__message-list__form__preview__container__image {
+                        box-shadow: -5px 0 10px #6666661e,
+                            -5px 0 10px #ffffff62,
+                            5px 0 10px #66666680;
+                        border-radius: 0.5rem;
+                        width: 100px;
+                        height: 100px;
+                        object-fit: cover;
+
+                    }
+
+                    .my-request__message-list__form__preview__container__remove {
+                        margin: 0 0.3rem;
+                        width: 0.8rem;
+                        height: 1.5rem;
+                        border: none;
+                        background-color: transparent;
+                        color: red;
+                        font-size: 1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: transform 0.1s ease;
+
+                        &:hover {
+                            transform: scale(1.5);
+                        }
+                    }
+
+
+                }
+            }
+
+        }
+
+        .my-request__message-list__form__label {
+            display: flex;
+            align-items: center;
+            margin: 0;
+            padding: 0.5rem;
+            background: white;
+            box-shadow: 0 -1px 6px 1px rgba(0, 0, 0, 0.2);
+            font-size: 1rem;
+            font-weight: 500;
+            color: v.$color-primary-orange;
+            border-radius: 0 0 0.3rem 0.3rem;
+
+            .my-request__message-list__form__label__attach {
+                font-size: 2rem;
+                margin: 0.2rem 0.3rem;
+                cursor: pointer;
+            }
+
+            .my-request__message-list__form__label__camera {
+                font-size: 2rem;
+                margin: 0.2rem 0.3rem;
+                cursor: pointer;
+            }
+
+            .my-request__message-list__form__label__input {
+                overflow: none;
+                scrollbar-width: none;
+                border-radius: 0.5rem;
+                width: 100%;
+                margin: 0 0.3rem;
+                color: black;
+                font-weight: 400;
+                border: none;
+                background-color: transparent;
+                resize: none;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                    /* For Chrome, Safari and Opera */
+                }
+
+                &:focus {
+                    outline: none;
+                }
+            }
+
+            .my-request__message-list__form__label__send {
+                margin: auto;
+                font-size: 2rem;
+                cursor: pointer;
+            }
+        }
+
+        .my-request__message-list__form__input {
+
+            display: none;
+
+        }
+
+        .my-request__message-list__form__button {
+            display: none;
+        }
+
+
+    }
+}
+
+@media (max-width: 1000px) {
+    .my-request {
+        width: 100%;
+        max-height: 100%;
+
+        .my-request__list {
+            display: none;
+
+            &.open {
+                display: block;
+                margin: 0 auto;
+                max-width: 90%;
+
+            }
+
+        }
+
+        .my-request__answer-list {
+            display: none;
+
+
+            &.open {
+                display: flex;
+                flex-direction: column;
+                margin: 0.5rem auto 0 auto;
+                width: 70%;
+                max-width: 70%;
+
+                .my-request__answer-list__header {
+                    display: flex;
+                    align-items: center;
+                    width: 100%;
+
+                    &.title {
+                        display: block;
+                        margin: 0;
+                        width: 100%;
+                        box-shadow: none;
+                        padding: 0 0.8rem 0.8rem 0.8rem;
+                        color: v.$color-primary-blue;
+                        font-size: 1.2rem;
+                        font-weight: 500;
+                        ;
+                    }
+
+                    &.return {
+                        display: block;
+                        box-shadow: none;
+                        width: auto;
+                        font-size: 4rem;
+                        margin: 0 auto 0 0.1rem;
+                        color: v.$color-primary-orange;
+                        cursor: pointer;
+
+                    }
+                }
+
+            }
+        }
+
+        .my-request__message-list {
+            display: none;
+
+            &.open {
+                display: flex;
+                margin: 1rem auto 0 auto;
+                max-width: 80%;
+                width: 80%;
+                //max-height: 100vh;
+
+                .my-request__message-list__user {
+
+                    .my-request__message-list__user__header {
+
+                        &.description {
+                            margin-top: 0;
+
+                        }
+
+                        .my-request__message-list__user__header__detail {
+
+                            /* &.deploy-arrow {
+                                width: 50%;
+                            } */
+
+
+                            &.return {
+                                display: block;
+                                font-size: 4rem;
+                                color: v.$color-primary-orange;
+                                cursor: pointer;
+                            }
+                        }
+                    }
+                }
+
+                .my-request__message-list__message {
+                    overflow-y: auto;
+                    max-height: 100vh;
+                }
+            }
+
+        }
+    }
+}
+
+@media (max-width: 800px) {
+    .my-request {
+        .my-request__list {
+            &.open {
+                max-width: 95%;
+            }
+
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .my-request {
+
+        .my-request__answer-list.open,
+        .my-request__message-list.open,
+        .my-request__list.open {
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .my-request__answer-list {
+            &.open {
+                margin: 0.5rem auto 0 auto;
+
+
+                .my-request__answer-list__header {
+                    &.return {
+                        font-size: 4rem;
+                        // height: 50px;
+                    }
+                }
+            }
+        }
+
+        .my-request__message-list {
+            &.open {
+                margin-top: 0;
+                margin-bottom: 0;
+
+                .my-request__message-list__user {
+                    .my-request__message-list__user__header {
+
+
+                        .my-request__message-list__user__header__detail {
+                            border-radius: 0;
+
+                            &.description {
+                                padding: 0 0.5rem;
+                                display: b lock;
+                                overflow: hidden;
+                                text-overflow: none;
+                                white-space: normal;
+                            }
+
+                            &.return {
+                                font-size: 4rem;
+                                width: 15%;
+                            }
+
+                            &.img {
+                                margin: 0.5rem 0.5rem 0.5rem 0.2rem;
+                                border-radius: 0.5rem;
+                            }
+
+                            &.denomination {
+                                width: 40%;
+
+                                &.deployed {
+                                    width: 100%;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                .my-request__message-list__form__label {
+                    border-radius: 0;
+                }
+            }
+        }
+    }
+}
+
+@media (max-height: 480px) {
+    .my-request {
+        overflow: auto;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+            /* For Chrome, Safari and Opera */
+        }
+    }
+}
