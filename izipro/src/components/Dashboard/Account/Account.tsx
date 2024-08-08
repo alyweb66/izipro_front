@@ -491,26 +491,30 @@ function Account() {
 		const checkNotificationStatus = async () => {
 			// set the state of the notification
 			// check if the user is already subscribed to push notifications
-			const registration = await navigator.serviceWorker.getRegistration();
-			if (registration) {
-				const subscription = await registration.pushManager.getSubscription();
-				setIsNotificationEnabled(!!subscription);
-			} else {
-				setIsNotificationEnabled(false);
-			}
+			if (window.location.protocol === 'https:' || window.location.hostname === 'localhost') {
+				if ('serviceWorker' in navigator) {
+					const registration = await navigator.serviceWorker.getRegistration();
+					if (registration) {
+						const subscription = await registration.pushManager.getSubscription();
+						setIsNotificationEnabled(!!subscription);
+					} else {
+						setIsNotificationEnabled(false);
+					}
 
-			// verify if the browser supports notifications push and service workers
-			const permission = document.getElementById('push-permission');
+					// verify if the browser supports notifications push and service workers
+					const permission = document.getElementById('push-permission');
 
-			if (
-				!permission &&
-				!('serviceWorker' in navigator) ||
-				!('Notification' in window)
-			) {
-				if (permission) {
-					permission.style.display = 'none';
+					if (
+						!permission &&
+						!('serviceWorker' in navigator) ||
+						!('Notification' in window)
+					) {
+						if (permission) {
+							permission.style.display = 'none';
+						}
+						return;
+					}
 				}
-				return;
 			}
 		};
 
@@ -588,7 +592,7 @@ function Account() {
 						<button className="account__profile__picture__delete" type='button' onClick={handleDeletePicture}>Supprimer</button>
 					</div >
 					<div className="notification-container">
-					{(notification === null || notificationLoading) && <Spinner delay={0}/>}
+						{(notification === null || notificationLoading) && <Spinner delay={0} />}
 						<div className="notification">
 							<FormGroup>
 								<FormControlLabel
@@ -782,7 +786,7 @@ function Account() {
 							<div className="request__form__map">
 								<p className="request__title-map">Vérifiez votre adresse sur la carte (validez pour actualiser):</p>
 								<div className="request__form__map__map">
-								{isLoading && <Spinner />}
+									{isLoading && <Spinner />}
 									<Map
 										reuseMaps
 										mapboxAccessToken={mapboxAccessToken}
