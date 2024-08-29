@@ -4,7 +4,7 @@ import pdfLogo from '/logo/logo-pdf.jpg';
 import { RequestProps } from '../../Type/Request';
 import React, { useRef } from 'react';
 //import { MessageProps } from '../../Type/message';
-import { userDataStore } from '../../store/UserData';
+//import { userDataStore } from '../../store/UserData';
 import { motion } from 'framer-motion';
 
 type ExpandedState = {
@@ -15,7 +15,7 @@ const RequestItem = ({
 	index,
 	requestByDate,
 	notViewedConversationStore,
-	handleViewedMessage,
+//	handleViewedMessage,
 	setIsMessageOpen,
 	request,
 	resetRequest,
@@ -31,7 +31,7 @@ const RequestItem = ({
 }: {
 	index?: number,
 	requestByDate?: RequestProps,
-	handleViewedMessage: Function,
+	//handleViewedMessage: Function,
 	notViewedConversationStore?: number[],
 	setIsMessageOpen?: Function,
 	request?: RequestProps,
@@ -48,7 +48,7 @@ const RequestItem = ({
 }) => {
 	const idRef = useRef<number>(0);
 	//store
-	const id = userDataStore((state) => state.id);
+	//const id = userDataStore((state) => state.id);
 
 	return (
 		<motion.div
@@ -66,8 +66,8 @@ const RequestItem = ({
 				if ((request || requestByDate) && setSelectedRequest) {
 					setSelectedRequest && setSelectedRequest(request || requestByDate);
 				}
-				const convId = (request || requestByDate)?.conversation?.find(conv => conv.user_1 === id || conv.user_2 === id)?.id;
-				handleViewedMessage(convId);
+				//const convId = (request || requestByDate)?.conversation?.find(conv => conv.user_1 === id || conv.user_2 === id)?.id;
+				//handleViewedMessage(convId);
 				if (window.innerWidth < 780) {
 					//itemList();
 					setIsListOpen && setIsListOpen(false);

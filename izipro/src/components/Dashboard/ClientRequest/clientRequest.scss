@@ -152,11 +152,6 @@
       }
 
       &.message {
-        // display: block;
-        // overflow: hidden;
-        // text-overflow: ellipsis;
-        // white-space: nowrap;
-        //cursor: pointer;
         border-radius: 0;
         width: inherit;
         border: none;
@@ -169,23 +164,11 @@
         font-weight: 400;
       }
 
-      /*  &.expanded {
-        white-space: normal;
-        max-width: none;
-      } */
-
-      /* &.false.selected {
-            border-radius: 1px solid v.$color-primary-blue;
-        } */
-
       .client-request__list__detail__item__footer {
         display: flex;
         flex-direction: column;
         align-items: baseline;
         margin-top: 0.5rem;
-
-
-
       }
 
       .client-request__list__detail__item__picture {
@@ -206,10 +189,11 @@
 
       .client-request__list__detail__item__delete {
         display: none;
-
+        
       }
-
+      
       .client-request__list__detail__item__delete-FaTrashAlt {
+        z-index: 10;
         font-size: 1.5rem;
         margin: 1rem 1rem 1rem auto;
         color: v.$color-error;

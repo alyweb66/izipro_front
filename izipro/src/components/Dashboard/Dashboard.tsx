@@ -191,14 +191,14 @@ function Dashboard() {
 	let decodeData: string | { value: string };
 	let isLogged: boolean;
 	try {
-        decodeData = JSON.parse(atob(getItem || ''));
-    } catch (error) {
-        decodeData = atob(getItem || '');
-    }
+		decodeData = JSON.parse(atob(getItem || ''));
+	} catch (error) {
+		decodeData = atob(getItem || '');
+	}
 
-	if (decodeData &&((typeof decodeData === 'object' && decodeData.value === 'true') || decodeData === 'session')) {
-			isLogged = true
-	}  else {
+	if (decodeData && ((typeof decodeData === 'object' && decodeData.value === 'true') || decodeData === 'session')) {
+		isLogged = true
+	} else {
 		isLogged = false;
 	}
 
@@ -948,6 +948,7 @@ function Dashboard() {
 							/>}
 						</ErrorBoundary>
 						{selectedTab === 'My conversations' && <MyConversation
+							viewedMyConversationState={viewedMyConversationState}
 							isHasMore={isMyConversationHasMore}
 							setIsHasMore={setIsMyConversationHasMore}
 							offsetRef={myConversationOffsetRef}

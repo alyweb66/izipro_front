@@ -87,6 +87,8 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [isSkipRequest] = useState<boolean>(true);
 	const [isSkipMessage, setIsSkipMessage] = useState<boolean>(true);
 	const [fetchConvIdState, setFetchConvIdState] = useState<number>(0);
+	const [hasManyImages, setHasManyImages] = useState(false);
+	const [showButton, setShowButton] = useState(false);
 	//const [isHandleClick, setIsHandleClick] = useState<boolean>(false);
 
 
@@ -706,16 +708,13 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	};
 
-	const [hasManyImages, setHasManyImages] = useState(false);
-
-	const [showButton, setShowButton] = useState(false);
-
+	//timeout to show the button to add request
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			setShowButton(true);
-		}, 1000); // Délai de 1 seconde
+		}, 1000); 
 
-		return () => clearTimeout(timer); // Nettoyage du timer
+		return () => clearTimeout(timer); 
 	}, []);
 
 	return (

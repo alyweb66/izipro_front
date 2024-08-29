@@ -179,7 +179,8 @@ function SettingAccount() {
 					<>
 						<form className={`setting-account__form ${jobLoading ? 'loading' : ''}`} onSubmit={handleSubmitJob}>
 							{/* {jobLoading && <Spinner />} */}
-							<h1 className="setting-account__form__title">Vos métiers:</h1>
+							<h1 className="setting-account__form__title">Options de recherche:</h1>
+							<h2 className="setting-account__subtitle">Séléctionnez un ou plusieurs métier:</h2>
 							<SelectBox
 								isSetting={true}
 								data={categoriesState}

@@ -60,6 +60,7 @@ type useQueryUserConversationsProps = {
 };
 
 type ClientMessageProps = {
+	viewedMyConversationState: number[];
 	offsetRef: React.MutableRefObject<number>;
 	isHasMore: boolean;
 	setIsHasMore: (hasMore: boolean) => void;
@@ -69,7 +70,7 @@ type ClientMessageProps = {
 };
 
 
-function MyConversation({ clientMessageSubscription, conversationIdState, setConversationIdState, isHasMore, setIsHasMore, offsetRef }: ClientMessageProps) {
+function MyConversation({ viewedMyConversationState, clientMessageSubscription, conversationIdState, setConversationIdState, isHasMore, setIsHasMore, offsetRef }: ClientMessageProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -541,6 +542,14 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 				setFetchConvIdState(conversationId?.id ?? 0);
 				setIsSkipMessage(false);
 			}
+
+			// to remove the request from the clientRequestStore
+			if (viewedMyConversationState.length > 0) {
+				const convId = selectedRequest?.conversation?.find(conv => conv.user_1 === id || conv.user_2 === id)?.id;
+				if (convId) {
+					handleViewedMessage(convId);
+				}
+			}
 		}
 
 	}, [selectedRequest]);
@@ -648,7 +657,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 									setHasManyImages={setHasManyImages}
 									request={request}
 									notViewedConversationStore={notViewedConversationStore}
-									handleViewedMessage={handleViewedMessage}
+									//handleViewedMessage={handleViewedMessage}
 									setIsMessageOpen={setIsMessageOpen}
 									resetRequest={resetRequest}
 									selectedRequest={selectedRequest!}
@@ -670,7 +679,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 									index={index}
 									notViewedConversationStore={notViewedConversationStore}
 									requestByDate={requestByDate}
-									handleViewedMessage={handleViewedMessage}
+									//handleViewedMessage={handleViewedMessage}
 									setIsMessageOpen={setIsMessageOpen}
 									selectedRequest={selectedRequest!}
 									setSelectedRequest={setSelectedRequest}

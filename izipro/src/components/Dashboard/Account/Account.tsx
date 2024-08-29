@@ -53,6 +53,7 @@ import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 import { useQueryGetNotification } from '../../Hook/Query';
 import { UPDATE_NOTIFICATION_MUTATION } from '../../GraphQL/notificationMutation';
 import { useNotificationStore } from '../../../store/Notification';
+import TextareaAutosize from 'react-textarea-autosize';
 //import '../../../styles/spinner.scss';
 
 
@@ -533,31 +534,31 @@ function Account() {
 	}, []); */
 	useEffect(() => {
 		const observer = new MutationObserver((mutationsList, observer) => {
-		  for (let mutation of mutationsList) {
-			if (mutation.type === 'childList') {
-			  if (document.querySelector('.mapboxgl-canvas')) {
-				setIsLoading(false);
-				observer.disconnect();
-				break;
-			  }
+			for (let mutation of mutationsList) {
+				if (mutation.type === 'childList') {
+					if (document.querySelector('.mapboxgl-canvas')) {
+						setIsLoading(false);
+						observer.disconnect();
+						break;
+					}
+				}
 			}
-		  }
 		});
-	
+
 		// Commence à observer le document entier pour les changements dans les enfants
 		observer.observe(document.body, { childList: true, subtree: true });
-	
+
 		// Vérifiez si la carte est déjà chargée au cas où elle serait déjà présente
 		if (document.querySelector('.mapboxgl-canvas')) {
-		  setIsLoading(false);
-		  observer.disconnect();
+			setIsLoading(false);
+			observer.disconnect();
 		}
-	
+
 		// Nettoyer l'observateur lors du démontage du composant
 		return () => {
-		  observer.disconnect();
+			observer.disconnect();
 		};
-	  }, []);
+	}, []);
 
 	// handle the switch change for notification
 	const handleSwitchChange = () => {
@@ -786,7 +787,7 @@ function Account() {
 									</label>
 									<label className="account__profile__form__label">
 										Description:
-										<textarea
+										<TextareaAutosize
 											className="account__profile__form__label__input textarea"
 											name="description"
 											id="description"
@@ -796,7 +797,7 @@ function Account() {
 											aria-label="Exprimez-vous 200 caractères maximum"
 											maxLength={200}
 										>
-										</textarea>
+										</TextareaAutosize>
 										<p>{descriptionState?.length}/200</p>
 									</label>
 								</>
