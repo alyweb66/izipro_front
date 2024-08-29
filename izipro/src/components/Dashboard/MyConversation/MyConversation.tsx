@@ -52,7 +52,6 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 
-
 type useQueryUserConversationsProps = {
 	loading: boolean;
 	data: { user: { requestsConversations: RequestProps[] } };
@@ -467,12 +466,13 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 						setIsMessageOpen(true);
 
 					} else {
+
 						setIsMessageOpen(false);
 						setIsListOpen(true);
 					}
 
 				} else {
-					setIsMessageOpen(false);
+					setIsMessageOpen(true);
 					setIsListOpen(true);
 				}
 			}
@@ -635,12 +635,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
 		}, 200);
 	}, [messageStore, isMessageOpen, selectedRequest]);
-
-
-	console.log('list', isListOpen);
-	console.log('message', isMessageOpen);
-
-
 
 	return (
 		<div className="my-conversation">

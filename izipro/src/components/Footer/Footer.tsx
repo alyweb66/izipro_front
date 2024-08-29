@@ -56,7 +56,6 @@ function Footer() {
 
 	//custom hooks Logout
 	const handleLogout = useHandleLogout();
-console.log('isgetRulesRef', isGetRulesRef.current);
 
 	//Query
 	const { loading: rulesLoading, rulesData } = useQueryRules(isGetRulesRef.current);

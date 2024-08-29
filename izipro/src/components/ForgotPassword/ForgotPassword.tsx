@@ -41,6 +41,29 @@ function ForgotPassword() {
 
 	const navigate = useNavigate();
 
+	// useEffect to check the size of the window
+	useEffect(() => {
+		if (!token) {
+			navigate('/');
+		}
+		const handleResize = () => {
+			if (window.innerWidth < 480) {
+				setIsLogo(true);
+			} else {
+				setIsLogo(false);
+			}
+		};
+
+		// add event listener to check the size of the window
+		window.addEventListener('resize', handleResize);
+
+		// 	call the function to check the size of the window
+		handleResize();
+
+		// remove the event listener when the component unmount
+		return () => window.removeEventListener('resize', handleResize);
+	}, []); 
+
 	const handleSubmitForm = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		event.stopPropagation();
@@ -82,28 +105,6 @@ function ForgotPassword() {
 
 
 	};
-
-	// useEffect to check the size of the window
-	useEffect(() => {
-		const handleResize = () => {
-			if (window.innerWidth < 480) {
-				setIsLogo(true);
-			} else {
-				setIsLogo(false);
-			}
-		};
-
-		// add event listener to check the size of the window
-		window.addEventListener('resize', handleResize);
-
-		// 	call the function to check the size of the window
-		handleResize();
-
-		// remove the event listener when the component unmount
-		return () => window.removeEventListener('resize', handleResize);
-	}, []); 
-
-
 
 	return (
 		<div className="forgot-password-container">
@@ -152,31 +153,6 @@ function ForgotPassword() {
 								{showConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 							</span>
 						</div>
-				{/* <input
-					type={showPassword ? 'text' : 'password'}
-					name="password"
-					value={password}
-					className="forgot-password-container__form__input"
-					placeholder="Mot de passe"
-					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
-					aria-label="Mot de passe"
-					maxLength={60}
-					required
-				/>
-				<input
-					type={showPassword ? 'text' : 'password'}
-					name="confirmPassword"
-					value={confirmPassword}
-					className="forgot-password-container__form__input"
-					placeholder="Confirmer le mot de passe"
-					onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(event.target.value)}
-					aria-label="Confirmer le mot de passe"
-					maxLength={60}
-					required
-				/> */}
-				{/* <button type="button" className="show-password" onClick={() => setShowPassword(!showPassword)}>
-					{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
-				</button> */}
 				<div className="message">
 							<Stack sx={{ width: '100%' }} spacing={2}>
 								{error && (

@@ -78,7 +78,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [selectedUser, setSelectedUser] = useState<UserDataProps | null>(null);
 	const [userDescription, setUserDescription] = useState<boolean>(false);
 	const [isListOpen, setIsListOpen] = useState<boolean>(true);
-	const [isAnswerOpen, setIsAnswerOpen] = useState<boolean>(false);
+	const [isAnswerOpen, setIsAnswerOpen] = useState<boolean>(window.innerWidth > 1000 ? true : false);
 	const [isMessageOpen, setIsMessageOpen] = useState<boolean>(window.innerWidth > 1000 ? true : false);
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
@@ -410,7 +410,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 
 	}, [usersConversationData]);
-	console.log('isMessageOpen', isMessageOpen);
 
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {

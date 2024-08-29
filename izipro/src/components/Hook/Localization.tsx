@@ -12,10 +12,8 @@ export const Localization = async (address: string, city: string, postal_code: s
 		const url = `${mapboxUrl}${formattedAddress}&access_token=${mapboxAccessToken}`;
 		
 		const response = await fetch(url);
-		console.log('mapurl',response);
 		
 		const data = await response.json();
-console.log('data',data);
 
 		// check if the city and postal code match the provided values
 		if (data.features && data.features.length > 0) {

@@ -302,14 +302,12 @@ function Account() {
 				return;
 			}
 		}
-		console.log('changedFields', changedFields);
 
 		// Delete the role and id fields
 		delete changedFields.role && delete changedFields.id;
 
 		// Check if there are changed values, if yes use mutation
 		const keys = Object.keys(changedFields).filter(key => changedFields[key] !== undefined && changedFields[key] !== null);
-		console.log('keys', keys);
 
 		// if there are changed values, use mutation
 		if (keys.length > 0) {
