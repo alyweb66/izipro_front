@@ -116,6 +116,10 @@
         border-radius: 12px;
         box-shadow: none;
 
+        &.siret {
+          margin-bottom: 0.5rem;
+        }
+
         &:focus {
           @include m.border;
         }
@@ -140,8 +144,9 @@
     .register-container__form {
       flex-direction: column;
       align-items: center;
-
+      
       .register-container__form__form {
+        position: relative;
         margin-bottom: 1rem;
         max-width: 100%;
         width: 100%;
@@ -160,9 +165,13 @@
           width: 70%;
         }
 
-        &.button {
-          max-width: 50%;
+        .button {
+          margin-top: 0.5rem;
           width: 50%;
+
+          &.pro {
+            margin-top: 0rem;
+          }
         }
       }
     }
@@ -183,6 +192,14 @@
           max-width: 90%;
           margin-left: 0;
           margin-right: 0;
+        }
+
+        .button {
+          margin-top: 0.5rem;
+
+          &.pro {
+            margin-top: 0rem;
+          }
         }
       }
     }

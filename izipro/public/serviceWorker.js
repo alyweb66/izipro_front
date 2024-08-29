@@ -29,7 +29,7 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     event.waitUntil(
-        openUrl(`${import.meta.env.VITE_CLIENT_URL}/dashboard`)
+        openUrl('https://betapoptest.online//dashboard')
     );
 });
 

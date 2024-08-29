@@ -123,45 +123,44 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(fetchConvIdState, 0, 100, isSkipMessage);
 
 	// useEffect to check the size of the window
+	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	useEffect(() => {
 		const handleResize = () => {
-			///if (!isHandleClick) {
+		
+			if (window.innerWidth !== windowWidth) {
+				setWindowWidth(window.innerWidth); 
 
-			if (window.innerWidth < 1000) {
-
-				if (isUserMessageOpen) {
-
-					setIsMessageOpen(true);
-					setIsAnswerOpen(false);
-					setIsListOpen(false);
-				} else if (!isUserMessageOpen) {
-
-					setIsMessageOpen(false);
-					setIsAnswerOpen(false);
-					setIsListOpen(true);
-
-				} else {
-					if (isAnswerOpen) {
-						setIsMessageOpen(false);
-						setIsAnswerOpen(true);
+				if (window.innerWidth < 1000) {
+					if (isUserMessageOpen) {
+						setIsMessageOpen(true);
+						setIsAnswerOpen(false);
 						setIsListOpen(false);
-					}
-					if (isListOpen) {
+					} else if (!isUserMessageOpen) {
 						setIsMessageOpen(false);
 						setIsAnswerOpen(false);
 						setIsListOpen(true);
+					} else {
+						if (isAnswerOpen) {
+							setIsMessageOpen(false);
+							setIsAnswerOpen(true);
+							setIsListOpen(false);
+						}
+						if (isListOpen) {
+							setIsMessageOpen(false);
+							setIsAnswerOpen(false);
+							setIsListOpen(true);
+						}
 					}
+
+				} else {
+
+					setIsMessageOpen(true);
+					setIsAnswerOpen(true);
+					setIsListOpen(true);
+
+
 				}
-
-			} else {
-
-				setIsMessageOpen(true);
-				setIsAnswerOpen(true);
-				setIsListOpen(true);
-
-
 			}
-			//}
 		};
 
 		// add event listener to check the size of the window
@@ -172,7 +171,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
-	}, [/* isMessageOpen, isAnswerOpen, isListOpen */]);
+	}, [windowWidth/* isMessageOpen, isAnswerOpen, isListOpen */]);
 
 	// useEffect to sort the requests by date and update the subscription
 	useEffect(() => {
@@ -411,6 +410,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 
 	}, [usersConversationData]);
+	console.log('isMessageOpen', isMessageOpen);
 
 	// useEffect to scroll to the end of the messages
 	useEffect(() => {
@@ -707,17 +707,17 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	};
 
-const [hasManyImages, setHasManyImages] = useState(false);
+	const [hasManyImages, setHasManyImages] = useState(false);
 
-const [showButton, setShowButton] = useState(false);
+	const [showButton, setShowButton] = useState(false);
 
-useEffect(() => {
-	const timer = setTimeout(() => {
-		setShowButton(true);
-	}, 1000); // Délai de 1 seconde
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setShowButton(true);
+		}, 1000); // Délai de 1 seconde
 
-	return () => clearTimeout(timer); // Nettoyage du timer
-}, []);
+		return () => clearTimeout(timer); // Nettoyage du timer
+	}, []);
 
 	return (
 		<div className="my-request">
@@ -816,7 +816,7 @@ useEffect(() => {
 
 										{(() => {
 											const imageUrls = request.media?.map(media => media.url) || [];
-										
+
 											return request.media?.map((media, index) => (
 												media ? (
 													media.name.endsWith('.pdf') ? (
@@ -842,10 +842,10 @@ useEffect(() => {
 															src={media.url}
 															onClick={(event) => {
 																setHasManyImages(false),
-																openModal(imageUrls, index),
-																imageUrls.length > 1 && setHasManyImages(true);
+																	openModal(imageUrls, index),
+																	imageUrls.length > 1 && setHasManyImages(true);
 
-																	event.stopPropagation();
+																event.stopPropagation();
 															}}
 															onError={(event) => {
 																event.currentTarget.src = '/logo/no-picture.jpg';
@@ -963,7 +963,7 @@ useEffect(() => {
 													setTimeout(() => {
 														setIsMessageOpen(true);
 														setIsListOpen(false);
-													}, 200);	
+													}, 200);
 												}
 
 											}}
@@ -1113,10 +1113,10 @@ useEffect(() => {
 																						src={media.url}
 																						onClick={(event) => {
 																							setHasManyImages(false),
-																							openModal(imageUrls, index),
-																							imageUrls.length > 1 && setHasManyImages(true);
-							
-																								event.stopPropagation();
+																								openModal(imageUrls, index),
+																								imageUrls.length > 1 && setHasManyImages(true);
+
+																							event.stopPropagation();
 																						}}
 																						alt={media.name}
 																						onError={(event) => {
@@ -1198,6 +1198,7 @@ useEffect(() => {
 									aria-label='Tapez votre message'
 									maxLength={500}
 									readOnly={selectedUser && selectedUser?.id > 0 ? false : true}
+									onClick={(event: React.MouseEvent) => { event.stopPropagation(); event?.preventDefault(); }}
 								/>
 								<MdSend
 									className="my-request__message-list__form__label__send"

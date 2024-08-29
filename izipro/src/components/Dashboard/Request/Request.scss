@@ -19,7 +19,14 @@
     position: relative;
     font-family: v.$font;
     height: 81vh;
-
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+    touch-action: pan-y;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+        /* For Chrome, Safari and Opera */
+    }
 
     &.no-req {
         display: flex;
@@ -366,6 +373,8 @@
 
 @media (max-width: 700px) {
     .request {
+        height: 100%;
+        
 
         .request__form {
 

@@ -10,6 +10,7 @@ function ConfirmEmail() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const token = new URLSearchParams(location.search).get('token');
+	
 	//store
 	const setIsEmailConfirmed = confirmEmailStore((state) => state.setIsEmailConfirmed);
 	// Mutation
@@ -32,7 +33,7 @@ function ConfirmEmail() {
 			throw new Error('Bad request');
 		}
 
-	});
+	}, [confirmRegisterEmail, token, setIsEmailConfirmed, navigate, confirmMailError]);
 
 
 

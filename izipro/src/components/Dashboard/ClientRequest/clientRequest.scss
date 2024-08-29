@@ -8,6 +8,8 @@
   .client-request__list {
     position: relative;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+    touch-action: pan-y;
     scrollbar-width: none;
     max-width: 80%;
     height: 100%;

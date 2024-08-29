@@ -454,23 +454,27 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		}
 
 	};
-
+	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	// useEffect to check the size of the window
 	useEffect(() => {
 		const handleResize = () => {
-			if (window.innerWidth < 780) {
-				if (selectedRequest && selectedRequest.id > 0) {
-					setIsListOpen(false);
-					setIsMessageOpen(true);
+			if (window.innerWidth !== windowWidth) {
+				setWindowWidth(window.innerWidth);
+
+				if (window.innerWidth < 780) {
+					if (selectedRequest && selectedRequest.id > 0) {
+						setIsListOpen(false);
+						setIsMessageOpen(true);
+
+					} else {
+						setIsMessageOpen(false);
+						setIsListOpen(true);
+					}
 
 				} else {
 					setIsMessageOpen(false);
 					setIsListOpen(true);
 				}
-
-			} else {
-				setIsMessageOpen(true);
-				setIsListOpen(true);
 			}
 		};
 
@@ -482,18 +486,15 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
-	}, []);
+	}, [windowWidth]);
 
 	// useEffect to set the new selected request
 	useEffect(() => {
-		if (request && window.innerWidth < 780) {
-			console.log('under 480');
-
+		if (request.id > 0 && window.innerWidth < 780) {
 			setSelectedRequest(request);
 			setIsListOpen(false);
 			setIsMessageOpen(true);
 		} else if (request && window.innerWidth > 780) {
-			console.log('over 480');
 			setSelectedRequest(request);
 		}
 	}, []);
@@ -570,7 +571,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		}
 	}, [requestsConversationStore]);
 
-
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
 
@@ -636,6 +636,9 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		}, 200);
 	}, [messageStore, isMessageOpen, selectedRequest]);
 
+
+	console.log('list', isListOpen);
+	console.log('message', isMessageOpen);
 
 
 

@@ -67,14 +67,14 @@ function Request() {
 	const [jobsState, setJobsState] = useState<JobProps[]>([]);
 	const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 450px)').matches);
 	const [isLoading, setIsLoading] = useState(true);
-
-	// file upload
-	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
-
 	// map
 	const [radius, setRadius] = useState(0); // Radius in meters
 	//const [map, setMap] = useState<mapboxgl.Map | null>(null);
 	const [zoom, setZoom] = useState(10);
+
+	// file upload
+	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
+
 
 
 	// mutation
@@ -205,7 +205,6 @@ function Request() {
 
 	// Get map instance
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-
 	const handleMapLoaded = () => {
 		setIsLoading(false);
 	};
@@ -281,20 +280,20 @@ function Request() {
 				return isMobile ? zoomMobile : zoomDesktop;
 			}
 		}
+		return 7; // default value
 	};
-
+	// Update the zoom level when the radius or screen size changes
+	useEffect(() => {
+		const newZoom = calculateZoomLevel(radius, isMobile);
+		newZoom && setZoom(newZoom);
+	}, [radius, isMobile]);
 	// Update the zoom level based on the radius and screen size
 	useEffect(() => {
 		const handleResize = () => setIsMobile(window.matchMedia('(max-width: 450px)').matches);
 		window.addEventListener('resize', handleResize);
 
 		return () => window.removeEventListener('resize', handleResize);
-	}, []);
 
-	// Update the zoom level when the radius or screen size changes
-	useEffect(() => {
-		const newZoom = calculateZoomLevel(radius, isMobile);
-		newZoom && setZoom(newZoom);
 	}, [radius, isMobile]);
 	//* end Mapping radius to zoom level
 
@@ -380,6 +379,7 @@ function Request() {
 											onLoad={handleMapLoaded}
 											dragRotate={false}
 											dragPan={false}
+
 										>
 											<Source
 												id="circle-data"
@@ -566,14 +566,14 @@ function Request() {
 										<Alert variant="filled" severity="error">{fileError}</Alert>
 									</Fade>
 								)}
-						{createLoading && <Spinner className="small-spinner" />}
+								{createLoading && <Spinner className="small-spinner" />}
 							</Stack>
 						</div>
 						<button
 							className="request__form__button"
 							type="submit"
 							disabled={createLoading}
-							>
+						>
 							Envoyer
 						</button>
 					</motion.form>

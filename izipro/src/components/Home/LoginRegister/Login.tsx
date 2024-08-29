@@ -38,6 +38,7 @@ function Login() {
 	const [emailModal, setEmailModal] = useState(false);
 	const [isLogo, setIsLogo] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
+	const [errorForgotPassword, setErrorForgotPassword] = useState('');
 
 	// Store
 	const [isEmailConfirmed, setIsEmailConfirmed] = confirmEmailStore((state) => [state.isEmailConfirmed, state.setIsEmailConfirmed]);
@@ -133,10 +134,10 @@ function Login() {
 
 		//check if the email is valid
 		if (!validator.isEmail(forgotPasswordEmail)) {
-			setMessageError('Adresse e-mail invalide');
+			setErrorForgotPassword('Adresse e-mail invalide');
 
 			setTimeout(() => {
-				setMessageError('');
+				setErrorForgotPassword('');
 			}, 15000);
 			return;
 		}
@@ -169,13 +170,6 @@ function Login() {
 			</div>}
 			<p className="login-container__title"> Se connecter</p>
 			<div className="message">
-				<Stack sx={{ width: '100%' }} spacing={2}>
-					{message && (
-						<Fade in={!!message} timeout={300}>
-							<Alert variant="filled" severity="info">{message}</Alert>
-						</Fade>
-					)}
-				</Stack>
 				<Stack sx={{ width: '100%' }} spacing={2}>
 					{isChangePassword && (
 						<Fade in={!!isChangePassword} timeout={300}>
@@ -223,36 +217,9 @@ function Login() {
 					</span>
 				</div>
 
-				{/* <TextField
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    value={password}
-                    className="custom-input"
-                    placeholder="Mot de passe"
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
-                    aria-label="Mot de passe"
-                    //maxLength={60}
-                    required
-                    fullWidth
-                    margin="normal"
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <IconButton
-                                    aria-label="toggle password visibility"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    edge="end"
-                                >
-                                    {showPassword ? <MdOutlineVisibilityOff />: <MdOutlineVisibility />}
-                                </IconButton>
-                            </InputAdornment>
-                        ),
-                    }}
-					
-                /> */}
 				<button type="submit" className='login-container__form button'>Se connecter</button>
 			</form>
-		{/* 	<button className="show-password" onClick={() => setShowPassword(!showPassword)}>
+			{/* 	<button className="show-password" onClick={() => setShowPassword(!showPassword)}>
 				{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
 			</button> */}
 			<div className="message">
@@ -296,6 +263,22 @@ function Login() {
 								required
 							/>
 						</label>
+						<div className="message">
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{errorForgotPassword && (
+									<Fade in={!!errorForgotPassword} timeout={300}>
+										<Alert variant="filled" severity="error">{errorForgotPassword}</Alert>
+									</Fade>
+								)}
+							</Stack>
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{message && (
+									<Fade in={!!message} timeout={300}>
+										<Alert variant="filled" severity="info">{message}</Alert>
+									</Fade>
+								)}
+							</Stack>
+						</div>
 						<button type="submit" className="email-modal__forgot-password-form button">Valider</button>
 					</form>
 				</div>

@@ -110,8 +110,8 @@ function Account() {
 	const [addressState, setAddressState] = useState(address || '');
 	const [postal_codeState, setPostalCodeState] = useState(postal_code || '');
 	const [cityState, setCityState] = useState(cityStore || '');
-	const [lngState, setLngState] = useState(lng || '');
-	const [latState, setLatState] = useState(lat || '');
+	const [lngState, setLngState] = useState(lng || 0);
+	const [latState, setLatState] = useState(lat || 0);
 	const [siretState, setSiretState] = useState(siret || '');
 	const [denominationState, setDenominationState] = useState(denomination || '');
 	const [descriptionState, setDescriptionState] = useState(description || '');
@@ -128,6 +128,7 @@ function Account() {
 	const [showOldPassword, setShowOldPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [notification, setNotification] = useState(emailNotification === null ? false : emailNotification);
+	const [isImgLoading, setIsImgLoading] = useState(true);
 	// state for mapBox
 	const [viewState, setViewState] = useState({
 		longitude: typeof lngState === 'number' ? lngState : parseFloat(lngState),
@@ -239,7 +240,6 @@ function Account() {
 		let newUserData = {} as UserAccountDataProps;
 		if (address !== addressState || cityStore !== cityState || postal_code !== postal_codeState) {
 			// fetch the location
-			//let newUserData = {} as UserAccountDataProps;;
 			if (addressState && cityState && postal_codeState) {
 				const location = await Localization(addressState, cityState, postal_codeState, setErrorAccount);
 
@@ -256,17 +256,20 @@ function Account() {
 			}
 		}
 
-		// Compare the initial data with the new data and get the changed fields
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const changedFields = (Object.keys(userDataStore.getState()) as Array<keyof UserDataProps>).reduce((result: any, key: keyof UserDataProps) => {
+		// Récupérer les clés communes entre userDataStore et userData
+		const commonKeys = Object.keys(userDataStore.getState()).filter(key => key in newUserData) as Array<keyof UserDataProps>;
 
-			if (userDataStore.getState()[key] !== userData[key]) {
-				result[key] = userData[key];
+		// Comparer les valeurs de ces clés pour voir si elles ont changé
+		const changedFields = commonKeys.reduce((result: any, key: keyof UserDataProps) => {
+			const storeValue = userDataStore.getState()[key];
+			const userDataValue = newUserData[key];
+
+			if (storeValue !== userDataValue && userDataValue !== undefined && userDataValue !== '' && userDataValue !== "") {
+				result[key] = userDataValue;
 			}
 
 			return result;
 		}, {});
-
 
 		if (changedFields.siret && changedFields.siret.length !== 14) {
 			setErrorAccount('Siret invalide');
@@ -299,12 +302,14 @@ function Account() {
 				return;
 			}
 		}
+		console.log('changedFields', changedFields);
 
 		// Delete the role and id fields
 		delete changedFields.role && delete changedFields.id;
 
 		// Check if there are changed values, if yes use mutation
 		const keys = Object.keys(changedFields).filter(key => changedFields[key] !== undefined && changedFields[key] !== null);
+		console.log('keys', keys);
 
 		// if there are changed values, use mutation
 		if (keys.length > 0) {
@@ -521,6 +526,41 @@ function Account() {
 		checkNotificationStatus();
 	}, []);
 
+	// check if map is already loaded
+	/* useEffect(() => {
+		// Vérifiez si la carte est déjà chargée
+		if (document.querySelector('.mapboxgl-canvas')) {
+			setIsLoading(false);
+		}
+	}, []); */
+	useEffect(() => {
+		const observer = new MutationObserver((mutationsList, observer) => {
+		  for (let mutation of mutationsList) {
+			if (mutation.type === 'childList') {
+			  if (document.querySelector('.mapboxgl-canvas')) {
+				setIsLoading(false);
+				observer.disconnect();
+				break;
+			  }
+			}
+		  }
+		});
+	
+		// Commence à observer le document entier pour les changements dans les enfants
+		observer.observe(document.body, { childList: true, subtree: true });
+	
+		// Vérifiez si la carte est déjà chargée au cas où elle serait déjà présente
+		if (document.querySelector('.mapboxgl-canvas')) {
+		  setIsLoading(false);
+		  observer.disconnect();
+		}
+	
+		// Nettoyer l'observateur lors du démontage du composant
+		return () => {
+		  observer.disconnect();
+		};
+	  }, []);
+
 	// handle the switch change for notification
 	const handleSwitchChange = () => {
 		if (isNotificationEnabled) {
@@ -531,7 +571,7 @@ function Account() {
 		setIsNotificationEnabled(!isNotificationEnabled);
 	};
 
-
+	// handle the map loaded
 	const handleMapLoaded = () => {
 		setIsLoading(false);
 	};
@@ -545,7 +585,7 @@ function Account() {
 		});
 	}, [lng, lat, lngState, latState]);
 
-	const [isImgLoading, setIsImgLoading] = useState(true);
+
 	return (
 		<div className="account">
 			<AnimatePresence>
@@ -672,7 +712,7 @@ function Account() {
 								/>
 							</label>
 							<label className="account__profile__form__label">
-								Adresse:StateState
+								Adresse:
 								<input
 									className="account__profile__form__label__input"
 									type="text"
@@ -841,17 +881,6 @@ function Account() {
 											{showOldPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 										</span>
 									</div>
-									{/* <input
-										className="__input"
-										type={showPassword ? 'text' : 'password'}
-										name="oldPassword"
-										value={oldPassword}
-										placeholder="Ancien mot de passe"
-										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setOldPassword(event.target.value)}
-										aria-label="Ancien mot de passe"
-										maxLength={60}
-										required
-									/> */}
 								</label>
 								<label className="__label">Nouveau mot de passe:
 									<div className="show-password">
@@ -873,17 +902,6 @@ function Account() {
 											{showPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 										</span>
 									</div>
-									{/* <input
-										className="__input"
-										type={showPassword ? 'text' : 'password'}
-										name="newPassword"
-										value={newPassword}
-										placeholder="Nouveau mot de passe"
-										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setNewPassword(event.target.value)}
-										aria-label="Nouveau mot de passe"
-										maxLength={60}
-										required
-									/> */}
 								</label>
 								<label className="__label">Confirmer le nouveau mot de passe:
 									<div className="show-password">
@@ -905,17 +923,6 @@ function Account() {
 											{showConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 										</span>
 									</div>
-									{/* <input
-										className="__input"
-										type={showPassword ? 'text' : 'password'}
-										name="confirmNewPassword"
-										value={confirmNewPassword}
-										placeholder="Confirmer le nouveau mot de passe"
-										onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(event.target.value)}
-										aria-label="Confirmer le nouveau mot de passe"
-										maxLength={60}
-										required
-									/> */}
 								</label>
 								<div className="message">
 									<Stack sx={{ width: '100%' }} spacing={2}>
@@ -931,9 +938,6 @@ function Account() {
 										)}
 									</Stack>
 								</div>
-								{/* <button className="show-password" onClick={() => setShowPassword(!showPassword)}>
-									{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
-								</button> */}
 								<button
 									className="account__profile__button"
 									type="submit">

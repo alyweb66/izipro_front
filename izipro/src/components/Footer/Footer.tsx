@@ -56,6 +56,7 @@ function Footer() {
 
 	//custom hooks Logout
 	const handleLogout = useHandleLogout();
+console.log('isgetRulesRef', isGetRulesRef.current);
 
 	//Query
 	const { loading: rulesLoading, rulesData } = useQueryRules(isGetRulesRef.current);
@@ -201,6 +202,7 @@ function Footer() {
 		}
 	}, [rulesData]);
 
+	// check if cookie consents are already accepted in the database
 	useEffect(() => {
 		if (window.location.pathname === '/dashboard' && cookiesNecessaryStore === null && id > 0) {
 			setRenderForce(false);
@@ -208,7 +210,7 @@ function Footer() {
 	}, [id]);
 
 
-	// check if cookie consents are accepted
+	// check if cookie consents are accepted to open the modal
 	useEffect(() => {
 		if (!localStorage.getItem('cookieConsents')) {
 			if(!CGUStore) {
@@ -236,9 +238,9 @@ function Footer() {
 
 		<div className="footer">
 			<footer className="footer-container">
-				<a className="footer-container__link" href="#" onClick={() => {setCGUModal(true), isGetRulesRef.current = true;}}>CGU</a>
+				<a className="footer-container__link" href="#" onClick={() => {setCGUModal(true), !CGUStore && (isGetRulesRef.current = true);}}>CGU</a>
 				<a className="footer-container__link" href="#" onClick={() => setContactModal(true)} >Contact</a>
-				<a className="footer-container__link" href="#" onClick={() => {setCookiesModal(true), isGetRulesRef.current = true, setClickCookie(true);}}>Cookies</a>
+				<a className="footer-container__link" href="#" onClick={() => {setCookiesModal(true), !cookieStore && (isGetRulesRef.current = true), setClickCookie(true);}}>Cookies</a>
 			</footer>
 
 			<RulesModal

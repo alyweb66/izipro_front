@@ -40,6 +40,31 @@ function Home() {
 		
 	},[]);
 
+// function to get the cookie value
+function getCookieValue(name: string) {
+	const value = `; ${document.cookie}`;
+	const parts = value.split(`; ${name}=`);
+	if (parts.length === 2) return parts.pop()?.split(';').shift();
+	return null;
+}
+
+// function to delete the cookie
+function deleteCookie(name: string) {
+	document.cookie = `${name}=; Max-Age=0; path=/; domain=${window.location.hostname};`;
+}
+	const cookies = document.cookie;
+	// useEffect to check if user is logged out by the server
+	useEffect(() => {
+		if (cookies) {
+			// check if the user is logged out by the server
+			const logoutCookieValue = getCookieValue('logout');
+			if (logoutCookieValue === 'true') {
+				localStorage.removeItem('login');
+				deleteCookie('logout');
+			}
+		}
+	}, []);
+
 
 	// useEffect to check the size of the window
 	useEffect(() => {

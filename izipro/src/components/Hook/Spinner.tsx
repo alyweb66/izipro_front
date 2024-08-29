@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import '../../styles/spinner.scss';
 
 const Spinner = ({ className = '', delay = 500 }) => {
-	console.log('className', className);
 	
 	const [show, setShow] = useState(false);
 

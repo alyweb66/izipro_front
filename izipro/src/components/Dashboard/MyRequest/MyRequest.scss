@@ -20,6 +20,8 @@
         width: 100%;
         max-width: 30%;
         margin: 1rem 0.1rem 0 0.1rem;
+        -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+        touch-action: pan-y;
 
         &::-webkit-scrollbar {
             display: none;
@@ -56,7 +58,7 @@
 
         .my-request__list__detail {
             overflow: hidden;
-            scrollbar-width: none;
+            scrollbar-width: none;  
 
             &::-webkit-scrollbar {
                 display: none;
@@ -304,6 +306,8 @@
 
         .my-request__answer-list__container {
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+            touch-action: pan-y;
             scrollbar-width: none;
             height: 93%;
 
@@ -808,12 +812,14 @@
             .my-request__message-list__form__label__attach {
                 font-size: 2rem;
                 margin: 0.2rem 0.3rem;
+                z-index: 10;
                 cursor: pointer;
             }
 
             .my-request__message-list__form__label__camera {
                 font-size: 2rem;
                 margin: 0.2rem 0.3rem;
+                z-index: 10;
                 cursor: pointer;
             }
 
@@ -828,6 +834,7 @@
                 border: none;
                 background-color: transparent;
                 resize: none;
+                z-index: 10;
 
                 &::-webkit-scrollbar {
                     display: none;
@@ -843,6 +850,7 @@
                 margin: auto;
                 font-size: 2rem;
                 cursor: pointer;
+                z-index: 10;
             }
         }
 
