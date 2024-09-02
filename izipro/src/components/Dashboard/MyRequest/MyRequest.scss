@@ -192,6 +192,7 @@
                     font-size: 1rem;
                     font-weight: 400;
                     background-color: v.$color-light-blue;
+                    z-index: 10;
                 }
 
                 &.expanded {
@@ -848,9 +849,10 @@
 
             .my-request__message-list__form__label__send {
                 margin: auto;
-                font-size: 2rem;
+                font-size: 2.5rem;
                 cursor: pointer;
                 z-index: 10;
+                margin-right: 0.5rem;
             }
         }
 

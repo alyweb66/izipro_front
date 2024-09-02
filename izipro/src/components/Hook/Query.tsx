@@ -100,7 +100,7 @@ export const useQueryJobData = (jobId:{job_id: number}[], skip: boolean ) => {
 export const  useQueryUserRequests = (id: number, offset: number, limit: number, skip: boolean) => {
 	
 	const { loading, error: getUserRequestsError, data: getUserRequestsData, fetchMore } = useQuery(GET_USER_REQUESTS, {
-		fetchPolicy: 'network-only',
+		fetchPolicy: 'no-cache',
 		variables: {
 			requestsId: id,
 			offset: offset,

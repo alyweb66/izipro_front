@@ -657,7 +657,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 									setHasManyImages={setHasManyImages}
 									request={request}
 									notViewedConversationStore={notViewedConversationStore}
-									//handleViewedMessage={handleViewedMessage}
 									setIsMessageOpen={setIsMessageOpen}
 									resetRequest={resetRequest}
 									selectedRequest={selectedRequest!}
@@ -679,7 +678,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 									index={index}
 									notViewedConversationStore={notViewedConversationStore}
 									requestByDate={requestByDate}
-									//handleViewedMessage={handleViewedMessage}
 									setIsMessageOpen={setIsMessageOpen}
 									selectedRequest={selectedRequest!}
 									setSelectedRequest={setSelectedRequest}

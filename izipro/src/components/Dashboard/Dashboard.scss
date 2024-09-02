@@ -1,6 +1,20 @@
 @use '../../styles/variables' as v;
 @use '../../styles/mixins' as m;
 
+// for burger notification
+@keyframes blinkBackground {
+    0% {
+      background-color: v.$color-primary-blue;
+    }
+    50% {
+      background-color: red;
+      box-shadow: 0 0 0px 0px rgba(255, 0, 0, 1), 0 0 0px 0px rgba(255, 0, 0, 0.8), 0 0 10px 1px rgba(255, 0, 0, 0.5);
+    }
+    100% {
+      background-color: v.$color-primary-blue;
+    }
+  }
+
 .dashboard {
     position: relative;
     width: 100%;
@@ -119,68 +133,8 @@
                     .indicator {
                         display: block;
                     }
-
-                    /*  &:before,
-                    &:after {
-                        content: "";
-                        position: absolute;
-                        border-radius: 50%;
-                        transform: scale(1);
-                        transition: 0.2s ease transform;
-                    }
-
-                    &:before {
-                        top: 0;
-                        left: 10px;
-                        width: 6px;
-                        height: 6px;
-                        background-color: v.$color-primary-orange;
-                    }
-
-                    &:after {
-                        top: 5px;
-                        left: 18px;
-                        width: 4px;
-                        height: 4px;
-                        background-color: v.$color-primary-blue;
-                    } */
-
                 }
             }
-
-
-            /* 
-            .dashboard__nav__menu__content__tab:before,
-            .dashboard__nav__menu__content__tab:after {
-                content: "";
-                position: absolute;
-                border-radius: 50%;
-                transform: scale(0);
-                transition: 0.2s ease transform;
-            }
-
-            .dashboard__nav__menu__content__tab:before {
-                top: 0;
-                left: 10px;
-                width: 6px;
-                height: 6px;
-                background-color: v.$color-primary-orange;
-            }
-
-            .dashboard__nav__menu__content__tab:after {
-                top: 5px;
-                left: 18px;
-                width: 4px;
-                height: 4px;
-                background-color: v.$color-primary-blue;
-            }
-
-
-            .dashboard__nav__menu__content__tab:hover:before,
-            .dashboard__nav__menu__content__tab:hover:after {
-                transform: scale(1);
-            } */
-
         }
 
         .dashboard__nav__menu::before {
@@ -197,9 +151,6 @@
             top: 0;
         }
 
-        /*  .dashboard__nav__menu::after {
-            bottom: 0;
-        } */
     }
 
 
@@ -207,10 +158,6 @@
 
 @media (max-width: 780px) {
     .dashboard {
-
-        /*  .dashboard__content {
-            height: 100%;
-        } */
         .__nav {
             .dashboard__nav__menu {
                 .dashboard__nav__menu__content__tab {
@@ -273,11 +220,9 @@
                     width: 100%;
                     height: 5vh;
                     padding-top: 0.5rem;
-                    // justify-content: space-between;
 
                     .__logo {
                         margin-left: 1rem;
-                        //  margin: 0.5rem 0 0 1rem;
                         display: inline-block;
                         width: 35px;
                         height: 35px;
@@ -294,7 +239,6 @@
                         .burger-icon {
                             width: 100%;
                             font-size: 2rem;
-                            // margin: 1rem;
                             display: flex;
                             flex-direction: column;
                             align-items: center;
@@ -314,6 +258,11 @@
                                 margin: 0.2rem;
                                 background-color: v.$color-primary-blue;
                                 border-radius: 1rem;
+
+                                &.notification {
+                                    background-color: v.$color-primary-blue;
+                                    animation: blinkBackground 2s infinite;
+                                }
                             }
 
                         }

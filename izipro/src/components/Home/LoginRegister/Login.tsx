@@ -18,13 +18,13 @@ import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 
 // State management and stores
 import { confirmEmailStore } from '../../../store/LoginRegister';
-import { changeForgotPasswordStore } from '../../../store/UserData';
-
-
+import { changeForgotPasswordStore, cookieConsents, userConversation, userDataStore } from '../../../store/UserData';
+//import { clientRequestStore, myRequestStore, requestConversationStore, requestDataStore } from '../../../store/Request';
+//import { messageDataStore, myMessageDataStore } from '../../../store/message';
+//import { subscriptionDataStore } from '../../../store/subscription';
+import { notViewedConversation, notViewedRequest, notViewedRequestRef, requestConversationIds } from '../../../store/Viewed';
 
 import './Login.scss';
-// secret key for encryption
-
 
 function Login() {
 
@@ -44,7 +44,7 @@ function Login() {
 	const [isEmailConfirmed, setIsEmailConfirmed] = confirmEmailStore((state) => [state.isEmailConfirmed, state.setIsEmailConfirmed]);
 	const [isChangePassword, setIsChangePassword] = changeForgotPasswordStore((state) => [state.isChangePassword, state.setIsChangePassword]);
 	const navigate = useNavigate();
-
+	
 	// Mutation
 	const [login, { error }] = useMutation(LOGIN_USER_MUTATION);
 	const [forgotPassword, { error: forgotPasswordError }] = useMutation(FORGOT_PASSWORD_MUTATION);
@@ -289,3 +289,4 @@ function Login() {
 }
 
 export default Login;
+

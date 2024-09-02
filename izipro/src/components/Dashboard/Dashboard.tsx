@@ -184,8 +184,6 @@ function Dashboard() {
 	const { logoutSubscription } = useLogoutSubscription();
 
 	// condition if user not logged in
-	//let isLogged;
-
 	// decode the data
 	const getItem = localStorage.getItem('login');
 	let decodeData: string | { value: string };
@@ -401,6 +399,7 @@ function Dashboard() {
 
 			// If offset is 0, it's the first query, so just replace the queries
 			if (requestStore.length === 0) {
+
 				// check if requests are already in the store
 				const requestsIds = requestStore.map(request => request.id);
 				const newRequests = getUserRequestsData.user.requests?.filter((request: RequestProps) => !requestsIds.includes(request.id));
@@ -867,7 +866,12 @@ function Dashboard() {
 							<button className="__menu" onClick={toggleMenu}>
 								<div className='burger-icon'>
 									<div className="burger-icon__line"></div>
-									<div className="burger-icon__middle"></div>
+									<div className={`burger-icon__middle ${
+										notViewedRequestStore.length > 0 
+										|| viewedMessageState.length > 0
+										|| viewedMyConversationState.length > 0
+										? 'notification' : ''
+										}`}></div>
 									<div className="burger-icon__line"></div>
 								</div>
 							</button>

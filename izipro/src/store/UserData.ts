@@ -18,12 +18,10 @@ type UserDataStore = UserDataProps & {
 	setImage: (image: string | '') => void;
 	setDescription: (description: string | '') => void;
 	setRole: (role: string | '') => void;
-	//initialData: UserDataProps;
-	//setInitialData: (data: UserDataProps) => void;
 	setAll: (data: UserDataProps) => void;
 	setAccount: (data: UserDataProps) => void;
-	setJobs: (jobs: Array<{ job_id: number}>) => void;
-	setSettings: (settings: Array<{ range: number}>) => void;
+	setJobs: (jobs: Array<{ job_id: number }>) => void;
+	setSettings: (settings: Array<{ range: number }>) => void;
 	resetUserData: () => void;
 
 }
@@ -39,9 +37,13 @@ type ChangeForgotPasswordProps = {
 }
 
 type UserConversationProps = {
-	users:UserDataProps[];
+	users: UserDataProps[];
 	setUsers: (users: UserDataProps[]) => void;
 	resetUsers: () => void;
+}
+
+type CookieConsentStore = CookieConsentsProps & {
+	resetCookieConsents: () => void;
 }
 
 export const changeForgotPasswordStore = create<ChangeForgotPasswordProps>((set) => ({
@@ -59,8 +61,8 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	address: '',
 	postal_code: '',
 	city: '',
-	lng:0,
-	lat:0,
+	lng: 0,
+	lat: 0,
 	siret: '',
 	denomination: '',
 	image: '',
@@ -68,29 +70,8 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	role: '',
 	CGU: null,
 	jobs: [],
-	settings: [{range: 0}],
+	settings: [{ range: 0 }],
 	deleted_at: '',
-
-	/* initialData: {
-		id: 0,
-		first_name: '',
-		last_name: '',
-		email: '',
-		address: '',
-		postal_code: '',
-		city: '',
-		lng:0,
-		lat:0,
-		siret: '',
-		denomination: '',
-		image: '',
-		description: '',
-		role: '',
-		CGU: null ,
-		jobs: [],
-		settings: [{range: 0}],
-		deleted_at: '',
-	}, */
 
 	setAccount: (data) => {
 		if (data) {
@@ -153,26 +134,31 @@ export const userDataStore = create<UserDataStore>((set) => ({
 	setJobs: (jobs) => set({ jobs }),
 	setSettings: (settings) => set({ settings }),
 
-	resetUserData: () => set({ 
-		id: 0, 
-		first_name: '', 
-		last_name: '', 
-		email: '', 
-		address: '', 
-		postal_code: '', 
-		city: '', 
-		lng:0, 
-		lat:0 , 
-		siret: '', 
-		denomination: '', 
-		jobs: [], 
-		settings: []
+	resetUserData: () => set({
+		id: 0,
+		first_name: '',
+		last_name: '',
+		email: '',
+		address: '',
+		postal_code: '',
+		city: '',
+		lng: 0,
+		lat: 0,
+		siret: '',
+		denomination: '',
+		jobs: [],
+		settings: [],
+		image: '',
+		description: '',
+		role: '',
+		CGU: null,
+		deleted_at: '',
 	})
 
 }));
 
 export const userConversation = create<UserConversationProps>((set) => ({
-	users:[],
+	users: [],
 	setUsers: (users) => set({ users }),
 	resetUsers: () => set({ users: [] })
 
@@ -183,13 +169,21 @@ export const rulesStore = create<Rules>(() => ({
 	cookies: '',
 }));
 
-export const cookieConsents = create<CookieConsentsProps>(() => ({
+export const cookieConsents = create<CookieConsentStore>((set) => ({
 	id: 0,
 	user_id: 0,
 	cookies_analytics: null,
 	cookies_marketing: null,
 	cookies_necessary: null,
+
+	resetCookieConsents: () => set({
+		id: 0,
+		user_id: 0,
+		cookies_analytics: null,
+		cookies_marketing: null,
+		cookies_necessary: null
+	})
 }));
-  
+
 
 
