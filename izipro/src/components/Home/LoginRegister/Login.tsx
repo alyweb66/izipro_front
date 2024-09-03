@@ -19,9 +19,9 @@ import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 // State management and stores
 import { confirmEmailStore } from '../../../store/LoginRegister';
 import { changeForgotPasswordStore, cookieConsents, userConversation, userDataStore } from '../../../store/UserData';
-//import { clientRequestStore, myRequestStore, requestConversationStore, requestDataStore } from '../../../store/Request';
-//import { messageDataStore, myMessageDataStore } from '../../../store/message';
-//import { subscriptionDataStore } from '../../../store/subscription';
+import { clientRequestStore, myRequestStore, requestConversationStore, requestDataStore } from '../../../store/Request';
+import { messageDataStore, myMessageDataStore } from '../../../store/message';
+import { subscriptionDataStore } from '../../../store/subscription';
 import { notViewedConversation, notViewedRequest, notViewedRequestRef, requestConversationIds } from '../../../store/Viewed';
 
 import './Login.scss';
@@ -44,7 +44,21 @@ function Login() {
 	const [isEmailConfirmed, setIsEmailConfirmed] = confirmEmailStore((state) => [state.isEmailConfirmed, state.setIsEmailConfirmed]);
 	const [isChangePassword, setIsChangePassword] = changeForgotPasswordStore((state) => [state.isChangePassword, state.setIsChangePassword]);
 	const navigate = useNavigate();
-	
+	const resetUserData = userDataStore((state) => state.resetUserData);
+	const resetRequest = requestDataStore((state) => state.resetRequest);
+	const resetMessage = messageDataStore((state) => state.resetMessage);
+	const resetMyMessage = myMessageDataStore((state) => state.resetMessage);
+	const resetRequestConversation = requestConversationStore((state) => state.resetRequestConversation);
+	const resetMyrequest = myRequestStore((state) => state.resetMyRequest);
+	const resetSubscription = subscriptionDataStore((state) => state.resetSubscription);
+	const resetClientRequest = clientRequestStore((state) => state.resetClientRequest);
+	const resetUsers = userConversation((state) => state.resetUsers);
+	const resetCookieConsents = cookieConsents((state) => state.resetCookieConsents);
+	const resetrequestConversationIds = requestConversationIds((state) => state.resetBotViewed);
+	const resetNotViewedConv = notViewedConversation((state) => state.resetBotViewed);
+	const resetNotViewedRequestRef = notViewedRequestRef ((state) => state.resetBotViewed);
+	const resetNotViewedRequest = notViewedRequest((state) => state.resetBotViewed);
+
 	// Mutation
 	const [login, { error }] = useMutation(LOGIN_USER_MUTATION);
 	const [forgotPassword, { error: forgotPasswordError }] = useMutation(FORGOT_PASSWORD_MUTATION);
@@ -97,7 +111,22 @@ function Login() {
 	// send login request
 	const handleLogin = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-
+		// reset all the stores
+		resetUserData();
+		resetRequest();
+		resetMessage();
+		resetMyMessage();
+		resetRequestConversation();
+		resetMyrequest();
+		resetSubscription();
+		resetClientRequest();
+		resetUsers();
+		resetCookieConsents();
+		resetrequestConversationIds();
+		resetNotViewedConv();
+		resetNotViewedRequestRef();
+		resetNotViewedRequest();
+		
 		login({
 			variables: {
 				input: {

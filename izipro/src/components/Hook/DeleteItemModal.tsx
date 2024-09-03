@@ -82,7 +82,7 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 							<p className="delete-item-modal__container__description">Vous allez supprimer votre compte definitevement, êtes vous sur?</p>
 						}
 						{isSessionExpired &&
-							<p className="delete-item-modal__container__description">Par mesure de sécurité, vous allez être redirigés vers l&apos;accueil pour vous identifier</p>
+							<p className="delete-item-modal__container__description">Un problème est survenu, par mesure de sécurité vous allez être redirigés vers l&apos;accueil pour vous identifier</p>
 						}
 						{!isDeleteUser && !isSessionExpired &&
 							<p className="delete-item-modal__container__description">Vous allez supprimer la demande <span className="modal-args">{modalArgs?.requestTitle}</span> , êtes vous sur?</p>

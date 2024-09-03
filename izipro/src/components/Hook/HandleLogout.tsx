@@ -1,11 +1,11 @@
 import { useMutation } from '@apollo/client';
 import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
-import { cookieConsents, userConversation, userDataStore } from '../../store/UserData';
+//import { cookieConsents, userConversation, userDataStore } from '../../store/UserData';
 import { useNavigate } from 'react-router-dom';
-import { clientRequestStore, myRequestStore, requestConversationStore, requestDataStore } from '../../store/Request';
-import { messageDataStore, myMessageDataStore } from '../../store/message';
-import { subscriptionDataStore } from '../../store/subscription';
-import { notViewedConversation, notViewedRequest, notViewedRequestRef, requestConversationIds } from '../../store/Viewed';
+//import { clientRequestStore, myRequestStore, requestConversationStore, requestDataStore } from '../../store/Request';
+//import { messageDataStore, myMessageDataStore } from '../../store/message';
+//import { subscriptionDataStore } from '../../store/subscription';
+//import { notViewedConversation, notViewedRequest, notViewedRequestRef, requestConversationIds } from '../../store/Viewed';
 
 export default function useHandleLogout() {
 	const navigate = useNavigate();
@@ -13,7 +13,7 @@ export default function useHandleLogout() {
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
 
 	// store
-	const resetUserData = userDataStore((state) => state.resetUserData);
+	/* const resetUserData = userDataStore((state) => state.resetUserData);
 	const resetRequest = requestDataStore((state) => state.resetRequest);
 	const resetMessage = messageDataStore((state) => state.resetMessage);
 	const resetMyMessage = myMessageDataStore((state) => state.resetMessage);
@@ -26,12 +26,12 @@ export default function useHandleLogout() {
 	const resetrequestConversationIds = requestConversationIds((state) => state.resetBotViewed);
 	const resetNotViewedConv = notViewedConversation((state) => state.resetBotViewed);
 	const resetNotViewedRequestRef = notViewedRequestRef ((state) => state.resetBotViewed);
-	const resetNotViewedRequest = notViewedRequest((state) => state.resetBotViewed);
+	const resetNotViewedRequest = notViewedRequest((state) => state.resetBotViewed); */
 
 	// Return a function that will handle the logout
 	return async (userId: number) => {
 		// reset all the stores
-		resetUserData();
+		/* resetUserData();
 		resetRequest();
 		resetMessage();
 		resetMyMessage();
@@ -44,7 +44,7 @@ export default function useHandleLogout() {
 		resetrequestConversationIds();
 		resetNotViewedConv();
 		resetNotViewedRequestRef();
-		resetNotViewedRequest();
+		resetNotViewedRequest(); */
 
 		await logout({
 			variables: {

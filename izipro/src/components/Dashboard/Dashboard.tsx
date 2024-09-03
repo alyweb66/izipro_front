@@ -28,7 +28,7 @@ import { useMyRequestMessageSubscriptions } from '../GraphQL/MyRequestSubscripti
 import { useClientRequestSubscriptions } from '../GraphQL/ClientRequestSubscription';
 import { useMyConversationSubscriptions } from '../GraphQL/MyConversationSubscription';
 import { useLogoutSubscription } from '../GraphQL/LogoutSubscription';
-import useHandleLogout from '../Hook/HandleLogout';
+//import useHandleLogout from '../Hook/HandleLogout';
 
 // Mutation
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
@@ -64,7 +64,7 @@ type useQueryUserConversationsProps = {
 
 function Dashboard() {
 	const navigate = useNavigate();
-	const handleLogout = useHandleLogout();
+	//const handleLogout = useHandleLogout();
 
 	// function to get the cookie value
 	function getCookieValue(name: string) {
@@ -152,6 +152,13 @@ function Dashboard() {
 	const isSkipGetUserDataRef = useRef<boolean>(true);
 	const isSkipSubscriptionRef = useRef<boolean>(false);
 	const isSkipMyRequestRef = useRef<boolean>(true);
+	const idRef = useRef<number>(id);
+
+	useEffect(() => {
+		if (id) {
+		idRef.current = id;
+		}
+	}, [id]);
 
 
 	// Query 
@@ -166,7 +173,6 @@ function Dashboard() {
 	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, (isSkipMyRequestRef.current || requestStore.length > 0));
 	const { loading: requestByIdLoading, requestById } = useQueryGetRequestById(requestByIdState);
 	console.log('id', id);
-
 
 	//*Query for ClientRequest
 	const { loading: getRequestByJobLoading, getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequest || clientRequestsStore.length > 0));
@@ -225,17 +231,46 @@ function Dashboard() {
 	// function to check if user is logged in and listener if close the page
 	useEffect(() => {
 		// clear local storage and session storage when user leaves the page if local storage is set to session
-		const handleBeforeUnload = (event: { preventDefault: () => void; returnValue: string; }) => {
-			event.preventDefault();
-			event.returnValue = '';
+		/* const handleBeforeUnload = (event: { preventDefault: () => void; returnValue: string; }) => {
+			//event.preventDefault();
+			// show the navigator alert message
+			//event.returnValue = '';
 			if (decodeData === 'session') {
 				// clear local storage,session storage and cookie
-				handleLogout(id);
+				//handleLogout(id);
 
 			}
-		};
-		window.addEventListener('beforeunload', handleBeforeUnload);
+		}; */
+		const handleUnload = () => {
+			if (decodeData === 'session' && idRef.current) {
+				// create request to logout the user in the json format for sendbeacon
+				const query = `
+				mutation Logout($logoutId: Int!) {
+  					logout(id: $logoutId)
+    			}
+			  `;
 
+				const variables = { logoutId: idRef.current }; 
+
+				// format data to send for sendBeacon
+				const data = JSON.stringify({
+					query,
+					variables
+				});
+
+				// use sendBeacon to send the request
+				const url = import.meta.env.VITE_SERVER_URL; 
+				const headers = { 'Content-Type': 'application/json' };
+
+				// Create a Blob object with the data
+				const blob = new Blob([data], { type: headers['Content-Type'] });
+
+				// send request to the server with sendBeacon
+				navigator.sendBeacon(url, blob);
+			}
+		};
+		//window.addEventListener('beforeunload', handleBeforeUnload);
+		window.addEventListener('unload', handleUnload);
 
 		// check if user is logged in
 		if (isLogged === false) {
@@ -249,7 +284,8 @@ function Dashboard() {
 
 		// clean event listener
 		return () => {
-			window.removeEventListener('beforeunload', handleBeforeUnload);
+		//	window.removeEventListener('beforeunload', handleBeforeUnload);
+			window.addEventListener('unload', handleUnload);
 		};
 	}, [decodeData]);
 
@@ -866,11 +902,10 @@ function Dashboard() {
 							<button className="__menu" onClick={toggleMenu}>
 								<div className='burger-icon'>
 									<div className="burger-icon__line"></div>
-									<div className={`burger-icon__middle ${
-										notViewedRequestStore.length > 0 
-										|| viewedMessageState.length > 0
-										|| viewedMyConversationState.length > 0
-										? 'notification' : ''
+									<div className={`burger-icon__middle ${notViewedRequestStore.length > 0
+											|| viewedMessageState.length > 0
+											|| viewedMyConversationState.length > 0
+											? 'notification' : ''
 										}`}></div>
 									<div className="burger-icon__line"></div>
 								</div>
