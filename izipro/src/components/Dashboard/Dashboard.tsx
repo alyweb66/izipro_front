@@ -80,6 +80,7 @@ function Dashboard() {
 	}
 
 	const cookies = document.cookie;
+
 	// useEffect to check if user is logged out by the server
 	useEffect(() => {
 		if (cookies) {
@@ -87,12 +88,12 @@ function Dashboard() {
 			const logoutCookieValue = getCookieValue('logout');
 			if (logoutCookieValue === 'true') {
 				localStorage.removeItem('login');
-				navigate('/');
 				deleteCookie('logout');
+				navigate('/');
+
 			}
 		}
 	}, [cookies]);
-
 
 	// State
 	const [isOpen, setIsOpen] = useState(false);
@@ -105,6 +106,7 @@ function Dashboard() {
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
+
 
 	//*state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
@@ -154,9 +156,10 @@ function Dashboard() {
 	const isSkipMyRequestRef = useRef<boolean>(true);
 	const idRef = useRef<number>(id);
 
+	// to keep id for the sendBeacon when the user leaves the page
 	useEffect(() => {
 		if (id) {
-		idRef.current = id;
+			idRef.current = id;
 		}
 	}, [id]);
 
@@ -250,7 +253,7 @@ function Dashboard() {
     			}
 			  `;
 
-				const variables = { logoutId: idRef.current }; 
+				const variables = { logoutId: idRef.current };
 
 				// format data to send for sendBeacon
 				const data = JSON.stringify({
@@ -259,7 +262,7 @@ function Dashboard() {
 				});
 
 				// use sendBeacon to send the request
-				const url = import.meta.env.VITE_SERVER_URL; 
+				const url = import.meta.env.VITE_SERVER_URL;
 				const headers = { 'Content-Type': 'application/json' };
 
 				// Create a Blob object with the data
@@ -284,7 +287,7 @@ function Dashboard() {
 
 		// clean event listener
 		return () => {
-		//	window.removeEventListener('beforeunload', handleBeforeUnload);
+			//	window.removeEventListener('beforeunload', handleBeforeUnload);
 			window.addEventListener('unload', handleUnload);
 		};
 	}, [decodeData]);
@@ -884,6 +887,7 @@ function Dashboard() {
 		setIsExpiredSession(false);
 		sessionStorage.clear();
 		localStorage.removeItem('login');
+		deleteCookie('logout');
 		navigate('/');
 	};
 
@@ -903,9 +907,9 @@ function Dashboard() {
 								<div className='burger-icon'>
 									<div className="burger-icon__line"></div>
 									<div className={`burger-icon__middle ${notViewedRequestStore.length > 0
-											|| viewedMessageState.length > 0
-											|| viewedMyConversationState.length > 0
-											? 'notification' : ''
+										|| viewedMessageState.length > 0
+										|| viewedMyConversationState.length > 0
+										? 'notification' : ''
 										}`}></div>
 									<div className="burger-icon__line"></div>
 								</div>
