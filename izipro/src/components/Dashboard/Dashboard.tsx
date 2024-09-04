@@ -48,6 +48,7 @@ import { messageDataStore, myMessageDataStore } from '../../store/message';
 import './Dashboard.scss';
 import { DeleteItemModal } from '../Hook/DeleteItemModal';
 
+
 const Request = lazy(() => import('./Request/Request'));
 const MyRequest = lazy(() => import('./MyRequest/MyRequest'));
 const MyConversation = lazy(() => import('./MyConversation/MyConversation'));
@@ -128,6 +129,7 @@ function Dashboard() {
 	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 	const [requestConversationIdStore, setRequestConversationsIdStore] = requestConversationIds((state) => [state.notViewed, state.setNotViewedStore]);
+
 
 	// Limit
 	const myRequestLimit = 5;
@@ -789,6 +791,7 @@ function Dashboard() {
 
 	}, [messageSubscription]);
 
+
 	// useEffect to count the number of conversation that are not viewed message in MyRequest
 	useEffect(() => {
 
@@ -932,10 +935,11 @@ function Dashboard() {
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
 							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }}>
 							<div className="tab-content">
+								
 								<span>MES DEMANDES</span>
-								<div className={`badge-container ${viewedMessageState.length > 0 ? 'visible' : ''}`}>
+								{(viewedMessageState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMessageState.length > 0 ? 'visible' : ''}`}>
 									{viewedMessageState.length > 0 && <Badge count={viewedMessageState.length} />}
-								</div>
+								</div>)}
 							</div>
 							<div className="indicator"></div>
 						</li>
@@ -944,9 +948,9 @@ function Dashboard() {
 								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); setIsSkipClientRequest(false); }}>
 								<div className="tab-content">
 									<span>CLIENT</span>
-									<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>
+									{(notViewedRequestStore.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>
 										{notViewedRequestStore.length > 0 && <Badge count={notViewedRequestStore.length} />}
-									</div>
+									</div>)}
 								</div>
 								{/* {notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />} */}
 								<div className="indicator"></div>
@@ -957,9 +961,9 @@ function Dashboard() {
 								onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }}>
 								<div className="tab-content">
 									<span>MES CONVERSATIONS</span>
-									<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
-										{viewedMyConversationState.length > 0 && <Badge count={viewedMyConversationState.length} />}
-									</div>
+									{(viewedMyConversationState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
+										{viewedMyConversationState.length > 0 && <Badge count={ viewedMyConversationState.length } />}
+									</div>)}
 								</div>
 								<div className="indicator"></div>
 							</li>

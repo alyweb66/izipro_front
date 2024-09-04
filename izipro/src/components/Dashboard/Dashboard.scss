@@ -4,16 +4,19 @@
 // for burger notification
 @keyframes blinkBackground {
     0% {
-      background-color: v.$color-primary-blue;
+        background-color: v.$color-primary-blue;
     }
+
     50% {
-      background-color: red;
-      box-shadow: 0 0 0px 0px rgba(255, 0, 0, 1), 0 0 0px 0px rgba(255, 0, 0, 0.8), 0 0 10px 1px rgba(255, 0, 0, 0.5);
+        background-color: rgb(255, 0, 0);
+        box-shadow: 0 0 0px 0px rgba(255, 0, 0, 1), 0 0 0px 0px rgba(255, 0, 0, 0.8), 0 0 10px 1px rgba(255, 0, 0, 0.5);
+        //box-shadow: 0 0 0px 0px rgb(44, 161, 8), 0 0 0px 0px rgba(3, 155, 11, 0.8), 0 0 10px 5px rgba(180, 250, 158, 0.5);
     }
+
     100% {
-      background-color: v.$color-primary-blue;
+        background-color: v.$color-primary-blue;
     }
-  }
+}
 
 .dashboard {
     position: relative;
@@ -98,8 +101,11 @@
                 transition: 0.2s ease color;
 
                 .badge-container {
-                    min-width: 24px;
-                    height: 24px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-width: 2rem;
+                    height: 1.5rem;
                     visibility: hidden;
 
                     &.visible {
@@ -115,7 +121,7 @@
 
                 .notification-badge {
                     margin-top: 0;
-                    padding-bottom: 1rem;
+                   // padding-bottom: 1rem;
                 }
 
                 &:hover {
@@ -299,6 +305,7 @@
                         transition: 0.1s;
                         list-style-type: none;
                         transition: transform 0.1s ease;
+                        
 
                         &:hover {
                             .indicator {

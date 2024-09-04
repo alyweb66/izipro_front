@@ -827,6 +827,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 															onClick={(event) => { event.stopPropagation(); }}
 															aria-label={`PDF associé à la demande ${request.title}`}
 														>
+															{}
 															<img
 																className="my-request__list__detail__item__picture img"
 																src={pdfLogo}

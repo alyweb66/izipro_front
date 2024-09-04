@@ -500,7 +500,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		}
 	}, []);
 
-	// useEffect to update the message store
+	// useEffect to update the message store from database
 	useEffect(() => {
 		if (messageData) {
 
@@ -621,7 +621,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 	}, [clientMessageSubscription]);
 
-	// cleane the request store if the component is unmounted
+	// clean the request store if the component is unmounted
 	useEffect(() => {
 		return () => {
 			//if the request is in the requestsConversationStore and if there is a conversation with the user
