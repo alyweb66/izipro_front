@@ -19,8 +19,11 @@ self.addEventListener('push', (event) => {
     const data = event.data ? event.data.json() : {};
     event.waitUntil(
         self.registration.showNotification(data.title, {
-            body: data.message,
+            body: data.body,
             icon: data.icon,
+            badge: data.badge,
+            tag: data.tag,
+            renotify: data.renotify
         })
     );
 });
@@ -48,4 +51,11 @@ async function openUrl(url) {
         return self.clients.openWindow(url);
     }
     return null;
+}
+
+{
+    "title": "Test Notification",
+    "message": "This is a test notification",
+    "icon": "https://back.betapoptest.online/logo/logo-email.jpg",
+    "badge": "https://back.betapoptest.online/logo/logo-email.jpg"
 }
