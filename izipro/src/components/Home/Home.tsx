@@ -19,40 +19,20 @@ function Home() {
 	const navigate = useNavigate();
 	const [isFooter, setIsFooter] = useState(false);
 
-	// check if user is logged in and if cookie consents are accepted
-	useEffect(() => {
-		// condition if user not logged in
-		const getItem = localStorage.getItem('login');
-		if (!getItem) {	
-			return;
-		}
-		const decodeData = atob(getItem || '');
-		let isLogged;
-		
-		if (decodeData === 'session') {
-			isLogged = { value: true };
-		} else {
-			isLogged = JSON.parse(decodeData || '{}');
-		}
-		if (isLogged) {
-			navigate('/dashboard');
-		}
-		
-	},[]);
-
-// function to get the cookie value
-function getCookieValue(name: string) {
-	const value = `; ${document.cookie}`;
-	const parts = value.split(`; ${name}=`);
-	if (parts.length === 2) return parts.pop()?.split(';').shift();
-	return null;
-}
-
-// function to delete the cookie
-function deleteCookie(name: string) {
-	document.cookie = `${name}=; Max-Age=0; path=/; domain=${window.location.hostname};`;
-}
+	// get the cookies
 	const cookies = document.cookie;
+	// function to get the cookie value
+	function getCookieValue(name: string) {
+		const value = `; ${document.cookie}`;
+		const parts = value.split(`; ${name}=`);
+		if (parts.length === 2) return parts.pop()?.split(';').shift();
+		return null;
+	}
+
+	// function to delete the cookie
+	function deleteCookie(name: string) {
+		document.cookie = `${name}=; Max-Age=0; path=/; domain=${window.location.hostname};`;
+	}
 	// useEffect to check if user is logged out by the server
 	useEffect(() => {
 		if (cookies) {
@@ -63,6 +43,27 @@ function deleteCookie(name: string) {
 				deleteCookie('logout');
 			}
 		}
+	}, [cookies]);
+	
+	// check if user is logged in and if cookie consents are accepted
+	useEffect(() => {
+		// condition if user not logged in
+		const getItem = localStorage.getItem('login');
+		if (!getItem) {
+			return;
+		}
+		const decodeData = atob(getItem || '');
+		let isLogged;
+
+		if (decodeData === 'session') {
+			isLogged = { value: true };
+		} else {
+			isLogged = JSON.parse(decodeData || '{}');
+		}
+		if (isLogged) {
+			navigate('/dashboard');
+		}
+
 	}, []);
 
 

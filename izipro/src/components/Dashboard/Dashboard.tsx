@@ -67,6 +67,8 @@ function Dashboard() {
 	const navigate = useNavigate();
 	//const handleLogout = useHandleLogout();
 
+
+	const cookies = document.cookie;
 	// function to get the cookie value
 	function getCookieValue(name: string) {
 		const value = `; ${document.cookie}`;
@@ -80,21 +82,8 @@ function Dashboard() {
 		document.cookie = `${name}=; Max-Age=0; path=/; domain=${window.location.hostname};`;
 	}
 
-	const cookies = document.cookie;
 
-	// useEffect to check if user is logged out by the server
-	useEffect(() => {
-		if (cookies) {
-			// check if the user is logged out by the server
-			const logoutCookieValue = getCookieValue('logout');
-			if (logoutCookieValue === 'true') {
-				localStorage.removeItem('login');
-				deleteCookie('logout');
-				navigate('/');
 
-			}
-		}
-	}, [cookies]);
 
 	// State
 	const [isOpen, setIsOpen] = useState(false);
@@ -165,6 +154,23 @@ function Dashboard() {
 		}
 	}, [id]);
 
+	// useEffect to check if user is logged out by the server
+	useEffect(() => {
+		if (cookies) {
+			// check if the user is logged out by the server
+			const logoutCookieValue = getCookieValue('logout');
+			if (logoutCookieValue === 'true') {
+
+				if(id > 0) {
+					setIsExpiredSession(true);
+				} else {
+					localStorage.removeItem('login');
+					deleteCookie('logout');
+					navigate('/');
+				}
+			}
+		}
+	}, [cookies]);
 
 	// Query 
 	const { loading: userDataLoading, getUserData } = useQueryUserData(isSkipGetUserDataRef.current || id !== 0);
@@ -210,6 +216,74 @@ function Dashboard() {
 	} else {
 		isLogged = false;
 	}
+
+	// function to handle navigation to my conversation
+	const handleMyConvesationNavigate = () => {
+		setSelectedTab('My conversations');
+	};
+
+	// function to range request by request location
+	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
+
+		// Define the two points for each request and filter them
+		const filteredRequests = requests.filter((request: RequestProps) => {
+			const requestPoint = turf.point([request.lng, request.lat]);
+			const userPoint = turf.point([lng ?? 0, lat ?? 0]);
+			const distance = turf.distance(requestPoint, userPoint);
+
+			return (
+				(distance < request.range / 1000 || request.range === 0) &&
+				(distance < settings[0].range / 1000 || settings[0].range === 0) &&
+				(request.conversation === null || request.conversation === undefined ||
+					!request.conversation.some(conversation =>
+						(conversation.user_1 !== null && conversation.user_2 !== null) &&
+						(conversation.user_1 === id || conversation.user_2 === id)
+					)
+				)
+			);
+		});
+
+
+		// Get all requests that are not in the store
+		const newRequests = filteredRequests.filter((request: RequestProps) =>
+			clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id)
+		);
+
+
+		// Add the new requests to the appropriate place in the list
+		if (newRequests && newRequests.length > 0) {
+			if (fromSubscribeToMore) {
+
+				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
+
+				// Add request.id to the viewedRequestStore
+				if (notViewedRequestStore.length === 0 || notViewedRequestStore.some(id => id !== newRequests[0].id)) {
+					setNotViewedRequestStore([...notViewedRequestStore, newRequests[0].id]);
+				}
+			} else {
+
+				setClientRequestsStore([...(clientRequestsStore || []), ...newRequests]);
+
+			}
+		}
+	}
+
+	// burger menu
+	const toggleMenu = () => {
+		// only if screen is less than 480px
+		if (window.innerWidth < 480) {
+			setIsOpen(!isOpen);
+		}
+	};
+
+	// function to redirect to home page when session is expired by serveur
+	const RedirectExpiredSession = () => {
+		setIsExpiredSession(false);
+		sessionStorage.clear();
+		localStorage.removeItem('login');
+		deleteCookie('logout');
+		navigate('/');
+	};
 
 	// useEffect to check the size of the window
 	useEffect(() => {
@@ -791,11 +865,8 @@ function Dashboard() {
 
 	}, [messageSubscription]);
 
-
 	// useEffect to count the number of conversation that are not viewed message in MyRequest
 	useEffect(() => {
-
-		//if (notViewedConversationStore.length > 0) {
 
 		// count the number of conversation that are not viewed message
 		const unviewedConversationIds = notViewedConversationStore.filter(id => requestConversationIdStore && requestConversationIdStore.includes(id));
@@ -806,8 +877,6 @@ function Dashboard() {
 		} else {
 			setViewedMessageState([]);
 		}
-
-		//}
 
 	}, [notViewedConversationStore, requestConversationIdStore]);
 
@@ -825,75 +894,6 @@ function Dashboard() {
 
 	}, [notViewedConversationStore, requestConversationIdStore]);
 
-	// function to handle navigation to my conversation
-	const handleMyConvesationNavigate = () => {
-		setSelectedTab('My conversations');
-	};
-
-
-	// function to range request by request location
-	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
-
-		// Define the two points for each request and filter them
-		const filteredRequests = requests.filter((request: RequestProps) => {
-			const requestPoint = turf.point([request.lng, request.lat]);
-			const userPoint = turf.point([lng ?? 0, lat ?? 0]);
-			const distance = turf.distance(requestPoint, userPoint);
-
-			return (
-				(distance < request.range / 1000 || request.range === 0) &&
-				(distance < settings[0].range / 1000 || settings[0].range === 0) &&
-				(request.conversation === null || request.conversation === undefined ||
-					!request.conversation.some(conversation =>
-						(conversation.user_1 !== null && conversation.user_2 !== null) &&
-						(conversation.user_1 === id || conversation.user_2 === id)
-					)
-				)
-			);
-		});
-
-
-		// Get all requests that are not in the store
-		const newRequests = filteredRequests.filter((request: RequestProps) =>
-			clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id)
-		);
-
-
-		// Add the new requests to the appropriate place in the list
-		if (newRequests && newRequests.length > 0) {
-			if (fromSubscribeToMore) {
-
-				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
-
-				// Add request.id to the viewedRequestStore
-				if (notViewedRequestStore.length === 0 || notViewedRequestStore.some(id => id !== newRequests[0].id)) {
-					setNotViewedRequestStore([...notViewedRequestStore, newRequests[0].id]);
-				}
-			} else {
-
-				setClientRequestsStore([...(clientRequestsStore || []), ...newRequests]);
-
-			}
-		}
-	}
-
-	// burger menu
-	const toggleMenu = () => {
-		// only if screen is less than 480px
-		if (window.innerWidth < 480) {
-			setIsOpen(!isOpen);
-		}
-	};
-
-	// function to redirect to home page when session is expired by serveur
-	const RedirectExpiredSession = () => {
-		setIsExpiredSession(false);
-		sessionStorage.clear();
-		localStorage.removeItem('login');
-		deleteCookie('logout');
-		navigate('/');
-	};
-
 	return (
 		<>
 			<div className='dashboard'>
@@ -902,7 +902,7 @@ function Dashboard() {
 					|| myConversationIdsLoading
 					|| requestMyConversationLoading
 					&& <Spinner />}
-				<nav className="__nav">
+				<nav className="__nav" /* ref={menuRef} */>
 					<div className="__burger" >
 						<div className="__container">
 							<img className="__logo" src="/izipro-logo.svg" alt="Izipro logo" onClick={() => window.location.reload()} />
@@ -935,7 +935,7 @@ function Dashboard() {
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
 							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }}>
 							<div className="tab-content">
-								
+
 								<span>MES DEMANDES</span>
 								{(viewedMessageState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMessageState.length > 0 ? 'visible' : ''}`}>
 									{viewedMessageState.length > 0 && <Badge count={viewedMessageState.length} />}
@@ -962,7 +962,7 @@ function Dashboard() {
 								<div className="tab-content">
 									<span>MES CONVERSATIONS</span>
 									{(viewedMyConversationState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
-										{viewedMyConversationState.length > 0 && <Badge count={ viewedMyConversationState.length } />}
+										{viewedMyConversationState.length > 0 && <Badge count={viewedMyConversationState.length} />}
 									</div>)}
 								</div>
 								<div className="indicator"></div>

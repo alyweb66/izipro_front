@@ -454,6 +454,11 @@
                         font-size: 0.8rem;
                         font-weight: 500;
                         color: v.$color-primary-blue;
+                        scrollbar-width: none;
+                        &::-webkit-scrollbar {
+                            display: none;
+                            /* For Chrome, Safari and Opera */
+                        }
                     }
 
                     .content {
@@ -465,7 +470,11 @@
                         margin-top: 1rem;
                         width: 80%;
                         max-width: fit-content;
-
+                        scrollbar-width: none;
+                        &::-webkit-scrollbar {
+                            display: none;
+                            /* For Chrome, Safari and Opera */
+                        }
 
 
 
@@ -701,7 +710,7 @@
             }
 
             .my-conversation__message-list__form__label__input {
-                overflow: none;
+                overflow: hidden;
                 scrollbar-width: none;
                 border-radius: 0.5rem;
                 width: 100%;

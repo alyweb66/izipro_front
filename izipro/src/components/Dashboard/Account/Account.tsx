@@ -255,6 +255,8 @@ function Account() {
 				setLngState(location?.lng);
 				setLatState(location?.lat);
 			}
+		} else {
+			newUserData = { ...userData };
 		}
 
 		// Récupérer les clés communes entre userDataStore et userData

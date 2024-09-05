@@ -37,6 +37,7 @@ const wsLink = new GraphQLWsLink(createClient({
 	url: import.meta.env.VITE_SERVER_SUBSCRIPTION,
 }));
 
+
 // The split function takes three parameters:
 // * A function that's called for each operation to execute
 // * The Link to use for an operation if the function returns a "truthy" value
@@ -50,7 +51,7 @@ const splitLink = split(
 		);
 	},
 	wsLink,
-	httpLink,
+	httpLink
 );
 // create a client and check if it exists
 let client;

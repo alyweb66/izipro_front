@@ -593,6 +593,11 @@
                         font-size: 0.8rem;
                         font-weight: 500;
                         color: v.$color-primary-blue;
+                        scrollbar-width: none;
+                        &::-webkit-scrollbar {
+                            display: none;
+                            /* For Chrome, Safari and Opera */
+                        }
                     }
 
                     .content {
@@ -604,7 +609,11 @@
                         margin-top: 1rem;
                         width: 80%;
                         max-width: fit-content;
-
+                        scrollbar-width: none;
+                        &::-webkit-scrollbar {
+                            display: none;
+                            /* For Chrome, Safari and Opera */
+                        }
 
                         &.me {
                             border-radius: 1rem 1rem 0rem 1rem;
@@ -626,6 +635,8 @@
                             .my-request__message-list__message__detail__texte {
                                 word-wrap: break-word;
                                 overflow-wrap: break-word;
+                                scrollbar-width: none;
+
 
                             }
                         }

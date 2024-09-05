@@ -1081,7 +1081,14 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 											.map((message, index, array) => (
 												<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
 													{index === array.length - 1 ? <div ref={endOfMessagesRef} aria-label="Dernier message visible" /> : null}
-													<div className={`content ${message.user_id === id ? 'me' : ''}`}>
+													<motion.div 
+													className={`content ${message.user_id === id ? 'me' : ''}`}
+													style={{ overflow: 'scroll' }}
+													initial={{ opacity: 0, scale: 0.9 }}
+													animate={{ opacity: 1, scale: 1 }}
+													exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
+													transition={{ duration: 0.1, type: 'tween' }}
+													>
 														{message.media[0].url && (
 															<div className="my-request__message-list__message__detail__image-container">
 																<div className={`map ${message.content ? 'message' : ''}`}>
@@ -1130,8 +1137,15 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 															</div>
 														)}
 														{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
-													</div>
-													<div className="my-request__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
+													</motion.div>
+													<motion.div 
+													className="my-request__message-list__message__detail__date"
+													style={{ overflow: 'scroll' }}
+													initial={{ opacity: 0, scale: 0.9 }}
+													animate={{ opacity: 1, scale: 1 }}
+													exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
+													transition={{ duration: 0.1, type: 'tween' }}
+													>{new Date(Number(message.created_at)).toLocaleString()}</motion.div>
 												</div>
 											))
 
