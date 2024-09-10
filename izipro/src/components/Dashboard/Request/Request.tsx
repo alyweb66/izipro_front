@@ -210,7 +210,7 @@ function Request() {
 	};
 
 	// Handle file upload
-	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement> & React.DragEvent<HTMLLabelElement>) => {
 		event.preventDefault();
 		setUploadFileError('');
 
@@ -230,7 +230,7 @@ function Request() {
 	};
 
 	// Handle file drop
-	const handleFileDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+/* 	const handleFileDrop = (event: React.DragEvent<HTMLLabelElement>) => {
 		event.preventDefault();
 		setUploadFileError('');
 
@@ -247,7 +247,7 @@ function Request() {
 				setUploadFileError('Nombre de fichiers maximum atteint');
 			}
 		}
-	};
+	}; */
 
 	// reset selected job when category changes
 	useEffect(() => {
@@ -483,7 +483,7 @@ function Request() {
 							className="request__form__label-file"
 							onDragOver={(event) => event.preventDefault()}
 							onDragEnter={(event) => event.preventDefault()}
-							onDrop={handleFileDrop}
+							onDrop={handleFileUpload}
 						>
 							<span>
 								<svg

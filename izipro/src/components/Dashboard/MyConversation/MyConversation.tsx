@@ -88,7 +88,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const [isSkipMessage, setIsSkipMessage] = useState(true);
 	const [fetchConvIdState, setFetchConvIdState] = useState(0);
 	const [hasManyImages, setHasManyImages] = useState(false);
-
+	const [uploadFileError, setUploadFileError] = useState('');
 
 	const limit = 4;
 
@@ -420,7 +420,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 	// remove file
 	const handleRemove = (index: number) => {
-
+		setUploadFileError('');
 		const newFiles = [...file];
 		newFiles.splice(index, 1);
 		setFile(newFiles);
@@ -428,6 +428,35 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		const newUrlFileList = [...urlFile];
 		newUrlFileList.splice(index, 1);
 		setUrlFile(newUrlFileList);
+	};
+
+
+	// Function to handle file upload
+	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+		event.preventDefault();
+		setUploadFileError('');
+
+		// Check if the number of files is less than 3
+		const remainingSlots = 4 - urlFile.length;
+
+		if ((event.target.files?.length ?? 0) > 4) {
+			setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+		}
+
+		if (event.target.files) {
+
+			if (remainingSlots > 0) {
+				const filesToUpload = Array.from(event.target.files).slice(0, remainingSlots);
+				handleFileChange(undefined, undefined, filesToUpload as File[]);
+
+				if (filesToUpload.length > 4) {
+					setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+				}
+			}
+			if (remainingSlots <= 0) {
+				setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+			}
+		}
 	};
 
 	// Function to remove viewed conversation
@@ -795,7 +824,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 												<div
 													className={`my-conversation__message-list__message__detail ${message.user_id === id ? 'me' : ''}`}
 													key={message.id}
-													
+
 												>
 													{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
 													<motion.div
@@ -857,13 +886,13 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 														)}
 														{message.content && <div className="my-conversation__message-list__message__detail__texte">{message.content}</div>}
 													</motion.div>
-													<motion.div 
-													className="my-conversation__message-list__message__detail__date"
-													style={{ overflow: 'scroll' }}
-													initial={{ opacity: 0, scale: 0.9 }}
-													animate={{ opacity: 1, scale: 1 }}
-													exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-													transition={{ duration: 0.1, type: 'tween' }}
+													<motion.div
+														className="my-conversation__message-list__message__detail__date"
+														style={{ overflow: 'scroll' }}
+														initial={{ opacity: 0, scale: 0.9 }}
+														animate={{ opacity: 1, scale: 1 }}
+														exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
+														transition={{ duration: 0.1, type: 'tween' }}
 													>{new Date(Number(message.created_at)).toLocaleString()}
 													</motion.div>
 												</div>
@@ -886,6 +915,13 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 									{fileError && (
 										<Fade in={!!fileError} timeout={300}>
 											<Alert variant="filled" severity="error">{fileError}</Alert>
+										</Fade>
+									)}
+								</Stack>
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{uploadFileError && (
+										<Fade in={!!uploadFileError} timeout={300}>
+											<Alert variant="filled" severity="error">{uploadFileError}</Alert>
 										</Fade>
 									)}
 								</Stack>
@@ -936,8 +972,9 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 								className="my-conversation__message-list__form__input"
 								type="file"
 								accept="image/*,.pdf"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
 								multiple={true}
+								disabled={selectedRequest && selectedRequest?.id > 0 ? false : true}
 							/>
 							<input
 								id="file-camera"
@@ -945,12 +982,14 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 								type="file"
 								accept="image/*"
 								capture="environment"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
+								disabled={selectedRequest && selectedRequest?.id > 0 ? false : true}
 							/>
 							<button
 								id="send-message"
 								className="my-conversation__message-list__form__button"
 								type="submit"
+								disabled={selectedRequest && selectedRequest?.id > 0 ? false : true}
 							>
 								Send
 							</button>

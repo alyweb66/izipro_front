@@ -5,7 +5,7 @@ export function useFileHandler() {
 	const [file, setFile] = useState<File[]>([]);
 	const [urlFile, setUrlFile] = useState<File[]>([]);
 
-	const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLLabelElement>, onDrag = false, media?: File[] ) => {
+	const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLLabelElement>, onDrag = false, media?: File[]) => {
 		setFileError('');
 		let files;
 		if (onDrag) {

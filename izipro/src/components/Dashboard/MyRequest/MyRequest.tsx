@@ -89,6 +89,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [fetchConvIdState, setFetchConvIdState] = useState<number>(0);
 	const [hasManyImages, setHasManyImages] = useState(false);
 	const [showButton, setShowButton] = useState(false);
+	const [uploadFileError, setUploadFileError] = useState('');
 	//const [isHandleClick, setIsHandleClick] = useState<boolean>(false);
 
 
@@ -353,6 +354,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	// remove file
 	const handleRemove = (index: number) => {
 		// Remove file from file list
+		setUploadFileError('');
 		const newFiles = [...file];
 		newFiles.splice(index, 1);
 		setFile(newFiles);
@@ -391,6 +393,35 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			});
 		}
 	};
+
+		// Function to handle file upload
+		const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+			event.preventDefault();
+			setUploadFileError('');
+	
+			// Check if the number of files is less than 3
+			const remainingSlots = 4 - urlFile.length;
+
+			if ((event.target.files?.length ?? 0) > 4) {
+				setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+			}
+	
+			if (event.target.files) {
+	
+				if (remainingSlots > 0) {
+					const filesToUpload = Array.from(event.target.files).slice(0, remainingSlots);
+					handleFileChange(undefined, undefined, filesToUpload as File[]);
+	
+					if (filesToUpload.length > 4) {
+						setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+					}
+				}
+				if (remainingSlots <= 0) {
+					setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+				}
+			}
+		};
+	
 
 	// useEffect to check the size of the window
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -727,10 +758,8 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			>
 				{requestLoading && <Spinner />}
 				{!requestByDate ? <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p> : (
-
 					<div className="my-request__list__detail" >
 						<AnimatePresence>
-
 							{isListOpen && requestByDate.map((request, index) => (
 								<motion.div
 									id={index === 0 ? 'first-request' : undefined}
@@ -1170,6 +1199,13 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 										</Fade>
 									)}
 								</Stack>
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{uploadFileError && (
+										<Fade in={!!uploadFileError} timeout={300}>
+											<Alert variant="filled" severity="error">{uploadFileError}</Alert>
+										</Fade>
+									)}
+								</Stack>
 							</div>
 							{urlFile.length > 0 && <div className="my-request__message-list__form__preview">
 								{urlFile.map((file, index) => (
@@ -1203,7 +1239,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 								/>
 								<TextareaAutosize
-									//key={messageValue || 'empty'}
 									id='messageInput'
 									className="my-request__message-list__form__label__input"
 									value={messageValue}
@@ -1218,6 +1253,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 									className="my-request__message-list__form__label__send"
 									onClick={() => document.getElementById('send-message')?.click()}
 									aria-label='Envoyer le message'
+									
 								/>
 							</label>
 							<input
@@ -1225,8 +1261,9 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								className="my-request__message-list__form__input"
 								type="file"
 								accept="image/*,.pdf"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
 								multiple={true}
+								disabled={selectedUser && selectedUser?.id > 0 ? false : true}
 							/>
 							<input
 								id="file-camera"
@@ -1234,12 +1271,14 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								type="file"
 								accept="image/*"
 								capture="environment"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
+								disabled={selectedUser && selectedUser?.id > 0 ? false : true}
 							/>
 							<button
 								id="send-message"
 								className="my-request__message-list__form__button"
 								type="submit"
+								disabled={selectedUser && selectedUser?.id > 0 ? false : true}
 							>
 								Send
 							</button>
