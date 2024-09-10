@@ -1,20 +1,28 @@
 import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
 import './NotFound.scss';
+import { errorStatusStore } from '../../store/LoginRegister';
 
 function NotFound() {
 	// use the `useRouteError` hook to get the error
 	const error = useRouteError();
 
+	// Store
+	const statusCode = errorStatusStore((state) => state.statusCode);
 
-	function getErrorMessage(e: unknown): string {
-		if (isRouteErrorResponse(e)) {
-			return e.statusText;
+	const errorStatusCode = statusCode || 404;
+
+	function getErrorMessage(error: unknown): string {
+		if (errorStatusCode === 404) {
+			return 'Not found';
+		} 
+		if (isRouteErrorResponse(error)) {
+			return error.statusText;
 		}
-		if (e instanceof Error) {
-			return e.message;
+		if (error instanceof Error) {
+			return error.message;
 		}
-		if (typeof e === 'string') {
-			return e;
+		if (typeof error === 'string') {
+			return error;
 		}
 
 		return 'Unknown error';
@@ -22,7 +30,7 @@ function NotFound() {
 
 	return (
 		<div className="not-found">
-			<h1 className="not-found__title">404</h1>
+			<h1 className="not-found__title">{errorStatusCode}</h1>
 			<img className="not-found__img" src="/images/404/404.jpeg" alt="" />
 			<p className="not-found__description">Désolé, une erreur inattendue est survenue.</p>
 			<p>

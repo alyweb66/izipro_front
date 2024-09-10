@@ -1245,7 +1245,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 									onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}
 									placeholder="Tapez votre message ici..."
 									aria-label='Tapez votre message'
-									maxLength={500}
+									maxLength={1000}
 									readOnly={selectedUser && selectedUser?.id > 0 ? false : true}
 									onClick={(event: React.MouseEvent) => { event.stopPropagation(); event?.preventDefault(); }}
 								/>

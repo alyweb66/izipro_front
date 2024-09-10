@@ -12,8 +12,12 @@ import { router } from './routes';
 //import { onError } from "apollo-link-error";
 import {ErrorResponse, onError  } from "@apollo/client/link/error"; 
 import './styles/index.scss';
+import { errorStatusStore } from './store/LoginRegister';
 
 
+const setStatusCode = (statusCode: number) => {
+	errorStatusStore.getState().statusCode = statusCode;
+};
 /* type ResponseError = ErrorResponse & {
 	networkError?: {
 	  statusCode?: number;
@@ -39,6 +43,7 @@ const errorLink = onError((error: ErrorResponse) => {
 	const statusCode = (error.networkError as ServerError).statusCode;
 
 	if (statusCode === 401) {
+		setStatusCode(statusCode);
 		localStorage.removeItem('login');
 		isLoggedOut = true;
 		

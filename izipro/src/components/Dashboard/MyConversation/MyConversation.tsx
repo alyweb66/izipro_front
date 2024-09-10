@@ -958,7 +958,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 									value={messageValue}
 									onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}
 									placeholder="Tapez votre message ici..."
-									maxLength={500}
+									maxLength={1000}
 									minRows={1}
 									readOnly={selectedRequest && selectedRequest?.id > 0 ? false : true}
 								/>

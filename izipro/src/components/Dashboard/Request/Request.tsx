@@ -300,7 +300,7 @@ function Request() {
 
 	return (
 		<div className="request">
-			{categoryLoading || JobDataLoading && <Spinner />}
+			{categoryLoading && <Spinner />}
 
 			{(!address && !city && !postal_code && !first_name && !last_name) &&
 				(<p className="request no-req">Veuillez renseigner les champs de &quot;Mes informations&quot; dans votre compte pour faire une demande</p>)}

@@ -19,6 +19,11 @@ type ConfirmEmailProps = {
 	setIsEmailConfirmed: (isEmailConfirmed: boolean) => void;
 }
 
+type ErrorResponse = {
+	statusCode: number;
+	setStatusCode: (statusCode: number) => void;
+}
+
 
 type UserFormStore = UserFormProps & {
     setEmail: (email: string) => void;
@@ -66,4 +71,9 @@ export const userFormStore = create<UserFormStore>((set) => ({
 	resetForm: () => set({ email: '', password: '', confirmPassword: '',
 		siret: '', proEmail: '', proPassword: '', isProfessional: false, userCreated: false, error: '', proUserError: '' })
     
+}));
+
+export const errorStatusStore = create<ErrorResponse>((set) => ({
+	statusCode: 0,
+	setStatusCode: (statusCode: number) => set({ statusCode })
 }));
