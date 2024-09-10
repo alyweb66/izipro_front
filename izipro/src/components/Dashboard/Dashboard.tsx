@@ -47,6 +47,8 @@ import { messageDataStore, myMessageDataStore } from '../../store/message';
 // Style
 import './Dashboard.scss';
 import { DeleteItemModal } from '../Hook/DeleteItemModal';
+//import useHandleLogout from '../Hook/HandleLogout';
+
 
 
 const Request = lazy(() => import('./Request/Request'));
@@ -65,25 +67,84 @@ type useQueryUserConversationsProps = {
 
 function Dashboard() {
 	const navigate = useNavigate();
+
+	// Store at the top for id to use in the sendBeacon
+	const [id, role, lng, lat, settings, jobs, setAll] = userDataStore((state) => [state.id, state.role, state.lng, state.lat, state.settings, state.jobs, state.setAll]);
+
 	//const handleLogout = useHandleLogout();
 
-
-	const cookies = document.cookie;
-	// function to get the cookie value
-	function getCookieValue(name: string) {
-		const value = `; ${document.cookie}`;
-		const parts = value.split(`; ${name}=`);
-		if (parts.length === 2) return parts.pop()?.split(';').shift();
-		return null;
+	// condition if user not logged in
+	// decode the data
+	const getItem = localStorage.getItem('login');
+	let decodeData: string | { value: string };
+	let isLogged: boolean;
+	try {
+		decodeData = JSON.parse(atob(getItem || ''));
+	} catch (error) {
+		decodeData = atob(getItem || '');
 	}
 
-	// function to delete the cookie
-	function deleteCookie(name: string) {
-		document.cookie = `${name}=; Max-Age=0; path=/; domain=${window.location.hostname};`;
+	if (decodeData && ((typeof decodeData === 'object' && decodeData.value === 'true') || decodeData === 'session')) {
+		isLogged = true
+	} else {
+		isLogged = false;
 	}
 
+	// function to logout the user when the page is closed
+	const handleUnload = () => {
+		if (decodeData === 'session' && idRef.current) {
+			// create request to logout the user in the json format for sendbeacon
+			const query = `
+			mutation Logout($logoutId: Int!) {
+				  logout(id: $logoutId)
+			}
+		  `;
+
+			const variables = { logoutId: idRef.current };
+
+			// format data to send for sendBeacon
+			const data = JSON.stringify({
+				query,
+				variables
+			});
+
+			// use sendBeacon to send the request
+			const url = import.meta.env.VITE_SERVER_URL;
+			const headers = { 'Content-Type': 'application/json' };
+
+			// Create a Blob object with the data
+			const blob = new Blob([data], { type: headers['Content-Type'] });
+
+			// send request to the server with sendBeacon
+			navigator.sendBeacon(url, blob);
+		}
+	};
+	// useEffect to check if user is logged in and use sendBeacon to logout the user
+	useEffect(() => {
+		// check if user is logged in
+		if (isLogged === false) {
+			// The data has expired
+			localStorage.removeItem('login')
+			
+			if (window.location.pathname !== '/') {		
+				navigate('/');
+			}
+		}
+		
+		handleUnload();
+		// function to check if user is logged in and listener if close the page
+		
+		//window.addEventListener('beforeunload', handleBeforeUnload);
+		window.addEventListener('unload', handleUnload);
 
 
+
+		// clean event listener
+		return () => {
+			//	window.removeEventListener('beforeunload', handleBeforeUnload);
+			window.addEventListener('unload', handleUnload);
+		};
+	}, [decodeData]);
 
 	// State
 	const [isOpen, setIsOpen] = useState(false);
@@ -114,7 +175,6 @@ function Dashboard() {
 	const [isSkipClientRequest, setIsSkipClientRequest] = useState<boolean>(true);
 
 	//store
-	const [id, role, lng, lat, settings, jobs, setAll] = userDataStore((state) => [state.id, state.role, state.lng, state.lat, state.settings, state.jobs, state.setAll]);
 	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 	const [requestConversationIdStore, setRequestConversationsIdStore] = requestConversationIds((state) => [state.notViewed, state.setNotViewedStore]);
@@ -154,24 +214,6 @@ function Dashboard() {
 		}
 	}, [id]);
 
-	// useEffect to check if user is logged out by the server
-	useEffect(() => {
-		if (cookies) {
-			// check if the user is logged out by the server
-			const logoutCookieValue = getCookieValue('logout');
-			if (logoutCookieValue === 'true') {
-
-				if(id > 0) {
-					setIsExpiredSession(true);
-				} else {
-					localStorage.removeItem('login');
-					deleteCookie('logout');
-					navigate('/');
-				}
-			}
-		}
-	}, [cookies]);
-
 	// Query 
 	const { loading: userDataLoading, getUserData } = useQueryUserData(isSkipGetUserDataRef.current || id !== 0);
 	const getUserSubscription = useQueryUserSubscriptions(isSkipSubscriptionRef.current);
@@ -199,23 +241,6 @@ function Dashboard() {
 	const { clientRequestSubscription } = useClientRequestSubscriptions((role !== 'pro'));
 	const { clientMessageSubscription } = useMyConversationSubscriptions((role !== 'pro'));
 	const { logoutSubscription } = useLogoutSubscription();
-
-	// condition if user not logged in
-	// decode the data
-	const getItem = localStorage.getItem('login');
-	let decodeData: string | { value: string };
-	let isLogged: boolean;
-	try {
-		decodeData = JSON.parse(atob(getItem || ''));
-	} catch (error) {
-		decodeData = atob(getItem || '');
-	}
-
-	if (decodeData && ((typeof decodeData === 'object' && decodeData.value === 'true') || decodeData === 'session')) {
-		isLogged = true
-	} else {
-		isLogged = false;
-	}
 
 	// function to handle navigation to my conversation
 	const handleMyConvesationNavigate = () => {
@@ -281,7 +306,7 @@ function Dashboard() {
 		setIsExpiredSession(false);
 		sessionStorage.clear();
 		localStorage.removeItem('login');
-		deleteCookie('logout');
+		handleUnload();
 		navigate('/');
 	};
 
@@ -306,67 +331,6 @@ function Dashboard() {
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
 	}, []);
-
-	// function to check if user is logged in and listener if close the page
-	useEffect(() => {
-		// clear local storage and session storage when user leaves the page if local storage is set to session
-		/* const handleBeforeUnload = (event: { preventDefault: () => void; returnValue: string; }) => {
-			//event.preventDefault();
-			// show the navigator alert message
-			//event.returnValue = '';
-			if (decodeData === 'session') {
-				// clear local storage,session storage and cookie
-				//handleLogout(id);
-
-			}
-		}; */
-		const handleUnload = () => {
-			if (decodeData === 'session' && idRef.current) {
-				// create request to logout the user in the json format for sendbeacon
-				const query = `
-				mutation Logout($logoutId: Int!) {
-  					logout(id: $logoutId)
-    			}
-			  `;
-
-				const variables = { logoutId: idRef.current };
-
-				// format data to send for sendBeacon
-				const data = JSON.stringify({
-					query,
-					variables
-				});
-
-				// use sendBeacon to send the request
-				const url = import.meta.env.VITE_SERVER_URL;
-				const headers = { 'Content-Type': 'application/json' };
-
-				// Create a Blob object with the data
-				const blob = new Blob([data], { type: headers['Content-Type'] });
-
-				// send request to the server with sendBeacon
-				navigator.sendBeacon(url, blob);
-			}
-		};
-		//window.addEventListener('beforeunload', handleBeforeUnload);
-		window.addEventListener('unload', handleUnload);
-
-		// check if user is logged in
-		if (isLogged === false) {
-			// The data has expired
-			localStorage.removeItem('login')
-
-			if (window.location.pathname !== '/') {
-				navigate('/');
-			}
-		}
-
-		// clean event listener
-		return () => {
-			//	window.removeEventListener('beforeunload', handleBeforeUnload);
-			window.addEventListener('unload', handleUnload);
-		};
-	}, [decodeData]);
 
 	// set the new request from requestById to myRequestStore 
 	useEffect(() => {

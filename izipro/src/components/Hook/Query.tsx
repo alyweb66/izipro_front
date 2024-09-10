@@ -15,9 +15,10 @@ export const useQueryUserData = (getData: boolean) => {
 	});
 	
 	if (getUserError) {
-		
 		throw new Error('Error while fetching user data');
 	}
+
+
 
 	return { loading, getUserData};
 };
@@ -311,10 +312,13 @@ export const useQueryVAPIDKey = () => {
 
 export const useQueryGetNotification = (skip: boolean) => {
 	const { loading, error: notificationError, data: notificationData } = useQuery(GET_USER_NOTIFICATION, {
+		fetchPolicy: 'no-cache',
 		skip
 	});
 	if (notificationError) {
 		throw new Error('Error while fetching notifications');
 	}
+	console.log('notificationData', notificationData);
+	
 	return {loading, notificationData};
 }

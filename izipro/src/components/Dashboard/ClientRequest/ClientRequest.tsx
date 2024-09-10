@@ -53,6 +53,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	const [hasManyImages, setHasManyImages] = useState(false);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{requestId: number, requestTitle: string } | null>(null);
+	
 	/* 	const [isLoading, setIsLoading] = useState(false); */
 	// Create a ref for the scroll position
 	//const offsetRef = useRef(0);
@@ -269,7 +270,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 			const data = fetchMoreResult.data.requestsByJob;
 
 			//get all request who are not in the store
-			const newRequests = data.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
+			const newRequests = data?.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
 
 			if (newRequests.length > 0) {
 
@@ -429,7 +430,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 					</div>
 				)}
 				<div className="client-request__list__fetch-button">
-					{isHasMore ? (<button
+					{(isHasMore && clientRequestsStore.length > 0) ? (<button
 						className="Btn"
 						onClick={(event) => {
 							event.preventDefault();

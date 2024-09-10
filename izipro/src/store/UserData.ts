@@ -51,7 +51,6 @@ export const changeForgotPasswordStore = create<ChangeForgotPasswordProps>((set)
 	setIsChangePassword: (isChangePassword) => set({ isChangePassword })
 }));
 
-
 // store creation for user data
 export const userDataStore = create<UserDataStore>((set) => ({
 	id: 0,

@@ -101,7 +101,17 @@ function Account() {
 			state.setImage,
 			state.postal_code
 		]);
-	const [emailNotification, setEmailNotification] = useNotificationStore((state) => [state.email_notification, state.setEmailNotification]);
+	const [
+		emailNotification,
+		endpointStore,
+		setEnpointStore,
+		setEmailNotification
+	] = useNotificationStore((state) => [
+		state.email_notification,
+		state.endpoint,
+		state.setEndpoint,
+		state.setEmailNotification
+	]);
 
 
 	//state
@@ -123,7 +133,7 @@ function Account() {
 	const [modalIsOpen, setModalIsOpen] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
 	const [ChangeEmail, setChangeEmail] = useState('');
-	const [isNotificationEnabled, setIsNotificationEnabled] = useState(Notification.permission === 'granted');
+	const [isNotificationEnabled, setIsNotificationEnabled] = useState(endpointStore ? true : false);
 	const [errorPicture, setErrorPicture] = useState('');
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [showOldPassword, setShowOldPassword] = useState(false);
@@ -195,16 +205,16 @@ function Account() {
 	}, [first_nameState, last_nameState, emailState, addressState, postal_codeState, cityState, lngState, latState, siretState, denominationState, descriptionState]);
 
 	// Set the notification state
-	useEffect(() => {
+	/* useEffect(() => {
 		if (notificationData && notificationData.user && emailNotification === null) {
-			const emailNotification = notificationData.user.notification?.email_notification;
+			const emailNotification = notificationData.user.notification[0]?.email_notification;
 
 			setEmailNotification(emailNotification);
 			setNotification(emailNotification);
 
 			isGetNotificationRef.current = true;
 		}
-	}, [notificationData]);
+	}, [notificationData]); */
 
 	// handle email notification
 	const handleNotification = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -487,25 +497,76 @@ function Account() {
 
 	};
 
+	if (emailNotification === null) {
+		isGetNotificationRef.current = false;
+	}
+
+	useEffect(() => {
+		if (endpointStore) {
+			setIsNotificationEnabled(true);
+		} else {
+			setIsNotificationEnabled(false);
+		}
+	}, [endpointStore]);
 	// useEffect for notification 
 	useEffect(() => {
 
-		if (emailNotification === null) {
-			isGetNotificationRef.current = false;
+		// Set email notification to the store and state
+		if (notificationData && notificationData.user && emailNotification === null) {
+			const emailNotification = notificationData.user.notification[0]?.email_notification;
+
+			setEmailNotification(emailNotification);
+			setNotification(emailNotification);
+
+			isGetNotificationRef.current = true;
 		}
 
+		// check if the user is already subscribed to push notifications
 		const checkNotificationStatus = async () => {
 			// set the state of the notification
 			// check if the user is already subscribed to push notifications
 			if (window.location.protocol === 'https:' || window.location.hostname === 'localhost') {
-				if ('serviceWorker' in navigator) {
+				if ('serviceWorker' in navigator && endpointStore === null) {
 					const registration = await navigator.serviceWorker.getRegistration();
+
 					if (registration) {
 						const subscription = await registration.pushManager.getSubscription();
-						setIsNotificationEnabled(!!subscription);
-					} else {
-						setIsNotificationEnabled(false);
-					}
+
+						//setIsNotificationEnabled(!!subscription);
+						if (subscription) {
+							const endpoint = subscription.endpoint;
+							const notification = notificationData?.user?.notification;
+console.log('notification', notification);
+console.log('endpointStore', endpointStore);
+
+
+							// check if the user is already subscribed to push notifications
+							let isSubscribed;
+							if (notification && notification.length > 0) {
+								console.log('notification', notification);
+								
+								const isNotification = notification.find((notification: {
+									id: number,
+									user: number,
+									email_notification: boolean,
+									endpoint: string,
+									public_key: string,
+									auth_token: string
+								}) => notification.endpoint === endpoint);
+								console.log('isNotification', isNotification);
+								
+								isSubscribed = isNotification.endpoint;
+							} else {
+								isSubscribed = endpointStore;
+							}
+
+							if (isSubscribed) {
+								setEnpointStore(isSubscribed);
+							} 
+			
+
+						}
+					} 
 
 					// verify if the browser supports notifications push and service workers
 					const permission = document.getElementById('push-permission');
@@ -525,15 +586,9 @@ function Account() {
 		};
 
 		checkNotificationStatus();
-	}, []);
+	}, [notificationData]);
 
 	// check if map is already loaded
-	/* useEffect(() => {
-		// Vérifiez si la carte est déjà chargée
-		if (document.querySelector('.mapboxgl-canvas')) {
-			setIsLoading(false);
-		}
-	}, []); */
 	useEffect(() => {
 		const observer = new MutationObserver((mutationsList, observer) => {
 			for (let mutation of mutationsList) {
@@ -566,6 +621,7 @@ function Account() {
 	const handleSwitchChange = () => {
 		if (isNotificationEnabled) {
 			disableNotifications();
+			setEnpointStore(null);
 		} else {
 			askPermission();
 		}
@@ -833,9 +889,10 @@ function Account() {
 										mapboxAccessToken={mapboxAccessToken}
 										{...viewState}
 										onMove={evt => setViewState(evt.viewState)}
-										scrollZoom={true}
-										maxZoom={15}
-										minZoom={10}
+										scrollZoom={false}
+										zoom={11}
+										//maxZoom={15}
+										//minZoom={10}
 										mapStyle="mapbox://styles/mapbox/streets-v12"
 										dragRotate={false}
 										dragPan={false}

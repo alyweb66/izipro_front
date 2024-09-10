@@ -2,6 +2,7 @@ import { useMutation } from "@apollo/client";
 import { CREATE_NOTIFICATION_PUSH_MUTATION, DELETE_NOTIFICATION_PUSH_MUTATION } from "../GraphQL/notificationMutation";
 import { useQueryVAPIDKey } from "./Query";
 import { userDataStore } from "../../store/UserData";
+import { useNotificationStore } from "../../store/Notification";
 
 
 type SubscriptionData = {
@@ -16,6 +17,7 @@ const serviceWorkerRegistration = () => {
     const { fetchVAPIDKey } = useQueryVAPIDKey();
     // Store
     const id = userDataStore((state) => state.id);
+    const setEnpointStore = useNotificationStore((state) => state.setEndpoint);
     // Mutation
     const [createNotification, { error: notificationError }] = useMutation(CREATE_NOTIFICATION_PUSH_MUTATION);
     const [deleteNotification, { error: deleteNotificationError }] = useMutation(DELETE_NOTIFICATION_PUSH_MUTATION);
@@ -31,7 +33,7 @@ const serviceWorkerRegistration = () => {
 
     // Register service worker
     async function registerServiceWorker() {
-        
+
         const registration = await navigator.serviceWorker.register('/serviceWorker.js');
         let subscription = await registration.pushManager.getSubscription();
 
@@ -50,6 +52,7 @@ const serviceWorkerRegistration = () => {
     // Save subscription to database
     async function saveSubscription(subscription: PushSubscription) {
         const subscriptionData: SubscriptionData = JSON.parse(JSON.stringify(subscription));
+        
         if (id > 0) {
             createNotification({
                 variables: {
@@ -60,6 +63,8 @@ const serviceWorkerRegistration = () => {
                         public_key: subscriptionData.keys.p256dh
                     }
                 }
+            }).then(() => {
+                setEnpointStore(subscriptionData.endpoint);
             });
 
             if (notificationError) {
@@ -79,8 +84,8 @@ const serviceWorkerRegistration = () => {
 
     }
 
-      // Unsubscribe from notifications
-      async function disableNotifications() {
+    // Unsubscribe from notifications
+    async function disableNotifications() {
         const registration = await navigator.serviceWorker.getRegistration();
         if (registration) {
             const subscription = await registration.pushManager.getSubscription();

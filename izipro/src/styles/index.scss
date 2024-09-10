@@ -5,13 +5,25 @@
 
 
 body {
+	position: relative;
 	box-sizing: border-box;
 	height: 100vh;
-	background: linear-gradient(to right, v.$backgroud-color-orange, v.$backgroud-color-blue);
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-		'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-		sans-serif;
+	'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+	sans-serif;
 	-webkit-font-smoothing: antialiased;
+	background: linear-gradient(to right, v.$backgroud-color-orange, v.$backgroud-color-blue);
+	
+	/* &::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.007); // Couleur noire semi-transparente
+		z-index: -1; // S'assure que le fond sombre soit derrière le contenu
+	} */
 
 }
 

@@ -1,11 +1,7 @@
 import { useMutation } from '@apollo/client';
 import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
-//import { cookieConsents, userConversation, userDataStore } from '../../store/UserData';
 import { useNavigate } from 'react-router-dom';
-//import { clientRequestStore, myRequestStore, requestConversationStore, requestDataStore } from '../../store/Request';
-//import { messageDataStore, myMessageDataStore } from '../../store/message';
-//import { subscriptionDataStore } from '../../store/subscription';
-//import { notViewedConversation, notViewedRequest, notViewedRequestRef, requestConversationIds } from '../../store/Viewed';
+
 
 export default function useHandleLogout() {
 	const navigate = useNavigate();
@@ -13,7 +9,8 @@ export default function useHandleLogout() {
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
 
 	// Return a function that will handle the logout
-	return async (userId: number) => {
+	return async (userId?: number) => {
+console.log('logout');
 
 		await logout({
 			variables: {
@@ -22,7 +19,6 @@ export default function useHandleLogout() {
 		}).then(() => {
 			// reset the user data
 			//resetUserData();
-		console.log('logout');
 
 			localStorage.removeItem('login')
 

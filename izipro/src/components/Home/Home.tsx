@@ -19,7 +19,7 @@ function Home() {
 	const navigate = useNavigate();
 	const [isFooter, setIsFooter] = useState(false);
 
-	// get the cookies
+/* 	// get the cookies
 	const cookies = document.cookie;
 	// function to get the cookie value
 	function getCookieValue(name: string) {
@@ -44,7 +44,7 @@ function Home() {
 			}
 		}
 	}, [cookies]);
-	
+	 */
 	// check if user is logged in and if cookie consents are accepted
 	useEffect(() => {
 		// condition if user not logged in

@@ -206,15 +206,12 @@
                     align-items: baseline;
                     margin-top: 0.5rem;
 
-
-
                 }
 
                 .my-request__list__detail__item__picture {
                     display: flex;
                     flex-wrap: wrap;
                     z-index: 1;
-
                     &.img {
                         margin: 1rem 0.5rem 0 0.5rem;
                         border-radius: 0.5rem;
@@ -222,8 +219,8 @@
                         height: 70px;
                         cursor: pointer;
 
-
                     }
+
                 }
 
                 .my-request__list__detail__item__delete {
@@ -491,9 +488,9 @@
                     &.deployed {
                         font-size: 0.8rem;
                         padding: 0 1rem;
-                        display: b lock;
+                        display: block;
                         overflow: hidden;
-                        text-overflow: none;
+                        text-overflow: ellipsis;
                         white-space: normal;
                     }
                 }
@@ -507,8 +504,6 @@
                     color: v.$color-primary-blue;
                     font-size: 0.8rem;
                     font-weight: 500;
-
-
                 }
             }
 
@@ -836,7 +831,7 @@
             }
 
             .my-request__message-list__form__label__input {
-                overflow: none;
+                overflow: hidden;
                 scrollbar-width: none;
                 border-radius: 0.5rem;
                 width: 100%;
@@ -961,11 +956,6 @@
                         }
 
                         .my-request__message-list__user__header__detail {
-
-                            /* &.deploy-arrow {
-                                width: 50%;
-                            } */
-
 
                             &.return {
                                 display: block;

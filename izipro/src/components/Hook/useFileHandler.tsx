@@ -36,7 +36,6 @@ export function useFileHandler() {
 						setFileError('');
 					}, 15000);
 					return false;
-					return false;
 				}
 				return true;
 			}

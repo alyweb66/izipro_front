@@ -124,6 +124,274 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(fetchConvIdState, 0, 100, isSkipMessage);
 
+
+	// Function to delete a request
+	const handleDeleteRequest = (requestId?: number) => {
+
+		deleteRequest({
+			variables:
+			{
+				input:
+				{
+					id: requestId,
+					user_id: id,
+				}
+			}
+
+		}).then((response) => {
+			// Get the conversation ids of the request
+			const conversationIds = myRequestStore.getState().requests.find(request => request.id === requestId)?.conversation?.map(conversation => conversation.id);
+
+			if (response.data.deleteRequest) {
+				// Remove the request from the store
+				setMyRequestsStore(myRequestsStore.filter(request => request.id !== requestId));
+			}
+			setUserConvState([]);
+			setModalArgs(null);
+			setDeleteItemModalIsOpen(false);
+
+			// remove subscription for this request
+			const subscription = subscriptionStore.find(subscription => subscription.subscriber === 'request');
+			const updatedSubscription = Array.isArray(subscription?.subscriber_id) ? subscription?.subscriber_id.filter(id => id !== requestId) : [];
+
+			subscriptionMutation({
+				variables: {
+					input: {
+						user_id: id,
+						subscriber: 'request',
+						subscriber_id: updatedSubscription
+					}
+				}
+			}).then((response) => {
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+
+				// replace the old subscription with the new one
+				subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
+					...prevState,
+					subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
+						subscription.subscriber === 'request' ? subscriptionWithoutTimestamps : subscription
+					)
+				}));
+
+				if (conversationIds) {
+					// remove subscription for this conversation
+					const conversationSubscription = subscriptionStore.find(subscription => subscription.subscriber === 'conversation');
+					const updatedConversationSubscription = Array.isArray(conversationSubscription?.subscriber_id) ? conversationSubscription?.subscriber_id.filter(id => !conversationIds.includes(id)) : [];
+
+					subscriptionMutation({
+						variables: {
+							input: {
+								user_id: id,
+								subscriber: 'conversation',
+								subscriber_id: updatedConversationSubscription
+							}
+						}
+					}).then((response) => {
+
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
+						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+
+						// replace the old subscription with the new one
+						subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
+							...prevState,
+							subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
+								subscription.subscriber === 'conversation' ? subscriptionWithoutTimestamps : subscription
+							)
+						}));
+
+						// delete from message store all message with this conversation viewedIds
+						myMessageDataStore.setState(prevState => {
+							const newMessages = prevState.messages.filter(
+								(message: MessageProps) => !conversationIds.includes(message.conversation_id)
+							);
+							return {
+								...prevState,
+								messages: [...newMessages]
+							};
+						});
+
+						// remove the conversation id from the notViewedConversationStore and database
+						deleteNotViewedConversation({
+							variables: {
+								input: {
+									user_id: id,
+									conversation_id: conversationIds
+								}
+							}
+						}).then(() => {
+							// remove the conversation id from the notViewedConversationStore
+							setNotViewedConversationStore(notViewedConversationStore.filter(id => !conversationIds.includes(id)));
+						});
+
+						if (deleteNotViewedConversationError) {
+							throw new Error('Error updating conversation');
+						}
+
+					});
+
+					if (subscriptionError) {
+						throw new Error('Error while updating conversation subscription');
+					}
+				}
+			});
+		});
+
+		if (deleteRequestError) {
+			throw new Error('Error while deleting request');
+		}
+
+	};
+
+	// Function to handle the users viewedIds for the conversation
+	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLDivElement>) => {
+		event?.preventDefault();
+
+		if (!request.conversation) {
+
+			setUserConvState([]);
+
+		} else {
+			// Get the user viewedIds from the conversation
+			const viewedIds = request?.conversation?.map(conversation => {
+				return conversation.user_1 !== id ? conversation.user_1 : conversation.user_2;
+			});
+
+			// Filter out the user viewedIds that are already in the userConvStore
+			const idStore = userConvStore.map(user => user.id);
+			const newIds = viewedIds.filter(id => !idStore.includes(id));
+
+			if (newIds.length > 0) {
+				setUserIds(newIds || []); // Provide a default value of an empty array
+			}
+		}
+	};
+
+	// Function to handle the user message and update the conversation viewed status
+	const handleMessageConversation = (userId: number, event?: React.MouseEvent<HTMLDivElement>) => {
+		event?.preventDefault();
+
+		// find the conversation id for the message
+		const conversation = selectedRequest?.conversation?.find(conversation =>
+			(conversation.user_1 === id || conversation.user_2 === id) &&
+			(conversation.user_1 === userId || conversation.user_2 === userId)
+		);
+
+		const conversationId = conversation?.id;
+		setConversationIdState(conversationId || 0);
+
+		// get only conversation id who are not in the store
+		let conversationIdNotStore;
+		if (messageStore.length > 0) {
+			conversationIdNotStore = !messageStore.some(message => message.conversation_id === conversationId);
+		} else {
+			conversationIdNotStore = true;
+		}
+
+		if (conversationIdNotStore && conversationId !== conversationIdState) {
+
+			setFetchConvIdState(conversationId ?? 0);
+			setIsSkipMessage(false);
+		}
+
+		// remove the conversation id from the notViewedConversationStore and database
+		if (conversationId && notViewedConversationStore?.some(id => id === conversationId)) {
+
+			deleteNotViewedConversation({
+				variables: {
+					input: {
+						user_id: id,
+						conversation_id: [conversationId]
+					}
+				}
+			}).then(() => {
+				// remove the conversation id from the notViewedConversationStore
+				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
+
+			});
+
+			if (deleteNotViewedConversationError) {
+				throw new Error('Error updating conversation');
+			}
+		}
+	};
+
+	// Function to send message and create conversation
+	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		// map file to send to graphql
+		const sendFile = file.map(file => ({
+			file,
+		}));
+		// create message
+		// if the message is not empty or the file is not empty
+		if (conversationIdState ?? 0 > 0) {
+			if (messageValue.trim() !== '' || sendFile.length > 0) {
+
+				message({
+					variables: {
+						id: id,
+						input: {
+							content: messageValue,
+							user_id: id,
+							conversation_id: conversationIdState,
+							media: sendFile
+						}
+					}
+				}).then(() => {
+					setMessageValue('');
+					setFile([]);
+					setUrlFile([]);
+				});
+			}
+		}
+		if (createMessageError) {
+			throw new Error('Error creating message');
+		}
+	};
+
+	// remove file
+	const handleRemove = (index: number) => {
+		// Remove file from file list
+		const newFiles = [...file];
+		newFiles.splice(index, 1);
+		setFile(newFiles);
+		// Remove file from urlFile list
+		const newUrlFileList = [...urlFile];
+		newUrlFileList.splice(index, 1);
+		setUrlFile(newUrlFileList);
+	};
+
+	// Function to fetchmore requests
+	const addRequest = () => {
+		if (fetchMore) {
+			fetchMore({
+				variables: {
+					offset: myRequestsStore.length // Next offset
+				},
+			}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
+
+				// remove request who is already in the store
+				const requestsIds = myRequestsStore.map(request => request.id);
+				const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIds.includes(request.id));
+
+				if (newRequests.length > 0) {
+					myRequestStore.setState(prevRequests => {
+						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
+					});
+
+					offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
+				}
+
+				// if there is no more request stop the infinite scroll
+				if (fetchMoreResult.data.user.requests.length < limit) {
+					setIsHasMore(false);
+				}
+
+			});
+		}
+	};
+
 	// useEffect to check the size of the window
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	useEffect(() => {
@@ -440,274 +708,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	}, [selectedUser]);
 
-
-	// Function to delete a request
-	const handleDeleteRequest = (requestId?: number) => {
-
-		deleteRequest({
-			variables:
-			{
-				input:
-				{
-					id: requestId,
-					user_id: id,
-				}
-			}
-
-		}).then((response) => {
-			// Get the conversation ids of the request
-			const conversationIds = myRequestStore.getState().requests.find(request => request.id === requestId)?.conversation?.map(conversation => conversation.id);
-
-			if (response.data.deleteRequest) {
-				// Remove the request from the store
-				setMyRequestsStore(myRequestsStore.filter(request => request.id !== requestId));
-			}
-			setUserConvState([]);
-			setModalArgs(null);
-			setDeleteItemModalIsOpen(false);
-
-			// remove subscription for this request
-			const subscription = subscriptionStore.find(subscription => subscription.subscriber === 'request');
-			const updatedSubscription = Array.isArray(subscription?.subscriber_id) ? subscription?.subscriber_id.filter(id => id !== requestId) : [];
-
-			subscriptionMutation({
-				variables: {
-					input: {
-						user_id: id,
-						subscriber: 'request',
-						subscriber_id: updatedSubscription
-					}
-				}
-			}).then((response) => {
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-
-				// replace the old subscription with the new one
-				subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
-					...prevState,
-					subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
-						subscription.subscriber === 'request' ? subscriptionWithoutTimestamps : subscription
-					)
-				}));
-
-				if (conversationIds) {
-					// remove subscription for this conversation
-					const conversationSubscription = subscriptionStore.find(subscription => subscription.subscriber === 'conversation');
-					const updatedConversationSubscription = Array.isArray(conversationSubscription?.subscriber_id) ? conversationSubscription?.subscriber_id.filter(id => !conversationIds.includes(id)) : [];
-
-					subscriptionMutation({
-						variables: {
-							input: {
-								user_id: id,
-								subscriber: 'conversation',
-								subscriber_id: updatedConversationSubscription
-							}
-						}
-					}).then((response) => {
-
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-
-						// replace the old subscription with the new one
-						subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
-							...prevState,
-							subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
-								subscription.subscriber === 'conversation' ? subscriptionWithoutTimestamps : subscription
-							)
-						}));
-
-						// delete from message store all message with this conversation viewedIds
-						myMessageDataStore.setState(prevState => {
-							const newMessages = prevState.messages.filter(
-								(message: MessageProps) => !conversationIds.includes(message.conversation_id)
-							);
-							return {
-								...prevState,
-								messages: [...newMessages]
-							};
-						});
-
-						// remove the conversation id from the notViewedConversationStore and database
-						deleteNotViewedConversation({
-							variables: {
-								input: {
-									user_id: id,
-									conversation_id: conversationIds
-								}
-							}
-						}).then(() => {
-							// remove the conversation id from the notViewedConversationStore
-							setNotViewedConversationStore(notViewedConversationStore.filter(id => !conversationIds.includes(id)));
-						});
-
-						if (deleteNotViewedConversationError) {
-							throw new Error('Error updating conversation');
-						}
-
-					});
-
-					if (subscriptionError) {
-						throw new Error('Error while updating conversation subscription');
-					}
-				}
-			});
-		});
-
-		if (deleteRequestError) {
-			throw new Error('Error while deleting request');
-		}
-
-	};
-
-	// Function to handle the users viewedIds for the conversation
-	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLDivElement>) => {
-		event?.preventDefault();
-
-		if (!request.conversation) {
-
-			setUserConvState([]);
-
-		} else {
-			// Get the user viewedIds from the conversation
-			const viewedIds = request?.conversation?.map(conversation => {
-				return conversation.user_1 !== id ? conversation.user_1 : conversation.user_2;
-			});
-
-			// Filter out the user viewedIds that are already in the userConvStore
-			const idStore = userConvStore.map(user => user.id);
-			const newIds = viewedIds.filter(id => !idStore.includes(id));
-
-			if (newIds.length > 0) {
-				setUserIds(newIds || []); // Provide a default value of an empty array
-			}
-		}
-	};
-
-	// Function to handle the user message and update the conversation viewed status
-	const handleMessageConversation = (userId: number, event?: React.MouseEvent<HTMLDivElement>) => {
-		event?.preventDefault();
-
-		// find the conversation id for the message
-		const conversation = selectedRequest?.conversation?.find(conversation =>
-			(conversation.user_1 === id || conversation.user_2 === id) &&
-			(conversation.user_1 === userId || conversation.user_2 === userId)
-		);
-
-		const conversationId = conversation?.id;
-		setConversationIdState(conversationId || 0);
-
-		// get only conversation id who are not in the store
-		let conversationIdNotStore;
-		if (messageStore.length > 0) {
-			conversationIdNotStore = !messageStore.some(message => message.conversation_id === conversationId);
-		} else {
-			conversationIdNotStore = true;
-		}
-
-		if (conversationIdNotStore && conversationId !== conversationIdState) {
-
-			setFetchConvIdState(conversationId ?? 0);
-			setIsSkipMessage(false);
-		}
-
-		// remove the conversation id from the notViewedConversationStore and database
-		if (conversationId && notViewedConversationStore?.some(id => id === conversationId)) {
-
-			deleteNotViewedConversation({
-				variables: {
-					input: {
-						user_id: id,
-						conversation_id: [conversationId]
-					}
-				}
-			}).then(() => {
-				// remove the conversation id from the notViewedConversationStore
-				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
-
-			});
-
-			if (deleteNotViewedConversationError) {
-				throw new Error('Error updating conversation');
-			}
-		}
-	};
-
-	// Function to send message and create conversation
-	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		// map file to send to graphql
-		const sendFile = file.map(file => ({
-			file,
-		}));
-		// create message
-		// if the message is not empty or the file is not empty
-		if (conversationIdState ?? 0 > 0) {
-			if (messageValue.trim() !== '' || sendFile.length > 0) {
-
-				message({
-					variables: {
-						id: id,
-						input: {
-							content: messageValue,
-							user_id: id,
-							conversation_id: conversationIdState,
-							media: sendFile
-						}
-					}
-				}).then(() => {
-					setMessageValue('');
-					setFile([]);
-					setUrlFile([]);
-				});
-			}
-		}
-		if (createMessageError) {
-			throw new Error('Error creating message');
-		}
-	};
-
-	// remove file
-	const handleRemove = (index: number) => {
-		// Remove file from file list
-		const newFiles = [...file];
-		newFiles.splice(index, 1);
-		setFile(newFiles);
-		// Remove file from urlFile list
-		const newUrlFileList = [...urlFile];
-		newUrlFileList.splice(index, 1);
-		setUrlFile(newUrlFileList);
-	};
-
-	// Function to fetchmore requests
-	const addRequest = () => {
-		if (fetchMore) {
-			fetchMore({
-				variables: {
-					offset: myRequestsStore.length // Next offset
-				},
-			}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
-
-				// remove request who is already in the store
-				const requestsIds = myRequestsStore.map(request => request.id);
-				const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIds.includes(request.id));
-
-				if (newRequests.length > 0) {
-					myRequestStore.setState(prevRequests => {
-						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
-					});
-
-					offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
-				}
-
-				// if there is no more request stop the infinite scroll
-				if (fetchMoreResult.data.user.requests.length < limit) {
-					setIsHasMore(false);
-				}
-
-			});
-		}
-	};
-
 	//timeout to show the button to add request
 	useEffect(() => {
 		const timer = setTimeout(() => {
@@ -832,6 +832,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 																className="my-request__list__detail__item__picture img"
 																src={pdfLogo}
 																alt={`PDF associé à la demande ${request.title}`}
+																
 															/>
 														</a>
 													) : (
