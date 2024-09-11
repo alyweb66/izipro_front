@@ -4,13 +4,13 @@ import  Home  from './components/Home/Home';
 import PrivateRoute  from './components/Hook/PrivateRoute';
 import ConfirmEmail  from './components/ConfirmEmail/ConfirmEmail';
 import ForgotPassword  from './components/ForgotPassword/ForgotPassword';
-import NotFound  from './components/NotFound/NotFound';
+import DisplayError  from './components/DisplayError/DisplayError';
 
 export const router = createBrowserRouter([
 	{
 		path: '/',
 		element: <Root />,
-		errorElement: <NotFound />,
+		errorElement: <DisplayError />,
 		children: [
 			{
 				children: [

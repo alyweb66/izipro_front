@@ -12,19 +12,14 @@ import { router } from './routes';
 //import { onError } from "apollo-link-error";
 import {ErrorResponse, onError  } from "@apollo/client/link/error"; 
 import './styles/index.scss';
-import { errorStatusStore } from './store/LoginRegister';
+import { serverErrorStore } from './store/LoginRegister';
 
-
-const setStatusCode = (statusCode: number) => {
-	errorStatusStore.getState().statusCode = statusCode;
+// store
+const setServerError = (serverError: { status: number; statusText: string }) => {
+	serverErrorStore.getState().setServerError(serverError);
 };
-/* type ResponseError = ErrorResponse & {
-	networkError?: {
-	  statusCode?: number;
-	  bodyText?: string;
-	};
-}
- */
+
+
 // Default options for Apollo Client
 const defaultOptions: DefaultOptions = {
 	watchQuery: {
@@ -41,9 +36,9 @@ let isLoggedOut = false;
 // Middleware to check if the user has a 401 error from the server
 const errorLink = onError((error: ErrorResponse) => {
 	const statusCode = (error.networkError as ServerError).statusCode;
-
+	setServerError({ status: statusCode, statusText: (error.networkError as ServerError)?.response.statusText || '' });
+	
 	if (statusCode === 401) {
-		setStatusCode(statusCode);
 		localStorage.removeItem('login');
 		isLoggedOut = true;
 		

@@ -1,13 +1,13 @@
 @use '../../styles/variables' as v;
 
-.not-found {
+.error {
   height: 100vh;
   width: 100vw;
  // margin: v.$gutter;
   text-align: center;
   background: radial-gradient(circle,  v.$color-secondary-blue, v.$color-secondary-orange,); 
 
-  .not-found__title {
+  .error__title {
     font-family: v.$font;
     font-weight: v.$font-title-weight;
     color: v.$color-primary-orange;
@@ -16,7 +16,7 @@
     line-height: v.$gutter * 8;
   }
 
-  .not-found__img {
+  .error__img {
     width: 100%;
     max-width: 25%;
     margin: 0 auto;
@@ -24,7 +24,7 @@
     border-radius: 15rem;
   }
 
-  .not-found__description {
+  .error__description {
     margin-top: 3rem;
     font-family: v.$font;
     font-size: 1.2rem;
@@ -32,15 +32,15 @@
     color: v.$color-primary-blue;
   }
 
-  .not-found__error {
+  .error__message {
     color: v.$color;
   }
 }
 
 @media (max-width: 768px) {
-  .not-found {
+  .error {
    
-    .not-found__img {
+    .error__img {
       max-width: 50%;
     }
 
