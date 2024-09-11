@@ -35,8 +35,14 @@ const defaultOptions: DefaultOptions = {
 let isLoggedOut = false;
 // Middleware to check if the user has a 401 error from the server
 const errorLink = onError((error: ErrorResponse) => {
-	const statusCode = (error.networkError as ServerError).statusCode;
-	setServerError({ status: statusCode, statusText: (error.networkError as ServerError)?.response.statusText || '' });
+	const statusCode = (error.networkError as ServerError)?.statusCode;
+
+	setServerError({ 
+		status: (statusCode || 500), 
+		statusText: (error.networkError as ServerError)?.response?.statusText 
+		|| (error.graphQLErrors && error.graphQLErrors[0]?.extensions?.code?.toString()) 
+		||'' 
+	});
 	
 	if (statusCode === 401) {
 		localStorage.removeItem('login');
@@ -46,7 +52,7 @@ const errorLink = onError((error: ErrorResponse) => {
 			window.location.href = '/';
 		}
 	}
-	
+	console.error('Error', serverErrorStore.getState(), error.response);
 });
 
 // Middleware to check if the user is logged out before making requests

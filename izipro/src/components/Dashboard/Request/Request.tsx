@@ -89,6 +89,7 @@ function Request() {
 	// remove file
 	const handleRemove = (index: number) => {
 		// Remove file from file list
+		setUploadFileError('');
 		const newFiles = [...file];
 		newFiles.splice(index, 1);
 		setFile(newFiles);
@@ -216,6 +217,10 @@ function Request() {
 
 		// Check if the number of files is less than 3
 		const remainingSlots = 3 - urlFile.length;
+
+		if ((event.target.files?.length ?? 0) > 3) {
+			setUploadFileError('Nombre de fichiers maximum atteint');
+		}
 
 		if (event.target.files) {
 
@@ -415,12 +420,10 @@ function Request() {
 											</Marker>
 										</Map>
 									</div>
-
 								</div>
 							</>
 						)}
 						<h2 className="request__form__title">Saisissez le titre:</h2>
-
 						<label className="request__form__label">
 							<input
 								className="request__form__label__input title"
@@ -476,7 +479,16 @@ function Request() {
 								))}
 							</AnimatePresence>
 						</div>
-						<p className="request__form error">{uploadFileError}</p>
+						{/* <p className="request__form error">{uploadFileError}</p> */}
+						<div className="upload-message">
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{uploadFileError && (
+									<Fade in={!!uploadFileError} timeout={300}>
+										<Alert variant="filled" severity="error">{uploadFileError}</Alert>
+									</Fade>
+								)}
+							</Stack>
+						</div>
 						<h2 className="request__form__title media">Ajoutez des photos (3 maximum):</h2>
 						<label
 							htmlFor="file"

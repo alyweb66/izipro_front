@@ -72,7 +72,7 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 						{/* <h1 className="modal__title">CGU</h1> */}
 						{loading ? <Spinner/> :
 							<div className="rules-modal__container__content">
-								<p className="rules-modal__container__content__description" dangerouslySetInnerHTML={{ __html: content }}></p>
+								<p className="rules-modal__container__content__description" dangerouslySetInnerHTML={{ __html: content || 'Empty...'}}></p>
 							</div>
 						}
 						{isCookie ? (

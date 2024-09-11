@@ -30,7 +30,7 @@ import serviceWorkerRegistration from '../../Hook/ServiceWorkerRegistration';
 import { UserAccountDataProps, UserDataProps } from '../../../Type/User';
 
 // Asset imports
-import profileLogo from '/logo/logo profile.jpeg';
+import profileLogo from '/logo/logo-profile.webp';
 
 //Mapbox
 import Map, { Marker } from 'react-map-gl';
@@ -664,7 +664,7 @@ console.log('endpointStore', endpointStore);
 							onClick={() => fileInput.current?.click()}
 							onLoad={() => setIsImgLoading(false)}
 							onError={(event) => {
-								event.currentTarget.src = '/logo/no-picture.jpg';
+								event.currentTarget.src = '/logo/no-picture.webp';
 								setIsImgLoading(false);
 							}}
 							style={{ cursor: 'pointer' }}

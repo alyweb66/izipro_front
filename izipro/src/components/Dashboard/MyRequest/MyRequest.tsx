@@ -32,7 +32,7 @@ import { SubscriptionProps } from '../../../Type/Subscription';
 // Components and utilities
 import './MyRequest.scss';
 import pdfLogo from '/logo/logo-pdf.jpg';
-import logoProfile from '/logo/logo profile.jpeg';
+import logoProfile from '/logo/logo-profile.webp';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt, FaCamera } from 'react-icons/fa';
 import { MdSend, MdAttachFile, MdKeyboardArrowLeft, MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
@@ -88,7 +88,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [isSkipMessage, setIsSkipMessage] = useState<boolean>(true);
 	const [fetchConvIdState, setFetchConvIdState] = useState<number>(0);
 	const [hasManyImages, setHasManyImages] = useState(false);
-	const [showButton, setShowButton] = useState(false);
 	const [uploadFileError, setUploadFileError] = useState('');
 	//const [isHandleClick, setIsHandleClick] = useState<boolean>(false);
 
@@ -739,14 +738,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	}, [selectedUser]);
 
-	//timeout to show the button to add request
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			setShowButton(true);
-		}, 1000); 
 
-		return () => clearTimeout(timer); 
-	}, []);
 
 	return (
 		<div className="my-request">
@@ -877,7 +869,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 																event.stopPropagation();
 															}}
 															onError={(event) => {
-																event.currentTarget.src = '/logo/no-picture.jpg';
+																event.currentTarget.src = '/logo/no-picture.webp';
 															}}
 															alt={`Image associée à la demande ${request.title}`}
 														/>
@@ -913,8 +905,8 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					</div>
 				)}
 
-				{showButton && <div className="my-request__list__fetch-button">
-					{isHasMore ? (<button
+				<div className="my-request__list__fetch-button">
+					{(isHasMore && requestByDate && requestByDate?.length > 0 )? (<button
 						className="Btn"
 						onClick={(event) => {
 							event.preventDefault();
@@ -929,7 +921,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					) : (
 						<p className="my-request__list no-req">Fin des résultats</p>
 					)}
-				</div>}
+				</div>
 			</div>
 
 			<AnimatePresence>
@@ -1010,7 +1002,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 													className="my-request__answer-list__user__header img"
 													src={user.image ? user.image : logoProfile}
 													onError={(event) => {
-														event.currentTarget.src = '/logo/no-picture.jpg';
+														event.currentTarget.src = '/logo/no-picture.webp';
 													}}
 													alt={`Image de profil de ${user.first_name} ${user.last_name}`} />
 												{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
@@ -1074,7 +1066,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 										className="my-request__message-list__user__header__detail img"
 										src={selectedUser?.image ? selectedUser.image : logoProfile}
 										onError={(event) => {
-											event.currentTarget.src = '/logo/no-picture.jpg';
+											event.currentTarget.src = '/logo/no-picture.webp';
 										}}
 										alt={selectedUser?.denomination ? selectedUser.denomination : `${selectedUser?.first_name} ${selectedUser?.last_name}`} />
 									{selectedUser?.denomination ? (
@@ -1156,7 +1148,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 																						}}
 																						alt={media.name}
 																						onError={(event) => {
-																							event.currentTarget.src = '/logo/no-picture.jpg';
+																							event.currentTarget.src = '/logo/no-picture.webp';
 																						}}
 																					/>
 																				)

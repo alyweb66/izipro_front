@@ -37,7 +37,7 @@ import { RequestProps } from '../../../Type/Request';
 import { MessageProps, MessageStoreProps } from '../../../Type/message';
 import { SubscriptionProps } from '../../../Type/Subscription';
 import pdfLogo from '/logo/logo-pdf.jpg';
-import logoProfile from '/logo/logo profile.jpeg';
+import logoProfile from '/logo/logo-profile.webp';
 
 // Components and utilities
 import './MyConversation.scss';
@@ -674,6 +674,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		}, 200);
 	}, [messageStore, isMessageOpen, selectedRequest]);
 
+
 	return (
 		<div className="my-conversation">
 			{(hideRequestLoading || convLoading) && <Spinner />}
@@ -723,7 +724,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 					</div>
 				)}
 				<div className="my-conversation__list__fetch-button">
-					{isHasMore ? (<button
+					{(isHasMore && requestByDate && requestByDate?.length > 0) ? (<button
 						className="Btn"
 						onClick={(event) => {
 							event.preventDefault();
@@ -739,6 +740,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 						<p className="my-conversation__list no-req">Fin des résultats</p>
 					)}
 				</div>
+				
 			</div>
 			<AnimatePresence>
 				{isMessageOpen && (
@@ -778,7 +780,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 											className="my-conversation__message-list__user__header__detail img"
 											src={selectedRequest.image ? selectedRequest.image : logoProfile}
 											onError={(event) => {
-												event.currentTarget.src = '/logo/no-picture.jpg';
+												event.currentTarget.src = '/logo/no-picture.webp';
 											}}
 											alt="" />
 										{selectedRequest.denomination ? (
@@ -873,7 +875,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 																						}}
 																						alt={media.name}
 																						onError={(event) => {
-																							event.currentTarget.src = '/logo/no-picture.jpg';
+																							event.currentTarget.src = '/logo/no-picture.webp';
 																						}}
 																					/>
 																				)

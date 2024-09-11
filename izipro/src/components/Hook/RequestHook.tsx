@@ -164,7 +164,7 @@ const RequestItem = ({
 									}}
 									alt={media.name}
 									onError={(event) => {
-										event.currentTarget.src = '/logo/no-picture.jpg';
+										event.currentTarget.src = '/logo/no-picture.webp';
 									}}
 								/>
 							)
