@@ -433,7 +433,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		setUrlFile(newUrlFileList);
 	};
 
-
 	// Function to handle file upload
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
 		event.preventDefault();
@@ -486,6 +485,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		}
 
 	};
+	
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	// useEffect to check the size of the window
 	useEffect(() => {

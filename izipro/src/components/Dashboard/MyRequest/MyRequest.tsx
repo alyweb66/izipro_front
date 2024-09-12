@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // Apollo Client mutations
 import { useMutation } from '@apollo/client';
@@ -21,7 +21,7 @@ import {
 import { myRequestStore } from '../../../store/Request';
 import { subscriptionDataStore, SubscriptionStore } from '../../../store/subscription';
 import { notViewedConversation } from '../../../store/Viewed';
-import { myMessageDataStore } from '../../../store/message';
+import { messageConvIdMyreqStore, myMessageDataStore } from '../../../store/message';
 
 // Types
 import { RequestProps } from '../../../Type/Request';
@@ -103,6 +103,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [messageStore] = myMessageDataStore((state) => [state.messages, state.setMessageStore]);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
+	const [isMessageConvIdFetched, setIsMessageConvIdFetched] = messageConvIdMyreqStore((state) => [state.convId, state.setConvId]);
 
 	//useRef
 	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
@@ -282,14 +283,14 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		setConversationIdState(conversationId || 0);
 
 		// get only conversation id who are not in the store
-		let conversationIdNotStore;
+		/* let conversationIdNotStore;
 		if (messageStore.length > 0) {
 			conversationIdNotStore = !messageStore.some(message => message.conversation_id === conversationId);
 		} else {
 			conversationIdNotStore = true;
-		}
+		} */
 
-		if (conversationIdNotStore && conversationId !== conversationIdState) {
+		if (conversationId !== conversationIdState && !isMessageConvIdFetched.some(convId => convId === conversationId)) {
 
 			setFetchConvIdState(conversationId ?? 0);
 			setIsSkipMessage(false);
@@ -394,42 +395,42 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	};
 
-		// Function to handle file upload
-		const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-			event.preventDefault();
-			setUploadFileError('');
-	
-			// Check if the number of files is less than 3
-			const remainingSlots = 4 - urlFile.length;
+	// Function to handle file upload
+	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+		event.preventDefault();
+		setUploadFileError('');
 
-			if ((event.target.files?.length ?? 0) > 4) {
-				setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
-			}
-	
-			if (event.target.files) {
-	
-				if (remainingSlots > 0) {
-					const filesToUpload = Array.from(event.target.files).slice(0, remainingSlots);
-					handleFileChange(undefined, undefined, filesToUpload as File[]);
-	
-					if (filesToUpload.length > 4) {
-						setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
-					}
-				}
-				if (remainingSlots <= 0) {
+		// Check if the number of files is less than 3
+		const remainingSlots = 4 - urlFile.length;
+
+		if ((event.target.files?.length ?? 0) > 4) {
+			setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+		}
+
+		if (event.target.files) {
+
+			if (remainingSlots > 0) {
+				const filesToUpload = Array.from(event.target.files).slice(0, remainingSlots);
+				handleFileChange(undefined, undefined, filesToUpload as File[]);
+
+				if (filesToUpload.length > 4) {
 					setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
 				}
 			}
-		};
-	
+			if (remainingSlots <= 0) {
+				setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+			}
+		}
+	};
+
 
 	// useEffect to check the size of the window
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	useEffect(() => {
 		const handleResize = () => {
-		
+
 			if (window.innerWidth !== windowWidth) {
-				setWindowWidth(window.innerWidth); 
+				setWindowWidth(window.innerWidth);
 
 				if (window.innerWidth < 1000) {
 					if (isUserMessageOpen) {
@@ -680,7 +681,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					};
 				}
 			});
-
+			setIsMessageConvIdFetched([...isMessageConvIdFetched, conversationIdState]);
 			setIsSkipMessage(true);
 
 		}
@@ -713,7 +714,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	}, [usersConversationData]);
 
 	// useEffect to scroll to the end of the messages
-	useEffect(() => {
+	useLayoutEffect(() => {
 
 		setTimeout(() => {
 			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -849,12 +850,12 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 															onClick={(event) => { event.stopPropagation(); }}
 															aria-label={`PDF associé à la demande ${request.title}`}
 														>
-															{}
+															{ }
 															<img
 																className="my-request__list__detail__item__picture img"
 																src={pdfLogo}
 																alt={`PDF associé à la demande ${request.title}`}
-																
+
 															/>
 														</a>
 													) : (
@@ -907,7 +908,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				)}
 
 				<div className="my-request__list__fetch-button">
-					{(isHasMore && requestByDate && requestByDate?.length > 0 )? (<button
+					{(isHasMore && requestByDate && requestByDate?.length > 0) ? (<button
 						className="Btn"
 						onClick={(event) => {
 							event.preventDefault();
@@ -1104,13 +1105,13 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 											.map((message, index, array) => (
 												<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
 													{index === array.length - 1 ? <div ref={endOfMessagesRef} aria-label="Dernier message visible" /> : null}
-													<motion.div 
-													className={`content ${message.user_id === id ? 'me' : ''}`}
-													style={{ overflow: 'scroll' }}
-													initial={{ opacity: 0, scale: 0.9 }}
-													animate={{ opacity: 1, scale: 1 }}
-													exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-													transition={{ duration: 0.1, type: 'tween' }}
+													<motion.div
+														className={`content ${message.user_id === id ? 'me' : ''}`}
+														style={{ overflow: 'scroll' }}
+														initial={{ opacity: 0, scale: 0.9 }}
+														animate={{ opacity: 1, scale: 1 }}
+														exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
+														transition={{ duration: 0.1, type: 'tween' }}
 													>
 														{message.media[0].url && (
 															<div className="my-request__message-list__message__detail__image-container">
@@ -1161,13 +1162,13 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 														)}
 														{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
 													</motion.div>
-													<motion.div 
-													className="my-request__message-list__message__detail__date"
-													style={{ overflow: 'scroll' }}
-													initial={{ opacity: 0, scale: 0.9 }}
-													animate={{ opacity: 1, scale: 1 }}
-													exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-													transition={{ duration: 0.1, type: 'tween' }}
+													<motion.div
+														className="my-request__message-list__message__detail__date"
+														style={{ overflow: 'scroll' }}
+														initial={{ opacity: 0, scale: 0.9 }}
+														animate={{ opacity: 1, scale: 1 }}
+														exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
+														transition={{ duration: 0.1, type: 'tween' }}
 													>{new Date(Number(message.created_at)).toLocaleString()}</motion.div>
 												</div>
 											))
@@ -1246,7 +1247,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 									className="my-request__message-list__form__label__send"
 									onClick={() => document.getElementById('send-message')?.click()}
 									aria-label='Envoyer le message'
-									
+
 								/>
 							</label>
 							<input
