@@ -426,7 +426,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	// useEffect to check the size of the window
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-	useEffect(() => {
+	useLayoutEffect(() => {
 		const handleResize = () => {
 
 			if (window.innerWidth !== windowWidth) {
@@ -731,7 +731,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	}, []);
 
 	// useEffect to update the visibility of the message if a user is selected
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (selectedUser && selectedUser?.id > 0) {
 			setIsUserMessageOpen(true);
 		} else {

@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // Apollo Client mutations
 import { useMutation } from '@apollo/client';
@@ -92,6 +92,59 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	// get requests by job
 	const { loading: requestJobLoading, fetchMore } = useQueryRequestByJob(jobs, 0, limit, clientRequestStore.length > 0);
 
+
+	// Function to hide a request
+	function handleHideRequest(requestId?: number) {
+
+		hideRequest({
+			variables: {
+				input: {
+					user_id: id,
+					request_id: requestId
+				}
+			}
+		}).then((response) => {
+
+			if (response.data.createHiddenClientRequest) {
+
+				setClientRequestsStore(clientRequestsStore.filter(request => request.id !== requestId));
+
+			}
+		});
+		if (hideRequestError) {
+			throw new Error('Error while hiding request');
+		}
+	};
+
+	// Function to load more requests 
+	function addRequest() {
+
+		fetchMore({
+			variables: {
+				offset: offsetRef.current, // Next offset
+			},
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		}).then(fetchMoreResult => {
+			const data = fetchMoreResult.data.requestsByJob;
+
+			//get all request who are not in the store
+			const newRequests = data?.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
+
+			if (newRequests.length > 0) {
+
+				RangeFilter(newRequests);
+				offsetRef.current = offsetRef.current + data.length;
+
+			}
+
+			// If there are no more requests, stop fetchmore
+			if (fetchMoreResult.data.requestsByJob.length < limit) {
+				setIsHasMore(false);
+			}
+		});
+
+	}
+
 	// add jobs to setSubscriptionJob if there are not already in, or have the same id
 	useEffect(() => {
 
@@ -164,7 +217,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	}, [jobs]);
 
 	// useEffect to see if the request is viewed
-	useEffect(() => {
+	useLayoutEffect(() => {
 		// Create an IntersectionObserver
 
 		const observer = new IntersectionObserver((entries) => {
@@ -235,58 +288,6 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 		};
 
 	});
-
-	// Function to hide a request
-	function handleHideRequest(requestId?: number) {
-
-		hideRequest({
-			variables: {
-				input: {
-					user_id: id,
-					request_id: requestId
-				}
-			}
-		}).then((response) => {
-
-			if (response.data.createHiddenClientRequest) {
-
-				setClientRequestsStore(clientRequestsStore.filter(request => request.id !== requestId));
-
-			}
-		});
-		if (hideRequestError) {
-			throw new Error('Error while hiding request');
-		}
-	};
-
-	// Function to load more requests 
-	function addRequest() {
-
-		fetchMore({
-			variables: {
-				offset: offsetRef.current, // Next offset
-			},
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		}).then(fetchMoreResult => {
-			const data = fetchMoreResult.data.requestsByJob;
-
-			//get all request who are not in the store
-			const newRequests = data?.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
-
-			if (newRequests.length > 0) {
-
-				RangeFilter(newRequests);
-				offsetRef.current = offsetRef.current + data.length;
-
-			}
-
-			// If there are no more requests, stop fetchmore
-			if (fetchMoreResult.data.requestsByJob.length < limit) {
-				setIsHasMore(false);
-			}
-		});
-
-	}
 
 	return (
 		<div className="client-request">

@@ -51,42 +51,10 @@ function SettingAccount() {
 	const { loading: jobLoading, jobData } = useQueryJobs(selectedCategory);
 	const { loading: jobDataLoading, jobs: jobDataName } = useQueryJobData(jobs ? jobs : [], skip);
 
-	// set job with the value from the database
-	useEffect(() => {
-		if (jobDataName) {
-			setSelectedJob(jobDataName);
-			setSkip(true);
-		}
-
-	}, [jobDataName, jobDataLoading]);
-
-	// Update jobs when category changes
-	useEffect(() => {
-		if (jobData) {
-			setJobsState(jobData.category.jobs);
-		}
-	}, [jobData]);
-
-	// Update categories when data is fetched
-	useEffect(() => {
-		if (categoriesData) {
-			setCategoriesState(categoriesData.categories);
-		}
-	}, [categoriesData]);
-
-
 	// mutation
 	const [createUserJob, { loading: userJobLoading, error: errorCreateUserJob }] = useMutation(USER_HAS_JOB_MUTATION);
 	const [deleteUserJob, { loading: deleteJobLoading, error: errorDeleteUserJob }] = useMutation(DELETE_USER_HAS_JOB_MUTATION);
 	const [userSetting, { loading: settingLoading, error: errorUserSetting }] = useMutation(USER_SETTING_MUTATION);
-
-	// function to remove wishlist job before submit
-	const handleRemoveListJob = (id: number, event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-		event.preventDefault();
-		event?.stopPropagation();
-		setWishListJob(wishListJob.filter((job) => job.id !== id));
-
-	};
 
 	// function to delete job in the database
 	const handleDeleteJob = (jobId: number, event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -172,6 +140,38 @@ function SettingAccount() {
 
 	};
 
+	// function to remove wishlist job before submit
+	const handleRemoveListJob = (id: number, event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		event.preventDefault();
+		event?.stopPropagation();
+		setWishListJob(wishListJob.filter((job) => job.id !== id));
+
+	};
+
+	// set job with the value from the database
+	useEffect(() => {
+		if (jobDataName) {
+			setSelectedJob(jobDataName);
+			setSkip(true);
+		}
+
+	}, [jobDataName, jobDataLoading]);
+
+	// Update jobs when category changes
+	useEffect(() => {
+		if (jobData) {
+			setJobsState(jobData.category.jobs);
+		}
+	}, [jobData]);
+
+	// Update categories when data is fetched
+	useEffect(() => {
+		if (categoriesData) {
+			setCategoriesState(categoriesData.categories);
+		}
+	}, [categoriesData]);
+
+
 	return (
 		<>
 			{role === 'pro' && (
@@ -230,7 +230,7 @@ function SettingAccount() {
 							</ul>
 							<button className="setting-account__form__button" type='submit'>valider les métiers</button>
 							<ul className={`setting-account__form__list job ${(userJobLoading || deleteJobLoading || categoryLoading) ? 'loading' : ''}`}>
-								{(userJobLoading || categoryLoading) && <Spinner className="small-spinner"/>}
+								{(userJobLoading || categoryLoading) && <Spinner className="small-spinner" />}
 
 								<h2 className="setting-account__subtitle">Métiers actuel:</h2>
 								<AnimatePresence>

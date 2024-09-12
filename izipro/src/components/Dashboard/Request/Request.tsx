@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import Map, { Layer, Marker, Source } from 'react-map-gl';
 //import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -40,7 +40,7 @@ import Fade from '@mui/material/Fade';
 function Request() {
 	const mapboxAccessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
-	//store
+	// Store
 	const id = userDataStore((state) => state.id);
 	const address = userDataStore((state) => state.address);
 	const city = userDataStore((state) => state.city);
@@ -52,7 +52,7 @@ function Request() {
 	const [myRequestsStore, setMyRequestsStore] = myRequestStore((state) => [state.requests, state.setMyRequestStore]);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 
-	//state
+	// State
 	const [urgent, setUrgent] = useState(false);
 	const [selectedCategory, setSelectedCategory] = useState(0);
 	const [selectedJob, setSelectedJob] = useState(0);
@@ -65,22 +65,19 @@ function Request() {
 	const [jobsState, setJobsState] = useState<JobProps[]>([]);
 	const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 450px)').matches);
 	const [isLoading, setIsLoading] = useState(true);
-	// map
+	// Map
 	const [radius, setRadius] = useState(0); // Radius in meters
 	const [zoom, setZoom] = useState(10);
 
-	// file upload
+	// File upload
 	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
 
 
-
-	// mutation
+	// Mutation
 	const [createRequest, { loading: createLoading, error: requestError }] = useMutation(REQUEST_MUTATION);
 
-	// fetch categories 
+	// Query
 	const { loading: categoryLoading, categoriesData } = useQueryCategory();
-
-	// fetch jobs
 	const { loading: JobDataLoading, jobData } = useQueryJobs(selectedCategory);
 
 	// remove file
@@ -186,22 +183,6 @@ function Request() {
 		}
 	};
 
-	// Update jobs when category changes
-	useEffect(() => {
-		if (jobData) {
-
-			setJobsState(jobData.category.jobs);
-		}
-	}, [jobData]);
-
-	// Update categories when data is fetched
-	useEffect(() => {
-		if (categoriesData) {
-			setCategoriesState(categoriesData.categories);
-		}
-	}, [categoriesData]);
-
-	// Get map instance
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const handleMapLoaded = () => {
 		setIsLoading(false);
@@ -231,25 +212,43 @@ function Request() {
 		}
 	};
 
-	// Handle file drop
-/* 	const handleFileDrop = (event: React.DragEvent<HTMLLabelElement>) => {
-		event.preventDefault();
-		setUploadFileError('');
+	// Update jobs when category changes
+	useEffect(() => {
+		if (jobData) {
 
-		// Check if the number of files is less than 3
-		const remainingSlots = 3 - urlFile.length;
-
-		if (event.dataTransfer.files) {
-
-			if (remainingSlots > 0) {
-				const filesToUpload = Array.from(event.dataTransfer.files).slice(0, remainingSlots);
-				handleFileChange(undefined, undefined, filesToUpload as File[]);
-			}
-			if (remainingSlots <= 0) {
-				setUploadFileError('Nombre de fichiers maximum atteint');
-			}
+			setJobsState(jobData.category.jobs);
 		}
-	}; */
+	}, [jobData]);
+
+	// Update categories when data is fetched
+	useEffect(() => {
+		if (categoriesData) {
+			setCategoriesState(categoriesData.categories);
+		}
+	}, [categoriesData]);
+
+	// Get map instance
+
+
+	// Handle file drop
+	/* 	const handleFileDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+			event.preventDefault();
+			setUploadFileError('');
+	
+			// Check if the number of files is less than 3
+			const remainingSlots = 3 - urlFile.length;
+	
+			if (event.dataTransfer.files) {
+	
+				if (remainingSlots > 0) {
+					const filesToUpload = Array.from(event.dataTransfer.files).slice(0, remainingSlots);
+					handleFileChange(undefined, undefined, filesToUpload as File[]);
+				}
+				if (remainingSlots <= 0) {
+					setUploadFileError('Nombre de fichiers maximum atteint');
+				}
+			}
+		}; */
 
 	// reset selected job when category changes
 	useEffect(() => {
@@ -285,12 +284,13 @@ function Request() {
 		return 7; // default value
 	};
 	// Update the zoom level when the radius or screen size changes
-	useEffect(() => {
+	useLayoutEffect(() => {
 		const newZoom = calculateZoomLevel(radius, isMobile);
 		newZoom && setZoom(newZoom);
 	}, [radius, isMobile]);
+
 	// Update the zoom level based on the radius and screen size
-	useEffect(() => {
+	useLayoutEffect(() => {
 		const handleResize = () => setIsMobile(window.matchMedia('(max-width: 450px)').matches);
 		window.addEventListener('resize', handleResize);
 
@@ -298,7 +298,6 @@ function Request() {
 
 	}, [radius, isMobile]);
 	//* end Mapping radius to zoom level
-
 
 	return (
 		<div className="request">

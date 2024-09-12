@@ -485,10 +485,10 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		}
 
 	};
-	
+
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	// useEffect to check the size of the window
-	useEffect(() => {
+	useLayoutEffect(() => {
 		const handleResize = () => {
 			if (window.innerWidth !== windowWidth) {
 				setWindowWidth(window.innerWidth);
@@ -586,8 +586,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		}
 
 	}, [selectedRequest]);
-console.log('isMessageConvIdFetched',isMessageConvIdFetched);
-console.log('messageStore',messageStore);
 
 	// useEffect to sort the requests by date
 	useEffect(() => {

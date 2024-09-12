@@ -1,5 +1,5 @@
 // React and React Router imports
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // State management and GraphQL imports
@@ -484,12 +484,28 @@ function Account() {
 
 	};
 
+	// handle the switch change for notification
+	const handleSwitchChange = () => {
+		if (isNotificationEnabled) {
+			disableNotifications();
+			setEnpointStore(null);
+		} else {
+			askPermission();
+		}
+		setIsNotificationEnabled(!isNotificationEnabled);
+	};
+
+	// handle the map loaded
+	const handleMapLoaded = () => {
+		setIsLoading(false);
+	};
+
 	if (emailNotification === null) {
 		isGetNotificationRef.current = false;
 	}
 
 	// set the notification
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (endpointStore) {
 			setIsNotificationEnabled(true);
 		} else {
@@ -529,7 +545,7 @@ function Account() {
 							// check if the user is already subscribed to push notifications
 							let isSubscribed;
 							if (notification && notification.length > 0) {
-								
+
 								const isNotification = notification.find((notification: {
 									id: number,
 									user: number,
@@ -538,7 +554,7 @@ function Account() {
 									public_key: string,
 									auth_token: string
 								}) => notification.endpoint === endpoint);
-								
+
 								isSubscribed = isNotification.endpoint;
 							} else {
 								isSubscribed = endpointStore;
@@ -546,11 +562,11 @@ function Account() {
 
 							if (isSubscribed) {
 								setEnpointStore(isSubscribed);
-							} 
-			
+							}
+
 
 						}
-					} 
+					}
 
 					// verify if the browser supports notifications push and service workers
 					const permission = document.getElementById('push-permission');
@@ -573,7 +589,7 @@ function Account() {
 	}, [notificationData]);
 
 	// check if map is already loaded
-	useEffect(() => {
+	useLayoutEffect(() => {
 		const observer = new MutationObserver((mutationsList, observer) => {
 			for (let mutation of mutationsList) {
 				if (mutation.type === 'childList') {
@@ -601,24 +617,8 @@ function Account() {
 		};
 	}, []);
 
-	// handle the switch change for notification
-	const handleSwitchChange = () => {
-		if (isNotificationEnabled) {
-			disableNotifications();
-			setEnpointStore(null);
-		} else {
-			askPermission();
-		}
-		setIsNotificationEnabled(!isNotificationEnabled);
-	};
-
-	// handle the map loaded
-	const handleMapLoaded = () => {
-		setIsLoading(false);
-	};
-
 	// useEffect for mapBox lng lat
-	useEffect(() => {
+	useLayoutEffect(() => {
 		setViewState({
 			longitude: typeof lngState === 'number' ? lngState : parseFloat(lngState),
 			latitude: typeof latState === 'number' ? latState : parseFloat(latState),
