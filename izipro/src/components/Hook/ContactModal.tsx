@@ -138,7 +138,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 									type="text"
 									name="last_name"
 									value={last_name || ''}
-									placeholder={'Nom' || ''}
+									placeholder={'Nom'}
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
 									aria-label="Nom"
 									maxLength={50}
@@ -151,7 +151,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 									type="text"
 									name="first_name"
 									value={first_name || ''}
-									placeholder={'Prénom' || ''}
+									placeholder={'Prénom'}
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)}
 									aria-label="Prénom"
 									maxLength={50}
@@ -165,7 +165,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 									type="text"
 									name="enterprise"
 									value={enterprise || ''}
-									placeholder={'Société' || ''}
+									placeholder={'Société'}
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEnterprise(event.target.value)}
 									aria-label="Société"
 									maxLength={50}
@@ -178,7 +178,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 									type="text"
 									name="email"
 									value={email || ''}
-									placeholder={'Email' || ''}
+									placeholder={'Email'}
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
 									aria-label="email"
 									maxLength={50}

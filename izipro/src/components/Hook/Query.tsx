@@ -318,7 +318,6 @@ export const useQueryGetNotification = (skip: boolean) => {
 	if (notificationError) {
 		throw new Error('Error while fetching notifications');
 	}
-	console.log('notificationData', notificationData);
 	
 	return {loading, notificationData};
 }

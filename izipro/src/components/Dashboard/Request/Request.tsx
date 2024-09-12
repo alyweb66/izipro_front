@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import Map, { Layer, Marker, Source } from 'react-map-gl';
-// @ts-expect-error no types for mapbox-gl
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+//import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Apollo Client
 import { useMutation } from '@apollo/client';
@@ -69,7 +67,6 @@ function Request() {
 	const [isLoading, setIsLoading] = useState(true);
 	// map
 	const [radius, setRadius] = useState(0); // Radius in meters
-	//const [map, setMap] = useState<mapboxgl.Map | null>(null);
 	const [zoom, setZoom] = useState(10);
 
 	// file upload

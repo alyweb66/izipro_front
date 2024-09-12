@@ -30,13 +30,12 @@ import serviceWorkerRegistration from '../../Hook/ServiceWorkerRegistration';
 import { UserAccountDataProps, UserDataProps } from '../../../Type/User';
 
 // Asset imports
-import profileLogo from '/logo/logo-profile.webp';
+import profileLogo from '/logo/logo-profile.jpg';
+import noPicture from '/logo/no-picture.jpg';
 
 //Mapbox
 import Map, { Marker } from 'react-map-gl';
-// @ts-expect-error no types for mapbox-gl
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+//import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Styling imports
 import './Account.scss';
@@ -203,18 +202,6 @@ function Account() {
 
 		setUserData(newUserData);
 	}, [first_nameState, last_nameState, emailState, addressState, postal_codeState, cityState, lngState, latState, siretState, denominationState, descriptionState]);
-
-	// Set the notification state
-	/* useEffect(() => {
-		if (notificationData && notificationData.user && emailNotification === null) {
-			const emailNotification = notificationData.user.notification[0]?.email_notification;
-
-			setEmailNotification(emailNotification);
-			setNotification(emailNotification);
-
-			isGetNotificationRef.current = true;
-		}
-	}, [notificationData]); */
 
 	// handle email notification
 	const handleNotification = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -501,6 +488,7 @@ function Account() {
 		isGetNotificationRef.current = false;
 	}
 
+	// set the notification
 	useEffect(() => {
 		if (endpointStore) {
 			setIsNotificationEnabled(true);
@@ -508,6 +496,7 @@ function Account() {
 			setIsNotificationEnabled(false);
 		}
 	}, [endpointStore]);
+
 	// useEffect for notification 
 	useEffect(() => {
 
@@ -536,14 +525,10 @@ function Account() {
 						if (subscription) {
 							const endpoint = subscription.endpoint;
 							const notification = notificationData?.user?.notification;
-console.log('notification', notification);
-console.log('endpointStore', endpointStore);
-
 
 							// check if the user is already subscribed to push notifications
 							let isSubscribed;
 							if (notification && notification.length > 0) {
-								console.log('notification', notification);
 								
 								const isNotification = notification.find((notification: {
 									id: number,
@@ -553,7 +538,6 @@ console.log('endpointStore', endpointStore);
 									public_key: string,
 									auth_token: string
 								}) => notification.endpoint === endpoint);
-								console.log('isNotification', isNotification);
 								
 								isSubscribed = isNotification.endpoint;
 							} else {
@@ -664,7 +648,7 @@ console.log('endpointStore', endpointStore);
 							onClick={() => fileInput.current?.click()}
 							onLoad={() => setIsImgLoading(false)}
 							onError={(event) => {
-								event.currentTarget.src = '/logo/no-picture.webp';
+								event.currentTarget.src = noPicture;
 								setIsImgLoading(false);
 							}}
 							style={{ cursor: 'pointer' }}

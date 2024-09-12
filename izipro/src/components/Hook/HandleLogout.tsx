@@ -10,7 +10,6 @@ export default function useHandleLogout() {
 
 	// Return a function that will handle the logout
 	return async (userId?: number) => {
-console.log('logout');
 
 		await logout({
 			variables: {

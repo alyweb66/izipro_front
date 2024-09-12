@@ -11,9 +11,7 @@ function DisplayError() {
 
 	// Function to get the error message
 	function getErrorMessage(error: {status: number, statusText: string}): string {
-		console.log('statusCode', serverErrorStatus, 'serverErrorText', serverErrorText);
-		console.log('error', error);
-		
+	
 		if (serverErrorStatus) {
 			return serverErrorText;
 		}
@@ -33,7 +31,7 @@ function DisplayError() {
 	return (
 		<div className="error">
 			<h1 className="error__title">{serverErrorStatus || error.status}</h1>
-			<img className="error__img" src="/images/404/Error.jpeg" alt="" />
+			<img className="error__img" src="/images/error/Error.jpg" alt="" />
 			<p className="error__description">Désolé, une erreur inattendue est survenue.</p>
 			<p>
 				<i className="error__message">{getErrorMessage(error)}</i>

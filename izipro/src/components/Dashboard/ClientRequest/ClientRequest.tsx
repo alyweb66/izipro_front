@@ -28,6 +28,7 @@ import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt } from 'react-icons/fa';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import noPicture from '/logo/no-picture.jpg';
 
 
 type ExpandedState = {
@@ -397,7 +398,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 															}}
 															alt={media.name}
 															onError={(event) => {
-																event.currentTarget.src = '/logo/no-picture.webp';
+																event.currentTarget.src = noPicture;
 															  }}
 														/>
 													)

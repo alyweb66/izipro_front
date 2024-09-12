@@ -1,6 +1,6 @@
 
 // React hooks and components
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 
 // Apollo Client mutations
@@ -28,16 +28,17 @@ import {
 	clientRequestStore
 } from '../../../store/Request';
 import { userDataStore } from '../../../store/UserData';
-import { messageDataStore } from '../../../store/message';
+import { messageConvIdMyConvStore, messageDataStore } from '../../../store/message';
 import { SubscriptionStore, subscriptionDataStore } from '../../../store/subscription';
 import { notViewedConversation } from '../../../store/Viewed';
 
 // Types and assets
 import { RequestProps } from '../../../Type/Request';
 import { MessageProps, MessageStoreProps } from '../../../Type/message';
+
 import { SubscriptionProps } from '../../../Type/Subscription';
 import pdfLogo from '/logo/logo-pdf.jpg';
-import logoProfile from '/logo/logo-profile.webp';
+import logoProfile from '/logo/logo-profile.jpg';
 
 // Components and utilities
 import './MyConversation.scss';
@@ -51,6 +52,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
+import noPicture from '/logo/no-picture.jpg';
 
 type useQueryUserConversationsProps = {
 	loading: boolean;
@@ -106,6 +108,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const role = userDataStore((state) => state.role);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
+	const [isMessageConvIdFetched, setIsMessageConvIdFetched] = messageConvIdMyConvStore((state) => [state.convId, state.setConvId]);
 
 	//mutation
 	const [conversation, { loading: convMutLoading, error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
@@ -545,7 +548,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 					messages: [...prevState.messages, ...newMessages]
 				};
 			});
-
+			setIsMessageConvIdFetched([...isMessageConvIdFetched, conversationIdState]);
 			setIsSkipMessage(true);
 		}
 	}, [messageData]);
@@ -559,14 +562,15 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 			setConversationIdState(conversationId?.id ?? 0);
 
 			// get only conversation id who are not in the store
-			let conversationIdNotStore;
+			/* let conversationIdNotStore;
 			if (messageStore.length > 0) {
 				conversationIdNotStore = !messageStore.some(message => message.conversation_id === conversationId?.id);
 			} else {
 				conversationIdNotStore = true;
 			}
-
-			if (conversationIdNotStore && conversationId?.id !== 0) {
+ */
+			// if the conversation id is not in the store and if the conv has not already been fetched  , fetch the message
+			if (conversationId?.id !== 0 && !isMessageConvIdFetched.some(convId => convId === conversationId?.id)) {
 
 				setFetchConvIdState(conversationId?.id ?? 0);
 				setIsSkipMessage(false);
@@ -582,6 +586,8 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		}
 
 	}, [selectedRequest]);
+console.log('isMessageConvIdFetched',isMessageConvIdFetched);
+console.log('messageStore',messageStore);
 
 	// useEffect to sort the requests by date
 	useEffect(() => {
@@ -662,12 +668,11 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 			//setRequestsConversationStore(removedRequest);
 			resetRequest();
 			setConversationIdState(0);
-
 		};
 	}, []);
 
 	// useEffect to scroll to the end of the messages
-	useEffect(() => {
+	useLayoutEffect(() => {
 
 		setTimeout(() => {
 			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -780,7 +785,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 											className="my-conversation__message-list__user__header__detail img"
 											src={selectedRequest.image ? selectedRequest.image : logoProfile}
 											onError={(event) => {
-												event.currentTarget.src = '/logo/no-picture.webp';
+												event.currentTarget.src = noPicture;
 											}}
 											alt="" />
 										{selectedRequest.denomination ? (
@@ -822,12 +827,14 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 									{Array.isArray(messageStore) &&
 										messageStore
 											.filter((message) => message.conversation_id === conversationIdState)
+											.sort((a, b) => Number(a.created_at) - Number(b.created_at))
 											.map((message, index, array) => (
 												<div
 													className={`my-conversation__message-list__message__detail ${message.user_id === id ? 'me' : ''}`}
 													key={message.id}
 
 												>
+													{/* if it is the last message, scroll to the end of the messages */}
 													{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
 													<motion.div
 														className={`content ${message.user_id === id ? 'me' : ''}`}
@@ -875,7 +882,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 																						}}
 																						alt={media.name}
 																						onError={(event) => {
-																							event.currentTarget.src = '/logo/no-picture.webp';
+																							event.currentTarget.src = noPicture;
 																						}}
 																					/>
 																				)

@@ -3,8 +3,7 @@ import { FaTrashAlt } from 'react-icons/fa';
 import pdfLogo from '/logo/logo-pdf.jpg';
 import { RequestProps } from '../../Type/Request';
 import React, { useRef } from 'react';
-//import { MessageProps } from '../../Type/message';
-//import { userDataStore } from '../../store/UserData';
+import noPicture from '/logo/no-picture.jpg';
 import { motion } from 'framer-motion';
 
 type ExpandedState = {
@@ -164,7 +163,7 @@ const RequestItem = ({
 									}}
 									alt={media.name}
 									onError={(event) => {
-										event.currentTarget.src = '/logo/no-picture.webp';
+										event.currentTarget.src = noPicture;
 									}}
 								/>
 							)

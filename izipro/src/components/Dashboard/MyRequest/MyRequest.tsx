@@ -32,7 +32,7 @@ import { SubscriptionProps } from '../../../Type/Subscription';
 // Components and utilities
 import './MyRequest.scss';
 import pdfLogo from '/logo/logo-pdf.jpg';
-import logoProfile from '/logo/logo-profile.webp';
+import logoProfile from '/logo/logo-profile.jpg';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt, FaCamera } from 'react-icons/fa';
 import { MdSend, MdAttachFile, MdKeyboardArrowLeft, MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
@@ -45,6 +45,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
+import noPicture from '/logo/no-picture.jpg';
 
 // Configuration for React Modal
 ReactModal.setAppElement('#root');
@@ -869,7 +870,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 																event.stopPropagation();
 															}}
 															onError={(event) => {
-																event.currentTarget.src = '/logo/no-picture.webp';
+																event.currentTarget.src = noPicture;
 															}}
 															alt={`Image associée à la demande ${request.title}`}
 														/>
@@ -1002,7 +1003,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 													className="my-request__answer-list__user__header img"
 													src={user.image ? user.image : logoProfile}
 													onError={(event) => {
-														event.currentTarget.src = '/logo/no-picture.webp';
+														event.currentTarget.src = noPicture;
 													}}
 													alt={`Image de profil de ${user.first_name} ${user.last_name}`} />
 												{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
@@ -1066,7 +1067,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 										className="my-request__message-list__user__header__detail img"
 										src={selectedUser?.image ? selectedUser.image : logoProfile}
 										onError={(event) => {
-											event.currentTarget.src = '/logo/no-picture.webp';
+											event.currentTarget.src = noPicture;
 										}}
 										alt={selectedUser?.denomination ? selectedUser.denomination : `${selectedUser?.first_name} ${selectedUser?.last_name}`} />
 									{selectedUser?.denomination ? (
@@ -1148,7 +1149,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 																						}}
 																						alt={media.name}
 																						onError={(event) => {
-																							event.currentTarget.src = '/logo/no-picture.webp';
+																							event.currentTarget.src = noPicture;
 																						}}
 																					/>
 																				)

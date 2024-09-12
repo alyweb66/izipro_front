@@ -20,7 +20,7 @@ import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 import { confirmEmailStore } from '../../../store/LoginRegister';
 import { changeForgotPasswordStore, cookieConsents, userConversation, userDataStore } from '../../../store/UserData';
 import { clientRequestStore, myRequestStore, requestConversationStore, requestDataStore } from '../../../store/Request';
-import { messageDataStore, myMessageDataStore } from '../../../store/message';
+import { messageConvIdMyConvStore, messageDataStore, myMessageDataStore } from '../../../store/message';
 import { subscriptionDataStore } from '../../../store/subscription';
 import { notViewedConversation, notViewedRequest, notViewedRequestRef, requestConversationIds } from '../../../store/Viewed';
 
@@ -58,6 +58,7 @@ function Login() {
 	const resetNotViewedConv = notViewedConversation((state) => state.resetBotViewed);
 	const resetNotViewedRequestRef = notViewedRequestRef ((state) => state.resetBotViewed);
 	const resetNotViewedRequest = notViewedRequest((state) => state.resetBotViewed);
+	const resetMessageMyConvId = messageConvIdMyConvStore((state) => state.resetMessageMyConvId);
 
 	// Mutation
 	const [login, { error }] = useMutation(LOGIN_USER_MUTATION);
@@ -126,6 +127,7 @@ function Login() {
 		resetNotViewedConv();
 		resetNotViewedRequestRef();
 		resetNotViewedRequest();
+		resetMessageMyConvId && resetMessageMyConvId();
 		
 		login({
 			variables: {

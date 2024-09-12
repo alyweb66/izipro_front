@@ -125,15 +125,15 @@ function Dashboard() {
 		if (isLogged === false) {
 			// The data has expired
 			localStorage.removeItem('login')
-			
-			if (window.location.pathname !== '/') {		
+
+			if (window.location.pathname !== '/') {
 				navigate('/');
 			}
 		}
-		
+
 		handleUnload();
 		// function to check if user is logged in and listener if close the page
-		
+
 		//window.addEventListener('beforeunload', handleBeforeUnload);
 		window.addEventListener('unload', handleUnload);
 
@@ -241,6 +241,15 @@ function Dashboard() {
 	const { clientRequestSubscription } = useClientRequestSubscriptions((role !== 'pro'));
 	const { clientMessageSubscription } = useMyConversationSubscriptions((role !== 'pro'));
 	const { logoutSubscription } = useLogoutSubscription();
+
+    // For indacating the tab under the burger menu
+	const tabLabels: { [key: string]: string } = {
+		'Request': 'DEMANDE',
+		'My requests': 'MES DEMANDES',
+		'Client request': 'CLIENT',
+		'My conversations': 'MES CONVERSATIONS',
+		'My profile': 'MON COMPTE'
+	};
 
 	// function to handle navigation to my conversation
 	const handleMyConvesationNavigate = () => {
@@ -883,13 +892,9 @@ function Dashboard() {
 							</button>
 							{isLogged && <Logout />}
 						</div>
-						<span className="dashboard__nav__burgerSelected">{
-							selectedTab === 'Request' ? 'DEMANDE' : ''
-								|| selectedTab === 'My requests' ? 'MES DEMANDES' : ''
-									|| selectedTab === 'Client request' ? 'CLIENT' : ''
-										|| selectedTab === 'My conversations' ? 'MES CONVERSATIONS' : ''
-											|| selectedTab === 'My profile' ? 'MON COMPTE' : ''
-						}</span>
+						<span className="dashboard__nav__burgerSelected">
+							{tabLabels[selectedTab] || ''}
+						</span>
 					</div>
 					<ul className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Request' ? 'active' : ''}`}
