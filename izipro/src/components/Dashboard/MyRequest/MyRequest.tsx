@@ -741,7 +741,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	}, [selectedUser]);
 
 
-
 	return (
 		<div className="my-request">
 			<div
@@ -1233,7 +1232,8 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 								/>
 								<TextareaAutosize
-									id='messageInput'
+									id="messageInput"
+									name="message"
 									className="my-request__message-list__form__label__input"
 									value={messageValue}
 									onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}

@@ -91,7 +91,7 @@ function Dashboard() {
 	}
 
 	// function to logout the user when the page is closed
-	const handleUnload = () => {
+	const handleBeforeUnload = () => {
 		if (decodeData === 'session' && idRef.current) {
 			// create request to logout the user in the json format for sendbeacon
 			const query = `
@@ -131,18 +131,18 @@ function Dashboard() {
 			}
 		}
 
-		handleUnload();
+		handleBeforeUnload();
 		// function to check if user is logged in and listener if close the page
 
 		//window.addEventListener('beforeunload', handleBeforeUnload);
-		window.addEventListener('unload', handleUnload);
+		window.addEventListener('beforeunload', handleBeforeUnload);
 
 
 
 		// clean event listener
 		return () => {
 			//	window.removeEventListener('beforeunload', handleBeforeUnload);
-			window.addEventListener('unload', handleUnload);
+			window.addEventListener('beforeunload', handleBeforeUnload);
 		};
 	}, [decodeData]);
 
@@ -315,7 +315,7 @@ function Dashboard() {
 		setIsExpiredSession(false);
 		sessionStorage.clear();
 		localStorage.removeItem('login');
-		handleUnload();
+		handleBeforeUnload();
 		navigate('/');
 	};
 

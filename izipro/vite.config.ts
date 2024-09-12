@@ -12,12 +12,12 @@ export default defineConfig({
 		visualizer({ open: true })
 	],
 	build: {
-		sourcemap: true, 
+		sourcemap: false, 
 		target: 'esnext',
 	},
 	resolve: {
 		alias: {
-		  '@': '/src',
+		  '@': path.resolve(__dirname, 'src'),
 		},
 	  },
 	  //*HTTPS server

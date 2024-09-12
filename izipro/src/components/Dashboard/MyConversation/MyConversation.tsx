@@ -743,7 +743,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 						<p className="my-conversation__list no-req">Fin des résultats</p>
 					)}
 				</div>
-				
+
 			</div>
 			<AnimatePresence>
 				{isMessageOpen && (
@@ -961,6 +961,8 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 									onClick={() => document.getElementById('file-camera')?.click()}
 								/>
 								<TextareaAutosize
+									id="message-input"
+									name="message"
 									className="my-conversation__message-list__form__label__input"
 									value={messageValue}
 									onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}

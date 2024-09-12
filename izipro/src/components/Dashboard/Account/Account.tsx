@@ -721,7 +721,7 @@ function Account() {
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstNameState(event.target.value)}
 									aria-label="Prénom"
 									maxLength={50}
-									autoComplete='first_name'
+									autoComplete="given-name"
 								/>
 							</label>
 							<label className="account__profile__form__label">
@@ -735,7 +735,7 @@ function Account() {
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastNameState(event.target.value)}
 									aria-label="Nom"
 									maxLength={50}
-									autoComplete='last_name'
+									autoComplete="family-name"
 								/>
 							</label>
 							<label className="account__profile__form__label">
@@ -749,7 +749,7 @@ function Account() {
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmailState(event.target.value)}
 									aria-label="Email"
 									maxLength={50}
-									autoComplete='email'
+									autoComplete="email"
 								/>
 							</label>
 							<label className="account__profile__form__label">
@@ -763,7 +763,7 @@ function Account() {
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddressState(event.target.value)}
 									aria-label="Adresse"
 									maxLength={100}
-									autoComplete='address'
+									autoComplete="street-address"
 									required
 								/>
 							</label>
@@ -777,7 +777,7 @@ function Account() {
 									placeholder={postal_codeState || ''}
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCodeState(event.target.value)}
 									aria-label="Code postal"
-									autoComplete='postal_code'
+									autoComplete="postal-code"
 									maxLength={10}
 									required
 								/>
@@ -792,7 +792,7 @@ function Account() {
 									placeholder={cityState || ''}
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCityState(event.target.value)}
 									aria-label="Ville"
-									autoComplete='city'
+									autoComplete="address-level2"
 									maxLength={20}
 									required
 								/>
@@ -809,7 +809,7 @@ function Account() {
 											placeholder={siretState || ''}
 											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiretState(event.target.value)}
 											aria-label="Siret"
-											autoComplete='siret'
+											autoComplete="off"
 											maxLength={14}
 										/>
 									</label>
@@ -823,7 +823,7 @@ function Account() {
 											placeholder={denominationState || ''}
 											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenominationState(event.target.value)}
 											aria-label="Dénomination"
-											autoComplete='denomination'
+											autoComplete="organization"
 											maxLength={50}
 										/>
 									</label>

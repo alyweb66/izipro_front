@@ -14,6 +14,7 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
     touch-action: pan-y;
+    height: 100%;
     
     .account__profile {
         position: relative;
@@ -22,6 +23,10 @@
         align-items: center;
         flex-wrap: wrap;
         justify-content: center;
+        overflow: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+        touch-action: pan-y;
       
 
         .notification-container {
@@ -104,6 +109,7 @@
                 margin: 1rem 0rem 2rem 0rem;
                 padding: 0 2rem 2rem 2rem;
                 border-radius: 0.5rem;
+                flex-grow: 1;
 
 
 
@@ -293,22 +299,23 @@
                     @include m.show-password;
                 }
             }
+
+            .account__profile__delete {
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                background-color: transparent;
+                border: none;
+                color: v.$color-primary-orange;
+                display: flex;
+                justify-content: center;
+                text-decoration: underline;
+                cursor: pointer;
+    
+            }
         }
 
 
-        .account__profile__delete {
-            position: absolute;
-            bottom: 10px;
-            right: 50px;
-            background-color: transparent;
-            border: none;
-            color: v.$color-primary-orange;
-            display: flex;
-            justify-content: center;
-            text-decoration: underline;
-            cursor: pointer;
-
-        }
 
         .account__profile__modification-error {
             margin: auto;
@@ -332,36 +339,6 @@
 
 }
 
-/* 
-.modal-info{
-    height: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: v.$font;
-    font-weight: 500;
-
-    .modal__container{
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        background-color: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow:  20px 20px 60px #bebebe,
-             -20px -20px 60px #ffffff;
-
-        .modal__container__error{
-            margin: 1rem auto;
-            color: v.$color-error;
-        }
-        .modal__container__message{
-            margin: 1rem auto;
-            color: v.$color-validation;
-            
-        }
-    }
-} */
 
 @media (max-width: 830px) {
     .account {
@@ -384,7 +361,23 @@
 
             .account-profile__setting-password {
                 width: 80%;
+                padding-bottom: 1rem;
+
+                .account__profile__delete {
+                    position: relative ;
+                    background-color: transparent;
+                    border: none;
+                    color: v.$color-primary-orange;
+                    margin-top: 4rem;
+                    margin-left: auto;
+                   /*  display: flex;
+                    justify-content: flex-end;
+                    text-decoration: underline; */
+                    cursor: pointer;
+        
+                }
             }
+
         }
 
 
@@ -417,6 +410,8 @@
             .account-profile__setting-password {
                 width: 100%;
             }
+            
+          
         }
     }
 

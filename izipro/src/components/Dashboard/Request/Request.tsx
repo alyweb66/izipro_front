@@ -345,23 +345,24 @@ function Request() {
 						{lng && lat && (
 							<>
 								<h2 className="request__form__title radius">Séléctionnez une distance:</h2>
-								<label className="request__form__label-radius" htmlFor="radius">
+								<label className="request__form__label-radius">
 									{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
+									<Box className="request__slider-container" sx={{ width: 250 }}>
+										<Slider
+											aria-labelledby="radius-slider-label"
+											defaultValue={105}
+											aria-label="Distance d'action"
+											valueLabelDisplay="auto"
+											value={radius === 0 ? 105 : radius / 1000}
+											step={5}
+											marks
+											min={5}
+											max={105}
+											onChange={(_, value) => setRadius((value as number) === 105 ? 0 : (value as number) * 1000)}
+											valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
+										/>
+									</Box>
 								</label>
-								<Box className="request__slider-container" sx={{ width: 250 }}>
-									<Slider
-										defaultValue={105}
-										aria-label="Distance d'action"
-										valueLabelDisplay="auto"
-										value={radius === 0 ? 105 : radius / 1000}
-										step={5}
-										marks
-										min={5}
-										max={105}
-										onChange={(_, value) => setRadius((value as number) === 105 ? 0 : (value as number) * 1000)}
-										valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
-									/>
-								</Box>
 								<div className="request__form__map">
 
 									<div className="request__form__map__map">
@@ -423,6 +424,7 @@ function Request() {
 						<label className="request__form__label">
 							<input
 								className="request__form__label__input title"
+								name="title"
 								type="text"
 								placeholder="Titre de la demande (50 caractères maximum)"
 								value={titleRequest}

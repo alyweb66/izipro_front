@@ -31,12 +31,12 @@
         background-color: transparent;
         overflow: auto;
         scrollbar-width: none;
+        height: 87vh;
 
         &::-webkit-scrollbar {
             display: none;
             /* For Chrome, Safari and Opera */
         }
-
     }
 
     .indicator {
@@ -185,7 +185,7 @@
             width: 100%;
             margin: 0;
             z-index: 11;
-
+            height: 9vh;
 
             .dashboard__nav__burgerSelected {
                 display: block;
@@ -334,6 +334,9 @@
             .dashboard__nav__menu::before {
                 height: 1px;
             }
+        }
+        .dashboard__content {
+            height: 91vh;
         }
     }
 }

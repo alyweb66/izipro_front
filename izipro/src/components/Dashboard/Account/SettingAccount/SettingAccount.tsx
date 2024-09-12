@@ -273,32 +273,34 @@ function SettingAccount() {
 								<span className="setting-account__radius__range">
 									{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
 								</span>
+
+								<Box className="slider-container" sx={{ width: 300 }}>
+									<Slider
+										aria-labelledby="radius-slider-label"
+										defaultValue={105}
+										aria-label="Distance d'action"
+										valueLabelDisplay="auto"
+										value={radius === 0 ? 105 : radius / 1000}
+										step={5}
+										marks
+										min={5}
+										max={105}
+										// transform 105 to 0 for condition in the function and database
+										onChange={(_, value) => setRadius((value as number) === 105 ? 0 : (value as number) * 1000)}
+										valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
+									/>
+								</Box>
+								<div className="message">
+									<Stack sx={{ width: '100%' }} spacing={2}>
+										{message && (
+											<Fade in={!!message} timeout={300}>
+												<Alert variant="filled" severity="success">{message}</Alert>
+											</Fade>
+										)}
+									</Stack>
+								</div>
+								<button className="setting-account__radius__button" onClick={handleValidateRange}>Valider la distance</button>
 							</label>
-							<Box className="slider-container" sx={{ width: 300 }}>
-								<Slider
-									defaultValue={105}
-									aria-label="Distance d'action"
-									valueLabelDisplay="auto"
-									value={radius === 0 ? 105 : radius / 1000}
-									step={5}
-									marks
-									min={5}
-									max={105}
-									// transform 105 to 0 for condition in the function and database
-									onChange={(_, value) => setRadius((value as number) === 105 ? 0 : (value as number) * 1000)}
-									valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
-								/>
-							</Box>
-							<div className="message">
-								<Stack sx={{ width: '100%' }} spacing={2}>
-									{message && (
-										<Fade in={!!message} timeout={300}>
-											<Alert variant="filled" severity="success">{message}</Alert>
-										</Fade>
-									)}
-								</Stack>
-							</div>
-							<button className="setting-account__radius__button" onClick={handleValidateRange}>Valider la distance</button>
 						</div>
 					</>
 				</div >

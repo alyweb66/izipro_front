@@ -23,6 +23,7 @@
     -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
     touch-action: pan-y;
     scrollbar-width: none;
+
     &::-webkit-scrollbar {
         display: none;
         /* For Chrome, Safari and Opera */
@@ -48,9 +49,6 @@
         align-items: center;
         @include m.select;
 
-        .request__slider-container {
-            margin: auto;
-        }
 
         & {
             width: 80%;
@@ -62,6 +60,10 @@
             justify-content: center;
         }
 
+        .request__slider-container {
+            margin: auto;
+        }
+
         .upload-message {
             position: relative;
             margin: auto;
@@ -70,7 +72,7 @@
             font-size: 0.8rem;
         }
 
-/* 
+        /* 
         &.error {
             width: 100%;
             text-align: center;
@@ -159,6 +161,9 @@
         }
 
         .request__form__label-radius {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             margin: auto;
 
         }
@@ -325,7 +330,7 @@
             @include m.blue-button;
 
             & {
-                margin: 0rem auto 1rem;
+                margin: 0rem auto 1rem auto;
                 position: relative;
             }
         }
@@ -338,7 +343,7 @@
             margin-bottom: 0.5rem;
             font-size: 0.8rem;
             min-height: 50px;
-        
+
         }
 
     }
@@ -346,8 +351,8 @@
 
 @media (max-width: 700px) {
     .request {
-        height: 100%;
-        
+        height: 81vh;
+
 
         .request__form {
 
@@ -371,6 +376,7 @@
 
 @media (max-width: 480px) {
     .request {
+        height: 91vh;
 
         .request__form {
             width: 90%;
@@ -379,7 +385,7 @@
                 width: 90%;
             }
 
-           /*  .request__form__label {
+            /*  .request__form__label {
                 margin: 0;
             } */
 
@@ -393,4 +399,3 @@
         }
     }
 }
-
