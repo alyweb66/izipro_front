@@ -90,6 +90,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [fetchConvIdState, setFetchConvIdState] = useState<number>(0);
 	const [hasManyImages, setHasManyImages] = useState(false);
 	const [uploadFileError, setUploadFileError] = useState('');
+	const [isFetchingMore, setIsFetchingMore] = useState(false);
 	//const [isHandleClick, setIsHandleClick] = useState<boolean>(false);
 
 
@@ -367,16 +368,21 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	// Function to fetchmore requests
 	const addRequest = () => {
-		if (fetchMore) {
+		if (fetchMore && !isFetchingMore) {
+			setIsFetchingMore(true);
 			fetchMore({
 				variables: {
 					offset: myRequestsStore.length // Next offset
 				},
 			}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
 
+
 				// remove request who is already in the store
-				const requestsIds = myRequestsStore.map(request => request.id);
-				const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIds.includes(request.id));
+				const requestsIdsStore = myRequestsStore.map(request => request.id);
+				console.log('requestsIds', requestsIdsStore);
+
+				const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIdsStore.includes(request.id));
+
 
 				if (newRequests.length > 0) {
 					myRequestStore.setState(prevRequests => {
@@ -390,10 +396,12 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				if (fetchMoreResult.data.user.requests.length < limit) {
 					setIsHasMore(false);
 				}
-
+				setIsFetchingMore(false);
 			});
+			
 		}
 	};
+	console.log('myRequestsStore', myRequestsStore);
 
 	// Function to handle file upload
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -886,6 +894,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 										type='button'
 										aria-label={`Supprimer la demande ${request.title}`}
 										onClick={(event) => {
+											event.preventDefault();
 											setDeleteItemModalIsOpen(true);
 											setModalArgs({ requestId: request.id, requestTitle: request.title }),
 												event.stopPropagation();
@@ -912,7 +921,9 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						onClick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
+							if (!isFetchingMore) {
 							addRequest();
+							}
 						}
 						}>
 						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>

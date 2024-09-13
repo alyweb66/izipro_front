@@ -35,20 +35,21 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 			setIsVisible(true);
 			document.body.style.overflow = 'hidden'; 
 		} else {
-		  document.body.style.overflow = ''; 
+		  document.body.style.overflow = 'unset'; 
 		}
-	
+
 		// Cleanup function to reset the overflow style
 		return () => {
-		  document.body.style.overflow = ''; 
+		  document.body.style.overflow = 'unset'; 
 		};
+		
 	}, [isOpenModal]);
 
 	const closeModal = () => {
 		setIsVisible(false);
 		setTimeout(() => {
 			setIsOpenModal(false);
-			
+
 		}, 300); // time must match the exit animation duration
 	};
 	return (
@@ -58,21 +59,22 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 			contentLabel="Delete Account"
 			shouldCloseOnOverlayClick={false}
 			aria-label={isCookie ? 'Accepter les cookies' : 'Conditions générales d utilisation'}
+			overlayClassName="rules-modal__overlay"
 		>
 			<AnimatePresence>
 				{isVisible && (
-					<motion.div 
+					<motion.div
 						key="rules-modal"
 						className="rules-modal__container"
 						initial={{ opacity: 0, scale: 0.9 }}
-						animate={{opacity: 1, scale: 1 }}
+						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0.9 }}
-						transition={{duration: 0.2, type: 'Inertia', stiffness: 50 }}
+						transition={{ duration: 0.2, type: 'Inertia', stiffness: 50 }}
 					>
 						{/* <h1 className="modal__title">CGU</h1> */}
-						{loading ? <Spinner/> :
+						{loading ? <Spinner /> :
 							<div className="rules-modal__container__content">
-								<p className="rules-modal__container__content__description" dangerouslySetInnerHTML={{ __html: content || 'Empty...'}}></p>
+								<p className="rules-modal__container__content__description" dangerouslySetInnerHTML={{ __html: content || 'Empty...' }}></p>
 							</div>
 						}
 						{isCookie ? (
@@ -84,7 +86,7 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 										handleAccept(undefined, true);
 									}}
 								>
-							Tout accepter
+									Tout accepter
 								</button>
 								<button
 									className="rules-modal__cancel"
@@ -93,20 +95,20 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 										handleAccept(undefined, false);
 									}}
 								>
-							Nécessaire seulement
+									Nécessaire seulement
 								</button>
-								{localStorage.getItem('cookieConsents') && 
-						<button
-							className="rules-modal__close"
-							onClick={() => {
-								//setIsOpenModal(false);
-								closeModal();
-							}}
-						>
-								Fermer
-						</button>
+								{localStorage.getItem('cookieConsents') &&
+									<button
+										className="rules-modal__close"
+										onClick={() => {
+											//setIsOpenModal(false);
+											closeModal();
+										}}
+									>
+										Fermer
+									</button>
 								}
-						
+
 							</div>
 						) : (
 							<div className="rules-modal__container__button">
@@ -119,7 +121,7 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 												handleAccept();
 											}}
 										>
-									Accepter
+											Accepter
 										</button>
 										<button
 											className="rules-modal__cancel"
@@ -129,7 +131,7 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 												if (handleLogout) handleLogout(id);
 											}}
 										>
-									Refuser
+											Refuser
 										</button>
 									</>
 								) : (
@@ -140,7 +142,7 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 											closeModal();
 										}}
 									>
-								Fermer
+										Fermer
 									</button>
 								)}
 							</div>
@@ -150,5 +152,5 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 			</AnimatePresence>
 		</ReactModal>
 	);
-	
+
 };

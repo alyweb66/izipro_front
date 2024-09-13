@@ -986,12 +986,12 @@ function Account() {
 									Valider
 								</button>
 							</form>
+						</div>
 							<button
 								className="account__profile__delete"
 								type='button'
 								onClick={() => setModalIsOpen(!modalIsOpen)}>supprimer mon compte
 							</button>
-						</div>
 					</div>
 				</motion.div >
 			</AnimatePresence>

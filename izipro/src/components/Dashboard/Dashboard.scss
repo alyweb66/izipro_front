@@ -25,6 +25,7 @@
     flex-direction: column;
     font-family: v.$font;
     height: 87vh;
+    height: 87dvh;
 
     .dashboard__content {
         flex: 1;
@@ -32,6 +33,7 @@
         overflow: auto;
         scrollbar-width: none;
         height: 87vh;
+        height: 87dvh;
 
         &::-webkit-scrollbar {
             display: none;
@@ -43,9 +45,7 @@
         display: none;
         position: absolute;
         bottom: -3px;
-
         width: 100%;
-
         height: 2px;
         background: linear-gradient(130deg, v.$color-primary-blue, v.$color-primary-orange);
         border-radius: 5px;
@@ -178,7 +178,7 @@
 @media (max-width: 480px) {
     .dashboard {
         height: 100vh;
-
+        height: 100dvh;
         .__nav {
             display: flex;
             justify-content: center;
@@ -186,6 +186,7 @@
             margin: 0;
             z-index: 11;
             height: 9vh;
+            height: 9dvh;
 
             .dashboard__nav__burgerSelected {
                 display: block;
@@ -195,7 +196,9 @@
                 font-weight: 500;
                 text-align: center;
                 position: relative;
-                padding-bottom: 0.5rem;
+                height: 4vh;
+                height: 4dvh;
+                //padding-bottom: 0.5rem;
 
             }
 
@@ -216,6 +219,7 @@
             .__burger {
                 width: 100%;
                 display: flex;
+                height: 100%;
                 flex-direction: column;
 
 
@@ -225,6 +229,7 @@
                     align-items: center;
                     width: 100%;
                     height: 5vh;
+                    height: 5dvh;
                     padding-top: 0.5rem;
 
                     .__logo {
@@ -288,7 +293,8 @@
                     position: absolute;
                     width: 100%;
                     z-index: 1;
-                    top: 4.4rem;
+                    top: 9vh;
+                    top: 9dvh;
                     left: 0;
                     border-radius: 0 0 0.5rem 0.5rem;
                     box-shadow: 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.1);
@@ -337,6 +343,7 @@
         }
         .dashboard__content {
             height: 91vh;
+            height: 91dvh;
         }
     }
 }
@@ -344,5 +351,6 @@
 @media (max-height: 630px) {
     .dashboard {
         height: 90vh;
+        height: 90dvh;
     }
 }

@@ -13,6 +13,7 @@
     scrollbar-width: none;
     max-width: 80%;
     height: 100%;
+    padding-top: 0.5rem;
     margin: 0 auto 1rem auto;
 
     &::-webkit-scrollbar {
@@ -25,7 +26,7 @@
       justify-content: center;
       width: 100%;
       height: auto;
-      margin: 1rem auto;
+      margin: 0 auto;
       border-radius: 0.5rem;
       box-shadow: none;
       max-width: 90%;

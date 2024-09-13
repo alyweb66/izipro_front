@@ -288,6 +288,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 		};
 
 	});
+console.log('clientRequestStore', clientRequestsStore);
 
 	return (
 		<div className="client-request">

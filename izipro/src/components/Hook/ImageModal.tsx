@@ -72,6 +72,7 @@ export function ImageModal({
 			onRequestClose={closeModal}
 			contentLabel="Image Modal"
 			shouldCloseOnOverlayClick={true}
+			overlayClassName="react-image-modal__overlay"
 		>
 			<button
 				id="close"

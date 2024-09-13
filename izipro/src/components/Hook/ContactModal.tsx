@@ -117,6 +117,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 			contentLabel="Delete Account"
 			shouldCloseOnOverlayClick={false}
 			aria-label="supprimer mon compte"
+			overlayClassName="contact-modal__overlay"
 		>
 			<AnimatePresence>
 				{isVisible && (

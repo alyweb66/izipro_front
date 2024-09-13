@@ -18,7 +18,7 @@
 .request {
     position: relative;
     font-family: v.$font;
-    height: 81vh;
+    height: 100%;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
     touch-action: pan-y;
@@ -71,15 +71,6 @@
             margin-bottom: 0.2rem;
             font-size: 0.8rem;
         }
-
-        /* 
-        &.error {
-            width: 100%;
-            text-align: center;
-            font-size: 1rem;
-            color: v.$color-error;
-            box-shadow: none;
-        } */
 
         .urgent-button {
             display: flex;
@@ -351,11 +342,8 @@
 
 @media (max-width: 700px) {
     .request {
-        height: 81vh;
-
-
+        height: 100%;
         .request__form {
-
             .request__form__select {
                 width: 70%;
             }
@@ -369,18 +357,15 @@
                     margin-top: 0rem;
                 }
             }
-
         }
     }
 }
 
 @media (max-width: 480px) {
     .request {
-        height: 91vh;
-
+        height: 100%;
         .request__form {
             width: 90%;
-
             .request__form__select {
                 width: 90%;
             }
@@ -394,8 +379,6 @@
                     margin: 0;
                 }
             }
-
-
         }
     }
 }
