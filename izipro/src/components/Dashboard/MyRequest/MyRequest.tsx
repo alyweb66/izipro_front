@@ -322,13 +322,17 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	// Function to send message and create conversation
 	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+
+		
 		// map file to send to graphql
 		const sendFile = file.map(file => ({
 			file,
 		}));
 		// create message
 		// if the message is not empty or the file is not empty
+		
 		if (conversationIdState ?? 0 > 0) {
+			
 			if (messageValue.trim() !== '' || sendFile.length > 0) {
 
 				message({
@@ -342,6 +346,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						}
 					}
 				}).then(() => {
+					
 					setMessageValue('');
 					setFile([]);
 					setUrlFile([]);
@@ -379,7 +384,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 				// remove request who is already in the store
 				const requestsIdsStore = myRequestsStore.map(request => request.id);
-				console.log('requestsIds', requestsIdsStore);
 
 				const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIdsStore.includes(request.id));
 
@@ -401,7 +405,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			
 		}
 	};
-	console.log('myRequestsStore', myRequestsStore);
 
 	// Function to handle file upload
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -987,7 +990,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 											}
 											key={user.id}
 											onClick={(event) => {
-
 												setSelectedUser(user);
 												handleMessageConversation(user.id, event);
 												if (window.innerWidth < 1000) {
@@ -1190,7 +1192,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 						<form className="my-request__message-list__form" onSubmit={(event) => {
 							event.preventDefault();
-							if (selectedUser?.id && !selectedUser?.deleted_at) {
+							if (selectedUser?.id && !selectedUser?.deleted_at) {	
 								handleMessageSubmit(event);
 							}
 

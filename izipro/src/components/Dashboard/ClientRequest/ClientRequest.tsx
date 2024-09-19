@@ -288,14 +288,13 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 		};
 
 	});
-console.log('clientRequestStore', clientRequestsStore);
 
 	return (
 		<div className="client-request">
 			<div id="scrollableClientRequest" className="client-request__list">
 				{(requestJobLoading || subscribeLoading || loading) && <Spinner />}
 				{(!address && !city && !postal_code && !first_name && !last_name) &&
-					(<p className="request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>)}
+					(<p className="client-request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>)}
 				{/* {!clientRequestsStore?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>} */}
 				{(address && city && postal_code && first_name && last_name) && (
 					<div className="client-request__list__detail">
@@ -447,7 +446,7 @@ console.log('clientRequestStore', clientRequestsStore);
 						<span className="tooltip">Charger plus</span>
 					</button>
 					) : (
-						<p className="client-request__list no-req">Fin des résultats</p>
+						(address && city && postal_code && first_name && last_name) && <p className="client-request__list no-req">Fin des résultats</p>
 					)}
 				</div>
 			</div>

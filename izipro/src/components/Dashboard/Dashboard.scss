@@ -32,8 +32,8 @@
         background-color: transparent;
         overflow: auto;
         scrollbar-width: none;
-        height: 87vh;
-        height: 87dvh;
+     /*    height: 87vh;
+        height: 87dvh; */
 
         &::-webkit-scrollbar {
             display: none;
@@ -177,6 +177,8 @@
 
 @media (max-width: 480px) {
     .dashboard {
+        display: flex;
+        flex-direction: column;
         height: 100vh;
         height: 100dvh;
         .__nav {
@@ -185,19 +187,23 @@
             width: 100%;
             margin: 0;
             z-index: 11;
-            height: 9vh;
-            height: 9dvh;
+            /* height: 9vh;
+            height: 9dvh; */
+            height: 3.9rem;
 
             .dashboard__nav__burgerSelected {
                 display: block;
+/*     align-items: center;
+    justify-content: center; */
                 color: v.$color-primary-orange;
                 font-size: 1rem;
                 font-family: v.$font;
                 font-weight: 500;
                 text-align: center;
                 position: relative;
-                height: 4vh;
-                height: 4dvh;
+                /* height: 4vh;
+                height: 4dvh; */
+                height: 1.56rem;
                 //padding-bottom: 0.5rem;
 
             }
@@ -221,6 +227,7 @@
                 display: flex;
                 height: 100%;
                 flex-direction: column;
+                justify-content: space-between;
 
 
                 .__container {
@@ -228,8 +235,9 @@
                     flex-direction: row;
                     align-items: center;
                     width: 100%;
-                    height: 5vh;
-                    height: 5dvh;
+                    height: 2.37rem;
+                    /* height: 5vh;
+                    height: 5dvh; */
                     padding-top: 0.5rem;
 
                     .__logo {
@@ -293,8 +301,7 @@
                     position: absolute;
                     width: 100%;
                     z-index: 1;
-                    top: 9vh;
-                    top: 9dvh;
+                    top: 3.9rem;
                     left: 0;
                     border-radius: 0 0 0.5rem 0.5rem;
                     box-shadow: 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.1);
@@ -342,15 +349,31 @@
             }
         }
         .dashboard__content {
-            height: 91vh;
-            height: 91dvh;
+            flex: 1;
+            height: auto;
+            /* height: 91vh;
+            height: 91dvh; */
         }
     }
 }
 
-@media (max-height: 630px) {
+@media (max-height: 630px) and (max-width: 480px) {
     .dashboard {
-        height: 90vh;
-        height: 90dvh;
+        height: 100vh;
+        height: 100dvh;
+    }
+}
+
+@media (max-height: 630px) and (max-width: 480px) {
+    .dashboard {
+        height: 100vh;
+        height: 100dvh;
+    }
+}
+
+@media (max-height: 630px) and (min-width: 480px) {
+    .dashboard {
+        height: 85vh;
+        height: 85dvh;
     }
 }

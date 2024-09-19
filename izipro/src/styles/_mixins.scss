@@ -253,7 +253,6 @@
     .custom-select-wrapper {
       width: 100%;
       max-width: 100%;
-
       border-radius: 0.5rem;
     }
 
@@ -270,17 +269,10 @@
 
     .custom-select-trigger {
       width: 100%;
-      //position: relative;
-      //display: block;
-      //width: 130px;
-      // padding: 0 84px 0 22px;
-      //padding: 0 22px;
       padding: 0.5rem 1.8rem 0.5rem 0.8rem;
       font-size: 1rem;
       font-weight: 400;
       color: black;
-      //border: 1px solid #b5b5b5;
-      //line-height: 60px;
       background: white;
       white-space: nowrap;
       overflow: hidden;
@@ -362,8 +354,6 @@
       width: 7px;
       height: 7px;
       margin-bottom: -4px;
-      //border-top: 1px solid #b5b5b5;
-      //border-left: 1px solid #b5b5b5;
       background: #fff;
       transform: rotate(45deg);
       transition: all .4s ease-in-out;
@@ -411,14 +401,11 @@
   @media (max-width: 480px) {
     .center {
       width: 100%;
-      //position:relative;
 
 
       .custom-options {
-        //border-top: 2px solid grey;
-        // border-bottom: 2px solid grey;
         position: fixed;
-        top: 4.4rem;
+        top: 3.7rem;
         left: 0;
         width: 100%;
         margin-top: 0;

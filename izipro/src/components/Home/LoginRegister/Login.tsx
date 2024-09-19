@@ -20,13 +20,15 @@ import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 import { confirmEmailStore } from '../../../store/LoginRegister';
 import { changeForgotPasswordStore, cookieConsents, userConversation, userDataStore } from '../../../store/UserData';
 import { clientRequestStore, myRequestStore, requestConversationStore, requestDataStore } from '../../../store/Request';
-import { messageConvIdMyConvStore, messageDataStore, myMessageDataStore } from '../../../store/message';
+import { messageConvIdMyConvStore, messageConvIdMyreqStore, messageDataStore, myMessageDataStore } from '../../../store/message';
 import { subscriptionDataStore } from '../../../store/subscription';
 import { notViewedConversation, notViewedRequest, notViewedRequestRef, requestConversationIds } from '../../../store/Viewed';
 
 import './Login.scss';
+import { useNotificationStore } from '../../../store/Notification';
 
 function Login() {
+	const navigate = useNavigate();
 
 	// State
 	const [email, setEmail] = useState('');
@@ -43,7 +45,6 @@ function Login() {
 	// Store
 	const [isEmailConfirmed, setIsEmailConfirmed] = confirmEmailStore((state) => [state.isEmailConfirmed, state.setIsEmailConfirmed]);
 	const [isChangePassword, setIsChangePassword] = changeForgotPasswordStore((state) => [state.isChangePassword, state.setIsChangePassword]);
-	const navigate = useNavigate();
 	const resetUserData = userDataStore((state) => state.resetUserData);
 	const resetRequest = requestDataStore((state) => state.resetRequest);
 	const resetMessage = messageDataStore((state) => state.resetMessage);
@@ -56,9 +57,11 @@ function Login() {
 	const resetCookieConsents = cookieConsents((state) => state.resetCookieConsents);
 	const resetrequestConversationIds = requestConversationIds((state) => state.resetBotViewed);
 	const resetNotViewedConv = notViewedConversation((state) => state.resetBotViewed);
-	const resetNotViewedRequestRef = notViewedRequestRef ((state) => state.resetBotViewed);
+	const resetNotViewedRequestRef = notViewedRequestRef((state) => state.resetBotViewed);
 	const resetNotViewedRequest = notViewedRequest((state) => state.resetBotViewed);
 	const resetMessageMyConvId = messageConvIdMyConvStore((state) => state.resetMessageMyConvId);
+	const resetMessageMyReqConvId = messageConvIdMyreqStore((state) => state.resetMessageMyReqConvId);
+	const resetNotification = useNotificationStore((state) => state.resetNotification);
 
 	// Mutation
 	const [login, { error }] = useMutation(LOGIN_USER_MUTATION);
@@ -127,8 +130,10 @@ function Login() {
 		resetNotViewedConv();
 		resetNotViewedRequestRef();
 		resetNotViewedRequest();
+		resetNotification();
+		resetMessageMyReqConvId && resetMessageMyReqConvId();
 		resetMessageMyConvId && resetMessageMyConvId();
-		
+
 		login({
 			variables: {
 				input: {
@@ -138,21 +143,20 @@ function Login() {
 				},
 			},
 		}).then((response) => {
+			console.log(response);
+			const userId = response.data?.login;
 			// if login is successful, redirect to dashboard
-			if (response.data?.login === true) {
-				// if user wants to keep the session active, store the hash in local storage
-				if (activeSession) {
-					const data = {
-						value: 'true',
-					};
-					const encodeData = btoa(JSON.stringify(data));
-					localStorage.setItem('login', encodeData);
-				} else {
-					const value = btoa('session');
-					localStorage.setItem('login', value);
-				}
+			if (userId && userId > 0) {
+				// set id to the store for headers in main.tsx
+				userDataStore.setState({ id: userId });
+				const valueSession = activeSession ? 'true' : 'session';
+				const data = { value: valueSession};
+				const encodeData = btoa(JSON.stringify(data));
+				localStorage.setItem('login', encodeData);
+
 				setIsChangePassword(false);
 				setIsEmailConfirmed(false);
+
 				navigate('/dashboard');
 			}
 		});

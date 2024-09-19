@@ -555,7 +555,7 @@ function Account() {
 									auth_token: string
 								}) => notification.endpoint === endpoint);
 
-								isSubscribed = isNotification.endpoint;
+								isSubscribed = isNotification?.endpoint;
 							} else {
 								isSubscribed = endpointStore;
 							}

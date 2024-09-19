@@ -3,10 +3,6 @@ import Spinner from './Spinner';
 import { JobProps } from '../../Type/Request';
 
 type SelectBoxProps = {
-	/* value: string;
-	placeholder: string;
-	isPlaceholder: boolean;
-	name: string; */
 	isSetting?: boolean;
 	isWishList?: boolean;
 	wishListJob?: JobProps[];
@@ -16,7 +12,6 @@ type SelectBoxProps = {
 	loading: boolean;
 	selected?: number;
 	setSelected?: (value: number) => void;
-	//options: { name: string; value: string | number; isPlaceholder?: boolean }[];
 };
 
 

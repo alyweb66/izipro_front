@@ -26,8 +26,10 @@ export default function useHandleLogout() {
 				document.cookie = 'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 				document.cookie = 'refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 			}
+			
 			//redirect to home page
-			navigate('/');
+				navigate('/');
+		
 		});
 
 		if (logoutError) {

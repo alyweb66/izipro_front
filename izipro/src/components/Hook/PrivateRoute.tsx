@@ -8,6 +8,7 @@ const PrivateRoute = () => {
   
     useEffect(() => {
       const login = localStorage.getItem('login');
+
       if (login) {
         setIsAuthenticated(true); // L'utilisateur est authentifié
       }

@@ -14,18 +14,19 @@ type SubscriptionData = {
 }
 
 const serviceWorkerRegistration = () => {
-    const { fetchVAPIDKey } = useQueryVAPIDKey();
     // Store
     const id = userDataStore((state) => state.id);
     const setEnpointStore = useNotificationStore((state) => state.setEndpoint);
     // Mutation
     const [createNotification, { error: notificationError }] = useMutation(CREATE_NOTIFICATION_PUSH_MUTATION);
     const [deleteNotification, { error: deleteNotificationError }] = useMutation(DELETE_NOTIFICATION_PUSH_MUTATION);
-
+    
+    const { fetchVAPIDKey } = useQueryVAPIDKey();
 
     // Ask for permission to send notifications
     async function askPermission() {
         const permission = await Notification.requestPermission();
+        
         if (permission === 'granted') {
             registerServiceWorker();
         }
@@ -34,15 +35,21 @@ const serviceWorkerRegistration = () => {
     // Register service worker
     async function registerServiceWorker() {
 
+        // check if service worker is supported
         const registration = await navigator.serviceWorker.register('/serviceWorker.js');
+        // get subscription if already exists
         let subscription = await registration.pushManager.getSubscription();
 
-        if (!subscription) {
 
+        if (!subscription) {
+            // subscribe to push notification
             subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: await getPublicKey()
             });
+
+            saveSubscription(subscription);
+        } else {
 
             saveSubscription(subscription);
         }
@@ -51,6 +58,7 @@ const serviceWorkerRegistration = () => {
 
     // Save subscription to database
     async function saveSubscription(subscription: PushSubscription) {
+        
         const subscriptionData: SubscriptionData = JSON.parse(JSON.stringify(subscription));
         
         if (id > 0) {
@@ -64,6 +72,7 @@ const serviceWorkerRegistration = () => {
                     }
                 }
             }).then(() => {
+                
                 setEnpointStore(subscriptionData.endpoint);
             });
 

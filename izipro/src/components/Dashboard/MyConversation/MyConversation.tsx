@@ -141,7 +141,9 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		// create message
 		// if the message is not empty or the file is not empty
 		if (conversationId ?? 0 > 0) {
+			
 			if (messageValue.trim() !== '' || sendFile.length > 0) {
+				
 				message({
 					variables: {
 						id: id,
@@ -182,6 +184,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	// Function to send message and create conversation
 	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>, requestId: number) => {
 		event.preventDefault();
+		
 		if (fileError) {
 			setFile([]);
 			setUrlFile([]);
@@ -913,6 +916,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 						<form className="my-conversation__message-list__form" onSubmit={(event) => {
 							event.preventDefault();
 							if (selectedRequest?.id && !selectedRequest.deleted_at) {
+								
 								handleMessageSubmit(event, selectedRequest.id);
 							}
 						}}>

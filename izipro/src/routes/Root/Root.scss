@@ -1,6 +1,8 @@
 @use '../../styles/variables' as v;
 
 .root {
+  display: flex;
+  flex-direction: column;
   width: 80rem; 
   max-width: 100%;
   margin: 0 auto;

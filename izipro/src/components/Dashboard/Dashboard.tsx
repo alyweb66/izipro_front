@@ -28,7 +28,7 @@ import { useMyRequestMessageSubscriptions } from '../GraphQL/MyRequestSubscripti
 import { useClientRequestSubscriptions } from '../GraphQL/ClientRequestSubscription';
 import { useMyConversationSubscriptions } from '../GraphQL/MyConversationSubscription';
 import { useLogoutSubscription } from '../GraphQL/LogoutSubscription';
-//import useHandleLogout from '../Hook/HandleLogout';
+
 
 // Mutation
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
@@ -47,8 +47,6 @@ import { messageDataStore, myMessageDataStore } from '../../store/message';
 // Style
 import './Dashboard.scss';
 import { DeleteItemModal } from '../Hook/DeleteItemModal';
-//import useHandleLogout from '../Hook/HandleLogout';
-
 
 
 const Request = lazy(() => import('./Request/Request'));
@@ -66,25 +64,26 @@ type useQueryUserConversationsProps = {
 };
 
 function Dashboard() {
+
 	const navigate = useNavigate();
 
 	// Store at the top for id to use in the sendBeacon
 	const [id, role, lng, lat, settings, jobs, setAll] = userDataStore((state) => [state.id, state.role, state.lng, state.lat, state.settings, state.jobs, state.setAll]);
 
-	//const handleLogout = useHandleLogout();
-
 	// condition if user not logged in
 	// decode the data
-	const getItem = localStorage.getItem('login');
-	let decodeData: string | { value: string };
+    const getItem = localStorage.getItem('login');
+
+	let decodeData:  string | { value: string };;
 	let isLogged: boolean;
 	try {
 		decodeData = JSON.parse(atob(getItem || ''));
+
 	} catch (error) {
 		decodeData = atob(getItem || '');
 	}
 
-	if (decodeData && ((typeof decodeData === 'object' && decodeData.value === 'true') || decodeData === 'session')) {
+	if (decodeData &&((typeof decodeData === 'object' && decodeData.value === 'true') || decodeData === 'session')) {
 		isLogged = true
 	} else {
 		isLogged = false;
@@ -92,7 +91,7 @@ function Dashboard() {
 
 	// function to logout the user when the page is closed
 	const handleBeforeUnload = () => {
-		if (decodeData === 'session' && idRef.current) {
+		if (typeof decodeData === 'object' && decodeData.value === 'session' && idRef.current) {
 			// create request to logout the user in the json format for sendbeacon
 			const query = `
 			mutation Logout($logoutId: Int!) {
@@ -242,7 +241,7 @@ function Dashboard() {
 	const { clientMessageSubscription } = useMyConversationSubscriptions((role !== 'pro'));
 	const { logoutSubscription } = useLogoutSubscription();
 
-    // For indacating the tab under the burger menu
+	// For indacating the tab under the burger menu
 	const tabLabels: { [key: string]: string } = {
 		'Request': 'DEMANDE',
 		'My requests': 'MES DEMANDES',

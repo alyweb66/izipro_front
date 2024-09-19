@@ -44,6 +44,7 @@ export const confirmEmailStore = create<ConfirmEmailProps>((set) => ({
 	isEmailConfirmed: false,
 	setIsEmailConfirmed: (isEmailConfirmed) => set({ isEmailConfirmed })
 }));
+
 // store creation for login and register function
 export const userFormStore = create<UserFormStore>((set) => ({
 	email: '',

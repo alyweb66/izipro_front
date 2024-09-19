@@ -14,34 +14,35 @@ function Header() {
 	// Check if user is logged in
 	useEffect(() => {
 		// condition if user not logged in
-		const getItem = localStorage.getItem('login');
-		const decodeData = atob(getItem || '');
-		let isLoggedValue;
-		if (decodeData === 'session') {
-
-			isLoggedValue = {value: 'true'};
-		} else {
-
-			isLoggedValue = JSON.parse(decodeData || '{}');
-		}
-
-		if (location.pathname === '/dashboard' && isLoggedValue) {
-			const newIsLogged = isLoggedValue.value === 'true' ? true : false;
-			
-			setIsLogged(newIsLogged );
-		} else {
-			setIsLogged(false);
-		}
+		
+			const getItem = localStorage.getItem('login');
+			const decodeData = atob(getItem || '');
+			let isLoggedValue;
+			if (decodeData === 'session') {
+	
+				isLoggedValue = {value: 'true'};
+			} else {
+	
+				isLoggedValue = JSON.parse(decodeData || '{}');
+			}
+	
+			if (location.pathname === '/dashboard' && isLoggedValue) {
+				const newIsLogged = isLoggedValue.value === 'true' ? true : false;
+				
+				setIsLogged(newIsLogged );
+			} else {
+				setIsLogged(false);
+			}
 	}, [location.pathname]);
-
+	console.log(isLogged);
 	return (
 		<header className="header" id="header">
 			<div className="header__container">
-				<img 
-				className='header__container image' 
-				src="/izipro-logo.png" 
-				alt="Izipro logo"
-				onClick={() => window.location.reload()} 
+				<img
+					className='header__container image'
+					src="/izipro-logo.png"
+					alt="Izipro logo"
+					onClick={() => window.location.reload()}
 				/>
 				<h1 className="header__container title">POP</h1>
 			</div>
@@ -56,4 +57,3 @@ export default Header;
 
 
 
-   

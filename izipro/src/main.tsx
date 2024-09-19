@@ -13,12 +13,33 @@ import { router } from './routes';
 import {ErrorResponse, onError  } from "@apollo/client/link/error"; 
 import './styles/index.scss';
 import { serverErrorStore } from './store/LoginRegister';
+import { setContext } from '@apollo/client/link/context';
+import { userDataStore } from './store/UserData';
 
 // store
 const setServerError = (serverError: { status: number; statusText: string }) => {
 	serverErrorStore.getState().setServerError(serverError);
 };
 
+
+// Middleware pour ajouter le userId dans les headers de chaque requête
+const userIdMiddleware = setContext((_, { headers }) => {
+	const { id } = userDataStore.getState();
+	console.log('main id', id);
+	
+	// Récupérer le userId depuis un cookie ou localStorage, par exemple
+	if (id === 0) {
+		return { headers };
+	} else {
+
+		return {
+			headers: {
+				...headers,
+				userid: id > 0 ? id : '',  // Ajoute l'userId au header
+			},
+		};
+	}
+  });
 
 // Default options for Apollo Client
 const defaultOptions: DefaultOptions = {
@@ -79,7 +100,7 @@ const wsLink = new GraphQLWsLink(createClient({
 
 
 //const httpLinkWithLogout = errorLink.concat(httpLink);
-const httpLinkWithMiddleware = ApolloLink.from([authMiddleware, errorLink, httpLink]);
+const httpLinkWithMiddleware = ApolloLink.from([userIdMiddleware, authMiddleware, errorLink, httpLink]);
 // The split function takes three parameters:
 // * A function that's called for each operation to execute
 // * The Link to use for an operation if the function returns a "truthy" value
@@ -95,6 +116,7 @@ const splitLink = split(
 	wsLink,
 	httpLinkWithMiddleware,
 );
+
 // create a client and check if it exists
 let client;
 if (!client) {
