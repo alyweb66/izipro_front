@@ -21,7 +21,7 @@ function Root() {
 		}
 
 		if (localStorage.getItem('login') === null) {
-			navigate('/');
+			navigate('/', { replace: true });
 		}
 	}, []);
 

@@ -72,9 +72,9 @@ function Dashboard() {
 
 	// condition if user not logged in
 	// decode the data
-    const getItem = localStorage.getItem('login');
+	const getItem = localStorage.getItem('login');
 
-	let decodeData:  string | { value: string };;
+	let decodeData: string | { value: string };;
 	let isLogged: boolean;
 	try {
 		decodeData = JSON.parse(atob(getItem || ''));
@@ -83,54 +83,58 @@ function Dashboard() {
 		decodeData = atob(getItem || '');
 	}
 
-	if (decodeData &&((typeof decodeData === 'object' && decodeData.value === 'true') || decodeData === 'session')) {
+	if (decodeData && typeof decodeData === 'object' && ('value' in decodeData) && (decodeData.value === 'true' || decodeData.value === 'session')) {
 		isLogged = true
 	} else {
 		isLogged = false;
 	}
 
 	// function to logout the user when the page is closed
-	const handleBeforeUnload = () => {
-		if (typeof decodeData === 'object' && decodeData.value === 'session' && idRef.current) {
+	const handleBeforeUnload = (event: BeforeUnloadEvent, subscriptionLogout = false) => {
+		//event.preventDefault();
+		if (typeof decodeData === 'object' && (decodeData.value === 'session' || subscriptionLogout) && idRef.current) {
+			
 			// create request to logout the user in the json format for sendbeacon
 			const query = `
 			mutation Logout($logoutId: Int!) {
 				  logout(id: $logoutId)
 			}
 		  `;
-
+	
 			const variables = { logoutId: idRef.current };
-
+	
 			// format data to send for sendBeacon
 			const data = JSON.stringify({
 				query,
 				variables
 			});
-
+	
 			// use sendBeacon to send the request
 			const url = import.meta.env.VITE_SERVER_URL;
 			const headers = { 'Content-Type': 'application/json' };
-
+	
 			// Create a Blob object with the data
 			const blob = new Blob([data], { type: headers['Content-Type'] });
-
+	
 			// send request to the server with sendBeacon
 			navigator.sendBeacon(url, blob);
 		}
 	};
 	// useEffect to check if user is logged in and use sendBeacon to logout the user
 	useEffect(() => {
+		console.log('isLogged', isLogged);
+		
 		// check if user is logged in
 		if (isLogged === false) {
 			// The data has expired
 			localStorage.removeItem('login')
 
 			if (window.location.pathname !== '/') {
-				navigate('/');
+				navigate('/', { replace: true });
 			}
 		}
 
-		handleBeforeUnload();
+		//handleBeforeUnload(new Event('beforeunload') as BeforeUnloadEvent);
 		// function to check if user is logged in and listener if close the page
 
 		//window.addEventListener('beforeunload', handleBeforeUnload);
@@ -140,8 +144,7 @@ function Dashboard() {
 
 		// clean event listener
 		return () => {
-			//	window.removeEventListener('beforeunload', handleBeforeUnload);
-			window.addEventListener('beforeunload', handleBeforeUnload);
+			window.removeEventListener('beforeunload', handleBeforeUnload);
 		};
 	}, [decodeData]);
 
@@ -156,6 +159,7 @@ function Dashboard() {
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
+	const [isMultipleLogout, setIsMultipleLogout] = useState<boolean>(false);
 
 
 	//*state for myRequest
@@ -311,11 +315,10 @@ function Dashboard() {
 
 	// function to redirect to home page when session is expired by serveur
 	const RedirectExpiredSession = () => {
-		setIsExpiredSession(false);
+		handleBeforeUnload(new Event('beforeunload') as BeforeUnloadEvent, true);
 		sessionStorage.clear();
 		localStorage.removeItem('login');
-		handleBeforeUnload();
-		navigate('/');
+		navigate('/', { replace: true });
 	};
 
 	// useEffect to check the size of the window
@@ -532,7 +535,12 @@ function Dashboard() {
 	// useEffect to check if user is logged out by serveur
 	useEffect(() => {
 		if (logoutSubscription && logoutSubscription.logout.value === true) {
-			setIsExpiredSession(true);
+			if (logoutSubscription.logout.multiple) {
+				setIsMultipleLogout(true);
+				setIsExpiredSession(true);
+			} else {
+				setIsExpiredSession(true);
+			}
 		}
 	}, [logoutSubscription]);
 
@@ -988,9 +996,10 @@ function Dashboard() {
 				</div>
 
 				<DeleteItemModal
-					isSessionExpired={true}
+					isMultipleLogout={isMultipleLogout}
+					isSessionExpired={isMultipleLogout ? false : true}
 					setDeleteItemModalIsOpen={setIsExpiredSession}
-					deleteItemModalIsOpen={isExpiredSession}
+					deleteItemModalIsOpen={isMultipleLogout || isExpiredSession}
 					handleDeleteItem={RedirectExpiredSession}
 				/>
 			</div>

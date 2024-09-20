@@ -21,7 +21,7 @@ function ConfirmEmail() {
 	useEffect(() =>{
 		//if no token redirect to home
 		if (!token){
-			navigate('/');
+			navigate('/', { replace: true });
 		}
 		confirmRegisterEmail({
 			variables:{
@@ -31,7 +31,7 @@ function ConfirmEmail() {
 			}
 		}).then(() => {
 			setIsEmailConfirmed(true);
-			navigate('/');
+			navigate('/', { replace: true });
 		});
 
 		if (confirmMailError){

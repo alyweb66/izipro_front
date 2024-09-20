@@ -5,7 +5,7 @@ import Presentation from './Presentation/Presentation';
 import Footer from '../Footer/Footer';
 
 // React Router
-import { useNavigate } from 'react-router-dom';
+import { replace, useNavigate } from 'react-router-dom';
 
 // Styles
 import './Home.scss';
@@ -61,7 +61,7 @@ function Home() {
 			isLogged = JSON.parse(decodeData || '{}');
 		}
 		if (isLogged) {
-			navigate('/dashboard');
+			navigate('/dashboard', { replace: true });
 		}
 
 	}, []);

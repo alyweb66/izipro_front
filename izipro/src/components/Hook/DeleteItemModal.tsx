@@ -13,6 +13,7 @@ interface ModalArgs {
 }
 
 interface DeleteItemModalProps {
+	isMultipleLogout?: boolean;
 	isSessionExpired?: boolean;
 	isDeleteUser?: boolean;
 	modalArgs?: ModalArgs | null;
@@ -23,6 +24,7 @@ interface DeleteItemModalProps {
 }
 
 export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
+	isMultipleLogout,
 	isSessionExpired,
 	isDeleteUser,
 	modalArgs,
@@ -74,7 +76,7 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 						exit={{ opacity: 0, scale: 0.9 }}
 						transition={{ duration: 0.2, type: 'Inertia', stiffness: 50 }}
 					>
-						{isSessionExpired ? (
+						{isMultipleLogout || isSessionExpired ? (
 							<h1 className="delete-item-modal__container__title">VOTRE SESSION A EXPIRÉ</h1>
 						) : (
 							<h1 className="delete-item-modal__container__title">ATTENTION!!</h1>
@@ -82,13 +84,16 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 						{isDeleteUser &&
 							<p className="delete-item-modal__container__description">Vous allez supprimer votre compte definitevement, êtes vous sur?</p>
 						}
+						{isMultipleLogout &&
+							<p className="delete-item-modal__container__description">Connexion à 2 comptes impossible sur le même navigateur. Vous serez redirigé vers l&apos;accueil pour vous reconnecter.</p>
+						}
 						{isSessionExpired &&
 							<p className="delete-item-modal__container__description">Un problème est survenu, par mesure de sécurité vous allez être redirigés vers l&apos;accueil pour vous identifier</p>
 						}
-						{!isDeleteUser && !isSessionExpired &&
+						{!isDeleteUser && isMultipleLogout || !isSessionExpired &&
 							<p className="delete-item-modal__container__description">Vous allez supprimer la demande <span className="modal-args">{modalArgs?.requestTitle}</span> , êtes vous sur?</p>
 						}
-						{isSessionExpired ? (
+						{isMultipleLogout  || isSessionExpired ? (
 							<div className="delete-item-modal__container__container__button">
 							<button
 								className="delete-item-modal__container__container__button__cancel"

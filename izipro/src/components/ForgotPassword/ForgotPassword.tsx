@@ -44,7 +44,7 @@ function ForgotPassword() {
 	// useEffect to check the size of the window
 	useEffect(() => {
 		if (!token) {
-			navigate('/');
+			navigate('/', { replace: true });
 		}
 		const handleResize = () => {
 			if (window.innerWidth < 480) {
@@ -95,7 +95,7 @@ function ForgotPassword() {
 			}
 		}).then(() => {
 			setIsChangePassword(true);
-			navigate('/');
+			navigate('/', { replace: true });
 
 		});
 

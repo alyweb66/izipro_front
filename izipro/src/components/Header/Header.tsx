@@ -16,20 +16,33 @@ function Header() {
 		// condition if user not logged in
 		
 			const getItem = localStorage.getItem('login');
-			const decodeData = atob(getItem || '');
+			//const decodeData = atob(getItem || '');
+			let decodeData;
+			try {
+				decodeData = JSON.parse(atob(getItem || ''));
+		
+			} catch (error) {
+				decodeData = atob(getItem || '');
+			}
+		
 			let isLoggedValue;
-			if (decodeData === 'session') {
+			if (decodeData && typeof decodeData === 'object' && ('value' in decodeData) && (decodeData.value === 'true' || decodeData.value === 'session')) {
+				isLoggedValue = true
+			} else {
+				isLoggedValue = false;
+			}
+			/* if (decodeData === 'session') {
 	
 				isLoggedValue = {value: 'true'};
 			} else {
 	
 				isLoggedValue = JSON.parse(decodeData || '{}');
-			}
+			} */
 	
 			if (location.pathname === '/dashboard' && isLoggedValue) {
-				const newIsLogged = isLoggedValue.value === 'true' ? true : false;
+				//const newIsLogged = isLoggedValue.value === 'true' ? true : false;
 				
-				setIsLogged(newIsLogged );
+				setIsLogged(true );
 			} else {
 				setIsLogged(false);
 			}

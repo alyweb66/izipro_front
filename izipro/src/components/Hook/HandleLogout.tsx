@@ -28,7 +28,7 @@ export default function useHandleLogout() {
 			}
 			
 			//redirect to home page
-				navigate('/');
+			navigate('/', { replace: true });
 		
 		});
 

@@ -56,6 +56,7 @@ export const LOGOUT = gql`
     logout(user_id: $user_id) {
         id
         value
+        multiple
     }
     }
 `;

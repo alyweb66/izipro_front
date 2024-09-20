@@ -7,20 +7,31 @@ const PrivateRoute = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
   
     useEffect(() => {
-      const login = localStorage.getItem('login');
-
-      if (login) {
-        setIsAuthenticated(true); // L'utilisateur est authentifié
+      const getItem = localStorage.getItem('login');
+      let decodeData;
+      if (getItem) {
+        try {
+          decodeData = JSON.parse(atob(getItem));
+        } catch (error) {
+          console.error('Error parsing JSON:', error);
+          decodeData = null;
+        }
       }
-      setLoading(false); // Chargement terminé
+      if (decodeData && (decodeData.value === 'session' || decodeData.value === 'true')) {
+        setIsAuthenticated(true); // Authentified user
+      } else {
+        localStorage.removeItem('login');
+      }
+      setLoading(false);
     }, []);
   
-    // Si en cours de vérification, on affiche un indicateur de chargement (ou rien)
     if (loading) {
-      return <div>Loading...</div>; // Ou un spinner, etc.
+      return <div>Loading...</div>; // 
     }
 
-  // Si l'utilisateur n'est pas authentifié, rediriger vers la page d'accueil
+
+
+  // Redirect to home page if the user is not authenticated
   return isAuthenticated ? <Dashboard /> : <Navigate to="/" />;
 };
 

@@ -157,7 +157,7 @@ function Login() {
 				setIsChangePassword(false);
 				setIsEmailConfirmed(false);
 
-				navigate('/dashboard');
+				navigate('/dashboard', { replace: true });
 			}
 		});
 

@@ -472,7 +472,7 @@ function Account() {
 				}
 				//redirect to home page
 				setModalIsOpen(false);
-				navigate('/');
+				navigate('/', { replace: true });
 				//});
 
 			}
