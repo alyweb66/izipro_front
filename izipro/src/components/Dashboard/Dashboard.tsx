@@ -90,7 +90,7 @@ function Dashboard() {
 	}
 
 	// function to logout the user when the page is closed
-	const handleBeforeUnload = (event: BeforeUnloadEvent, subscriptionLogout = false) => {
+	const handleBeforeUnload = (_event: BeforeUnloadEvent, subscriptionLogout = false) => {
 		//event.preventDefault();
 		if (typeof decodeData === 'object' && (decodeData.value === 'session' || subscriptionLogout) && idRef.current) {
 			
@@ -122,7 +122,6 @@ function Dashboard() {
 	};
 	// useEffect to check if user is logged in and use sendBeacon to logout the user
 	useEffect(() => {
-		console.log('isLogged', isLogged);
 		
 		// check if user is logged in
 		if (isLogged === false) {
@@ -134,7 +133,7 @@ function Dashboard() {
 			}
 		}
 
-		//handleBeforeUnload(new Event('beforeunload') as BeforeUnloadEvent);
+		
 		// function to check if user is logged in and listener if close the page
 
 		//window.addEventListener('beforeunload', handleBeforeUnload);
@@ -534,11 +533,17 @@ function Dashboard() {
 
 	// useEffect to check if user is logged out by serveur
 	useEffect(() => {
-		if (logoutSubscription && logoutSubscription.logout.value === true) {
-			if (logoutSubscription.logout.multiple) {
+
+		const sessionCookie = document.cookie.split(';').find(cookie => cookie.includes('session-id'));
+		const sessionId = sessionCookie?.split('=')[1].trim();
+	
+		if ( logoutSubscription && logoutSubscription.logout.value === true ) {
+			if (logoutSubscription.logout.multiple && (sessionId && sessionId === logoutSubscription.logout.session)) {
 				setIsMultipleLogout(true);
 				setIsExpiredSession(true);
-			} else {
+			} else if (sessionId && sessionId === logoutSubscription.logout.session) {
+				console.log('logout', logoutSubscription.logout.session, sessionId);
+				
 				setIsExpiredSession(true);
 			}
 		}

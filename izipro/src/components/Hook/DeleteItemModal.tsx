@@ -6,13 +6,13 @@ import '../../styles/deleteItemModal.scss';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
-interface ModalArgs {
+type ModalArgs = {
 	//event: React.MouseEvent;
 	requestId: number;
 	requestTitle: string;
 }
 
-interface DeleteItemModalProps {
+type DeleteItemModalProps = {
 	isMultipleLogout?: boolean;
 	isSessionExpired?: boolean;
 	isDeleteUser?: boolean;

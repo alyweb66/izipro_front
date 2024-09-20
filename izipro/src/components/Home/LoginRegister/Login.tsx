@@ -143,7 +143,6 @@ function Login() {
 				},
 			},
 		}).then((response) => {
-			console.log(response);
 			const userId = response.data?.login;
 			// if login is successful, redirect to dashboard
 			if (userId && userId > 0) {

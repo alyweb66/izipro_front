@@ -25,7 +25,7 @@ import Fade from '@mui/material/Fade';
 
 ReactModal.setAppElement('#root');
 
-interface DeleteItemModalProps {
+type DeleteItemModalProps = {
 	isOpenModal: boolean;
 	setIsOpenModal: (value: boolean) => void;
 }

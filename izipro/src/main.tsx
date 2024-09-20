@@ -25,7 +25,6 @@ const setServerError = (serverError: { status: number; statusText: string }) => 
 // Middleware pour ajouter le userId dans les headers de chaque requête
 const userIdMiddleware = setContext((_, { headers }) => {
 	const { id } = userDataStore.getState();
-	console.log('main id', id);
 	
 	// Récupérer le userId depuis un cookie ou localStorage, par exemple
 	if (id === 0) {

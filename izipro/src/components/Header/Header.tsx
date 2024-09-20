@@ -47,7 +47,7 @@ function Header() {
 				setIsLogged(false);
 			}
 	}, [location.pathname]);
-	console.log(isLogged);
+
 	return (
 		<header className="header" id="header">
 			<div className="header__container">

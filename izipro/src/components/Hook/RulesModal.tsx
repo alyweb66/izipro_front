@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 ReactModal.setAppElement('#root');
 
-interface DeleteItemModalProps {
+type DeleteItemModalProps = {
 	loading?: boolean;
 	isCookie?: boolean;
 	content: string;

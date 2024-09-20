@@ -1,10 +1,11 @@
 import { createBrowserRouter } from 'react-router-dom';
 import  Root  from './routes/Root/Root';
 import  Home  from './components/Home/Home';
-import PrivateRoute  from './components/Hook/PrivateRoute';
+//import PrivateRoute  from './components/Hook/PrivateRoute';
 import ConfirmEmail  from './components/ConfirmEmail/ConfirmEmail';
 import ForgotPassword  from './components/ForgotPassword/ForgotPassword';
 import DisplayError  from './components/DisplayError/DisplayError';
+import Dashboard from './components/Dashboard/Dashboard';
 
 export const router = createBrowserRouter([
 	{
@@ -20,7 +21,7 @@ export const router = createBrowserRouter([
 					},
 					{
 						path: '/dashboard',
-						element:  <PrivateRoute />,
+						element:  <Dashboard />,
 					},
 					{
 						path: '/confirm-email',
