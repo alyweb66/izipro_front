@@ -239,10 +239,10 @@ function Dashboard() {
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
 	// Subscription
+	const { logoutSubscription } = useLogoutSubscription();
 	const { messageSubscription } = useMyRequestMessageSubscriptions();
 	const { clientRequestSubscription } = useClientRequestSubscriptions((role !== 'pro'));
 	const { clientMessageSubscription } = useMyConversationSubscriptions((role !== 'pro'));
-	const { logoutSubscription } = useLogoutSubscription();
 
 	// For indacating the tab under the burger menu
 	const tabLabels: { [key: string]: string } = {

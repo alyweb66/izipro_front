@@ -296,7 +296,7 @@
             display: flex;
             justify-content: center;
             width: 100%;
-            margin: 0.5rem auto;
+            margin: auto;
             border-radius: 0.5rem;
             box-shadow: none;
             max-width: 90%;
@@ -310,7 +310,7 @@
             -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
             touch-action: pan-y;
             scrollbar-width: none;
-            height: 93%;
+            height: auto;
 
             &::-webkit-scrollbar {
                 display: none;
@@ -690,13 +690,15 @@
                                 .my-request__message-list__message__detail__image {
                                     border-radius: 0.5rem;
                                     cursor: pointer;
-                                    object-fit: cover;
+                                    object-fit: contain;
                                     flex: 1;
                                     width: auto;
                                     min-width: 5rem;
                                     height: auto;
 
                                     &.single {
+                                        object-fit: contain;
+                                        max-height: 20rem;
                                         width: fit-content;
 
                                     }
@@ -757,6 +759,7 @@
             box-sizing: border-box;
             bottom: 0;
             width: 100%;
+            z-index: 8;
 
             .my-request__message-list__form__preview {
                 max-width: 100%;
@@ -819,6 +822,7 @@
             font-weight: 500;
             color: v.$color-primary-orange;
             border-radius: 0 0 0.3rem 0.3rem;
+            z-index: 8;
 
             .my-request__message-list__form__label__attach {
                 font-size: 2rem;
@@ -861,8 +865,8 @@
                 margin: auto;
                 font-size: 2.5rem;
                 cursor: pointer;
-                z-index: 10;
                 margin-right: 0.5rem;
+                z-index: 10;
             }
         }
 
@@ -946,6 +950,7 @@
 
             &.open {
                 display: flex;
+                flex-direction: column;
                 margin: 0 auto;
                 max-width: 80%;
                 width: 80%;

@@ -46,17 +46,14 @@ const RequestItem = ({
 	setHasManyImages: Function
 }) => {
 	const idRef = useRef<number>(0);
-	//store
-	//const id = userDataStore((state) => state.id);
 
 	return (
 		<motion.div
 			id={index === 0 ? 'first-user' : undefined}
-			/* data-request-conv-id={(request || requestByDate)?.id}  */
 			className={`my-conversation__list__detail__item
 			${(request || requestByDate)?.urgent} 
 			${request ? 'new' : ''} 
-			${selectedRequest?.id === (request || requestByDate)?.id ? 'selected' : ''}
+			${selectedRequest?.id === (request || requestByDate)?.id && window.innerWidth > 800 ? 'selected' : ''}
 			${requestByDate?.deleted_at ? 'deleted' : ''}
 			${(request || requestByDate)?.conversation?.some(conv => notViewedConversationStore?.some(id => id === conv.id)) ? 'not-viewed' : ''}
 			` }

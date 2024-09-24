@@ -93,7 +93,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [isFetchingMore, setIsFetchingMore] = useState(false);
 	//const [isHandleClick, setIsHandleClick] = useState<boolean>(false);
 
-
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
 
@@ -118,7 +117,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	//mutation
 	const [deleteRequest, { loading: deleteRequestLoading, error: deleteRequestError }] = useMutation(DELETE_REQUEST_MUTATION);
-	const [message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
+	const [message, { loading: messageMutationLoading, error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
@@ -323,16 +322,14 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
-		
 		// map file to send to graphql
 		const sendFile = file.map(file => ({
 			file,
 		}));
 		// create message
 		// if the message is not empty or the file is not empty
-		
 		if (conversationIdState ?? 0 > 0) {
-			
+
 			if (messageValue.trim() !== '' || sendFile.length > 0) {
 
 				message({
@@ -346,7 +343,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						}
 					}
 				}).then(() => {
-					
+
 					setMessageValue('');
 					setFile([]);
 					setUrlFile([]);
@@ -402,7 +399,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				}
 				setIsFetchingMore(false);
 			});
-			
+
 		}
 	};
 
@@ -474,6 +471,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 				}
 			}
+			endOfMessagesRef.current?.scrollIntoView();
 		};
 
 		// add event listener to check the size of the window
@@ -727,10 +725,17 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	// useEffect to scroll to the end of the messages
 	useLayoutEffect(() => {
 
-		setTimeout(() => {
-			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-		}, 200);
-
+		const scrollToEnd = (behavior: ScrollBehavior) => {
+			endOfMessagesRef.current?.scrollIntoView({ behavior });
+		  };
+		
+		  requestAnimationFrame(() => {
+			setTimeout(() => {
+			  scrollToEnd('auto');
+			 // add a delay to scroll to the end of the messages to be sure that the messages are loaded
+			  setTimeout(() => scrollToEnd('smooth'), 500);
+			}, 0);
+		  });
 	}, [messageStore, conversationIdState, isMessageOpen]);
 
 	//  set selected request at null when the component is unmounted
@@ -925,7 +930,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							event.preventDefault();
 							event.stopPropagation();
 							if (!isFetchingMore) {
-							addRequest();
+								addRequest();
 							}
 						}
 						}>
@@ -1040,14 +1045,14 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			<AnimatePresence>
 				{isMessageOpen && (
 					<motion.div
-						className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`}
+						className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${(messageLoading || messageMutationLoading) ? 'loading' : ''}`}
 						aria-label='Liste des messages'
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
-						{messageLoading && <Spinner />}
+						{(messageLoading || messageMutationLoading) && <Spinner />}
 						<div className="my-request__message-list__user" aria-label="Détails de l'utilisateur" >
 							<div
 								className="my-request__message-list__user__header"
@@ -1114,16 +1119,16 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 										messageStore
 											.filter((message) => message.conversation_id === conversationIdState)
 											.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
-											.map((message, index, array) => (
+											.map((message) => (
 												<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
-													{index === array.length - 1 ? <div ref={endOfMessagesRef} aria-label="Dernier message visible" /> : null}
+													{/* {index === array.length - 1 ? <div ref={endOfMessagesRef} aria-label="Dernier message visible" /> : null} */}
 													<motion.div
 														className={`content ${message.user_id === id ? 'me' : ''}`}
 														style={{ overflow: 'scroll' }}
 														initial={{ opacity: 0, scale: 0.9 }}
 														animate={{ opacity: 1, scale: 1 }}
 														exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-														transition={{ duration: 0.1, type: 'tween' }}
+														transition={{ duration: 0.3, type: 'tween' }}
 													>
 														{message.media[0].url && (
 															<div className="my-request__message-list__message__detail__image-container">
@@ -1184,15 +1189,15 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 													>{new Date(Number(message.created_at)).toLocaleString()}</motion.div>
 												</div>
 											))
-
 									}
+									<div ref={endOfMessagesRef} aria-label="Dernier message visible" />
 								</div>
 							</div>
 						</div>
 
 						<form className="my-request__message-list__form" onSubmit={(event) => {
 							event.preventDefault();
-							if (selectedUser?.id && !selectedUser?.deleted_at) {	
+							if (selectedUser?.id && !selectedUser?.deleted_at) {
 								handleMessageSubmit(event);
 							}
 
@@ -1258,7 +1263,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								/>
 								<MdSend
 									className="my-request__message-list__form__label__send"
-									onClick={() => document.getElementById('send-message')?.click()}
+									onClick={(event) => {document.getElementById('send-message')?.click(), event.stopPropagation(); event?.preventDefault(); }} 
 									aria-label='Envoyer le message'
 
 								/>

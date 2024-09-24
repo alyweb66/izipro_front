@@ -141,9 +141,9 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		// create message
 		// if the message is not empty or the file is not empty
 		if (conversationId ?? 0 > 0) {
-			
+
 			if (messageValue.trim() !== '' || sendFile.length > 0) {
-				
+
 				message({
 					variables: {
 						id: id,
@@ -184,7 +184,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	// Function to send message and create conversation
 	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>, requestId: number) => {
 		event.preventDefault();
-		
+
 		if (fileError) {
 			setFile([]);
 			setUrlFile([]);
@@ -512,6 +512,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 					setIsListOpen(true);
 				}
 			}
+			endOfMessagesRef.current?.scrollIntoView();
 		};
 
 		// add event listener to check the size of the window
@@ -675,9 +676,18 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	// useEffect to scroll to the end of the messages
 	useLayoutEffect(() => {
 
-		setTimeout(() => {
-			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-		}, 200);
+		const scrollToEnd = (behavior: ScrollBehavior) => {
+			endOfMessagesRef.current?.scrollIntoView({ behavior });
+		};
+		// scroll to the end of the messages before painting browser with requestAnimationFrame
+		requestAnimationFrame(() => {
+			setTimeout(() => {
+				scrollToEnd('auto');
+
+				setTimeout(() => scrollToEnd('smooth'), 500);
+			}, 0);
+		});
+		
 	}, [messageStore, isMessageOpen, selectedRequest]);
 
 
@@ -821,7 +831,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							)}
 
 						</div>
-						{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
+	
 						<div className="my-conversation__container">
 							<div className="my-conversation__background">
 								<div /* id="scrollableMessageList" */ className="my-conversation__message-list__message">
@@ -829,21 +839,21 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 										messageStore
 											.filter((message) => message.conversation_id === conversationIdState)
 											.sort((a, b) => Number(a.created_at) - Number(b.created_at))
-											.map((message, index, array) => (
+											.map((message) => (
 												<div
 													className={`my-conversation__message-list__message__detail ${message.user_id === id ? 'me' : ''}`}
 													key={message.id}
 
 												>
 													{/* if it is the last message, scroll to the end of the messages */}
-													{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
+
 													<motion.div
 														className={`content ${message.user_id === id ? 'me' : ''}`}
 														style={{ overflow: 'scroll' }}
 														initial={{ opacity: 0, scale: 0.9 }}
 														animate={{ opacity: 1, scale: 1 }}
 														exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-														transition={{ duration: 0.1, type: 'tween' }}
+														transition={{ duration: 0.3, type: 'tween'}}
 													>
 														{message.media[0].url && (
 															<div className="my-conversation__message-list__message__detail__image-container">
@@ -909,6 +919,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 											))
 
 									}
+									<div ref={endOfMessagesRef} />
 								</div>
 							</div>
 						</div>
@@ -916,7 +927,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 						<form className="my-conversation__message-list__form" onSubmit={(event) => {
 							event.preventDefault();
 							if (selectedRequest?.id && !selectedRequest.deleted_at) {
-								
+
 								handleMessageSubmit(event, selectedRequest.id);
 							}
 						}}>
@@ -977,7 +988,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 								/>
 								<MdSend
 									className="my-conversation__message-list__form__label__send"
-									onClick={() => document.getElementById('send-message')?.click()}
+									onClick={(event) => {document.getElementById('send-message')?.click(), event.stopPropagation(); event?.preventDefault();}}
 								/>
 							</label>
 							<input

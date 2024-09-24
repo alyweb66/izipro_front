@@ -22,11 +22,10 @@ const setServerError = (serverError: { status: number; statusText: string }) => 
 };
 
 
-// Middleware pour ajouter le userId dans les headers de chaque requête
+// Middleware to add the userId to the headers
 const userIdMiddleware = setContext((_, { headers }) => {
 	const { id } = userDataStore.getState();
 	
-	// Récupérer le userId depuis un cookie ou localStorage, par exemple
 	if (id === 0) {
 		return { headers };
 	} else {
@@ -34,7 +33,7 @@ const userIdMiddleware = setContext((_, { headers }) => {
 		return {
 			headers: {
 				...headers,
-				userid: id > 0 ? id : '',  // Ajoute l'userId au header
+				userid: id > 0 ? id : '', 
 			},
 		};
 	}
@@ -92,8 +91,16 @@ const httpLink = createUploadLink({
 });
 
 // Create a WebSocket link
-const wsLink = new GraphQLWsLink(createClient({
+const wsLink = new GraphQLWsLink(
+	createClient({
 	url: import.meta.env.VITE_SERVER_SUBSCRIPTION,
+	retryAttempts: 5, // Number of retries
+	keepAlive: 10000, // Delay between pings
+    retryWait: async (retries) => {
+		const waitTime = 3000 * retries; // Exponential delay between retries
+		console.log(`Attente de ${waitTime / 1000} secondes avant la tentative de reconnexion ${retries}`);
+		return new Promise(resolve => setTimeout(resolve, waitTime));
+	},
 }));
 
 
