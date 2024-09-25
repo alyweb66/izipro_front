@@ -37,8 +37,8 @@ import { RequestProps } from '../../../Type/Request';
 import { MessageProps, MessageStoreProps } from '../../../Type/message';
 
 import { SubscriptionProps } from '../../../Type/Subscription';
-import pdfLogo from '/logo/logo-pdf.jpg';
-import logoProfile from '/logo/logo-profile.jpg';
+import pdfLogo from '/logo/logo-pdf.webp';
+import logoProfile from '/logo/logo-profile.webp';
 
 // Components and utilities
 import './MyConversation.scss';
@@ -52,7 +52,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
-import noPicture from '/logo/no-picture.jpg';
+import noPicture from '/logo/no-picture.webp';
 
 type useQueryUserConversationsProps = {
 	loading: boolean;
@@ -679,12 +679,28 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		const scrollToEnd = (behavior: ScrollBehavior) => {
 			endOfMessagesRef.current?.scrollIntoView({ behavior });
 		};
+		const ensureScrollToEnd = () => {
+			const container = endOfMessagesRef.current?.parentElement;
+		
+			if (container) {
+			  // verify if we have reached the end of the messages
+			  const hasReachedEnd = container.scrollTop + container.clientHeight >= container.scrollHeight;
+		
+			  if (!hasReachedEnd) {
+				// If we haven't reached the end, scroll to the end
+				scrollToEnd('auto');
+				setTimeout(ensureScrollToEnd, 0); 
+			  } else {
+				// If we have reached the end, scroll to the end smoothly
+				scrollToEnd('smooth');
+			  }
+			}
+		  };
 		// scroll to the end of the messages before painting browser with requestAnimationFrame
 		requestAnimationFrame(() => {
 			setTimeout(() => {
 				scrollToEnd('auto');
-
-				setTimeout(() => scrollToEnd('smooth'), 500);
+				setTimeout(ensureScrollToEnd, 500);
 			}, 0);
 		});
 		

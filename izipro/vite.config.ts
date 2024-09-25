@@ -12,20 +12,31 @@ export default defineConfig({
 		visualizer({ open: true })
 	],
 	build: {
-		sourcemap: false, 
+		sourcemap: true,
 		target: 'esnext',
+		rollupOptions: {
+			output: {
+			  manualChunks(id) {
+				if (id.includes('node_modules')) {
+				  if (id.includes('mapbox-gl')) {
+					return 'mapbox-gl'; // Crée un chunk séparé pour mapbox-gl
+				  }
+				}
+			  }
+			}
+		  }
 	},
 	resolve: {
 		alias: {
-		  '@': path.resolve(__dirname, 'src'),
+			'@': path.resolve(__dirname, 'src'),
 		},
-	  },
-	  //*HTTPS server
-/* 	server: {
-		https: {
-		  key: fs.readFileSync(path.resolve(__dirname, 'key.pem')),
-		  cert: fs.readFileSync(path.resolve(__dirname, 'cert.pem')),
-		},
-	  }, */
+	},
+	//*HTTPS server
+	/* 	server: {
+			https: {
+			  key: fs.readFileSync(path.resolve(__dirname, 'key.pem')),
+			  cert: fs.readFileSync(path.resolve(__dirname, 'cert.pem')),
+			},
+		  }, */
 });
 

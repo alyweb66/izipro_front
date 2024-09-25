@@ -1,5 +1,10 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
-import Map, { Layer, Marker, Source } from 'react-map-gl';
+import { lazy, useEffect, useLayoutEffect, useState } from 'react';
+//import Map, { Layer, Marker, Source } from 'react-map-gl';
+import maplibregl, { Map } from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+/* const Marker = lazy(() => import('react-map-gl/maplibre').then(module => ({ default: module.Marker })));
+const Layer = lazy(() => import('react-map-gl/maplibre').then(module => ({ default: module.Layer })));
+const Source = lazy(() => import('react-map-gl/maplibre').then(module => ({ default: module.Source }))); */
 //import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Apollo Client
@@ -16,7 +21,7 @@ import { myRequestStore } from '../../../store/Request';
 
 // Types and icons
 import { CategoryPros, JobProps } from '../../../Type/Request';
-import pdfLogo from '/logo/logo-pdf.jpg';
+import pdfLogo from '/logo/logo-pdf.webp';
 import { TbUrgent } from 'react-icons/tb';
 import { FaCamera } from 'react-icons/fa';
 
@@ -28,17 +33,18 @@ import Spinner from '../../Hook/Spinner';
 import SelectBox from '../../Hook/SelectBox';
 import { subscriptionDataStore } from '../../../store/subscription';
 import { motion, AnimatePresence } from 'framer-motion';
-import { IoLocationSharp } from "react-icons/io5";
+//import { IoLocationSharp } from "react-icons/io5";
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
+import * as turf from '@turf/turf';
 
 
 
 function Request() {
-	const mapboxAccessToken = import.meta.env.VITE_MAPBOX_TOKEN;
+	//const mapboxAccessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 	// Store
 	const id = userDataStore((state) => state.id);
@@ -184,9 +190,9 @@ function Request() {
 	};
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const handleMapLoaded = () => {
+	/* const handleMapLoaded = () => {
 		setIsLoading(false);
-	};
+	}; */
 
 	// Handle file upload
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement> & React.DragEvent<HTMLLabelElement>) => {
@@ -211,7 +217,135 @@ function Request() {
 			}
 		}
 	};
+	const [map, setMap] = useState<Map | null>(null);
+	/* const createGeoJSONCircle = (center, radiusInMeters, points = 64) => {
+		const coords = {
+		  latitude: center[1],
+		  longitude: center[0]
+		};
+	
+		const km = radiusInMeters / 1000;
+		const ret = [];
+		const distanceX = km / (111.32 * Math.cos(coords.latitude * Math.PI / 180));
+		const distanceY = km / 110.574;
+	
+		let theta, x, y;
+		for (let i = 0; i < points; i++) {
+		  theta = (i / points) * (2 * Math.PI);
+		  x = distanceX * Math.cos(theta);
+		  y = distanceY * Math.sin(theta);
+	
+		  ret.push([coords.longitude + x, coords.latitude + y]);
+		}
+		ret.push(ret[0]);
+	
+		return {
+		  type: 'Feature',
+		  geometry: {
+			type: 'Polygon',
+			coordinates: [ret]
+		  }
+		};
+	  }; */
+	useEffect(() => {
+		const MapInstance  = new maplibregl.Map({
+			container: 'map',
+			style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+			center: [lng ?? 0, lat ?? 0],
+			zoom: 10,
+		});
 
+		MapInstance .on('load', () => {
+			setIsLoading(false);
+			setMap(MapInstance);
+		});
+		
+		return () => {
+			if (map) {
+				map.remove();
+			}
+		};
+	}, [lng, lat]);
+console.log('radius', radius);
+
+	useLayoutEffect(() => {
+		if (map) {
+		// Add markers, layers, sources, etc. as needed
+			new maplibregl.Marker()
+			.setLngLat([lng ?? 0, lat ?? 0])
+			.addTo(map as maplibregl.Map);
+
+			let circle = null;
+			if (lng !== null && lat !== null) {
+				const center = turf.point([lng, lat]); // Créer un point à partir des coordonnées
+			    circle = turf.circle(center, radius / 1000, { steps: 100, units: 'kilometers' }); // Créer un cercle
+				// Rest of the code...
+			}
+		/* 	const circle = turf.circle(center, radius / 1000, { steps: 100, units: 'kilometers' }); // Créer un cercle */
+	  
+		  // Créer les coordonnées du cercle
+	/* 	  let circleCoordinates: number[][] = [];
+		  if (lng !== null && lat !== null) {
+			circleCoordinates = createGeoJSONCircle({ lng, lat }, radius);
+		  }
+	console.log(circleCoordinates); */
+	
+		  // Ajouter une source pour le cercle
+		 /*  if (map.getSource('circle')) {
+			(map.getSource('circle') as maplibregl.GeoJSONSource).setData({
+			  type: 'Feature',
+			  geometry: {
+				type: 'Polygon',
+				coordinates: [circleCoordinates],
+			  },
+			  properties: {}, // Add an empty properties object
+			});
+		  } else {
+			map.addSource('circle', {
+			  type: 'geojson',
+			  data: {
+				type: 'Feature',
+				geometry: {
+				  type: 'Polygon',
+				  coordinates: [circleCoordinates],
+				},
+				properties: {}, // Add an empty properties object
+			  },
+			}); */
+			if (map.getSource('circle')) {
+				if (circle) {
+					(map.getSource('circle') as maplibregl.GeoJSONSource).setData(circle); // Mettre à jour la source existante
+				}
+			  } else {
+				map.addSource('circle', {
+				  type: 'geojson',
+				  data: circle || { type: 'FeatureCollection', features: [] },
+				});
+			// Ajouter une couche pour afficher le cercle
+			map.addLayer({
+			  id: 'circle-layer',
+			  type: 'fill',
+			  source: 'circle',
+			  layout: {},
+			  paint: {
+				'fill-color': 'orange',
+				'fill-opacity': 0.4,
+			  },
+			});
+		  }
+		   // Calculer les limites du cercle pour adapter le zoom
+		   if (radius === 0) {
+			map.setZoom(10); // Set zoom to 12 if radius is 0
+
+		   } else if (circle) {
+			  const bounds = turf.bbox(circle).slice(0, 4) as [number, number, number, number]; // Obtenir les limites du cercle
+			   if (bounds) {
+				   map.fitBounds(bounds, { padding: 20, duration: 500 }); // Ajuster le zoom en fonction des limites
+			   }
+		   }
+		 //  map.fitBounds(bounds, { padding: 20 }); // Ajuster le zoom en fonction des limites
+		}
+	  }, [map, radius, lng, lat]);
 	// Update jobs when category changes
 	useEffect(() => {
 		if (jobData) {
@@ -365,11 +499,12 @@ function Request() {
 								</label>
 								<div className="request__form__map">
 
-									<div className="request__form__map__map">
+									<div id="map" className="request__form__map__map">
 										{isLoading && <Spinner />}
-										<Map
+										{/* <Map
+
 											reuseMaps
-											mapboxAccessToken={mapboxAccessToken}
+											//mapboxAccessToken={mapboxAccessToken}
 											initialViewState={{
 												longitude: lng,
 												latitude: lat,
@@ -377,7 +512,7 @@ function Request() {
 											}}
 											zoom={zoom}
 											scrollZoom={false}
-											mapStyle="mapbox://styles/mapbox/streets-v12"
+											mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
 											onLoad={handleMapLoaded}
 											dragRotate={false}
 											dragPan={false}
@@ -415,7 +550,7 @@ function Request() {
 													<IoLocationSharp className="map-marker__icon" />
 												</div>
 											</Marker>
-										</Map>
+										</Map> */}
 									</div>
 								</div>
 							</>

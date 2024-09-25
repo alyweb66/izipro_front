@@ -1,5 +1,5 @@
 // React and React Router imports
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { lazy, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // State management and GraphQL imports
@@ -30,11 +30,12 @@ import serviceWorkerRegistration from '../../Hook/ServiceWorkerRegistration';
 import { UserAccountDataProps, UserDataProps } from '../../../Type/User';
 
 // Asset imports
-import profileLogo from '/logo/logo-profile.jpg';
-import noPicture from '/logo/no-picture.jpg';
+import profileLogo from '/logo/logo-profile.webp';
+import noPicture from '/logo/no-picture.webp';
 
 //Mapbox
-import Map, { Marker } from 'react-map-gl';
+const Map = lazy(() => import('react-map-gl/maplibre'));
+const Marker = lazy(() => import('react-map-gl/maplibre').then(module => ({ default: module.Marker })));
 //import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Styling imports

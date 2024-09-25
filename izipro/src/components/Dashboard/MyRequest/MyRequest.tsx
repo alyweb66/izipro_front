@@ -31,8 +31,8 @@ import { SubscriptionProps } from '../../../Type/Subscription';
 
 // Components and utilities
 import './MyRequest.scss';
-import pdfLogo from '/logo/logo-pdf.jpg';
-import logoProfile from '/logo/logo-profile.jpg';
+import pdfLogo from '/logo/logo-pdf.webp';
+import logoProfile from '/logo/logo-profile.webp';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt, FaCamera } from 'react-icons/fa';
 import { MdSend, MdAttachFile, MdKeyboardArrowLeft, MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
@@ -45,7 +45,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
-import noPicture from '/logo/no-picture.jpg';
+import noPicture from '/logo/no-picture.webp';
 
 // Configuration for React Modal
 ReactModal.setAppElement('#root');
@@ -727,15 +727,32 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		const scrollToEnd = (behavior: ScrollBehavior) => {
 			endOfMessagesRef.current?.scrollIntoView({ behavior });
-		  };
+		};
+		const ensureScrollToEnd = () => {
+			const container = endOfMessagesRef.current?.parentElement;
 		
-		  requestAnimationFrame(() => {
+			if (container) {
+			  // verify if we have reached the end of the messages
+			  const hasReachedEnd = container.scrollTop + container.clientHeight >= container.scrollHeight;
+		
+			  if (!hasReachedEnd) {
+				// If we haven't reached the end, scroll to the end
+				scrollToEnd('auto');
+				setTimeout(ensureScrollToEnd, 0); 
+			  } else {
+				// If we have reached the end, scroll to the end smoothly
+				scrollToEnd('smooth');
+			  }
+			}
+		  };
+		// scroll to the end of the messages before painting browser with requestAnimationFrame
+		requestAnimationFrame(() => {
 			setTimeout(() => {
-			  scrollToEnd('auto');
-			 // add a delay to scroll to the end of the messages to be sure that the messages are loaded
-			  setTimeout(() => scrollToEnd('smooth'), 500);
+				scrollToEnd('auto');
+				setTimeout(ensureScrollToEnd, 500);
 			}, 0);
-		  });
+		});
+		
 	}, [messageStore, conversationIdState, isMessageOpen]);
 
 	//  set selected request at null when the component is unmounted
@@ -1109,12 +1126,11 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								</div>
 								}
 							</div>
-							{/* 	)} */}
 
 						</div>
 						<div className="my-request__container">
 							<div className="my-request__background">
-								<div /* id="scrollableMessage" */ className="my-request__message-list__message" aria-label='Message de la conversation'>
+								<div className="my-request__message-list__message" aria-label="Message de la conversation">
 									{Array.isArray(messageStore) && isUserMessageOpen &&
 										messageStore
 											.filter((message) => message.conversation_id === conversationIdState)

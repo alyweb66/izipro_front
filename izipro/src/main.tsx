@@ -10,7 +10,7 @@ import { createClient } from 'graphql-ws';
 import ReactDOM from 'react-dom/client';
 import { router } from './routes';
 //import { onError } from "apollo-link-error";
-import {ErrorResponse, onError  } from "@apollo/client/link/error"; 
+import { ErrorResponse, onError } from "@apollo/client/link/error";
 import './styles/index.scss';
 import { serverErrorStore } from './store/LoginRegister';
 import { setContext } from '@apollo/client/link/context';
@@ -25,7 +25,7 @@ const setServerError = (serverError: { status: number; statusText: string }) => 
 // Middleware to add the userId to the headers
 const userIdMiddleware = setContext((_, { headers }) => {
 	const { id } = userDataStore.getState();
-	
+
 	if (id === 0) {
 		return { headers };
 	} else {
@@ -33,11 +33,11 @@ const userIdMiddleware = setContext((_, { headers }) => {
 		return {
 			headers: {
 				...headers,
-				userid: id > 0 ? id : '', 
+				userid: id > 0 ? id : '',
 			},
 		};
 	}
-  });
+});
 
 // Default options for Apollo Client
 const defaultOptions: DefaultOptions = {
@@ -56,17 +56,20 @@ let isLoggedOut = false;
 const errorLink = onError((error: ErrorResponse) => {
 	const statusCode = (error.networkError as ServerError)?.statusCode;
 
-	setServerError({ 
-		status: (statusCode || 500), 
-		statusText: (error.networkError as ServerError)?.response?.statusText 
-		|| (error.graphQLErrors && error.graphQLErrors[0]?.extensions?.code?.toString()) 
-		||'' 
+	setServerError({
+		status: (statusCode || 500),
+		statusText: (
+			(error.networkError as ServerError)?.response?.headers.get('message')
+			|| (error.networkError && (error.networkError as ServerError).response?.statusText)
+			|| (error.graphQLErrors && error.graphQLErrors[0]?.extensions?.code?.toString())
+			|| ''
+		)
 	});
-	
+
 	if (statusCode === 401) {
 		localStorage.removeItem('login');
 		isLoggedOut = true;
-		
+
 		if (window.location.pathname === '/dashboard') {
 			window.location.href = '/';
 		}
@@ -77,12 +80,12 @@ const errorLink = onError((error: ErrorResponse) => {
 // Middleware to check if the user is logged out before making requests
 const authMiddleware = new ApolloLink((operation, forward) => {
 	if (isLoggedOut) {
-	  // Prevent further requests if the user is logged out
-	  return null;
+		// Prevent further requests if the user is logged out
+		return null;
 	}
 	return forward(operation);
-  });
-  
+});
+
 // Create an upload link
 const httpLink = createUploadLink({
 	uri: import.meta.env.VITE_SERVER_URL,
@@ -90,19 +93,27 @@ const httpLink = createUploadLink({
 	headers: { 'Apollo-Require-Preflight': 'true' },
 });
 
+
 // Create a WebSocket link
 const wsLink = new GraphQLWsLink(
 	createClient({
-	url: import.meta.env.VITE_SERVER_SUBSCRIPTION,
-	retryAttempts: 5, // Number of retries
-	keepAlive: 10000, // Delay between pings
-    retryWait: async (retries) => {
-		const waitTime = 3000 * retries; // Exponential delay between retries
-		console.log(`Attente de ${waitTime / 1000} secondes avant la tentative de reconnexion ${retries}`);
-		return new Promise(resolve => setTimeout(resolve, waitTime));
-	},
-}));
-
+		url: import.meta.env.VITE_SERVER_SUBSCRIPTION,
+		retryAttempts: Infinity,
+		shouldRetry: () => true,
+		keepAlive: 10000,
+		on: {
+			/* closed: () => {
+				console.log(`WebSocket fermé avec le code  et la raison: `);
+			}, */
+			error: () => {
+				window.location.reload();
+			},
+			/* connected: () => {
+				console.log(`WebSocket connecté`);
+			}, */
+		},
+	})
+);
 
 
 //const httpLinkWithLogout = errorLink.concat(httpLink);

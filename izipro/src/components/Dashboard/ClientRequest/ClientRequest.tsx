@@ -19,7 +19,7 @@ import { notViewedRequest } from '../../../store/Viewed';
 // Types and assets
 import { RequestProps } from '../../../Type/Request';
 import { SubscriptionProps } from '../../../Type/Subscription';
-import pdfLogo from '/logo/logo-pdf.jpg';
+import pdfLogo from '/logo/logo-pdf.webp';
 
 // Components and utilities
 import './clientRequest.scss';
@@ -28,7 +28,7 @@ import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt } from 'react-icons/fa';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import { motion, AnimatePresence } from 'framer-motion';
-import noPicture from '/logo/no-picture.jpg';
+import noPicture from '/logo/no-picture.webp';
 
 
 type ExpandedState = {
