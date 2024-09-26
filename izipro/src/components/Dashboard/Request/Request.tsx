@@ -1,11 +1,7 @@
-import { lazy, useEffect, useLayoutEffect, useState } from 'react';
+import {useEffect, useLayoutEffect, useState } from 'react';
 //import Map, { Layer, Marker, Source } from 'react-map-gl';
 import maplibregl, { Map } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-/* const Marker = lazy(() => import('react-map-gl/maplibre').then(module => ({ default: module.Marker })));
-const Layer = lazy(() => import('react-map-gl/maplibre').then(module => ({ default: module.Layer })));
-const Source = lazy(() => import('react-map-gl/maplibre').then(module => ({ default: module.Source }))); */
-//import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Apollo Client
 import { useMutation } from '@apollo/client';
@@ -69,11 +65,12 @@ function Request() {
 	const [uploadFileError, setUploadFileError] = useState('');
 	const [categoriesState, setCategoriesState] = useState<CategoryPros[]>([]);
 	const [jobsState, setJobsState] = useState<JobProps[]>([]);
-	const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 450px)').matches);
+	//const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 450px)').matches);
 	const [isLoading, setIsLoading] = useState(true);
+	const [map, setMap] = useState<Map | null>(null);
 	// Map
 	const [radius, setRadius] = useState(0); // Radius in meters
-	const [zoom, setZoom] = useState(10);
+	//const [zoom, setZoom] = useState(10);
 
 	// File upload
 	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
@@ -217,136 +214,87 @@ function Request() {
 			}
 		}
 	};
-	const [map, setMap] = useState<Map | null>(null);
-	/* const createGeoJSONCircle = (center, radiusInMeters, points = 64) => {
-		const coords = {
-		  latitude: center[1],
-		  longitude: center[0]
-		};
-	
-		const km = radiusInMeters / 1000;
-		const ret = [];
-		const distanceX = km / (111.32 * Math.cos(coords.latitude * Math.PI / 180));
-		const distanceY = km / 110.574;
-	
-		let theta, x, y;
-		for (let i = 0; i < points; i++) {
-		  theta = (i / points) * (2 * Math.PI);
-		  x = distanceX * Math.cos(theta);
-		  y = distanceY * Math.sin(theta);
-	
-		  ret.push([coords.longitude + x, coords.latitude + y]);
-		}
-		ret.push(ret[0]);
-	
-		return {
-		  type: 'Feature',
-		  geometry: {
-			type: 'Polygon',
-			coordinates: [ret]
-		  }
-		};
-	  }; */
+
+	// Map instance
 	useEffect(() => {
-		const MapInstance  = new maplibregl.Map({
+		const MapInstance = new maplibregl.Map({
 			container: 'map',
-			style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+			style: import.meta.env.VITE_MAPLIBRE_URL,
 			center: [lng ?? 0, lat ?? 0],
 			zoom: 10,
+			minZoom: 5, // Set minimum zoom level
+			maxZoom: 15, // Set maximum zoom level
+			dragPan: false, // Disable dragging to pan the map
+			scrollZoom: false, // Disable scroll zoom
+			attributionControl: false,
 		});
 
-		MapInstance .on('load', () => {
+		MapInstance.on('load', () => {
 			setIsLoading(false);
 			setMap(MapInstance);
 		});
-		
+
 		return () => {
 			if (map) {
 				map.remove();
 			}
 		};
 	}, [lng, lat]);
-console.log('radius', radius);
 
+	// Adding options to the map
 	useLayoutEffect(() => {
 		if (map) {
-		// Add markers, layers, sources, etc. as needed
-			new maplibregl.Marker()
-			.setLngLat([lng ?? 0, lat ?? 0])
-			.addTo(map as maplibregl.Map);
 
+			// Add markers, layers, sources, etc. as needed
+			new maplibregl.Marker({
+				color: "#028eef",
+			})
+				.setLngLat([lng ?? 0, lat ?? 0])
+				.addTo(map as maplibregl.Map);
+
+			// Create a circle around the center point
 			let circle = null;
 			if (lng !== null && lat !== null) {
-				const center = turf.point([lng, lat]); // Créer un point à partir des coordonnées
-			    circle = turf.circle(center, radius / 1000, { steps: 100, units: 'kilometers' }); // Créer un cercle
-				// Rest of the code...
+				const center = turf.point([lng, lat]); // Crate center point
+				circle = turf.circle(center, radius / 1000, { steps: 100, units: 'kilometers' }); // Create a circle from the center point
 			}
-		/* 	const circle = turf.circle(center, radius / 1000, { steps: 100, units: 'kilometers' }); // Créer un cercle */
-	  
-		  // Créer les coordonnées du cercle
-	/* 	  let circleCoordinates: number[][] = [];
-		  if (lng !== null && lat !== null) {
-			circleCoordinates = createGeoJSONCircle({ lng, lat }, radius);
-		  }
-	console.log(circleCoordinates); */
-	
-		  // Ajouter une source pour le cercle
-		 /*  if (map.getSource('circle')) {
-			(map.getSource('circle') as maplibregl.GeoJSONSource).setData({
-			  type: 'Feature',
-			  geometry: {
-				type: 'Polygon',
-				coordinates: [circleCoordinates],
-			  },
-			  properties: {}, // Add an empty properties object
-			});
-		  } else {
-			map.addSource('circle', {
-			  type: 'geojson',
-			  data: {
-				type: 'Feature',
-				geometry: {
-				  type: 'Polygon',
-				  coordinates: [circleCoordinates],
-				},
-				properties: {}, // Add an empty properties object
-			  },
-			}); */
+
+			// Add circle to the map
 			if (map.getSource('circle')) {
 				if (circle) {
-					(map.getSource('circle') as maplibregl.GeoJSONSource).setData(circle); // Mettre à jour la source existante
+					(map.getSource('circle') as maplibregl.GeoJSONSource).setData(circle); // Update the circle data
 				}
-			  } else {
+			} else {
 				map.addSource('circle', {
-				  type: 'geojson',
-				  data: circle || { type: 'FeatureCollection', features: [] },
+					type: 'geojson',
+					data: circle || { type: 'FeatureCollection', features: [] },
 				});
-			// Ajouter une couche pour afficher le cercle
-			map.addLayer({
-			  id: 'circle-layer',
-			  type: 'fill',
-			  source: 'circle',
-			  layout: {},
-			  paint: {
-				'fill-color': 'orange',
-				'fill-opacity': 0.4,
-			  },
-			});
-		  }
-		   // Calculer les limites du cercle pour adapter le zoom
-		   if (radius === 0) {
-			map.setZoom(10); // Set zoom to 12 if radius is 0
+				// Show the circle on the map
+				map.addLayer({
+					id: 'circle-layer',
+					type: 'fill',
+					source: 'circle',
+					layout: {},
+					paint: {
+						'fill-color': 'orange',
+						'fill-opacity': 0.4,
+					},
+				});
+			}
+			// Zoom ajust to circle
+			if (radius === 0) {
+				map.setZoom(10); // Set zoom to 12 if radius is 0
 
-		   } else if (circle) {
-			  const bounds = turf.bbox(circle).slice(0, 4) as [number, number, number, number]; // Obtenir les limites du cercle
-			   if (bounds) {
-				   map.fitBounds(bounds, { padding: 20, duration: 500 }); // Ajuster le zoom en fonction des limites
-			   }
-		   }
-		 //  map.fitBounds(bounds, { padding: 20 }); // Ajuster le zoom en fonction des limites
+			} else if (circle) {
+				const bounds = turf.bbox(circle).slice(0, 4) as [number, number, number, number]; // Get circle bounds
+				if (bounds) {
+					map.fitBounds(bounds, { padding: 20, duration: 500 });
+				}
+			}
 		}
-	  }, [map, radius, lng, lat]);
+	}, [map, radius, lng, lat]);
 	// Update jobs when category changes
+
 	useEffect(() => {
 		if (jobData) {
 
@@ -361,29 +309,6 @@ console.log('radius', radius);
 		}
 	}, [categoriesData]);
 
-	// Get map instance
-
-
-	// Handle file drop
-	/* 	const handleFileDrop = (event: React.DragEvent<HTMLLabelElement>) => {
-			event.preventDefault();
-			setUploadFileError('');
-	
-			// Check if the number of files is less than 3
-			const remainingSlots = 3 - urlFile.length;
-	
-			if (event.dataTransfer.files) {
-	
-				if (remainingSlots > 0) {
-					const filesToUpload = Array.from(event.dataTransfer.files).slice(0, remainingSlots);
-					handleFileChange(undefined, undefined, filesToUpload as File[]);
-				}
-				if (remainingSlots <= 0) {
-					setUploadFileError('Nombre de fichiers maximum atteint');
-				}
-			}
-		}; */
-
 	// reset selected job when category changes
 	useEffect(() => {
 		if (selectedCategory) {
@@ -391,47 +316,6 @@ console.log('radius', radius);
 		}
 	}, [selectedCategory]);
 
-
-	//* Mapping radius to zoom level
-	const radiusToZoomMapping = [
-		{ maxRadius: 5000, zoomMobile: 10.5, zoomDesktop: 11 },
-		{ maxRadius: 10000, zoomMobile: 9.5, zoomDesktop: 10 },
-		{ maxRadius: 15000, zoomMobile: 9, zoomDesktop: 9.5 },
-		{ maxRadius: 20000, zoomMobile: 8.5, zoomDesktop: 9 },
-		{ maxRadius: 25000, zoomMobile: 8.2, zoomDesktop: 8.5 },
-		{ maxRadius: 35000, zoomMobile: 7.9, zoomDesktop: 8 },
-		{ maxRadius: 40000, zoomMobile: 7.7, zoomDesktop: 8 },
-		{ maxRadius: 45000, zoomMobile: 7.5, zoomDesktop: 7.7 },
-		{ maxRadius: 50000, zoomMobile: 7.4, zoomDesktop: 7.5 },
-		{ maxRadius: 60000, zoomMobile: 6.9, zoomDesktop: 7 },
-		{ maxRadius: 100000, zoomMobile: 6.4, zoomDesktop: 6.8 },
-		{ maxRadius: Infinity, zoomMobile: 6, zoomDesktop: 7 }
-	];
-
-	// Calculate the zoom level based on the radius
-	const calculateZoomLevel = (radius: number, isMobile: boolean) => {
-		for (const { maxRadius, zoomMobile, zoomDesktop } of radiusToZoomMapping) {
-			if (radius <= maxRadius) {
-				return isMobile ? zoomMobile : zoomDesktop;
-			}
-		}
-		return 7; // default value
-	};
-	// Update the zoom level when the radius or screen size changes
-	useLayoutEffect(() => {
-		const newZoom = calculateZoomLevel(radius, isMobile);
-		newZoom && setZoom(newZoom);
-	}, [radius, isMobile]);
-
-	// Update the zoom level based on the radius and screen size
-	useLayoutEffect(() => {
-		const handleResize = () => setIsMobile(window.matchMedia('(max-width: 450px)').matches);
-		window.addEventListener('resize', handleResize);
-
-		return () => window.removeEventListener('resize', handleResize);
-
-	}, [radius, isMobile]);
-	//* end Mapping radius to zoom level
 
 	return (
 		<div className="request">
@@ -501,56 +385,6 @@ console.log('radius', radius);
 
 									<div id="map" className="request__form__map__map">
 										{isLoading && <Spinner />}
-										{/* <Map
-
-											reuseMaps
-											//mapboxAccessToken={mapboxAccessToken}
-											initialViewState={{
-												longitude: lng,
-												latitude: lat,
-												zoom: zoom
-											}}
-											zoom={zoom}
-											scrollZoom={false}
-											mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
-											onLoad={handleMapLoaded}
-											dragRotate={false}
-											dragPan={false}
-
-										>
-											<Source
-												id="circle-data"
-												type="geojson"
-												data={{
-													type: 'Feature',
-													geometry: {
-														type: 'Point',
-														coordinates: [lng, lat]
-													}
-												}}
-											>
-												<Layer
-													id="circle-layer"
-													type="circle"
-													paint={{
-														'circle-radius': {
-															stops: [
-																[0, 0],
-																[15.8, radius] // Adjust the multiplier for scaling
-															],
-															base: 2
-														}, // Adjust the radius as needed
-														'circle-color': 'orange',
-														'circle-opacity': 0.4
-													}}
-												/>
-											</Source>
-											<Marker longitude={lng} latitude={lat}>
-												<div className="map-marker">
-													<IoLocationSharp className="map-marker__icon" />
-												</div>
-											</Marker>
-										</Map> */}
 									</div>
 								</div>
 							</>

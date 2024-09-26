@@ -1,5 +1,5 @@
 // React and React Router imports
-import { lazy, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // State management and GraphQL imports
@@ -33,16 +33,15 @@ import { UserAccountDataProps, UserDataProps } from '../../../Type/User';
 import profileLogo from '/logo/logo-profile.webp';
 import noPicture from '/logo/no-picture.webp';
 
-//Mapbox
-const Map = lazy(() => import('react-map-gl/maplibre'));
-const Marker = lazy(() => import('react-map-gl/maplibre').then(module => ({ default: module.Marker })));
+//Maplibre
+import maplibregl, { Map } from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 //import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Styling imports
 import './Account.scss';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
-import { IoLocationSharp } from "react-icons/io5";
 import Switch from '@mui/material/Switch';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -61,8 +60,7 @@ ReactModal.setAppElement('#root');
 
 
 function Account() {
-	// token for mapbox
-	const mapboxAccessToken = import.meta.env.VITE_MAPBOX_TOKEN;
+
 	// Navigate
 	const navigate = useNavigate();
 
@@ -141,12 +139,7 @@ function Account() {
 	const [notification, setNotification] = useState(emailNotification === null ? false : emailNotification);
 	const [isImgLoading, setIsImgLoading] = useState(true);
 	// state for mapBox
-	const [viewState, setViewState] = useState({
-		longitude: typeof lngState === 'number' ? lngState : parseFloat(lngState),
-		latitude: typeof latState === 'number' ? latState : parseFloat(latState),
-		zoom: 12,
-	});
-
+	const [map, setMap] = useState<Map | null>(null);
 
 	// Message modification account
 	const [messageAccount, setMessageAccount] = useState('');
@@ -496,14 +489,49 @@ function Account() {
 		setIsNotificationEnabled(!isNotificationEnabled);
 	};
 
-	// handle the map loaded
-	const handleMapLoaded = () => {
-		setIsLoading(false);
-	};
 
 	if (emailNotification === null) {
 		isGetNotificationRef.current = false;
 	}
+
+	// Map instance
+	useEffect(() => {
+	
+		const MapInstance = new maplibregl.Map({
+			container: 'map',
+			style: import.meta.env.VITE_MAPLIBRE_URL,
+			center: [lng ?? 0, lat ?? 0],
+			zoom: 10,
+			minZoom: 5, // Set minimum zoom level
+			maxZoom: 15, // Set maximum zoom level
+			dragPan: false, // Disable dragging to pan the map
+			attributionControl: false,
+
+		});
+
+		MapInstance.on('load', () => {
+			setIsLoading(false);
+			setMap(MapInstance);
+		});
+
+		return () => {
+			if (map) {
+				map.remove();
+			}
+		};
+	}, [lng, lat]);
+
+	// Adding options to the map
+	useLayoutEffect(() => {
+		if (map) {
+			// Add markers, layers, sources, etc. as needed
+			new maplibregl.Marker({
+				color: "#028eef",
+			})
+				.setLngLat([lng ?? 0, lat ?? 0])
+				.addTo(map as maplibregl.Map);
+		}
+	}, [map, lng, lat]);
 
 	// set the notification
 	useLayoutEffect(() => {
@@ -588,44 +616,6 @@ function Account() {
 
 		checkNotificationStatus();
 	}, [notificationData]);
-
-	// check if map is already loaded
-	useLayoutEffect(() => {
-		const observer = new MutationObserver((mutationsList, observer) => {
-			for (let mutation of mutationsList) {
-				if (mutation.type === 'childList') {
-					if (document.querySelector('.mapboxgl-canvas')) {
-						setIsLoading(false);
-						observer.disconnect();
-						break;
-					}
-				}
-			}
-		});
-
-		// Commence à observer le document entier pour les changements dans les enfants
-		observer.observe(document.body, { childList: true, subtree: true });
-
-		// Vérifiez si la carte est déjà chargée au cas où elle serait déjà présente
-		if (document.querySelector('.mapboxgl-canvas')) {
-			setIsLoading(false);
-			observer.disconnect();
-		}
-
-		// Nettoyer l'observateur lors du démontage du composant
-		return () => {
-			observer.disconnect();
-		};
-	}, []);
-
-	// useEffect for mapBox lng lat
-	useLayoutEffect(() => {
-		setViewState({
-			longitude: typeof lngState === 'number' ? lngState : parseFloat(lngState),
-			latitude: typeof latState === 'number' ? latState : parseFloat(latState),
-			zoom: 12,
-		});
-	}, [lng, lat, lngState, latState]);
 
 
 	return (
@@ -867,31 +857,8 @@ function Account() {
 							<button className="account__profile__button" type="submit">Valider</button>
 							<div className="request__form__map">
 								<p className="request__title-map">Vérifiez votre adresse sur la carte (validez pour actualiser):</p>
-								<div className="request__form__map__map">
+								<div id="map" className="request__form__map__map">
 									{isLoading && <Spinner />}
-									<Map
-										reuseMaps
-										mapboxAccessToken={mapboxAccessToken}
-										{...viewState}
-										onMove={evt => setViewState(evt.viewState)}
-										scrollZoom={false}
-										zoom={11}
-										//maxZoom={15}
-										//minZoom={10}
-										mapStyle="mapbox://styles/mapbox/streets-v12"
-										dragRotate={false}
-										dragPan={false}
-										onLoad={handleMapLoaded}
-									>
-										<Marker
-											longitude={typeof lngState === 'number' ? lngState : parseFloat(lngState)}
-											latitude={typeof latState === 'number' ? latState : parseFloat(latState)}
-										>
-											<div className="map-marker">
-												<IoLocationSharp className="map-marker__icon" />
-											</div>
-										</Marker>
-									</Map>
 								</div>
 							</div>
 

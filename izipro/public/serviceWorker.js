@@ -8,7 +8,7 @@ if ('serviceWorker' in navigator) {
         console.log('Service Worker registered with scope:', registration.scope);
     });
 } */
-
+//* Notification push
 // organize push event
 self.addEventListener('install', () => {
     self.skipWaiting();
@@ -52,3 +52,43 @@ async function openUrl(url) {
     }
     return null;
 }
+//* End notification push
+
+//* Cache map tiles
+const CACHE_NAME = 'map-tiles-cache';
+const TILE_URL_PATTERN = /https:\/\/basemaps\.cartocdn\.com\/gl\/voyager-gl-style\/.*/;
+
+// Prepare cache for map tiles
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('Opened cache');
+    })
+  );
+});
+
+// Cache map tiles
+self.addEventListener('fetch', (event) => {
+  if (TILE_URL_PATTERN.test(event.request.url)) {
+    event.respondWith(
+      caches.match(event.request).then((response) => {
+        return response || fetch(event.request).then((response) => {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, response.clone());
+            return response;
+          });
+        });
+      })
+    );
+  }
+});
+
+// Clear cache when user is not login
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'CLEAR_CACHE') {
+    caches.delete(CACHE_NAME).then(() => {
+      console.log('Cache cleared');
+    });
+  }
+});
+//* End cache map tiles

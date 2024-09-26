@@ -21,7 +21,6 @@ const setServerError = (serverError: { status: number; statusText: string }) => 
 	serverErrorStore.getState().setServerError(serverError);
 };
 
-
 // Middleware to add the userId to the headers
 const userIdMiddleware = setContext((_, { headers }) => {
 	const { id } = userDataStore.getState();
@@ -93,7 +92,6 @@ const httpLink = createUploadLink({
 	headers: { 'Apollo-Require-Preflight': 'true' },
 });
 
-
 // Create a WebSocket link
 const wsLink = new GraphQLWsLink(
 	createClient({
@@ -114,7 +112,6 @@ const wsLink = new GraphQLWsLink(
 		},
 	})
 );
-
 
 //const httpLinkWithLogout = errorLink.concat(httpLink);
 const httpLinkWithMiddleware = ApolloLink.from([userIdMiddleware, authMiddleware, errorLink, httpLink]);
@@ -185,6 +182,16 @@ const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
 
+// register the service worker
+if ('serviceWorker' in navigator) {
+	window.addEventListener('load', () => {
+		navigator.serviceWorker.register('/service-worker.js').then((registration) => {
+			console.log('Service Worker registered with scope:', registration.scope);
+		}, (error) => {
+			console.error('Service Worker registration failed:', error);
+		});
+	});
+}
 
 // render element in the DOM
 root.render(

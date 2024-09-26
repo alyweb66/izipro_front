@@ -14,17 +14,6 @@ export default defineConfig({
 	build: {
 		sourcemap: true,
 		target: 'esnext',
-		rollupOptions: {
-			output: {
-			  manualChunks(id) {
-				if (id.includes('node_modules')) {
-				  if (id.includes('mapbox-gl')) {
-					return 'mapbox-gl'; // Crée un chunk séparé pour mapbox-gl
-				  }
-				}
-			  }
-			}
-		  }
 	},
 	resolve: {
 		alias: {
