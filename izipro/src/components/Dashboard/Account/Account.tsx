@@ -504,6 +504,7 @@ function Account() {
 			zoom: 10,
 			minZoom: 5, // Set minimum zoom level
 			maxZoom: 15, // Set maximum zoom level
+			scrollZoom: false, // Disable zooming with the scroll wheel
 			dragPan: false, // Disable dragging to pan the map
 			attributionControl: false,
 

@@ -276,8 +276,8 @@ function Request() {
 					source: 'circle',
 					layout: {},
 					paint: {
-						'fill-color': 'orange',
-						'fill-opacity': 0.4,
+						'fill-color': 'red',
+						'fill-opacity': 0.3,
 					},
 				});
 			}
