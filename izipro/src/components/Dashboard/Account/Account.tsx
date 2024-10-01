@@ -496,19 +496,21 @@ function Account() {
 
 	// Map instance
 	useEffect(() => {
-	
+
 		const MapInstance = new maplibregl.Map({
 			container: 'map',
 			style: import.meta.env.VITE_MAPLIBRE_URL,
 			center: [lng ?? 0, lat ?? 0],
 			zoom: 10,
-			minZoom: 5, // Set minimum zoom level
-			maxZoom: 15, // Set maximum zoom level
 			scrollZoom: false, // Disable zooming with the scroll wheel
 			dragPan: false, // Disable dragging to pan the map
 			attributionControl: false,
 
 		});
+
+		// Disable map interactions 
+		MapInstance.touchZoomRotate.disable();
+		MapInstance.doubleClickZoom.disable();
 
 		MapInstance.on('load', () => {
 			setIsLoading(false);
@@ -956,11 +958,11 @@ function Account() {
 								</button>
 							</form>
 						</div>
-							<button
-								className="account__profile__delete"
-								type='button'
-								onClick={() => setModalIsOpen(!modalIsOpen)}>supprimer mon compte
-							</button>
+						<button
+							className="account__profile__delete"
+							type='button'
+							onClick={() => setModalIsOpen(!modalIsOpen)}>supprimer mon compte
+						</button>
 					</div>
 				</motion.div >
 			</AnimatePresence>

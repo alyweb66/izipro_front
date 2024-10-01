@@ -5,9 +5,8 @@
   position: relative;
   height: 5vh;
   height: 5dvh;
-  //background-color: rgba(224, 132, 11, 0.192);
-  //background-image: linear-gradient(to right, transparent 0%, rgba(224, 132, 11, 0.26) 10%, rgba(224, 132, 11, 0.26) 90%, transparent 100%);
-  //border-top: 2px solid v.$color-primary-orange;
+  background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.527) 10%,rgba(255, 255, 255, 0.527) 90%, transparent 100%);
+
 
   .footer-container {
     display: flex;

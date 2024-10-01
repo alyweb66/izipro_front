@@ -87,29 +87,26 @@ const authMiddleware = new ApolloLink((operation, forward) => {
 
 // Create an upload link
 const httpLink = createUploadLink({
-	uri: import.meta.env.VITE_SERVER_URL,
+	uri: import.meta.env.MODE === 'production' ? import.meta.env.VITE_SERVER_URL : 'http://localhost:3000/',
 	credentials: 'include',
 	headers: { 'Apollo-Require-Preflight': 'true' },
 });
 
+
 // Create a WebSocket link
 const wsLink = new GraphQLWsLink(
 	createClient({
-		url: import.meta.env.VITE_SERVER_SUBSCRIPTION,
+		url: import.meta.env.MODE === 'production' ? import.meta.env.VITE_SERVER_SUBSCRIPTION : 'ws://localhost:3000/subscriptions',
 		retryAttempts: Infinity,
-		shouldRetry: () => true,
-		keepAlive: 10000,
-		on: {
-			/* closed: () => {
-				console.log(`WebSocket fermé avec le code  et la raison: `);
-			}, */
-			error: () => {
-				window.location.reload();
-			},
-			/* connected: () => {
-				console.log(`WebSocket connecté`);
-			}, */
+		shouldRetry: (errOrCloseEvent) => {
+			// Retry if the connection is closed by refreshing the page or other
+			// need return always true because if false that create an error on firefox 
+			if (errOrCloseEvent instanceof CloseEvent) {
+					return true;  
+			}
+			return true;
 		},
+		keepAlive: 10000,
 	})
 );
 
@@ -185,7 +182,7 @@ const root = ReactDOM.createRoot(
 // register the service worker
 if ('serviceWorker' in navigator) {
 	window.addEventListener('load', () => {
-		navigator.serviceWorker.register('/service-worker.js').then((registration) => {
+		navigator.serviceWorker.register('/serviceWorker.js').then((registration) => {
 			console.log('Service Worker registered with scope:', registration.scope);
 		}, (error) => {
 			console.error('Service Worker registration failed:', error);

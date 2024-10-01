@@ -47,6 +47,7 @@ import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import noPicture from '/logo/no-picture.webp';
 
+
 // Configuration for React Modal
 ReactModal.setAppElement('#root');
 
@@ -432,7 +433,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	};
 
 
-	// useEffect to check the size of the window
+	// useEffect to check the size of the window and update the page visibility 
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	useLayoutEffect(() => {
 		const handleResize = () => {
@@ -722,39 +723,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	}, [usersConversationData]);
 
-	// useEffect to scroll to the end of the messages
-	useLayoutEffect(() => {
-
-		const scrollToEnd = (behavior: ScrollBehavior) => {
-			endOfMessagesRef.current?.scrollIntoView({ behavior });
-		};
-		const ensureScrollToEnd = () => {
-			const container = endOfMessagesRef.current?.parentElement;
-		
-			if (container) {
-			  // verify if we have reached the end of the messages
-			  const hasReachedEnd = container.scrollTop + container.clientHeight >= container.scrollHeight;
-		
-			  if (!hasReachedEnd) {
-				// If we haven't reached the end, scroll to the end
-				scrollToEnd('auto');
-				setTimeout(ensureScrollToEnd, 0); 
-			  } else {
-				// If we have reached the end, scroll to the end smoothly
-				scrollToEnd('smooth');
-			  }
-			}
-		  };
-		// scroll to the end of the messages before painting browser with requestAnimationFrame
-		requestAnimationFrame(() => {
-			setTimeout(() => {
-				scrollToEnd('auto');
-				setTimeout(ensureScrollToEnd, 500);
-			}, 0);
-		});
-		
-	}, [messageStore, conversationIdState, isMessageOpen]);
-
 	//  set selected request at null when the component is unmounted
 	useEffect(() => {
 		return () => {
@@ -773,6 +741,38 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	}, [selectedUser]);
 
+	// useEffect to scroll to the end of the messages
+	useLayoutEffect(() => {
+
+		const scrollToEnd = (behavior: ScrollBehavior) => {
+			endOfMessagesRef.current?.scrollIntoView({ behavior });
+		};
+		const ensureScrollToEnd = () => {
+			const container = endOfMessagesRef.current?.parentElement;
+
+			if (container) {
+				// verify if we have reached the end of the messages
+				const hasReachedEnd = container.scrollTop + container.clientHeight >= container.scrollHeight;
+
+				if (!hasReachedEnd) {
+					// If we haven't reached the end, scroll to the end
+					scrollToEnd('auto');
+					setTimeout(ensureScrollToEnd, 0);
+				} else {
+					// If we have reached the end, scroll to the end smoothly
+					scrollToEnd('smooth');
+				}
+			}
+		};
+		// scroll to the end of the messages before painting browser with requestAnimationFrame
+		requestAnimationFrame(() => {
+			setTimeout(() => {
+				scrollToEnd('auto');
+				setTimeout(ensureScrollToEnd, 500);
+			}, 0);
+		});
+
+	}, [messageStore, isMessageOpen, conversationIdState]);
 
 	return (
 		<div className="my-request">
@@ -895,6 +895,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 															className="my-request__list__detail__item__picture img"
 															key={media.id}
 															src={media.url}
+															loading="lazy"
 															onClick={(event) => {
 																setHasManyImages(false),
 																	openModal(imageUrls, index),
@@ -1069,7 +1070,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
-						{(messageLoading || messageMutationLoading) && <Spinner />}
+						{(messageLoading || messageMutationLoading ) && <Spinner />}
 						<div className="my-request__message-list__user" aria-label="Détails de l'utilisateur" >
 							<div
 								className="my-request__message-list__user__header"
@@ -1128,16 +1129,18 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							</div>
 
 						</div>
-						<div className="my-request__container">
-							<div className="my-request__background">
-								<div className="my-request__message-list__message" aria-label="Message de la conversation">
+						<div className="my-request__container" >
+							<div className="my-request__background" >
+								<div
+									className="my-request__message-list__message"
+									aria-label="Message de la conversation"
+								>
 									{Array.isArray(messageStore) && isUserMessageOpen &&
 										messageStore
 											.filter((message) => message.conversation_id === conversationIdState)
 											.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
 											.map((message) => (
 												<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
-													{/* {index === array.length - 1 ? <div ref={endOfMessagesRef} aria-label="Dernier message visible" /> : null} */}
 													<motion.div
 														className={`content ${message.user_id === id ? 'me' : ''}`}
 														style={{ overflow: 'scroll' }}
@@ -1164,7 +1167,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 																						onClick={(event) => { event.stopPropagation(); }} >
 																						<img
 																							className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																							//key={media.id} 
+																							//key={media.id}
 																							src={pdfLogo}
 																							alt={media.name}
 																						/>
@@ -1174,11 +1177,11 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 																						className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
 																						key={media.id}
 																						src={media.url}
+																						loading="lazy"
 																						onClick={(event) => {
 																							setHasManyImages(false),
 																								openModal(imageUrls, index),
 																								imageUrls.length > 1 && setHasManyImages(true);
-
 																							event.stopPropagation();
 																						}}
 																						alt={media.name}
@@ -1279,7 +1282,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								/>
 								<MdSend
 									className="my-request__message-list__form__label__send"
-									onClick={(event) => {document.getElementById('send-message')?.click(), event.stopPropagation(); event?.preventDefault(); }} 
+									onClick={(event) => { document.getElementById('send-message')?.click(), event.stopPropagation(); event?.preventDefault(); }}
 									aria-label='Envoyer le message'
 
 								/>
@@ -1344,5 +1347,78 @@ export default MyRequest;
 
 
 
-
+{/* {Array.isArray(messageStore) && isUserMessageOpen &&
+											messageStore
+												.filter((message) => message.conversation_id === conversationIdState)
+												.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
+												.map((message) => (
+													<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
+														<motion.div
+															className={`content ${message.user_id === id ? 'me' : ''}`}
+															style={{ overflow: 'scroll' }}
+															initial={{ opacity: 0, scale: 0.9 }}
+															animate={{ opacity: 1, scale: 1 }}
+															exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
+															transition={{ duration: 0.3, type: 'tween' }}
+														>
+															{message.media[0].url && (
+																<div className="my-request__message-list__message__detail__image-container">
+																	<div className={`map ${message.content ? 'message' : ''}`}>
+																		{(() => {
+																			const imageUrls = message.media?.map(media => media.url) || [];
+																			return message.media?.map((media, index) => (
+																				media ? (
+																					media.name.endsWith('.pdf') ? (
+																						<a
+																							className="a-pdf"
+																							href={media.url}
+																							key={media.id}
+																							download={media.name}
+																							target="_blank"
+																							rel="noopener noreferrer"
+																							onClick={(event) => { event.stopPropagation(); }} >
+																							<img
+																								className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																								//key={media.id}
+																								src={pdfLogo}
+																								alt={media.name}
+																							/>
+																						</a>
+																					) : (
+																						<img
+																							className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																							key={media.id}
+																							src={media.url}
+																							loading="lazy"
+																							onClick={(event) => {
+																								setHasManyImages(false),
+																									openModal(imageUrls, index),
+																									imageUrls.length > 1 && setHasManyImages(true);
+																								event.stopPropagation();
+																							}}
+																							alt={media.name}
+																							onError={(event) => {
+																								event.currentTarget.src = noPicture;
+																							}}
+																						/>
+																					)
+																				) : null
+																			));
+																		})()}
+																	</div>
+																</div>
+															)}
+															{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
+														</motion.div>
+														<motion.div
+															className="my-request__message-list__message__detail__date"
+															style={{ overflow: 'scroll' }}
+															initial={{ opacity: 0, scale: 0.9 }}
+															animate={{ opacity: 1, scale: 1 }}
+															exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
+															transition={{ duration: 0.1, type: 'tween' }}
+														>{new Date(Number(message.created_at)).toLocaleString()}</motion.div>
+													</div>
+												))
+										} */}
 

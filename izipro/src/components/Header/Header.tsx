@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 function Header() {
 	// State
 	const [isLogged, setIsLogged] = useState(false);
+	const [withGradient, setWithGradient] = useState(false);
 
 	const location = useLocation();
 
@@ -31,29 +32,27 @@ function Header() {
 			} else {
 				isLoggedValue = false;
 			}
-			/* if (decodeData === 'session') {
 	
-				isLoggedValue = {value: 'true'};
+			if (location.pathname === '/dashboard') {
+				setWithGradient(true);
+
+				if (isLoggedValue) {
+					setIsLogged(true);
+				} else {
+					setIsLogged(false);
+				}	
 			} else {
-	
-				isLoggedValue = JSON.parse(decodeData || '{}');
-			} */
-	
-			if (location.pathname === '/dashboard' && isLoggedValue) {
-				//const newIsLogged = isLoggedValue.value === 'true' ? true : false;
-				
-				setIsLogged(true );
-			} else {
+				setWithGradient(false);
 				setIsLogged(false);
 			}
 	}, [location.pathname]);
 
 	return (
-		<header className="header" id="header">
+		<header className={`header ${withGradient ? 'with-gradient' : ''}`}  id="header">
 			<div className="header__container">
 				<img
 					className='header__container image'
-					src="/izipro-logo.png"
+					src="/izipro-logo.svg"
 					alt="Izipro logo"
 					onClick={() => window.location.reload()}
 				/>

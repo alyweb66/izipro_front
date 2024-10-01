@@ -2,14 +2,16 @@
 @use '../../styles/variables' as v;
 
 .header {
-    // max-width: 100%; //!
     width: 100%;
     height : 8vh;
     height : 8dvh;
-    //padding-top: 1rem;
     display: flex;
     justify-content: space-around;
-   // padding-top: 1rem;
+    background-blend-mode: screen;
+    &.with-gradient {
+        background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.527) 10%, rgba(255, 255, 255, 0.527) 90%, transparent 100%);
+    }
+
  
 
     .header__container {
@@ -29,6 +31,7 @@
             font-family: v.$font;
             font-weight: v.$font-title-weight;
             font-size: 2.3rem;
+            margin-left: 0.5rem;
         }
     }
 }
@@ -52,6 +55,7 @@
         height: 10vh;
         height: 10dvh;
         margin-bottom: 0.5rem;
+        
         .header__container {
             &.title {
                 font-size: 1.5rem;

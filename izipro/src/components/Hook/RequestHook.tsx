@@ -151,6 +151,7 @@ const RequestItem = ({
 									className="my-conversation__list__detail__item__picture img"
 									key={media.id}
 									src={media.url}
+									loading="lazy"
 									onClick={(event) => {
 										setHasManyImages && setHasManyImages(false),
 											openModal && openModal(imageUrls, index),

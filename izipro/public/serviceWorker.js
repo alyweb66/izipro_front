@@ -62,7 +62,6 @@ const TILE_URL_PATTERN = /https:\/\/basemaps\.cartocdn\.com\/gl\/voyager-gl-styl
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Opened cache');
     })
   );
 });
@@ -72,12 +71,21 @@ self.addEventListener('fetch', (event) => {
   if (TILE_URL_PATTERN.test(event.request.url)) {
     event.respondWith(
       caches.match(event.request).then((response) => {
-        return response || fetch(event.request).then((response) => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request).then((response) => {
           return caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, response.clone());
             return response;
+          }).catch((error) => {
+            console.error('Error opening cache for fetch:', error);
           });
+        }).catch((error) => {
+          console.error('Fetch error:', error);
         });
+      }).catch((error) => {
+        console.error('Cache match error:', error);
       })
     );
   }
@@ -87,7 +95,8 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'CLEAR_CACHE') {
     caches.delete(CACHE_NAME).then(() => {
-      console.log('Cache cleared');
+    }).catch((error) => {
+      console.error('Error clearing cache:', error);
     });
   }
 });

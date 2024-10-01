@@ -129,10 +129,6 @@
       &.button {
         @include m.orange-button;
 
-        &{
-          font-weight: 500;
-        }
-
         &.pro {
           margin-bottom: 0.5rem;
           

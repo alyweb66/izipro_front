@@ -53,7 +53,8 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import noPicture from '/logo/no-picture.webp';
-
+//import { VariableSizeList as List, ListChildComponentProps } from 'react-window';
+//import { useVirtualizer } from '@tanstack/react-virtual';
 type useQueryUserConversationsProps = {
 	loading: boolean;
 	data: { user: { requestsConversations: RequestProps[] } };
@@ -681,21 +682,21 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		};
 		const ensureScrollToEnd = () => {
 			const container = endOfMessagesRef.current?.parentElement;
-		
+
 			if (container) {
-			  // verify if we have reached the end of the messages
-			  const hasReachedEnd = container.scrollTop + container.clientHeight >= container.scrollHeight;
-		
-			  if (!hasReachedEnd) {
-				// If we haven't reached the end, scroll to the end
-				scrollToEnd('auto');
-				setTimeout(ensureScrollToEnd, 0); 
-			  } else {
-				// If we have reached the end, scroll to the end smoothly
-				scrollToEnd('smooth');
-			  }
+				// verify if we have reached the end of the messages
+				const hasReachedEnd = container.scrollTop + container.clientHeight >= container.scrollHeight;
+
+				if (!hasReachedEnd) {
+					// If we haven't reached the end, scroll to the end
+					scrollToEnd('auto');
+					setTimeout(ensureScrollToEnd, 0);
+				} else {
+					// If we have reached the end, scroll to the end smoothly
+					scrollToEnd('smooth');
+				}
 			}
-		  };
+		};
 		// scroll to the end of the messages before painting browser with requestAnimationFrame
 		requestAnimationFrame(() => {
 			setTimeout(() => {
@@ -703,7 +704,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 				setTimeout(ensureScrollToEnd, 500);
 			}, 0);
 		});
-		
+
 	}, [messageStore, isMessageOpen, selectedRequest]);
 
 
@@ -847,10 +848,10 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							)}
 
 						</div>
-	
+
 						<div className="my-conversation__container">
 							<div className="my-conversation__background">
-								<div /* id="scrollableMessageList" */ className="my-conversation__message-list__message">
+								<div className="my-conversation__message-list__message">
 									{Array.isArray(messageStore) &&
 										messageStore
 											.filter((message) => message.conversation_id === conversationIdState)
@@ -861,15 +862,13 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 													key={message.id}
 
 												>
-													{/* if it is the last message, scroll to the end of the messages */}
-
 													<motion.div
 														className={`content ${message.user_id === id ? 'me' : ''}`}
 														style={{ overflow: 'scroll' }}
 														initial={{ opacity: 0, scale: 0.9 }}
 														animate={{ opacity: 1, scale: 1 }}
 														exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-														transition={{ duration: 0.3, type: 'tween'}}
+														transition={{ duration: 0.3, type: 'tween' }}
 													>
 														{message.media[0].url && (
 															<div className="my-conversation__message-list__message__detail__image-container">
@@ -900,6 +899,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 																						className={`my-conversation__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
 																						key={media.id}
 																						src={media.url}
+																						loading="lazy"
 																						onClick={(event) => {
 																							setHasManyImages(false),
 																								openModal(imageUrls, index),
@@ -933,7 +933,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 													</motion.div>
 												</div>
 											))
-
 									}
 									<div ref={endOfMessagesRef} />
 								</div>
@@ -1004,7 +1003,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 								/>
 								<MdSend
 									className="my-conversation__message-list__form__label__send"
-									onClick={(event) => {document.getElementById('send-message')?.click(), event.stopPropagation(); event?.preventDefault();}}
+									onClick={(event) => { document.getElementById('send-message')?.click(), event.stopPropagation(); event?.preventDefault(); }}
 								/>
 							</label>
 							<input

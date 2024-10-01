@@ -1,4 +1,4 @@
-import {useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 //import Map, { Layer, Marker, Source } from 'react-map-gl';
 import maplibregl, { Map } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -40,7 +40,6 @@ import * as turf from '@turf/turf';
 
 
 function Request() {
-	//const mapboxAccessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
 	// Store
 	const id = userDataStore((state) => state.id);
@@ -222,12 +221,14 @@ function Request() {
 			style: import.meta.env.VITE_MAPLIBRE_URL,
 			center: [lng ?? 0, lat ?? 0],
 			zoom: 10,
-			minZoom: 5, // Set minimum zoom level
-			maxZoom: 15, // Set maximum zoom level
 			dragPan: false, // Disable dragging to pan the map
 			scrollZoom: false, // Disable scroll zoom
 			attributionControl: false,
 		});
+
+		// Disable map interactions 
+		MapInstance.touchZoomRotate.disable();
+		MapInstance.doubleClickZoom.disable();
 
 		MapInstance.on('load', () => {
 			setIsLoading(false);
@@ -247,7 +248,7 @@ function Request() {
 
 			// Add markers, layers, sources, etc. as needed
 			new maplibregl.Marker({
-				color: "#028eef",
+				color: "#f37c04",
 			})
 				.setLngLat([lng ?? 0, lat ?? 0])
 				.addTo(map as maplibregl.Map);
@@ -276,7 +277,7 @@ function Request() {
 					source: 'circle',
 					layout: {},
 					paint: {
-						'fill-color': 'red',
+						'fill-color': '#028eef',
 						'fill-opacity': 0.3,
 					},
 				});

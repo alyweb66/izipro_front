@@ -18,11 +18,13 @@
 
   .login-container__logo {
     display: flex;
+    justify-content: center;
     margin: 0;
 
     .__image {
       width: 50px;
       height: 50px;
+      
     }
 
     .__title {
@@ -30,6 +32,7 @@
       font-family: v.$font;
       font-weight: v.$font-title-weight;
       font-size: 2.3rem;
+      margin-left: 0.5rem;
     }
   }
 
@@ -96,7 +99,6 @@
         justify-content: center;
         align-items: center;
         max-width: 20%;
-        font-weight: 500;
 
       }
 
@@ -290,6 +292,7 @@
 
   .login-container__title {
     margin-bottom: 0;
+    
   }
 
     .login-container__form {
