@@ -253,9 +253,6 @@ function Login() {
 
 				<button type="submit" className='login-container__form button'>Se connecter</button>
 			</form>
-			{/* 	<button className="show-password" onClick={() => setShowPassword(!showPassword)}>
-				{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
-			</button> */}
 			<div className="message">
 				<Stack sx={{ width: '100%' }} spacing={2}>
 					{messageError && (

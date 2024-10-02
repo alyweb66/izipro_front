@@ -9,14 +9,17 @@
 
 
   .footer-container {
-    display: flex;
-    justify-content: space-around;
-    padding: 0.5rem;
-    text-align: center;
-    font-size: 1rem;
-    bottom: 0;
     width: 100%;
-    background-color: transparent;
+    &__nav {
+      display: flex;
+      justify-content: space-around;
+      padding: 0.5rem;
+      text-align: center;
+      font-size: 1rem;
+      bottom: 0;
+      width: 100%;
+      background-color: transparent;
+    }
 
     .footer-container__link {
       color: v.$color-primary-blue;

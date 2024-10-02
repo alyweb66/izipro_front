@@ -763,8 +763,9 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							event.preventDefault();
 							event.stopPropagation();
 							addRequest();
-						}
-						}>
+						}}
+						aria-label="Charger plus de conversations">
+
 						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
 						<span className="icon2"></span>
 						<span className="tooltip">Charger plus</span>
@@ -808,6 +809,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 													}, 200);
 												}
 											}}
+											 aria-label="Retour à la liste des conversations"
 										/>
 										<img
 											className="my-conversation__message-list__user__header__detail img"
@@ -860,7 +862,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 												<div
 													className={`my-conversation__message-list__message__detail ${message.user_id === id ? 'me' : ''}`}
 													key={message.id}
-
+													aria-label={`Message de ${message.user_id === id ? 'vous' : 'l\'autre utilisateur'}`}
 												>
 													<motion.div
 														className={`content ${message.user_id === id ? 'me' : ''}`}
@@ -885,16 +887,16 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 																						download={media.name}
 																						target="_blank"
 																						rel="noopener noreferrer"
-																						onClick={(event) => { event.stopPropagation(); }} >
+																						onClick={(event) => { event.stopPropagation(); }} 
+																						aria-label={`Télécharger le fichier PDF ${media.name}`}
+																						>
 																						<img
 																							className={`my-conversation__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																							//key={media.id} 
 																							src={pdfLogo}
 																							alt={media.name}
 																						/>
 																					</a>
 																				) : (
-
 																					<img
 																						className={`my-conversation__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
 																						key={media.id}
@@ -922,15 +924,16 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 														)}
 														{message.content && <div className="my-conversation__message-list__message__detail__texte">{message.content}</div>}
 													</motion.div>
-													<motion.div
+													<motion.time
 														className="my-conversation__message-list__message__detail__date"
 														style={{ overflow: 'scroll' }}
 														initial={{ opacity: 0, scale: 0.9 }}
 														animate={{ opacity: 1, scale: 1 }}
 														exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 														transition={{ duration: 0.1, type: 'tween' }}
+														dateTime={new Date(Number(message.created_at)).toISOString()}
 													>{new Date(Number(message.created_at)).toLocaleString()}
-													</motion.div>
+													</motion.time>
 												</div>
 											))
 									}
@@ -975,6 +978,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 										<div
 											className="my-conversation__message-list__form__preview__container__remove"
 											onClick={() => handleRemove(index)}
+											aria-label="Supprimer le fichier"
 										>
 											X
 										</div>
@@ -985,10 +989,12 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 								<MdAttachFile
 									className="my-conversation__message-list__form__label__attach"
 									onClick={() => document.getElementById('send-file')?.click()}
+									aria-label="Joindre un fichier"
 								/>
 								<FaCamera
 									className="my-conversation__message-list__form__label__camera"
 									onClick={() => document.getElementById('file-camera')?.click()}
+									aria-label="Prendre une photo"
 								/>
 								<TextareaAutosize
 									id="message-input"
@@ -1000,10 +1006,12 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 									maxLength={1000}
 									minRows={1}
 									readOnly={selectedRequest && selectedRequest?.id > 0 ? false : true}
+									aria-label="Tapez votre message ici"
 								/>
 								<MdSend
 									className="my-conversation__message-list__form__label__send"
 									onClick={(event) => { document.getElementById('send-message')?.click(), event.stopPropagation(); event?.preventDefault(); }}
+								aria-label="Envoyer le message"
 								/>
 							</label>
 							<input
@@ -1014,6 +1022,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
 								multiple={true}
 								disabled={selectedRequest && selectedRequest?.id > 0 ? false : true}
+								aria-label="Joindre un fichier"
 							/>
 							<input
 								id="file-camera"
@@ -1023,12 +1032,14 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 								capture="environment"
 								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
 								disabled={selectedRequest && selectedRequest?.id > 0 ? false : true}
+								aria-label="Prendre une photo"
 							/>
 							<button
 								id="send-message"
 								className="my-conversation__message-list__form__button"
 								type="submit"
 								disabled={selectedRequest && selectedRequest?.id > 0 ? false : true}
+								aria-label="Envoyer le message"
 							>
 								Send
 							</button>

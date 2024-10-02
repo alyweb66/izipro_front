@@ -11,6 +11,23 @@
     height: 100dvh;
 
     .rules-modal__container {
+        // height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        .rules-modal-header {
+            flex-shrink: 0;
+            height: 10%;
+            .modal__title {
+                color: v.$color-primary-orange;
+                font-weight: 500;
+                font-size: 2rem;
+                text-align: center;
+              //  height: 10%;
+            }
+        }
+
         @include m.modal-container;
 
         & {
@@ -18,61 +35,66 @@
             height: 70vh;
         }
 
-        .rules-modal__container__content {
+        .rules-modal-description {
+            flex-grow: 1;
             overflow: auto;
-            overflow-x: hidden;
-            height: 100%;
+            .rules-modal__container__content {
+                overflow: auto;
+                overflow-x: hidden;
+                height: 100%;
 
-            .rules-modal__container__content__description {
-                padding-bottom: 1rem;
-                text-align: left;
-
-                .rules-title {
-                    color: v.$color-primary-orange;
-                    font-weight: 500;
-                    font-size: 2rem;
+                .rules-modal__container__content__description {
+                    padding-bottom: 1rem;
                     text-align: left;
-                }
+                    height: auto;
 
-                .rules-list {
-                    display: flex;
-                    flex-direction: column;
-                    width: 100%;
-                    max-width: 100%;
-                    background: white;
-                    border-radius: 0.5rem;
-                    font-size: 0.9rem;
-                    font-weight: 500;
-                    text-align: left;
-
-                    .rules-list__tag {
-
-                        font-weight: 350;
-                        font-size: 1.2rem;
-                        // margin-bottom: 0.5rem;
-                        // margin-top: 0.5rem;
+                    .rules-title {
+                        color: v.$color-primary-orange;
+                        font-weight: 500;
+                        font-size: 2rem;
                         text-align: left;
                     }
-                }
 
-                .rules-subtitle {
-                    color: v.$color-primary-blue;
-                    font-weight: 400;
-                    font-size: 1.2rem;
-                    margin-bottom: 0.5rem;
-                    margin-top: 0.5rem;
-                    text-align: left;
-                }
+                    .rules-list {
+                        display: flex;
+                        flex-direction: column;
+                        width: 100%;
+                        max-width: 100%;
+                        background: white;
+                        border-radius: 0.5rem;
+                        font-size: 0.9rem;
+                        font-weight: 500;
+                        text-align: left;
 
-                .rules-description {
-                    color: black;
-                    font-weight: 400;
-                    font-size: 1rem;
-                    margin-bottom: 0.5rem;
-                    margin-top: 0.5rem;
-                    text-align: left;
-                }
+                        .rules-list__tag {
 
+                            font-weight: 350;
+                            font-size: 1.2rem;
+                            // margin-bottom: 0.5rem;
+                            // margin-top: 0.5rem;
+                            text-align: left;
+                        }
+                    }
+
+                    .rules-subtitle {
+                        color: v.$color-primary-blue;
+                        font-weight: 400;
+                        font-size: 1.2rem;
+                        margin-bottom: 0.5rem;
+                        margin-top: 0.5rem;
+                        text-align: left;
+                    }
+
+                    .rules-description {
+                        color: black;
+                        font-weight: 400;
+                        font-size: 1rem;
+                        margin-bottom: 0.5rem;
+                        margin-top: 0.5rem;
+                        text-align: left;
+                    }
+
+                }
             }
         }
 
@@ -81,10 +103,13 @@
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
-            margin: auto;
+            margin: 0 auto;
             max-width: 100%;
             width: 100%;
-            padding-top: 1rem;
+            padding-top: 0.5rem;
+            height: auto;
+            background-color: white;
+            //z-index: 2;
 
             .rules-modal__cancel,
             .rules-modal__close,
@@ -119,7 +144,7 @@
     background: rgba(0, 0, 0, 0.2);
     z-index: 999;
     backdrop-filter: blur(5px);
-    
+
 }
 
 @media (max-width: 700px) {

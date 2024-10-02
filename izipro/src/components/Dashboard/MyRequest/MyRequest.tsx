@@ -780,7 +780,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				id="scrollableRequest"
 				className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}
 				aria-label="Liste des demandes"
-
 			>
 				{requestLoading && <Spinner />}
 				{!requestByDate ? <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p> : (
@@ -1198,14 +1197,16 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 														)}
 														{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
 													</motion.div>
-													<motion.div
+													<motion.time
 														className="my-request__message-list__message__detail__date"
 														style={{ overflow: 'scroll' }}
 														initial={{ opacity: 0, scale: 0.9 }}
 														animate={{ opacity: 1, scale: 1 }}
 														exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 														transition={{ duration: 0.1, type: 'tween' }}
-													>{new Date(Number(message.created_at)).toLocaleString()}</motion.div>
+														dateTime={new Date(Number(message.created_at)).toISOString()}
+													>{new Date(Number(message.created_at)).toLocaleString()}
+													</motion.time>
 												</div>
 											))
 									}
@@ -1295,6 +1296,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
 								multiple={true}
 								disabled={selectedUser && selectedUser?.id > 0 ? false : true}
+								aria-label="Envoyer un fichier"
 							/>
 							<input
 								id="file-camera"
@@ -1304,12 +1306,14 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								capture="environment"
 								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
 								disabled={selectedUser && selectedUser?.id > 0 ? false : true}
+								aria-label="Prendre une photo"
 							/>
 							<button
 								id="send-message"
 								className="my-request__message-list__form__button"
 								type="submit"
 								disabled={selectedUser && selectedUser?.id > 0 ? false : true}
+								aria-label="Envoyer le message"
 							>
 								Send
 							</button>
@@ -1346,79 +1350,4 @@ export default MyRequest;
 
 
 
-
-{/* {Array.isArray(messageStore) && isUserMessageOpen &&
-											messageStore
-												.filter((message) => message.conversation_id === conversationIdState)
-												.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
-												.map((message) => (
-													<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
-														<motion.div
-															className={`content ${message.user_id === id ? 'me' : ''}`}
-															style={{ overflow: 'scroll' }}
-															initial={{ opacity: 0, scale: 0.9 }}
-															animate={{ opacity: 1, scale: 1 }}
-															exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-															transition={{ duration: 0.3, type: 'tween' }}
-														>
-															{message.media[0].url && (
-																<div className="my-request__message-list__message__detail__image-container">
-																	<div className={`map ${message.content ? 'message' : ''}`}>
-																		{(() => {
-																			const imageUrls = message.media?.map(media => media.url) || [];
-																			return message.media?.map((media, index) => (
-																				media ? (
-																					media.name.endsWith('.pdf') ? (
-																						<a
-																							className="a-pdf"
-																							href={media.url}
-																							key={media.id}
-																							download={media.name}
-																							target="_blank"
-																							rel="noopener noreferrer"
-																							onClick={(event) => { event.stopPropagation(); }} >
-																							<img
-																								className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																								//key={media.id}
-																								src={pdfLogo}
-																								alt={media.name}
-																							/>
-																						</a>
-																					) : (
-																						<img
-																							className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																							key={media.id}
-																							src={media.url}
-																							loading="lazy"
-																							onClick={(event) => {
-																								setHasManyImages(false),
-																									openModal(imageUrls, index),
-																									imageUrls.length > 1 && setHasManyImages(true);
-																								event.stopPropagation();
-																							}}
-																							alt={media.name}
-																							onError={(event) => {
-																								event.currentTarget.src = noPicture;
-																							}}
-																						/>
-																					)
-																				) : null
-																			));
-																		})()}
-																	</div>
-																</div>
-															)}
-															{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
-														</motion.div>
-														<motion.div
-															className="my-request__message-list__message__detail__date"
-															style={{ overflow: 'scroll' }}
-															initial={{ opacity: 0, scale: 0.9 }}
-															animate={{ opacity: 1, scale: 1 }}
-															exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-															transition={{ duration: 0.1, type: 'tween' }}
-														>{new Date(Number(message.created_at)).toLocaleString()}</motion.div>
-													</div>
-												))
-										} */}
 

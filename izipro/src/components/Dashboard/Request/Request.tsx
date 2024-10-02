@@ -333,18 +333,20 @@ function Request() {
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 						transition={{ duration: 0.1, type: 'tween' }}
+						aria-label="Formulaire de demande"
 					>
-						<h2 className="request__form__title urgent">Si votre demande est une urgence cliquez sur URGENT:</h2>
+						<h1 className="request__form__title urgent">Si votre demande est une urgence cliquez sur URGENT:</h1>
 						<button
 							className={`urgent-button ${urgent ? 'active' : ''}`}
+							title="Marquer comme demande urgente"
 							onClick={(event) => {
 								event.preventDefault();
 								setUrgent(!urgent);
 							}
 							}
 						>URGENT
-							<TbUrgent className="urgent-icon" /></button>
-						<h2 className="request__form__title">Séléctionnez la catégorie et le métier concerné:</h2>
+							<TbUrgent className="urgent-icon" aria-label="Icône de demande urgente" /></button>
+						<h1 className="request__form__title">Séléctionnez la catégorie et le métier concerné:</h1>
 						<SelectBox
 							data={categoriesState}
 							selected={selectedCategory}
@@ -363,14 +365,15 @@ function Request() {
 
 						{lng && lat && (
 							<>
-								<h2 className="request__form__title radius">Séléctionnez une distance:</h2>
+								<h1 className="request__form__title radius">Séléctionnez une distance:</h1>
 								<label className="request__form__label-radius">
 									{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
 									<Box className="request__slider-container" sx={{ width: 250 }}>
 										<Slider
 											aria-labelledby="radius-slider-label"
 											defaultValue={105}
-											aria-label="Distance d'action"
+											aria-valuetext={radius === 0 ? 'Toute la France' : `${radius / 1000} Km autour de moi`}
+											aria-label="Distance de recherche"
 											valueLabelDisplay="auto"
 											value={radius === 0 ? 105 : radius / 1000}
 											step={5}
@@ -390,11 +393,13 @@ function Request() {
 								</div>
 							</>
 						)}
-						<h2 className="request__form__title">Saisissez le titre:</h2>
+						<h1 className="request__form__title">Saisissez le titre:</h1>
 						<label className="request__form__label">
 							<input
 								className="request__form__label__input title"
 								name="title"
+								aria-label="Titre de la demande"
+								title="Titre de la demande (50 caractères maximum)"
 								type="text"
 								placeholder="Titre de la demande (50 caractères maximum)"
 								value={titleRequest}
@@ -402,7 +407,7 @@ function Request() {
 								maxLength={50}
 							/>
 						</label>
-						<h2 className="request__form__title">Décrivez votre demande:</h2>
+						<h1 className="request__form__title">Décrivez votre demande:</h1>
 						<label className="request__form__label">
 							<TextareaAutosize
 								className="request__form__label__input textarea"
@@ -436,6 +441,7 @@ function Request() {
 											style={{ width: '100px', height: '100px', objectFit: 'cover' }}
 											src={file.type === 'application/pdf' ? pdfLogo : file.name}
 											alt={`Preview ${index}`}
+											title={`Prévisualisation du fichier ${index + 1}`}
 										/>
 										<div
 											className="request__form__input-media remove"
@@ -457,13 +463,15 @@ function Request() {
 								)}
 							</Stack>
 						</div>
-						<h2 className="request__form__title media">Ajoutez des photos (3 maximum):</h2>
+						<h1 className="request__form__title media">Ajoutez des photos (3 maximum):</h1>
 						<label
 							htmlFor="file"
 							className="request__form__label-file"
 							onDragOver={(event) => event.preventDefault()}
 							onDragEnter={(event) => event.preventDefault()}
 							onDrop={handleFileUpload}
+							aria-label="Ajouter des fichiers"
+							title="Glissez et déposez vos fichiers ici ou cliquez pour les sélectionner"
 						>
 							<span>
 								<svg
@@ -476,6 +484,7 @@ function Request() {
 									width="60px"
 									height="60px"
 								>
+									<title id="upload-icon">Icône de téléchargement de fichier</title>
 									<g>
 										<g>
 											<g>
@@ -515,6 +524,8 @@ function Request() {
 							multiple={true}
 							onChange={handleFileUpload}
 							accept=".jpg,.jpeg,.png,.pdf"
+							aria-label="Téléchargez plusieurs fichiers (formats acceptés : .jpg, .jpeg, .png, .pdf)"
+							title="Téléchargez des fichiers"
 						/>
 						<input
 							id="fileInput"
@@ -523,10 +534,14 @@ function Request() {
 							accept="image/*"
 							capture="environment"
 							onChange={handleFileUpload}
+							aria-label="Prendre une photo via la caméra"
+							title="Prendre une photo via la caméra"
 						/>
 						<FaCamera
 							className="request__form__input-media camera-icone "
 							onClick={() => document.getElementById('fileInput')?.click()}
+							aria-label="Icône de caméra pour prendre une photo"
+							title="Prendre une photo avec la caméra"
 						/>
 
 						<div className="message">
@@ -553,6 +568,8 @@ function Request() {
 							className="request__form__button"
 							type="submit"
 							disabled={createLoading}
+							aria-label="Envoyer le formulaire de demande"
+							title="Envoyer"
 						>
 							Envoyer
 						</button>

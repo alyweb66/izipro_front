@@ -3,18 +3,18 @@
 .root {
   display: flex;
   flex-direction: column;
-  width: 80rem; 
+  width: 80rem;
   max-width: 100%;
   margin: 0 auto;
   height: 100vh;
   height: 100dvh;
-  overflow: auto;
-  scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
+  //overflow: auto;
+  //scrollbar-width: none;
+
+ // &::-webkit-scrollbar {
+   // display: none;
     /* For Chrome, Safari and Opera */
-}
-  
+  //}
 
 
   main {

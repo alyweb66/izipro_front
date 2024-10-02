@@ -29,52 +29,50 @@ function Presentation() {
 
 	return (
 		<div className="presentation-container">
-			<h2 className="presentation-container__title">&quot;La solution pour connecter efficacement particuliers et professionnels.&quot;</h2>
-			<div className="presentation-container__particular">
-				<div className="image image-1">
-				</div>
-				<div className="image image-2"></div>
-			</div>
-			<div className="presentation-container__content">
-				<p className="content">
-					Plus de temps à perdre ? Dites adieu aux recherches fastidieuses de professionnels. Simplifiez votre vie avec notre plateforme pratique pour faire vos demandes de devis ou d&apos;urgence aux proffessionnel. Faites place à l&apos;efficacité et gagnez du temps pour ce qui compte vraiment.
-				</p>
-			</div>
-			{imagePosition ? (
-				<>
-					<div className="presentation-container__particular-pro">
-						<div className="image image-1">
-						</div>
-						<div className="image image-2">
-						</div>
-						<div className="image image-3">
-						</div>
-					</div>
-					<div className="presentation-container__content">
-						<p className="content">
-							Avec notre plateforme, les jeunes entrepreneurs comme vous peuvent enfin se lancer dans leurs projets avec confiance et facilité. Plus besoin de chercher désespérément des clients - notre réseau dynamique vous met en contact avec les bonnes personnes au bon moment.
-						</p>
-					</div>
-				</>
-			) : (
-				<>
-					<div className="presentation-container__content">
-						<p className="content">
-							Avec notre plateforme, les jeunes entrepreneurs comme vous peuvent enfin se lancer dans leurs projets avec confiance et facilité. Plus besoin de chercher désespérément des clients - notre réseau dynamique vous met en contact avec les bonnes personnes au bon moment.
-						</p>
-					</div>
-					<div className="presentation-container__particular-pro">
-						<div className="image image-1">
-						</div>
-						<div className="image image-2">
-						</div>
-						<div className="image image-3">
-						</div>
-					</div>
-				</>
-			)}
-
-		</div>
+      <h1 className="presentation-container__title">La solution pour connecter efficacement particuliers et professionnels.</h1>
+      <section className="presentation-container__particular" aria-labelledby="particular-section">
+        <h2 id="particular-section" className="visually-hidden">Particuliers</h2>
+        <div className="image image-1" role="img" aria-label="Image de particulier 1"></div>
+        <div className="image image-2" role="img" aria-label="Image de particulier 2"></div>
+      </section>
+      <section className="presentation-container__content" aria-labelledby="content-section">
+        <h2 id="content-section" className="visually-hidden">Contenu</h2>
+        <p className="content">
+          Plus de temps à perdre ? Dites adieu aux recherches fastidieuses de professionnels. Simplifiez votre vie avec notre plateforme pratique pour faire vos demandes de devis ou d'urgence aux professionnels. Faites place à l'efficacité et gagnez du temps pour ce qui compte vraiment.
+        </p>
+      </section>
+      {imagePosition ? (
+        <>
+          <section className="presentation-container__particular-pro" aria-labelledby="particular-pro-section">
+            <h2 id="particular-pro-section" className="visually-hidden">Particuliers et Professionnels</h2>
+            <div className="image image-1" role="img" aria-label="Image de particulier et professionnel 1"></div>
+            <div className="image image-2" role="img" aria-label="Image de particulier et professionnel 2"></div>
+            <div className="image image-3" role="img" aria-label="Image de particulier et professionnel 3"></div>
+          </section>
+          <section className="presentation-container__content" aria-labelledby="content-pro-section">
+            <h2 id="content-pro-section" className="visually-hidden">Contenu pour Professionnels</h2>
+            <p className="content">
+              Avec notre plateforme, les jeunes entrepreneurs comme vous peuvent enfin se lancer dans leurs projets avec confiance et facilité. Plus besoin de chercher désespérément des clients - notre réseau dynamique vous met en contact avec les bonnes personnes au bon moment.
+            </p>
+          </section>
+        </>
+      ) : (
+        <>
+          <section className="presentation-container__content" aria-labelledby="content-pro-section">
+            <h2 id="content-pro-section" className="visually-hidden">Contenu pour Professionnels</h2>
+            <p className="content">
+              Avec notre plateforme, les jeunes entrepreneurs comme vous peuvent enfin se lancer dans leurs projets avec confiance et facilité. Plus besoin de chercher désespérément des clients - notre réseau dynamique vous met en contact avec les bonnes personnes au bon moment.
+            </p>
+          </section>
+          <section className="presentation-container__particular-pro" aria-labelledby="particular-pro-section">
+            <h2 id="particular-pro-section" className="visually-hidden">Particuliers et Professionnels</h2>
+            <div className="image image-1" role="img" aria-label="Image de particulier et professionnel 1"></div>
+            <div className="image image-2" role="img" aria-label="Image de particulier et professionnel 2"></div>
+            <div className="image image-3" role="img" aria-label="Image de particulier et professionnel 3"></div>
+          </section>
+        </>
+      )}
+    </div>
 	);
 }
 

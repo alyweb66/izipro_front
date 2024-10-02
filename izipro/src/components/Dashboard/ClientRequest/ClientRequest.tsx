@@ -315,7 +315,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 									animate={{opacity: 1, scale: 1 }}
 									exit={{ opacity: 0, scale: 0.9 }}
 									transition={{duration: 0.2, type: 'Inertia', stiffness: 50 }}
-
+									aria-label={`Demande de ${request.first_name} ${request.last_name}`}
 								>
 									{hiddenLoading && modalArgs?.requestId === request.id && <Spinner />}
 									{request.urgent && <p className="client-request__list__detail__item urgent">URGENT</p>}
@@ -361,11 +361,11 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 
 											event.stopPropagation();
 										}}
+										aria-label={`Message de la demande ${request.title}`}
 									>
 										{request.message}
 									</p>
 									<div className="client-request__list__detail__item__picture">
-
 										{(() => {
 											const imageUrls = request.media?.map(media => media.url) || [];
 											return request.media?.map((media, index) => (
@@ -377,10 +377,11 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 															download={media.name}
 															target="_blank"
 															rel="noopener noreferrer"
-															onClick={(event) => { event.stopPropagation(); }} >
+															onClick={(event) => { event.stopPropagation(); }} 
+															aria-label={`Télécharger le fichier PDF ${media.name}`}
+															>
 															<img
 																className="client-request__list__detail__item__picture img"
-																//key={media.id} 
 																src={pdfLogo}
 																alt={media.name}
 															/>
@@ -408,7 +409,6 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 										})()}
 
 									</div>
-
 									<button
 										id={`delete-request-${request.id}`}
 										className="client-request__list__detail__item__delete"
@@ -417,7 +417,9 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 											setDeleteItemModalIsOpen(true);
 											setModalArgs({requestId: request.id, requestTitle: request.title});
 											event.stopPropagation();
-										}}>
+										}}
+										aria-label={`Supprimer la demande ${request.title}`}
+										>
 									</button>
 									<FaTrashAlt
 										className="client-request__list__detail__item__delete-FaTrashAlt"
@@ -425,6 +427,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 											document.getElementById(`delete-request-${request.id}`)?.click(),
 											event.stopPropagation();
 										}}
+										aria-label={`Supprimer la demande ${request.title}`}
 									/>
 								</motion.div>
 							))}
@@ -437,10 +440,10 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 						onClick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
-
 							addRequest();
-						}
-						}>
+						}}
+						aria-label="Charger plus de demandes"
+						>
 						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
 						<span className="icon2"></span>
 						<span className="tooltip">Charger plus</span>

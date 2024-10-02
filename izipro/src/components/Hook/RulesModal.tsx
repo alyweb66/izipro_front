@@ -33,16 +33,16 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 	useEffect(() => {
 		if (isOpenModal) {
 			setIsVisible(true);
-			document.body.style.overflow = 'hidden'; 
+			document.body.style.overflow = 'hidden';
 		} else {
-		  document.body.style.overflow = 'unset'; 
+			document.body.style.overflow = 'unset';
 		}
 
 		// Cleanup function to reset the overflow style
 		return () => {
-		  document.body.style.overflow = 'unset'; 
+			document.body.style.overflow = 'unset';
 		};
-		
+
 	}, [isOpenModal]);
 
 	const closeModal = () => {
@@ -56,9 +56,10 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 		<ReactModal
 			className="rules-modal"
 			isOpen={isOpenModal}
-			contentLabel="Delete Account"
+			contentLabel={isCookie ? 'Accepter les cookies' : 'Conditions générales d\'utilisation'}
 			shouldCloseOnOverlayClick={false}
-			aria-label={isCookie ? 'Accepter les cookies' : 'Conditions générales d utilisation'}
+			aria-labelledby="rules-modal-title"
+			aria-describedby="rules-modal-description"
 			overlayClassName="rules-modal__overlay"
 		>
 			<AnimatePresence>
@@ -71,82 +72,92 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
 						exit={{ opacity: 0, scale: 0.9 }}
 						transition={{ duration: 0.2, type: 'Inertia', stiffness: 50 }}
 					>
-						{/* <h1 className="modal__title">CGU</h1> */}
-						{loading ? <Spinner /> :
-							<div className="rules-modal__container__content">
-								<p className="rules-modal__container__content__description" dangerouslySetInnerHTML={{ __html: content || 'Empty...' }}></p>
-							</div>
-						}
-						{isCookie ? (
-							<div className="rules-modal__container__button">
-								<button
-									className="rules-modal__accept"
-									onClick={() => {
-										closeModal();
-										handleAccept(undefined, true);
-									}}
-								>
-									Tout accepter
-								</button>
-								<button
-									className="rules-modal__cancel"
-									onClick={() => {
-										closeModal();
-										handleAccept(undefined, false);
-									}}
-								>
-									Nécessaire seulement
-								</button>
-								{localStorage.getItem('cookieConsents') &&
+						<header className="rules-modal-header">
+							<h1 id="rules-modal-title" className="modal__title">
+								{isCookie ? 'Accepter les cookies' : 'Conditions générales d\'utilisation'}
+							</h1>
+						</header>
+						<section className="rules-modal-description">
+							{loading ? <Spinner /> : (
+								<div className="rules-modal__container__content">
+									<p className="rules-modal__container__content__description" dangerouslySetInnerHTML={{ __html: content || 'Empty...' }}></p>
+								</div>
+							)}
+						</section>
+						<footer className="rules-modal__container__button">
+							{isCookie ? (
+								<>
 									<button
-										className="rules-modal__close"
+										className="rules-modal__accept"
 										onClick={() => {
-											//setIsOpenModal(false);
 											closeModal();
+											handleAccept(undefined, true);
 										}}
+										aria-label="Tout accepter"
 									>
-										Fermer
+										Tout accepter
 									</button>
-								}
-
-							</div>
-						) : (
-							<div className="rules-modal__container__button">
-								{id && !CGU ? (
-									<>
+									<button
+										className="rules-modal__cancel"
+										onClick={() => {
+											closeModal();
+											handleAccept(undefined, false);
+										}}
+										aria-label="Nécessaire seulement"
+									>
+										Nécessaire seulement
+									</button>
+									{localStorage.getItem('cookieConsents') && (
 										<button
-											className="rules-modal__accept"
+											className="rules-modal__close"
 											onClick={() => {
 												closeModal();
-												handleAccept();
 											}}
+											aria-label="Fermer"
 										>
-											Accepter
+											Fermer
 										</button>
+									)}
+								</>
+							) : (
+								<>
+									{id && !CGU ? (
+										<>
+											<button
+												className="rules-modal__accept"
+												onClick={() => {
+													closeModal();
+													handleAccept();
+												}}
+												aria-label="Accepter"
+											>
+												Accepter
+											</button>
+											<button
+												className="rules-modal__cancel"
+												onClick={() => {
+													closeModal();
+													if (handleLogout) handleLogout(id);
+												}}
+												aria-label="Refuser"
+											>
+												Refuser
+											</button>
+										</>
+									) : (
 										<button
-											className="rules-modal__cancel"
+											className="rules-modal__close"
 											onClick={() => {
-												//setIsOpenModal(false);
 												closeModal();
-												if (handleLogout) handleLogout(id);
 											}}
+											aria-label="Fermer"
 										>
-											Refuser
+											Fermer
 										</button>
-									</>
-								) : (
-									<button
-										className="rules-modal__close"
-										onClick={() => {
-											//setIsOpenModal(false);
-											closeModal();
-										}}
-									>
-										Fermer
-									</button>
-								)}
-							</div>
-						)}
+									)}
+								</>
+							)}
+						</footer>
 					</motion.div>
 				)}
 			</AnimatePresence>

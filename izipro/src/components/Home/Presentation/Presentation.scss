@@ -8,7 +8,20 @@
     max-width: 60rem;
     margin: 2rem auto;
     font-family: v.$font;
+    overflow: hidden;
+  scrollbar-width: none;
 
+  &::-webkit-scrollbar {
+    display: none;
+    /* For Chrome, Safari and Opera */
+  }
+
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+    }
 
     &__title {
         text-align: center;

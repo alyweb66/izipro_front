@@ -112,7 +112,7 @@ function ForgotPassword() {
 				<img className='__image' src="/izipro-logo.svg" alt="Izipro logo" />
 				<h1 className="__title">POP</h1>
 			</div>}
-			<form className="forgot-password-container__form" onSubmit={handleSubmitForm}>
+			<form className="forgot-password-container__form" onSubmit={handleSubmitForm} aria-label="Formulaire de réinitialisation de mot de passe">
 				<h1 className="forgot-password-container__form__title">Réinitialisez votre mot de passe</h1>
 				<h2 className="forgot-password-container__form__subtitle">Veuillez rentrer votre nouveau mot de passe (8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial )</h2>
 				<div className="show-password">
@@ -130,6 +130,7 @@ function ForgotPassword() {
 							<span
 								className="toggle-password-icon"
 								onClick={() => setShowPassword(!showPassword)}
+								aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
 							>
 								{showPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 							</span>
@@ -142,13 +143,14 @@ function ForgotPassword() {
 								className="__input"
 								placeholder="Confirmer mot de passe"
 								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(event.target.value)}
-								aria-label="Confirmer mot de passe"
+								aria-label="Confirmer le mot de passe"
 								maxLength={60}
 								required
 							/>
 							<span
 								className="toggle-password-icon"
 								onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+								aria-label={showConfirmPassword ? "Masquer la confirmation du mot de passe" : "Afficher la confirmation du mot de passe"}
 							>
 								{showConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 							</span>

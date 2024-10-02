@@ -321,9 +321,9 @@ function Register() {
 									name="confirmPassword"
 									value={proConfirmPassword}
 									className="__input"
-									placeholder="Confirmer mot de passe"
+									placeholder="Confirmer le mot de passe"
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProConfirmPassword(event.target.value)}
-									aria-label="Confirmer mot de passe"
+									aria-label="Confirmer le mot de passe"
 									maxLength={60}
 									required
 								/>
@@ -341,7 +341,7 @@ function Register() {
 								className="register-container__form__form input siret"
 								placeholder="Siret (14 chiffres)"
 								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
-								aria-label="siret"
+								aria-label="Siret"
 								maxLength={14}
 								required
 							/>

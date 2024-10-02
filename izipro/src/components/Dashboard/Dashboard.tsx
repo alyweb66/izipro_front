@@ -887,10 +887,16 @@ function Dashboard() {
 					|| myConversationIdsLoading
 					|| requestMyConversationLoading
 					&& <Spinner />}
-				<nav className="__nav" /* ref={menuRef} */>
+				<nav className="__nav" aria-label="Navigation principale">
 					<div className="__burger" >
 						<div className="__container">
-							<img className="__logo" src="/izipro-logo.svg" alt="Izipro logo" onClick={() => window.location.reload()} />
+							<img 
+							className="__logo" 
+							src="/izipro-logo.svg" 
+							alt="Izipro logo" 
+							role="button"
+							aria-label="Recharger la page"
+							onClick={() => window.location.reload()} />
 							<button className="__menu" onClick={toggleMenu}>
 								<div className='burger-icon'>
 									<div className="burger-icon__line"></div>
@@ -910,11 +916,11 @@ function Dashboard() {
 					</div>
 					<ul className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Request' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('Request'); setIsOpen(!isOpen); }}>DEMANDE
+							onClick={() => { setSelectedTab('Request'); setIsOpen(!isOpen); }} aria-label="Ouvrir les demandes">DEMANDE
 							<div className="indicator"></div>
 						</li>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }}>
+							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }} aria-label="Ouvrir mes demandes">
 							<div className="tab-content">
 
 								<span>MES DEMANDES</span>
@@ -926,7 +932,7 @@ function Dashboard() {
 						</li>
 						{role === 'pro' &&
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
-								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); setIsSkipClientRequest(false); }}>
+								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); setIsSkipClientRequest(false); }} aria-label="Ouvrir les demandes clients">
 								<div className="tab-content">
 									<span>CLIENT</span>
 									{(notViewedRequestStore.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>
@@ -939,7 +945,7 @@ function Dashboard() {
 						}
 						{role === 'pro' &&
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
-								onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }}>
+								onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }} aria-label="Ouvrir mes conversations">
 								<div className="tab-content">
 									<span>MES CONVERSATIONS</span>
 									{(viewedMyConversationState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
@@ -950,7 +956,7 @@ function Dashboard() {
 							</li>
 						}
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My profile' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My profile'); setIsOpen(!isOpen); }}>MON COMPTE
+							onClick={() => { setSelectedTab('My profile'); setIsOpen(!isOpen); }} aria-label="Ouvrir mon compte">MON COMPTE
 							<div className="indicator"></div>
 						</li>
 						{!isFooter && <Footer />}

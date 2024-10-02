@@ -41,18 +41,19 @@ export function useModal() {
 	return { modalIsOpen, openModal, closeModal, selectedImage: images[selectedImageIndex], nextImage, previousImage };
 }
 
-export function ImageModal({ 
-	modalIsOpen, 
-	closeModal, 
-	selectedImage, 
-	nextImage, 
-	previousImage, 
+export function ImageModal({
+	modalIsOpen,
+	closeModal,
+	selectedImage,
+	nextImage,
+	previousImage,
 	hasManyImages
 
-}: { 
-		
-	modalIsOpen: boolean, closeModal: () => void, selectedImage: string, nextImage: () => void, previousImage: () => void, hasManyImages: boolean }) {
-	
+}: {
+
+	modalIsOpen: boolean, closeModal: () => void, selectedImage: string, nextImage: () => void, previousImage: () => void, hasManyImages: boolean
+}) {
+
 	// useEffect to block the background scrolling
 	useEffect(() => {
 		if (modalIsOpen) {
@@ -64,33 +65,42 @@ export function ImageModal({
 			document.body.style.overflow = '';
 		};
 	}, [modalIsOpen]);
-	
+
 	return (
 		<ReactModal
 			className="react-modal"
 			isOpen={modalIsOpen}
 			onRequestClose={closeModal}
-			contentLabel="Image Modal"
+			aria-labelledby="react-modal-title"
+			aria-describedby="react-modal-description"
 			shouldCloseOnOverlayClick={true}
 			overlayClassName="react-image-modal__overlay"
 		>
-			<button
-				id="close"
-				className="react-modal__button"
-				onClick={closeModal}>Fermer
-			</button>
-			<div className="react-modal__picture">
+			<header>
+				<button
+					id="close"
+					className="react-modal__button"
+					onClick={closeModal}>Fermer
+					aria-label="Fermer le modal"
+				</button>
+			</header>
+			<section className="react-modal__picture" aria-labelledby="image-modal-title">
 				<MdClose
 					className="react-modal__button-close"
 					onClick={() => document.getElementById('close')?.click()}
+					aria-label="Fermer le modal"
 				/>
 				<button
 					id="previous"
 					className="react-modal__picture button"
-					onClick={previousImage}>Précédent</button>
+					aria-label="Image précédente"
+					onClick={previousImage}
+				>Précédent
+				</button>
 				{hasManyImages && <MdKeyboardArrowLeft
 					className="react-modal__picture back"
 					onClick={() => document.getElementById('previous')?.click()}
+					aria-label="Image précédente"
 				/>}
 				{selectedImage?.endsWith('.pdf') ? (
 					<a
@@ -100,10 +110,11 @@ export function ImageModal({
 						download={selectedImage}
 						target="_blank"
 						rel="noopener noreferrer"
-						onClick={(event) => { event.stopPropagation(); }} >
+						onClick={(event) => { event.stopPropagation(); }}
+						aria-label="Télécharger le fichier PDF"
+					>
 						<img
 							className="react-modal__picture img"
-							//key={media.id} 
 							src={pdfLogo}
 							alt={selectedImage}
 						/>
@@ -121,12 +132,17 @@ export function ImageModal({
 				<button
 					id="next"
 					className="react-modal__picture button"
-					onClick={nextImage}>Suivant</button>
+					onClick={nextImage}
+					aria-label="Image suivante"
+				>Suivant
+				</button>
 				{hasManyImages && <MdKeyboardArrowRight
 					className="react-modal__picture forward"
 					onClick={() => document.getElementById('next')?.click()}
+					aria-label="Image suivante"
 				/>}
-			</div>
+			</section>
+
 		</ReactModal>
 	);
 }

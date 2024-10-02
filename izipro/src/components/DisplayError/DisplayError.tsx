@@ -10,8 +10,8 @@ function DisplayError() {
 	const [serverErrorStatus, serverErrorText] = serverErrorStore((state) => [state.status, state.statusText]);
 
 	// Function to get the error message
-	function getErrorMessage(error: {status: number, statusText: string}): string {
-	
+	function getErrorMessage(error: { status: number, statusText: string }): string {
+
 		if (serverErrorStatus) {
 			return serverErrorText;
 		}
@@ -29,15 +29,27 @@ function DisplayError() {
 	}
 
 	return (
-		<div className="error">
-			<h1 className="error__title">{serverErrorStatus || error.status}</h1>
-			<img className="error__img" src="/images/error/Error.webp" alt="" />
-			<p className="error__description">Désolé, une erreur inattendue est survenue.</p>
-			<p>
-				<i className="error__message">{getErrorMessage(error)}</i>
-			</p>
-		</div>
+		<section className="error" aria-labelledby="error-title" aria-describedby="error-description">
+			<header>
+				<h1 id="error-title" className="error__title">{serverErrorStatus || error.status}</h1>
+			</header>
+			<img className="error__img" src="/images/error/Error.webp" alt="Image d'erreur" />
+			<p id="error-description" className="error__description">Désolé, une erreur inattendue est survenue.</p>
+			<article>
+				<p>
+					<i className="error__message">{getErrorMessage(error)}</i>
+				</p>
+			</article>
+		</section>
 	);
 }
 
 export default DisplayError;
+{/* <div className="error">
+	<h1 className="error__title">{serverErrorStatus || error.status}</h1>
+	<img className="error__img" src="/images/error/Error.webp" alt="" />
+	<p className="error__description">Désolé, une erreur inattendue est survenue.</p>
+	<p>
+		<i className="error__message">{getErrorMessage(error)}</i>
+	</p>
+</div> */}

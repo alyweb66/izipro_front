@@ -177,7 +177,7 @@ function SettingAccount() {
 			{role === 'pro' && (
 				<div className="setting-account">
 					<>
-						<form className={`setting-account__form ${jobLoading ? 'loading' : ''}`} onSubmit={handleSubmitJob}>
+						<form className={`setting-account__form ${jobLoading ? 'loading' : ''}`} onSubmit={handleSubmitJob} aria-label="Formulaire de sélection de métiers">
 							{/* {jobLoading && <Spinner />} */}
 							<h1 className="setting-account__form__title">Options de recherche:</h1>
 							<h2 className="setting-account__subtitle">Séléctionnez un ou plusieurs métier:</h2>
@@ -221,14 +221,19 @@ function SettingAccount() {
 													restDelta: 0.001
 												}
 											}}
+											aria-label={`Métier sélectionné: ${job.name}`}
 										>
 											{job.name}
-											<button className="setting-account__form__list__delete__button" onClick={(event) => handleRemoveListJob(job.id, event)}>X</button>
+											<button 
+											className="setting-account__form__list__delete__button" 
+											onClick={(event) => handleRemoveListJob(job.id, event)}
+											aria-label={`Supprimer le métier ${job.name}`}
+											>X</button>
 										</motion.li>
 									))}
 								</AnimatePresence>
 							</ul>
-							<button className="setting-account__form__button" type='submit'>valider les métiers</button>
+							<button className="setting-account__form__button" type="submit" aria-label="Valider les métiers">valider les métiers</button>
 							<ul className={`setting-account__form__list job ${(userJobLoading || deleteJobLoading || categoryLoading) ? 'loading' : ''}`}>
 								{(userJobLoading || categoryLoading) && <Spinner className="small-spinner" />}
 
@@ -252,9 +257,14 @@ function SettingAccount() {
 													restDelta: 0.001
 												}
 											}}
+											aria-label={`Métier actuel: ${job.name}`}
 										>
 											{job.name}
-											<button className="setting-account__form__list__delete__button" onClick={(event) => handleDeleteJob(job.id, event)}>X</button>
+											<button 
+											className="setting-account__form__list__delete__button" 
+											onClick={(event) => handleDeleteJob(job.id, event)}
+											aria-label={`Supprimer le métier ${job.name}`}
+											>X</button>
 										</motion.li>
 									))
 										:
@@ -299,7 +309,7 @@ function SettingAccount() {
 										)}
 									</Stack>
 								</div>
-								<button className="setting-account__radius__button" onClick={handleValidateRange}>Valider la distance</button>
+								<button className="setting-account__radius__button" onClick={handleValidateRange} aria-label="Valider la distance">Valider la distance</button>
 							</label>
 						</div>
 					</>

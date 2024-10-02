@@ -54,6 +54,8 @@ function Header() {
 					className='header__container image'
 					src="/izipro-logo.svg"
 					alt="Izipro logo"
+					role="button"
+					aria-label="Recharger la page"
 					onClick={() => window.location.reload()}
 				/>
 				<h1 className="header__container title">POP</h1>

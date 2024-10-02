@@ -78,6 +78,8 @@ const RequestItem = ({
 			animate={{ opacity: 1, scale: 1 }}
 			exit={{ opacity: 0, scale: 0.9 }}
 			transition={{ duration: 0.1, type: 'tween' }}
+			role="listitem"
+			aria-labelledby={`request-title-${(request || requestByDate)?.id}`}
 		>
 			{requestByDate?.deleted_at && <p className="my-conversation__list__detail__item__deleted">SUPPRIMÉ PAR L&apos;UTILISATEUR</p>}
 			{(request || requestByDate)?.urgent && <p className="my-conversation__list__detail__item urgent">URGENT</p>}
@@ -139,7 +141,9 @@ const RequestItem = ({
 									download={media.name}
 									target="_blank"
 									rel="noopener noreferrer"
-									onClick={(event) => { event.stopPropagation(); }} >
+									onClick={(event) => { event.stopPropagation(); }} 
+									aria-label={`Télécharger ${media.name}`}
+									>
 									<img
 										className="my-conversation__list__detail__item__picture img"
 										src={pdfLogo}
@@ -174,6 +178,7 @@ const RequestItem = ({
 				id={`delete-request-${(request || requestByDate)?.id ?? ''}`}
 				className="my-conversation__list__detail__item__delete"
 				type='button'
+				aria-label="Supprimer la demande"
 				onClick={(event) => {
 					event.stopPropagation();
 					if (request?.id) {
@@ -191,6 +196,7 @@ const RequestItem = ({
 			</button>
 			<FaTrashAlt
 				className="my-conversation__list__detail__item__delete-FaTrashAlt"
+				aria-label="Supprimer la demande"
 				onClick={(event) => {
 					document.getElementById(`delete-request-${(request || requestByDate)?.id}`)?.click(),
 

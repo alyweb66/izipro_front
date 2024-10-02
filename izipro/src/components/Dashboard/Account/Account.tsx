@@ -631,6 +631,7 @@ function Account() {
 					animate={{ opacity: 1, scale: 1 }}
 					exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 					transition={{ duration: 0.1, type: 'tween' }}
+					aria-label="Profil utilisateur"
 				>
 
 					<div className="account__picture" >
@@ -646,6 +647,7 @@ function Account() {
 								setIsImgLoading(false);
 							}}
 							style={{ cursor: 'pointer' }}
+							aria-label="Changer la photo de profil"
 						/>
 						<input
 							className="account__profile__picture__input"
@@ -654,6 +656,7 @@ function Account() {
 							onChange={handleProfilePicture}
 							style={{ display: 'none' }}
 							accept=".jpg,.jpeg,.png"
+							aria-label="Sélectionner une nouvelle photo de profil"
 						/>
 						<div className="message">
 							<Stack sx={{ width: '100%' }} spacing={2}>
@@ -664,7 +667,14 @@ function Account() {
 								)}
 							</Stack>
 						</div>
-						<button className="account__profile__picture__delete" type='button' onClick={handleDeletePicture}>Supprimer</button>
+						<button 
+						className="account__profile__picture__delete" 
+						type='button' 
+						onClick={handleDeletePicture}
+						aria-label="Supprimer la photo de profil"
+						>
+							Supprimer
+							</button>
 					</div >
 					<div className="notification-container">
 						{(notification === null || notificationLoading) && <Spinner delay={0} />}
@@ -857,7 +867,7 @@ function Account() {
 									)}
 								</Stack>
 							</div>
-							<button className="account__profile__button" type="submit">Valider</button>
+							<button className="account__profile__button" type="submit" aria-label="Valider les modifications">Valider</button>
 							<div className="request__form__map">
 								<p className="request__title-map">Vérifiez votre adresse sur la carte (validez pour actualiser):</p>
 								<div id="map" className="request__form__map__map">
@@ -871,7 +881,9 @@ function Account() {
 							<SettingAccount />
 							<form
 								className={`__password ${changepasswordLoading ? 'loading' : ''}`}
-								onSubmit={handleSubmitNewPassword}>
+								onSubmit={handleSubmitNewPassword}
+								aria-label="Formulaire de changement de mot de passe"
+								>
 								{changepasswordLoading && <Spinner />}
 								<h1 className="__title">Changer le mot de passe:</h1>
 								<label className="__label"> Ancien mot de passe:
@@ -890,6 +902,7 @@ function Account() {
 										<span
 											className="toggle-password-icon"
 											onClick={(event) => { setShowOldPassword(!showOldPassword), event.preventDefault() }}
+											aria-label={showOldPassword ? "Masquer l'ancien mot de passe" : "Afficher l'ancien mot de passe"}
 										>
 											{showOldPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 										</span>
@@ -911,6 +924,7 @@ function Account() {
 										<span
 											className="toggle-password-icon"
 											onClick={(event) => { setShowPassword(!showPassword), event.preventDefault() }}
+											aria-label={showPassword ? "Masquer le nouveau mot de passe" : "Afficher le nouveau mot de passe"}
 										>
 											{showPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 										</span>
@@ -932,6 +946,7 @@ function Account() {
 										<span
 											className="toggle-password-icon"
 											onClick={(event) => { setShowConfirmPassword(!showConfirmPassword), event.preventDefault() }}
+											aria-label={showConfirmPassword ? "Masquer le nouveau mot de passe" : "Afficher le nouveau mot de passe"}
 										>
 											{showConfirmPassword ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
 										</span>
@@ -953,7 +968,9 @@ function Account() {
 								</div>
 								<button
 									className="account__profile__button"
-									type="submit">
+									type="submit"
+									aria-label="Valider le changement de mot de passe"
+									>
 									Valider
 								</button>
 							</form>
@@ -961,7 +978,9 @@ function Account() {
 						<button
 							className="account__profile__delete"
 							type='button'
-							onClick={() => setModalIsOpen(!modalIsOpen)}>supprimer mon compte
+							onClick={() => setModalIsOpen(!modalIsOpen)}
+							aria-label="Supprimer mon compte"
+							>supprimer mon compte
 						</button>
 					</div>
 				</motion.div >
