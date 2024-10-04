@@ -55,7 +55,6 @@
         .message {
             width: 90%;
             max-width: fit-content;
-            // max-width: clamp(30rem, 100%, 50rem); // to adapt to the screen size
             margin: 0.5rem auto 0 auto;
 
 
@@ -69,7 +68,6 @@
 
 
             .account__profile__picture__img {
-                // @include m.border;
                 margin: auto;
                 width: 8rem;
                 height: 8rem;

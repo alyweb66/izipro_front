@@ -624,16 +624,16 @@ function Account() {
 	return (
 		<div className="account">
 			<AnimatePresence>
+
 				<motion.div
 					className='account__profile'
-					/* className={`account__profile ${loading ? 'loading' : ''}`} */
 					initial={{ opacity: 0, scale: 0.9 }}
 					animate={{ opacity: 1, scale: 1 }}
 					exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 					transition={{ duration: 0.1, type: 'tween' }}
 					aria-label="Profil utilisateur"
 				>
-
+					{updateUserLoading && <Spinner />}
 					<div className="account__picture" >
 						{isImgLoading && <Spinner delay={0} />}
 						<img
@@ -667,14 +667,14 @@ function Account() {
 								)}
 							</Stack>
 						</div>
-						<button 
-						className="account__profile__picture__delete" 
-						type='button' 
-						onClick={handleDeletePicture}
-						aria-label="Supprimer la photo de profil"
+						<button
+							className="account__profile__picture__delete"
+							type='button'
+							onClick={handleDeletePicture}
+							aria-label="Supprimer la photo de profil"
 						>
 							Supprimer
-							</button>
+						</button>
 					</div >
 					<div className="notification-container">
 						{(notification === null || notificationLoading) && <Spinner delay={0} />}
@@ -711,7 +711,7 @@ function Account() {
 					</div>
 					<div className="account_profile_container">
 						<form className={`account__profile__form ${updateUserLoading ? 'loading' : ''}`} onSubmit={handleAccountSubmit} >
-							{updateUserLoading && <Spinner />}
+							{/* {updateUserLoading && <Spinner />} */}
 							<h1 className="account__profile__form__title">Mes informations:</h1>
 							<div></div>
 							<label className="account__profile__form__label">
@@ -883,7 +883,7 @@ function Account() {
 								className={`__password ${changepasswordLoading ? 'loading' : ''}`}
 								onSubmit={handleSubmitNewPassword}
 								aria-label="Formulaire de changement de mot de passe"
-								>
+							>
 								{changepasswordLoading && <Spinner />}
 								<h1 className="__title">Changer le mot de passe:</h1>
 								<label className="__label"> Ancien mot de passe:
@@ -970,7 +970,7 @@ function Account() {
 									className="account__profile__button"
 									type="submit"
 									aria-label="Valider le changement de mot de passe"
-									>
+								>
 									Valider
 								</button>
 							</form>
@@ -980,7 +980,7 @@ function Account() {
 							type='button'
 							onClick={() => setModalIsOpen(!modalIsOpen)}
 							aria-label="Supprimer mon compte"
-							>supprimer mon compte
+						>supprimer mon compte
 						</button>
 					</div>
 				</motion.div >

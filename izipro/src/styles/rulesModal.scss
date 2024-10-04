@@ -12,32 +12,36 @@
 
     .rules-modal__container {
         // height: 100dvh;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
+        @include m.modal-container;
+
+        & {
+            display: flex;
+            flex-direction: column;
+            width: 60vw;
+            height: 70vh;
+            overflow: hidden;
+        }
+
 
         .rules-modal-header {
             flex-shrink: 0;
             height: 10%;
+
             .modal__title {
                 color: v.$color-primary-orange;
                 font-weight: 500;
                 font-size: 2rem;
                 text-align: center;
-              //  height: 10%;
+                //  height: 10%;
             }
         }
 
-        @include m.modal-container;
-
-        & {
-            width: 60vw;
-            height: 70vh;
-        }
+        
 
         .rules-modal-description {
             flex-grow: 1;
             overflow: auto;
+
             .rules-modal__container__content {
                 overflow: auto;
                 overflow-x: hidden;

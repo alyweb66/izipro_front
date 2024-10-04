@@ -1,46 +1,56 @@
 import { useEffect, useState } from 'react';
+import InstallPWA from '../../Hook/InstallPWA';
 import './Presentation.scss';
 
+
 function Presentation() {
-	// State 
-	const [imagePosition, setImagePosition] = useState(false);
+  // State 
+  const [imagePosition, setImagePosition] = useState(false);
 
-	// useEffect to check the size of the window
-	useEffect(() => {
+  // useEffect to check the size of the window
+  useEffect(() => {
 
-		// function to check the size of the window
-		const handleResize = () => {
-			if (window.innerWidth < 800) {
-				setImagePosition(true);
-			} else {
-				setImagePosition(false);
-			}
-		};
+    // function to check the size of the window
+    const handleResize = () => {
+      if (window.innerWidth < 800) {
+        setImagePosition(true);
+      } else {
+        setImagePosition(false);
+      }
+    };
 
-		// add event listener to check the size of the window
-		window.addEventListener('resize', handleResize);
+    // add event listener to check the size of the window
+    window.addEventListener('resize', handleResize);
 
-		// 	call the function to check the size of the window
-		handleResize();
+    // 	call the function to check the size of the window
+    handleResize();
 
-		// remove the event listener when the component unmount
-		return () => window.removeEventListener('resize', handleResize);
-	}, []);
+    // remove the event listener when the component unmount
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-	return (
-		<div className="presentation-container">
+  return (
+    <div className="presentation-container">
+      <div className="install-application">
+        <h2 className="title">Installeeeer l'application :</h2>
+        <InstallPWA />
+      </div>
       <h1 className="presentation-container__title">La solution pour connecter efficacement particuliers et professionnels.</h1>
+      <div>
+        {/* Autres contenus de la page */}
+      </div>
       <section className="presentation-container__particular" aria-labelledby="particular-section">
         <h2 id="particular-section" className="visually-hidden">Particuliers</h2>
-        <div className="image image-1" role="img" aria-label="Image de particulier 1"></div>
-        <div className="image image-2" role="img" aria-label="Image de particulier 2"></div>
-      </section>
-      <section className="presentation-container__content" aria-labelledby="content-section">
+        <div className="presentation-container__particular image">
+          <div className="image image-1" role="img" aria-label="Image de particulier 1"></div>
+          <div className="image image-2" role="img" aria-label="Image de particulier 2"></div>
+        </div>
         <h2 id="content-section" className="visually-hidden">Contenu</h2>
         <p className="content">
           Plus de temps à perdre ? Dites adieu aux recherches fastidieuses de professionnels. Simplifiez votre vie avec notre plateforme pratique pour faire vos demandes de devis ou d'urgence aux professionnels. Faites place à l'efficacité et gagnez du temps pour ce qui compte vraiment.
         </p>
       </section>
+
       {imagePosition ? (
         <>
           <section className="presentation-container__particular-pro" aria-labelledby="particular-pro-section">
@@ -73,7 +83,7 @@ function Presentation() {
         </>
       )}
     </div>
-	);
+  );
 }
 
 export default Presentation;

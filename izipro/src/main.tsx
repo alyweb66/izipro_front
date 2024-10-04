@@ -15,6 +15,11 @@ import './styles/index.scss';
 import { serverErrorStore } from './store/LoginRegister';
 import { setContext } from '@apollo/client/link/context';
 import { userDataStore } from './store/UserData';
+import ReloadPrompt from './Prompt';
+import { registerSW } from 'virtual:pwa-register'
+
+// Register the service worker PWA
+registerSW({ immediate: true })
 
 // store
 const setServerError = (serverError: { status: number; statusText: string }) => {
@@ -179,7 +184,7 @@ const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
 
-// register the service worker
+/* // register the service worker
 if ('serviceWorker' in navigator) {
 	window.addEventListener('load', () => {
 		navigator.serviceWorker.register('/serviceWorker.js').then((registration) => {
@@ -188,11 +193,12 @@ if ('serviceWorker' in navigator) {
 			console.error('Service Worker registration failed:', error);
 		});
 	});
-}
+} */
 
 // render element in the DOM
 root.render(
 	<ApolloProvider client={client}>
 		<RouterProvider router={router} />
+		<ReloadPrompt />
 	</ApolloProvider>,
 );

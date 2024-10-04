@@ -7,6 +7,13 @@ type MessageStore = {
     resetMessage: () => void;
 }
 
+type MessageConvIdStore = {
+	convId: number[];
+	setConvId: (data: number[]) => void;
+	resetMessageMyConvId?: () => void;
+	resetMessageMyReqConvId?: () => void;
+};
+
 export const messageDataStore = create<MessageStore>((set) => ({
 	messages: [],
 	setMessageStore: (data) => set({ messages: data }),
@@ -19,12 +26,7 @@ export const myMessageDataStore = create<MessageStore>((set) => ({
 	resetMessage: () => set({ messages: [] }),
 }));
 
-type MessageConvIdStore = {
-	convId: number[];
-	setConvId: (data: number[]) => void;
-	resetMessageMyConvId?: () => void;
-	resetMessageMyReqConvId?: () => void;
-};
+
 
 export const messageConvIdMyConvStore = create<MessageConvIdStore>((set) => ({
 	convId: [],

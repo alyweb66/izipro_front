@@ -21,6 +21,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "serviceWorker.js", "serviceWorkerRegistration.js"],
+  "include": ["src", "serviceWorker.js", "serviceWorkerRegistration.js", "node_modules/vite-plugin-pwa/client.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

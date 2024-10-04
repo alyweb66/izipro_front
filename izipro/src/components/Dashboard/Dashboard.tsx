@@ -93,36 +93,36 @@ function Dashboard() {
 	const handleBeforeUnload = (_event: BeforeUnloadEvent, subscriptionLogout = false) => {
 		//event.preventDefault();
 		if (typeof decodeData === 'object' && (decodeData.value === 'session' || subscriptionLogout) && idRef.current) {
-			
+
 			// create request to logout the user in the json format for sendbeacon
 			const query = `
 			mutation Logout($logoutId: Int!) {
 				  logout(id: $logoutId)
 			}
 		  `;
-	
+
 			const variables = { logoutId: idRef.current };
-	
+
 			// format data to send for sendBeacon
 			const data = JSON.stringify({
 				query,
 				variables
 			});
-	
+
 			// use sendBeacon to send the request
 			const url = import.meta.env.MODE === 'production' ? import.meta.env.VITE_SERVER_URL : 'http://localhost:3000/';
 			const headers = { 'Content-Type': 'application/json' };
-	
+
 			// Create a Blob object with the data
 			const blob = new Blob([data], { type: headers['Content-Type'] });
-	
+
 			// send request to the server with sendBeacon
 			navigator.sendBeacon(url, blob);
 		}
 	};
 	// useEffect to check if user is logged in and use sendBeacon to logout the user
 	useEffect(() => {
-		
+
 		// check if user is logged in
 		if (isLogged === false) {
 			// The data has expired
@@ -133,7 +133,7 @@ function Dashboard() {
 			}
 		}
 
-		
+
 		// function to check if user is logged in and listener if close the page
 
 		//window.addEventListener('beforeunload', handleBeforeUnload);
@@ -536,14 +536,14 @@ function Dashboard() {
 
 		const sessionCookie = document.cookie.split(';').find(cookie => cookie.includes('session-id'));
 		const sessionId = sessionCookie?.split('=')[1].trim();
-	
-		if ( logoutSubscription && logoutSubscription.logout.value === true ) {
+
+		if (logoutSubscription && logoutSubscription.logout.value === true) {
 			if (logoutSubscription.logout.multiple && (sessionId && sessionId === logoutSubscription.logout.session)) {
 				setIsMultipleLogout(true);
 				setIsExpiredSession(true);
 			} else if (sessionId && sessionId === logoutSubscription.logout.session) {
 				console.log('logout', logoutSubscription.logout.session, sessionId);
-				
+
 				setIsExpiredSession(true);
 			}
 		}
@@ -881,6 +881,7 @@ function Dashboard() {
 
 	return (
 		<>
+			
 			<div className='dashboard'>
 				{userDataLoading
 					|| notViewedConversationLoading
@@ -890,13 +891,13 @@ function Dashboard() {
 				<nav className="__nav" aria-label="Navigation principale">
 					<div className="__burger" >
 						<div className="__container">
-							<img 
-							className="__logo" 
-							src="/izipro-logo.svg" 
-							alt="Izipro logo" 
-							role="button"
-							aria-label="Recharger la page"
-							onClick={() => window.location.reload()} />
+							<img
+								className="__logo"
+								src="/izipro-logo.svg"
+								alt="Izipro logo"
+								role="button"
+								aria-label="Recharger la page"
+								onClick={() => window.location.reload()} />
 							<button className="__menu" onClick={toggleMenu}>
 								<div className='burger-icon'>
 									<div className="burger-icon__line"></div>
