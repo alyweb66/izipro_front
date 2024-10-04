@@ -53,7 +53,7 @@
         & {
             width: 80%;
             margin: auto;
-            margin-top: 1rem;
+            margin-top: 0rem;
             border-radius: 0.5rem;
             display: flex;
             flex-direction: column;
@@ -354,7 +354,7 @@
 
             .request__form__title {
                 &.urgent {
-                    margin-top: 0rem;
+                    margin-top: 1rem;
                 }
             }
         }

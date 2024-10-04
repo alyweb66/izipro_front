@@ -5,16 +5,18 @@ import visualizer from 'rollup-plugin-visualizer';
 // import fs from 'fs';
 import path from 'path';
 import legacy from '@vitejs/plugin-legacy';
+import sass from 'sass';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+
 	plugins: [
 		react(),
 		legacy({
 			targets: ['defaults', 'not IE 11', 'safari >= 9'], // Définition des navigateurs cibles
 			additionalLegacyPolyfills: ['regenerator-runtime/runtime'], // Polyfills supplémentaires pour Safari 10
 			modernPolyfills: true,
-		  }),
+		}),
 		// Visualizer for checking bundle size after build
 		//visualizer({ open: true }),
 		VitePWA({
@@ -46,7 +48,6 @@ export default defineConfig({
 	],
 	build: {
 		sourcemap: true,
-		target: 'esnext',
 		/* rollupOptions: {
 			external: ['workbox-window']
 		  } */
@@ -56,6 +57,14 @@ export default defineConfig({
 			'@': path.resolve(__dirname, 'src'),
 		},
 	},
+	css: {
+		preprocessorOptions: {
+			scss: {
+				api: 'modern-compiler',
+			},
+		},
+	},
+
 
 	//*HTTPS server
 	/* 	server: {

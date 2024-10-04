@@ -32,7 +32,7 @@ function Presentation() {
   return (
     <div className="presentation-container">
       <div className="install-application">
-        <h2 className="title">Installeeeer l'application :</h2>
+        <h2 className="title">Installer l'application :</h2>
         <InstallPWA />
       </div>
       <h1 className="presentation-container__title">La solution pour connecter efficacement particuliers et professionnels.</h1>

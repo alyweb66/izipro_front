@@ -17,7 +17,7 @@
     "@turf/turf": "^7.1.0",
     "apollo-upload-client": "^18.0.1",
     "dompurify": "^3.1.7",
-    "framer-motion": "^11.9.0",
+    "framer-motion": "^11.11.0",
     "graphql": "^16.9.0",
     "graphql-ws": "^5.16.0",
     "immer": "^10.1.1",

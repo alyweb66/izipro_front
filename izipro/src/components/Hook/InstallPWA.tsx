@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MdInstallMobile } from "react-icons/md";
+//import { MdInstallMobile } from "react-icons/md";
 import { motion } from 'framer-motion';
 import Spinner from './Spinner';
 import '../../styles/installPWA.scss';
@@ -112,10 +112,11 @@ const InstallPWA: React.FC = () => {
     <>
       {showInstallButton && (
         <>
-          <MdInstallMobile className="install-button"
+          {/* <MdInstallMobile className="install-button"
             onClick={() => document.getElementById('install')?.click()}
             aria-label='Joindre un fichier'
-          />
+          /> */}
+          <div className="install-button" ></div>
 
           <button id="install" onClick={handleInstallClick} style={{ display: 'none' }}>
           </button>
@@ -127,7 +128,7 @@ const InstallPWA: React.FC = () => {
             <p className="content-PWA">L'installation de l'application n'est pas supportée sur Firefox, utilisez Chrome ou un autre navigateur pour installer l'application.</p>
           )}
           {browserName === 'Safari' && (
-            <p className="content-PWA">Pour installer l'application depuis Safari, cliquez sur le bouton de partage du navigateur et sélectionnez l'option : <strong>“Ajouter à l'écran d'accueil”.</strong></p>
+            <p className="content-PWA">Pour installer l'application depuis Safari, cliquez sur le bouton de partage du navigateur et sélectionnez l'option : <strong className="strong-PWA">“Ajouter à l'écran d'accueil”.</strong></p>
           )}
           {browserName === 'un navigateur non supporté' && (
             <p className="content-PWA">L'installation de l'application n'est pas supportée sur ce navigateur.</p>
@@ -147,7 +148,7 @@ const InstallPWA: React.FC = () => {
                 exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
                 transition={{ duration: 0.1, type: 'tween' }}
               >
-                L'application est déjà installé, pour la réinstaller manuellement sélectionner <strong>“Ajouter à l'écran d'accueil”</strong> dans le menu de votre navigateur </motion.p>
+                L'application est déjà installé, pour la réinstaller manuellement sélectionner <strong className="strong-PWA">“Ajouter à l'écran d'accueil”</strong> dans le menu de votre navigateur </motion.p>
             )
           }
         </div>

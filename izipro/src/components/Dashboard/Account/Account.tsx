@@ -40,7 +40,6 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 // Styling imports
 import './Account.scss';
-import { motion, AnimatePresence } from 'framer-motion';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import Switch from '@mui/material/Switch';
 import FormGroup from '@mui/material/FormGroup';
@@ -53,6 +52,7 @@ import { useQueryGetNotification } from '../../Hook/Query';
 import { UPDATE_NOTIFICATION_MUTATION } from '../../GraphQL/notificationMutation';
 import { useNotificationStore } from '../../../store/Notification';
 import TextareaAutosize from 'react-textarea-autosize';
+import { Grow } from '@mui/material';
 //import '../../../styles/spinner.scss';
 
 
@@ -623,14 +623,9 @@ function Account() {
 
 	return (
 		<div className="account">
-			<AnimatePresence>
-
-				<motion.div
-					className='account__profile'
-					initial={{ opacity: 0, scale: 0.9 }}
-					animate={{ opacity: 1, scale: 1 }}
-					exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-					transition={{ duration: 0.1, type: 'tween' }}
+			<Grow in={true} timeout={200}>
+				<div
+					className="account__profile"
 					aria-label="Profil utilisateur"
 				>
 					{updateUserLoading && <Spinner />}
@@ -983,9 +978,8 @@ function Account() {
 						>supprimer mon compte
 						</button>
 					</div>
-				</motion.div >
-			</AnimatePresence>
-
+				</div >
+			</Grow>
 			<DeleteItemModal
 				isDeleteUser={true}
 				setDeleteItemModalIsOpen={setModalIsOpen}

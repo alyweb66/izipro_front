@@ -36,6 +36,7 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import * as turf from '@turf/turf';
+import { Grow } from '@mui/material';
 
 
 
@@ -185,10 +186,6 @@ function Request() {
 		}
 	};
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	/* const handleMapLoaded = () => {
-		setIsLoading(false);
-	}; */
 
 	// Handle file upload
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement> & React.DragEvent<HTMLLabelElement>) => {
@@ -294,8 +291,8 @@ function Request() {
 			}
 		}
 	}, [map, radius, lng, lat]);
-	// Update jobs when category changes
 
+	// Update jobs when category changes
 	useEffect(() => {
 		if (jobData) {
 
@@ -319,21 +316,18 @@ function Request() {
 
 
 	return (
-		<div className="request">
-			{categoryLoading && <Spinner />}
+		<Grow in={true} timeout={200}>
+			<div className="request">
+				{categoryLoading && <Spinner />}
 
-			{(!address && !city && !postal_code && !first_name && !last_name) &&
-				(<p className="request no-req">Veuillez renseigner les champs de &quot;Mes informations&quot; dans votre compte pour faire une demande</p>)}
-			<AnimatePresence>
+				{(!address && !city && !postal_code && !first_name && !last_name) &&
+					(<p className="request no-req">Veuillez renseigner les champs de &quot;Mes informations&quot; dans votre compte pour faire une demande</p>)}
 				{address && city && postal_code && first_name && last_name && (
-					<motion.form
+					<form
 						className="request__form"
 						onSubmit={handleSubmitRequest}
-						initial={{ opacity: 0, scale: 0.9 }}
-						animate={{ opacity: 1, scale: 1 }}
-						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-						transition={{ duration: 0.1, type: 'tween' }}
 						aria-label="Formulaire de demande"
+
 					>
 						<h1 className="request__form__title urgent">Si votre demande est une urgence cliquez sur URGENT:</h1>
 						<button
@@ -573,10 +567,10 @@ function Request() {
 						>
 							Envoyer
 						</button>
-					</motion.form>
+					</form>
 				)}
-			</AnimatePresence>
-		</div>
+			</div>
+		</Grow>
 	);
 }
 
