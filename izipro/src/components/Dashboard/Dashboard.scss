@@ -32,7 +32,7 @@
         background-color: transparent;
         overflow: auto;
         scrollbar-width: none;
-     /*    height: 87vh;
+        /*    height: 87vh;
         height: 87dvh; */
 
         &::-webkit-scrollbar {
@@ -123,12 +123,21 @@
 
                 .notification-badge {
                     margin-top: 0;
-                   // padding-bottom: 1rem;
+                    // padding-bottom: 1rem;
                 }
 
                 &:hover {
                     color: v.$color-primary-orange;
-                    cursor: pointer;
+
+                    /* For mouse */
+                    @media (hover: hover) and (pointer: fine) {
+                        cursor: pointer;
+                    }
+
+                    /* For touch */
+                    @media (hover: none) and (pointer: coarse) {
+                        cursor: default;
+                    }
 
                     .indicator {
                         display: block;
@@ -183,6 +192,7 @@
         flex-direction: column;
         height: 100vh;
         height: 100dvh;
+
         .__nav {
             display: flex;
             justify-content: center;
@@ -240,7 +250,16 @@
                         display: inline-block;
                         width: 35px;
                         height: 35px;
-                        cursor: pointer;
+
+                        /* For mouse */
+                        @media (hover: hover) and (pointer: fine) {
+                            cursor: pointer;
+                        }
+
+                        /* For touch */
+                        @media (hover: none) and (pointer: coarse) {
+                            cursor: default;
+                        }
                     }
 
                     .__menu {
@@ -248,7 +267,16 @@
                         display: flex;
                         border: none;
                         background-color: transparent;
-                        cursor: pointer;
+
+                        /* For mouse */
+                        @media (hover: hover) and (pointer: fine) {
+                            cursor: pointer;
+                        }
+
+                        /* For touch */
+                        @media (hover: none) and (pointer: coarse) {
+                            cursor: default;
+                        }
 
                         .burger-icon {
                             width: 100%;
@@ -302,7 +330,17 @@
                     box-shadow: 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.1);
                     padding: 1rem 0.5rem;
                     font-weight: 500;
-                    cursor: pointer;
+
+                    /* For mouse */
+                    @media (hover: hover) and (pointer: fine) {
+                        cursor: pointer;
+                    }
+
+                    /* For touch */
+                    @media (hover: none) and (pointer: coarse) {
+                        cursor: default;
+                    }
+
                     flex-wrap: wrap;
 
                     .dashboard__nav__menu__content__tab {
@@ -313,7 +351,7 @@
                         transition: 0.1s;
                         list-style-type: none;
                         transition: transform 0.1s ease;
-                        
+
 
                         &:hover {
                             .indicator {
@@ -343,6 +381,7 @@
                 height: 1px;
             }
         }
+
         .dashboard__content {
             flex: 1;
             height: auto;

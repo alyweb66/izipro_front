@@ -19,7 +19,15 @@
 
 
     span {
-      cursor: pointer;
+      /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
     }
 
     span:hover {

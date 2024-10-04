@@ -14,7 +14,16 @@
   font-weight: 500;
   box-shadow: none;
   letter-spacing: 0.02rem;
-  cursor: pointer;
+
+  /* For mouse */
+  @media (hover: hover) and (pointer: fine) {
+    cursor: pointer;
+  }
+
+  /* For touch */
+  @media (hover: none) and (pointer: coarse) {
+    cursor: default;
+  }
 
   &:hover {
     background: v.$color-primary-orange;
@@ -34,7 +43,16 @@
   font-weight: 500;
   letter-spacing: 0.02rem;
   box-shadow: none;
-  cursor: pointer;
+
+  /* For mouse */
+  @media (hover: hover) and (pointer: fine) {
+    cursor: pointer;
+  }
+
+  /* For touch */
+  @media (hover: none) and (pointer: coarse) {
+    cursor: default;
+  }
 
   &:hover {
     background: v.$color-primary-blue;
@@ -52,7 +70,17 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+
+    /* For mouse */
+    @media (hover: hover) and (pointer: fine) {
+      cursor: pointer;
+    }
+
+    /* For touch */
+    @media (hover: none) and (pointer: coarse) {
+      cursor: default;
+    }
+
     position: relative;
     transition-duration: .3s;
     margin-bottom: 0.5rem;
@@ -283,7 +311,16 @@
       box-shadow: -5px 0 10px #66666610,
         -5px 0 10px #ffffff05,
         5px 0 10px #6666660e;
-      cursor: pointer;
+
+      /* For mouse */
+      @media (hover: hover) and (pointer: fine) {
+        cursor: pointer;
+      }
+
+      /* For touch */
+      @media (hover: none) and (pointer: coarse) {
+        cursor: default;
+      }
 
       &.no-data {
         color: #a19f9f;
@@ -374,7 +411,17 @@
       font-weight: 400;
       color: #5c5a5a;
       line-height: 2rem;
-      cursor: pointer;
+
+      /* For mouse */
+      @media (hover: hover) and (pointer: fine) {
+        cursor: pointer;
+      }
+
+      /* For touch */
+      @media (hover: none) and (pointer: coarse) {
+        cursor: default;
+      }
+
       transition: all .1s ease-in-out;
     }
 
@@ -404,20 +451,20 @@
     .center {
       width: 100%;
 
-        .custom-options {
-          position: fixed;
-          top: 3.7rem;
-          left: 0;
-          width: 100%;
-          margin-top: 0;
-          height: fit-content;
-          max-height: 70dvh;
-          display: block;
-          z-index: 1000;
-          overflow-y: auto;
-          background-color: white;
-        }
-      
+      .custom-options {
+        position: fixed;
+        top: 3.7rem;
+        left: 0;
+        width: 100%;
+        margin-top: 0;
+        height: fit-content;
+        max-height: 70dvh;
+        display: block;
+        z-index: 1000;
+        overflow-y: auto;
+        background-color: white;
+      }
+
 
       .custom-options::before,
       .custom-options::after {
@@ -501,7 +548,17 @@
     right: -0.5rem;
     top: 50%;
     transform: translateY(-50%);
-    cursor: pointer;
+
+    /* For mouse */
+    @media (hover: hover) and (pointer: fine) {
+      cursor: pointer;
+    }
+
+    /* For touch */
+    @media (hover: none) and (pointer: coarse) {
+      cursor: default;
+    }
+
     color: #979797;
     z-index: 2;
   }

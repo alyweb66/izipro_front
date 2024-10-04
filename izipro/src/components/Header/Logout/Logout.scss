@@ -67,7 +67,15 @@
             font-size: 3.5rem;
             color: v.$color-primary-orange;
             margin-right: 1rem;
-            cursor: pointer;
+            /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
         }
 
         .logout__button {

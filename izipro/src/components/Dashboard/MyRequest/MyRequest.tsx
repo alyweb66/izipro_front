@@ -31,8 +31,8 @@ import { SubscriptionProps } from '../../../Type/Subscription';
 
 // Components and utilities
 import './MyRequest.scss';
-import pdfLogo from '/logo/logo-pdf.webp';
-import logoProfile from '/logo/logo-profile.webp';
+import pdfLogo from '/logo-pdf.webp';
+import logoProfile from '/logo-profile.webp';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt, FaCamera } from 'react-icons/fa';
 import { MdSend, MdAttachFile, MdKeyboardArrowLeft, MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
@@ -45,7 +45,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
-import noPicture from '/logo/no-picture.webp';
+import noPicture from '/no-picture.webp';
 
 
 // Configuration for React Modal
@@ -1069,7 +1069,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
-						{(messageLoading || messageMutationLoading ) && <Spinner />}
+						{(messageLoading || messageMutationLoading) && <Spinner />}
 						<div className="my-request__message-list__user" aria-label="Détails de l'utilisateur" >
 							<div
 								className="my-request__message-list__user__header"
@@ -1260,12 +1260,20 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							<label className="my-request__message-list__form__label">
 								<MdAttachFile
 									className="my-request__message-list__form__label__attach"
-									onClick={() => document.getElementById('send-file')?.click()}
+									onClick={(event) => {
+										event.preventDefault(),
+											event.stopPropagation(),
+											document.getElementById('send-file')?.click()
+									}}
 									aria-label='Joindre un fichier'
 								/>
 								<FaCamera
 									className="my-request__message-list__form__label__camera"
-									onClick={() => document.getElementById('file-camera')?.click()}
+									onClick={(event) => {
+										event.preventDefault(),
+											event.stopPropagation(),
+											document.getElementById('file-camera')?.click()
+									}}
 									aria-label='Prendre une photo'
 
 								/>

@@ -29,7 +29,6 @@
     "react-modal": "^3.16.1",
     "react-router-dom": "^6.26.2",
     "react-textarea-autosize": "^8.5.3",
-    "rollup-plugin-visualizer": "^5.12.0",
     "validator": "^13.12.0",
     "workbox-precaching": "^7.1.0",
     "zustand": "^4.5.5"

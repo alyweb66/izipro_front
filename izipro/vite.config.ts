@@ -1,11 +1,9 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import react from '@vitejs/plugin-react';
-import visualizer from 'rollup-plugin-visualizer';
 // import fs from 'fs';
 import path from 'path';
 import legacy from '@vitejs/plugin-legacy';
-import sass from 'sass';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,8 +15,6 @@ export default defineConfig({
 			additionalLegacyPolyfills: ['regenerator-runtime/runtime'], // Polyfills supplémentaires pour Safari 10
 			modernPolyfills: true,
 		}),
-		// Visualizer for checking bundle size after build
-		//visualizer({ open: true }),
 		VitePWA({
 			registerType: 'autoUpdate',
 			includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],

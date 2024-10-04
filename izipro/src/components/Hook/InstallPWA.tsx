@@ -116,7 +116,12 @@ const InstallPWA: React.FC = () => {
             onClick={() => document.getElementById('install')?.click()}
             aria-label='Joindre un fichier'
           /> */}
-          <div className="install-button" ></div>
+          <div
+            className="install-button"
+            onClick={() => document.getElementById('install')?.click()}
+            aria-label='Joindre un fichier'
+          >
+          </div>
 
           <button id="install" onClick={handleInstallClick} style={{ display: 'none' }}>
           </button>

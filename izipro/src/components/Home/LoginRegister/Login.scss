@@ -143,7 +143,15 @@
     align-items: center;
     gap: 0.5rem;
     position: relative;
-    cursor: pointer;
+    /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
     font-size: 18px;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
@@ -203,7 +211,15 @@
     font-size: 14px;
     color: #666;
     text-decoration: none;
-    cursor: pointer;
+    /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
   }
 
   .email-modal {

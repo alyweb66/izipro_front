@@ -82,7 +82,16 @@
             border: none;
             background-color: transparent;
             margin: 0 auto;
-            cursor: pointer;
+
+            /* For mouse */
+            @media (hover: hover) and (pointer: fine) {
+                cursor: pointer;
+            }
+
+            /* For touch */
+            @media (hover: none) and (pointer: coarse) {
+                cursor: default;
+            }
 
 
             .urgent-icon {
@@ -270,7 +279,17 @@
                 color: red;
                 font-size: 1rem;
                 font-weight: 600;
-                cursor: pointer;
+
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer;
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default;
+                }
+
                 transition: transform 0.1s ease;
 
                 &:hover {
@@ -289,7 +308,17 @@
             &.camera-icone {
                 margin-bottom: 0;
                 font-size: 2rem;
-                cursor: pointer;
+
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer;
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default;
+                }
+
                 color: v.$color-primary-orange;
 
             }
@@ -314,7 +343,16 @@
             text-align: center;
             padding: 5px;
             color: #404040;
-            cursor: pointer;
+
+            /* For mouse */
+            @media (hover: hover) and (pointer: fine) {
+                cursor: pointer;
+            }
+
+            /* For touch */
+            @media (hover: none) and (pointer: coarse) {
+                cursor: default;
+            }
         }
 
         .request__form__button {
@@ -343,6 +381,7 @@
 @media (max-width: 700px) {
     .request {
         height: 100%;
+
         .request__form {
             .request__form__select {
                 width: 70%;
@@ -364,8 +403,10 @@
 @media (max-width: 480px) {
     .request {
         height: 100%;
+
         .request__form {
             width: 90%;
+
             .request__form__select {
                 width: 90%;
             }

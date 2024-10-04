@@ -30,8 +30,8 @@ import serviceWorkerRegistration from '../../Hook/ServiceWorkerRegistration';
 import { UserAccountDataProps, UserDataProps } from '../../../Type/User';
 
 // Asset imports
-import profileLogo from '/logo/logo-profile.webp';
-import noPicture from '/logo/no-picture.webp';
+import profileLogo from '/logo-profile.webp';
+import noPicture from '/no-picture.webp';
 
 //Maplibre
 import maplibregl, { Map } from 'maplibre-gl';

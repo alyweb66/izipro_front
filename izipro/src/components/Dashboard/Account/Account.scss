@@ -86,7 +86,15 @@
                 color: v.$color-primary-orange;
                 font-size: 1rem;
                 font-weight: 500;
-                cursor: pointer;
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
 
                 &:hover {
                     color: v.$color-primary-blue;
@@ -309,7 +317,15 @@
             text-align: right;
             color: v.$color-primary-orange;
             text-decoration: underline;
-            cursor: pointer;
+            /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
 
         }
 
@@ -370,7 +386,15 @@
                 margin-top: 1rem;
                 margin-left: auto;
                 margin-right: 0.5rem;
-                cursor: pointer;
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
     
             }
 

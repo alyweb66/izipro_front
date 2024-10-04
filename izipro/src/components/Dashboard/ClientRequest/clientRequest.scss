@@ -59,7 +59,15 @@
     .client-request__list__detail__item {
       overflow: hidden;
       scrollbar-width: none;
-      cursor: pointer;
+      /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
       display: flex;
       flex-direction: column;
       margin: 1rem;
@@ -196,7 +204,15 @@
           border-radius: 0.5rem;
           width: 70px;
           height: 70px;
-          cursor: pointer;
+          /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
 
 
         }
@@ -212,7 +228,15 @@
         font-size: 1.5rem;
         margin: 1rem 1rem 1rem auto;
         color: v.$color-error;
-        cursor: pointer;
+        /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
       }
     }
 
@@ -254,7 +278,15 @@
         .client-request__list__detail__item {
 
           &.message {
-            cursor: pointer;
+            /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
             display: block;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -283,7 +315,15 @@
 
       .client-request__list__detail__item {
         &.message {
-          cursor: pointer;
+          /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
           display: block;
           overflow: hidden;
           text-overflow: ellipsis;

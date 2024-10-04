@@ -17,7 +17,7 @@ import { myRequestStore } from '../../../store/Request';
 
 // Types and icons
 import { CategoryPros, JobProps } from '../../../Type/Request';
-import pdfLogo from '/logo/logo-pdf.webp';
+import pdfLogo from '/logo-pdf.webp';
 import { TbUrgent } from 'react-icons/tb';
 import { FaCamera } from 'react-icons/fa';
 

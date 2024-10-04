@@ -37,8 +37,8 @@ import { RequestProps } from '../../../Type/Request';
 import { MessageProps, MessageStoreProps } from '../../../Type/message';
 
 import { SubscriptionProps } from '../../../Type/Subscription';
-import pdfLogo from '/logo/logo-pdf.webp';
-import logoProfile from '/logo/logo-profile.webp';
+import pdfLogo from '/logo-pdf.webp';
+import logoProfile from '/logo-profile.webp';
 
 // Components and utilities
 import './MyConversation.scss';
@@ -52,7 +52,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
-import noPicture from '/logo/no-picture.webp';
+import noPicture from '/no-picture.webp';
 //import { VariableSizeList as List, ListChildComponentProps } from 'react-window';
 //import { useVirtualizer } from '@tanstack/react-virtual';
 type useQueryUserConversationsProps = {
@@ -988,12 +988,20 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							<label className="my-conversation__message-list__form__label">
 								<MdAttachFile
 									className="my-conversation__message-list__form__label__attach"
-									onClick={() => document.getElementById('send-file')?.click()}
+									onClick={(event) => {
+										event.stopPropagation(),
+										event.preventDefault(),
+										document.getElementById('send-file')?.click()
+									}}
 									aria-label="Joindre un fichier"
 								/>
 								<FaCamera
 									className="my-conversation__message-list__form__label__camera"
-									onClick={() => document.getElementById('file-camera')?.click()}
+									onClick={(event) => {
+										event.preventDefault(),
+										event.stopPropagation(),
+										document.getElementById('file-camera')?.click()
+									}}
 									aria-label="Prendre une photo"
 								/>
 								<TextareaAutosize

@@ -26,7 +26,7 @@
         .title {
             font-size: 1.2rem;
             font-weight: 500;
-            color: v.$color-primary-blue;	
+            color: v.$color-primary-blue;
             /* color: transparent;
             background-image: linear-gradient(to right, v.$color-primary-orange 40%, v.$color-primary-blue 60%, ); */
             -webkit-background-clip: text;
@@ -117,6 +117,7 @@
                 width: 100%;
                 // max-width: 50%;
             }
+
             .content {
                 width: 100%;
                 margin-top: 1rem;

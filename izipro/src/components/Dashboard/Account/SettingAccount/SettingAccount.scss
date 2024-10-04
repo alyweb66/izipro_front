@@ -2,7 +2,7 @@
 @use '../../../../styles/mixins' as m;
 
 .setting-account {
-    margin:  0 auto;
+    margin: 0 auto;
     padding: 1rem;
     border-radius: 0.5rem;
     display: flex;
@@ -104,7 +104,17 @@
                 color: red;
                 font-size: 1rem;
                 font-weight: 600;
-                cursor: pointer;
+
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer;
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default;
+                }
+
                 transition: transform 0.1s ease;
 
                 &:hover {
@@ -125,18 +135,19 @@
         position: relative;
         display: flex;
         flex-direction: column;
-        
+
         .setting-account__radius__label {
             display: flex;
             flex-direction: column;
+
             .setting-account__radius__range {
-                margin:auto;
+                margin: auto;
                 font-size: 1rem;
                 font-weight: 400;
             }
         }
-        
-        
+
+
         .slider-container {
             margin: auto;
         }

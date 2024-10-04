@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { FaTrashAlt } from 'react-icons/fa';
-import pdfLogo from '/logo/logo-pdf.webp';
+import pdfLogo from '/logo-pdf.webp';
 import { RequestProps } from '../../Type/Request';
 import React, { useRef } from 'react';
-import noPicture from '/logo/no-picture.webp';
+import noPicture from '/no-picture.webp';
 import { motion } from 'framer-motion';
 
 type ExpandedState = {
