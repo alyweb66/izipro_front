@@ -28,6 +28,7 @@ import { useMyRequestMessageSubscriptions } from '../GraphQL/MyRequestSubscripti
 import { useClientRequestSubscriptions } from '../GraphQL/ClientRequestSubscription';
 import { useMyConversationSubscriptions } from '../GraphQL/MyConversationSubscription';
 import { useLogoutSubscription } from '../GraphQL/LogoutSubscription';
+import  OffLine  from '../Hook/OffLine';
 
 
 // Mutation
@@ -159,6 +160,7 @@ function Dashboard() {
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
 	const [isMultipleLogout, setIsMultipleLogout] = useState<boolean>(false);
+	const [isOffLine, setIsOffLine] = useState<boolean>(false);
 
 
 	//*state for myRequest
@@ -215,6 +217,8 @@ function Dashboard() {
 			idRef.current = id;
 		}
 	}, [id]);
+
+
 
 	// Query 
 	const { loading: userDataLoading, getUserData } = useQueryUserData(isSkipGetUserDataRef.current || id !== 0);
@@ -537,7 +541,7 @@ function Dashboard() {
 		const sessionCookie = document.cookie.split(';').find(cookie => cookie.includes('session-id'));
 		const sessionId = sessionCookie?.split('=')[1].trim();
 
-		if (logoutSubscription && logoutSubscription.logout.value === true) {
+		if (logoutSubscription && logoutSubscription.logout?.value === true) {
 			if (logoutSubscription.logout.multiple && (sessionId && sessionId === logoutSubscription.logout.session)) {
 				setIsMultipleLogout(true);
 				setIsExpiredSession(true);
@@ -643,8 +647,8 @@ function Dashboard() {
 	// useEffect subscribe to new client Clientrequest
 	useEffect(() => {
 
-		if (clientRequestSubscription) {
-			const requestAdded = clientRequestSubscription.requestAdded[0];
+		if (clientRequestSubscription && clientRequestSubscription.requestAdded) {
+			const requestAdded = clientRequestSubscription?.requestAdded[0];
 
 
 			if (clientRequestsStore.length === 0 || clientRequestsStore.some(prevRequest => prevRequest.id !== requestAdded.id)) {
@@ -879,9 +883,46 @@ function Dashboard() {
 
 	}, [notViewedConversationStore, requestConversationIdStore]);
 
+	// Check internet connection status to display a message
+	useEffect(() => {
+		let offlineTimeout: NodeJS.Timeout | null = null;
+	
+		const handleOffline = () => {
+			offlineTimeout = setTimeout(() => {
+				setIsOffLine(true);
+			}, 5000); // 10 secondes
+		};
+	
+		const handleOnline = () => {
+			if (offlineTimeout) {
+				clearTimeout(offlineTimeout);
+				offlineTimeout = null;
+			}
+			setIsOffLine(false);
+		};
+	
+		window.addEventListener('offline', handleOffline);
+		window.addEventListener('online', handleOnline);
+	
+		// Clean listeners
+		return () => {
+			if (offlineTimeout) {
+				clearTimeout(offlineTimeout);
+			}
+			window.removeEventListener('offline', handleOffline);
+			window.removeEventListener('online', handleOnline);
+		};
+	}, []);
+
+	const ErrorFallback = () => {
+		return (
+		  <div style={{ padding: '10px', backgroundColor: '#f8d7da', color: '#721c24', border: '1px solid #f5c6cb', borderRadius: '4px', position: 'fixed', top: '4rem' }}>
+			<p>Impossible de charger l'élément</p>
+		  </div>
+		);
+	  };
 	return (
-		<>
-			
+		<>	
 			<div className='dashboard'>
 				{userDataLoading
 					|| notViewedConversationLoading
@@ -965,12 +1006,12 @@ function Dashboard() {
 				</nav>
 
 
-				<div className="dashboard__content">
+				{isOffLine ? (<OffLine />) : (<div className="dashboard__content">
 					<Suspense fallback={<Spinner />}>
-						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
+						<ErrorBoundary FallbackComponent={ErrorFallback}>
 							{selectedTab === 'Request' && <Request />}
 						</ErrorBoundary>
-						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
+						<ErrorBoundary FallbackComponent={ErrorFallback}>
 							{selectedTab === 'My requests' && <MyRequest
 								setIsHasMore={setIsMyRequestHasMore}
 								isHasMore={isMyRequestHasMore}
@@ -991,10 +1032,10 @@ function Dashboard() {
 							setConversationIdState={setMyConversationIdState}
 							clientMessageSubscription={clientMessageSubscription}
 						/>}
-						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
+						<ErrorBoundary FallbackComponent={ErrorFallback}>
 							{selectedTab === 'My profile' && <Account />}
 						</ErrorBoundary>
-						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
+						<ErrorBoundary FallbackComponent={ErrorFallback}>
 							{selectedTab === 'Client request' && <ClientRequest
 								loading={getRequestByJobLoading}
 								offsetRef={clientRequestOffset}
@@ -1005,7 +1046,7 @@ function Dashboard() {
 							/>}
 						</ErrorBoundary>
 					</Suspense>
-				</div>
+				</div>)}
 
 				<DeleteItemModal
 					isMultipleLogout={isMultipleLogout}

@@ -56,7 +56,7 @@ function Presentation() {
           <section className="presentation-container__particular-pro" aria-labelledby="particular-pro-section">
             <h2 id="particular-pro-section" className="visually-hidden">Particuliers et Professionnels</h2>
             <div className="image image-1" role="img" aria-label="Image de particulier et professionnel 1"></div>
-            <div className="image image-2" role="img" aria-label="Image de particulier et professionnel 2"></div>
+            {/* <div className="image image-2" role="img" aria-label="Image de particulier et professionnel 2"></div> */}
             <div className="image image-3" role="img" aria-label="Image de particulier et professionnel 3"></div>
           </section>
           <section className="presentation-container__content" aria-labelledby="content-pro-section">

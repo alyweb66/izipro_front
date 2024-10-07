@@ -68,6 +68,16 @@
             }
 
             .my-request__list__detail__item {
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                scrollbar-width: none;
+                margin: 1rem;
+                background-color: white;
+                border-radius: 0.5rem;
+                box-shadow: -5px 0 10px #6666661c,
+                -5px 0 10px #ffffff17,
+                5px 0 10px #6666661c;
 
                 /* For mouse */
                 @media (hover: hover) and (pointer: fine) {
@@ -79,16 +89,6 @@
                     cursor: default;
                 }
 
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                scrollbar-width: none;
-                margin: 1rem;
-                background-color: white;
-                border-radius: 0.5rem;
-                box-shadow: -5px 0 10px #6666661c,
-                -5px 0 10px #ffffff17,
-                5px 0 10px #6666661c;
 
                 &::-webkit-scrollbar {
                     display: none;
@@ -192,17 +192,6 @@
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
-
-                    /* For mouse */
-                    @media (hover: hover) and (pointer: fine) {
-                        cursor: pointer;
-                    }
-
-                    /* For touch */
-                    @media (hover: none) and (pointer: coarse) {
-                        cursor: default;
-                    }
-
                     width: inherit;
                     border: none;
                     padding-left: 0.3rem;
@@ -215,6 +204,17 @@
                     font-weight: 400;
                     background-color: v.$color-light-blue;
                     z-index: 10;
+
+                    /* For mouse */
+                    @media (hover: hover) and (pointer: fine) {
+                        cursor: pointer;
+                    }
+
+                    /* For touch */
+                    @media (hover: none) and (pointer: coarse) {
+                        cursor: default;
+                    }
+
                 }
 
                 &.expanded {
@@ -263,6 +263,7 @@
                     font-size: 1.5rem;
                     margin: 1rem 1rem 1rem auto;
                     color: v.$color-error;
+                    z-index: 2;
 
                     /* For mouse */
                     @media (hover: hover) and (pointer: fine) {
@@ -274,7 +275,6 @@
                         cursor: default;
                     }
 
-                    z-index: 2;
                 }
             }
         }
@@ -474,6 +474,9 @@
                 display: flex;
                 flex-direction: column;
                 box-shadow: 0 1px 6px -2px rgba(0, 0, 0, 0.2);
+                position: relative;
+                background-color: white;
+                border-radius: 0.3rem 0.3rem 0 0;
 
                 /* For mouse */
                 @media (hover: hover) and (pointer: fine) {
@@ -485,9 +488,6 @@
                     cursor: default;
                 }
 
-                position: relative;
-                background-color: white;
-                border-radius: 0.3rem 0.3rem 0 0;
 
 
                 .my-request__message-list__user__header__detail {
@@ -722,6 +722,11 @@
 
                                     .my-request__message-list__message__detail__image-pdf {
                                         border-radius: 0.5rem;
+                                        object-fit: cover;
+                                        flex: 1;
+                                        width: auto;
+                                        min-width: 5rem;
+                                        height: auto;
 
                                         /* For mouse */
                                         @media (hover: hover) and (pointer: fine) {
@@ -733,11 +738,6 @@
                                             cursor: default;
                                         }
 
-                                        object-fit: cover;
-                                        flex: 1;
-                                        width: auto;
-                                        min-width: 5rem;
-                                        height: auto;
 
                                         &.single {
                                             width: fit-content;
@@ -760,6 +760,11 @@
 
                                 .my-request__message-list__message__detail__image {
                                     border-radius: 0.5rem;
+                                    object-fit: contain;
+                                    flex: 1;
+                                    width: auto;
+                                    min-width: 5rem;
+                                    height: auto;
 
                                     /* For mouse */
                                     @media (hover: hover) and (pointer: fine) {
@@ -771,11 +776,6 @@
                                         cursor: default;
                                     }
 
-                                    object-fit: contain;
-                                    flex: 1;
-                                    width: auto;
-                                    min-width: 5rem;
-                                    height: auto;
 
                                     &.single {
                                         object-fit: contain;
@@ -878,6 +878,7 @@
                         color: red;
                         font-size: 1rem;
                         font-weight: 600;
+                        transition: transform 0.1s ease;
 
                         /* For mouse */
                         @media (hover: hover) and (pointer: fine) {
@@ -889,7 +890,6 @@
                             cursor: default;
                         }
 
-                        transition: transform 0.1s ease;
 
                         &:hover {
                             transform: scale(1.5);
@@ -973,6 +973,8 @@
             .my-request__message-list__form__label__send {
                 margin: auto;
                 font-size: 2.5rem;
+                margin-right: 0.5rem;
+                z-index: 10;
 
                 /* For mouse */
                 @media (hover: hover) and (pointer: fine) {
@@ -984,8 +986,6 @@
                     cursor: default;
                 }
 
-                margin-right: 0.5rem;
-                z-index: 10;
             }
         }
 

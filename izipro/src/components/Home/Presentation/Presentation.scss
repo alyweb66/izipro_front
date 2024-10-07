@@ -27,8 +27,6 @@
             font-size: 1.2rem;
             font-weight: 500;
             color: v.$color-primary-blue;
-            /* color: transparent;
-            background-image: linear-gradient(to right, v.$color-primary-orange 40%, v.$color-primary-blue 60%, ); */
             -webkit-background-clip: text;
             background-clip: text;
             margin-bottom: 0.5rem;
@@ -57,9 +55,6 @@
     .presentation-container__particular {
         display: flex;
 
-        /*  box-shadow: 22px 22px 44px #d4d4d4,
-            -22px -22px 44px #ffffff; */
-
         &.image {
             height: 40vh;
             width: 49%;
@@ -77,18 +72,27 @@
                 height: 100%;
                 background-size: cover;
                 background-position: center;
-                animation: fade 30s infinite;
+                opacity: 0;
+            animation: fade 20s infinite;
+            transition: opacity 2s ease-in-out;
+               // animation: fade 30s infinite;
             }
 
             .image-1 {
                 background-image: url('/images/Overwhelmed-mother.webp');
-                animation-delay: 1s;
+                animation-delay: 0s;
             }
 
             .image-2 {
                 background-image: url('/images/Overwhelmed-men.webp');
-                animation-delay: 15s;
+                animation-delay: 10s;
             }
+
+            .image-3 {
+                background-image: url('/images/Overwhelmed-mother.webp');
+                animation-delay: 20s;
+            }
+
         }
 
         .content {
@@ -174,22 +178,25 @@
             height: 100%;
             background-size: cover;
             background-position: center;
-            animation: fade 30s infinite;
+           // animation: fade 30s infinite;
+           opacity: 0;
+            animation: fade 20s infinite;
+            transition: opacity 2s ease-in-out;
         }
 
         .image-1 {
             background-image: url('/images/Welding-gate.webp');
-            animation-delay: 1s;
+            animation-delay: 0s;
         }
 
-        .image-2 {
+        /* .image-2 {
             background-image: url('/images/Woman-sewing.webp');
-            animation-delay: 15s;
-        }
+            animation-delay: 12s;
+        } */
 
         .image-3 {
             background-image: url('/images/Startup-woman.webp');
-            animation-delay: 15s;
+            animation-delay: 10s;
         }
 
     }
@@ -231,3 +238,26 @@
         opacity: 0;
     }
 }
+
+/* @keyframes fade {
+    0% {
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    60% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 0;
+    }
+} */
+

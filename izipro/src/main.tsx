@@ -15,12 +15,43 @@ import './styles/index.scss';
 import { serverErrorStore } from './store/LoginRegister';
 import { setContext } from '@apollo/client/link/context';
 import { userDataStore } from './store/UserData';
-import ReloadPrompt from './Prompt';
+//import ReloadPrompt from './Prompt';
 import { registerSW } from 'virtual:pwa-register'
 
 // Register the service worker PWA
-registerSW({ immediate: true })
-
+//registerSW({ immediate: true })
+let updateNotified = false;
+// Enregistre le service worker avec des événements de feedback
+registerSW({
+	onNeedRefresh() {
+		//console.log("Nouvelle version disponible ! Mise à jour en cours...");
+		// Optionnel : Afficher une notification si nécessaire
+	},
+	onOfflineReady() {
+		//	console.log("L'application est prête à fonctionner hors ligne !");
+	},
+	onRegistered(registration) {
+		if (registration) {
+			registration.addEventListener('updatefound', () => {
+				const newWorker = registration.installing;
+				if (newWorker) {
+					newWorker.addEventListener('statechange', () => {
+						if (newWorker.state === 'installed') {
+							// Le nouveau service worker est installé
+							if (navigator.serviceWorker.controller && !updateNotified) {
+								alert('Votre applicaiton a été mise à jour');
+								updateNotified = true;
+							}
+						}
+					});
+				}
+			});
+		}
+	},
+	onRegisterError(error) {
+		console.error("Erreur lors de l'enregistrement du Service Worker:", error);
+	},
+});
 // store
 const setServerError = (serverError: { status: number; statusText: string }) => {
 	serverErrorStore.getState().setServerError(serverError);
@@ -97,23 +128,29 @@ const httpLink = createUploadLink({
 	headers: { 'Apollo-Require-Preflight': 'true' },
 });
 
-
+let wsLink;
 // Create a WebSocket link
-const wsLink = new GraphQLWsLink(
-	createClient({
-		url: import.meta.env.MODE === 'production' ? import.meta.env.VITE_SERVER_SUBSCRIPTION : 'ws://localhost:3000/subscriptions',
-		retryAttempts: Infinity,
-		shouldRetry: (errOrCloseEvent) => {
-			// Retry if the connection is closed by refreshing the page or other
-			// need return always true because if false that create an error on firefox 
-			if (errOrCloseEvent instanceof CloseEvent) {
-					return true;  
-			}
-			return true;
-		},
-		keepAlive: 10000,
-	})
-);
+window.addEventListener('online', () => {
+	wsLink = new GraphQLWsLink(
+		createClient({
+			url: import.meta.env.MODE === 'production' ? import.meta.env.VITE_SERVER_SUBSCRIPTION : 'ws://localhost:3000/subscriptions',
+			retryAttempts: Infinity,
+			shouldRetry: (errOrCloseEvent) => {
+				// Retry if the connection is closed by refreshing the page or other
+				// need return always true because if false that create an error on firefox 
+				if (errOrCloseEvent instanceof CloseEvent) {
+					return true;
+				}
+				return true;
+			},
+			keepAlive: 10000,
+		})
+	);
+});
+
+window.addEventListener('offline', () => {
+	wsLink = null;
+});
 
 //const httpLinkWithLogout = errorLink.concat(httpLink);
 const httpLinkWithMiddleware = ApolloLink.from([userIdMiddleware, authMiddleware, errorLink, httpLink]);
@@ -129,7 +166,7 @@ const splitLink = split(
 			definition.operation === 'subscription'
 		);
 	},
-	wsLink,
+	(wsLink || httpLinkWithMiddleware),
 	httpLinkWithMiddleware,
 );
 
@@ -199,6 +236,6 @@ if ('serviceWorker' in navigator) {
 root.render(
 	<ApolloProvider client={client}>
 		<RouterProvider router={router} />
-		<ReloadPrompt />
+		{/* <ReloadPrompt /> */}
 	</ApolloProvider>,
 );

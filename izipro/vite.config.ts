@@ -18,7 +18,7 @@ export default defineConfig({
 		VitePWA({
 			registerType: 'autoUpdate',
 			includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
-			strategies: 'injectManifest',
+			strategies: 'generateSW',
 			srcDir: 'src',
 			filename: 'serviceWorker.js',
 			manifest: false,
@@ -26,12 +26,12 @@ export default defineConfig({
 				globPatterns: ['**/*.{tsx,js,scss,html,png,jpg,svg}'],
 				runtimeCaching: [{
 					urlPattern: /^https:\/\/back\.betapoptest\.online\/.*/i,
-					handler: 'StaleWhileRevalidate',
+					handler: 'NetworkFirst',
 					options: {
 						cacheName: 'api-back-cache',
 						expiration: {
-							maxEntries: 10,
-							maxAgeSeconds: 30000,
+							maxEntries: 30,
+							maxAgeSeconds: 60 * 60 * 24 * 30, // 30 Days
 						},
 						cacheableResponse: {
 							statuses: [0, 200],

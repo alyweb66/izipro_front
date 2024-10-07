@@ -33,7 +33,7 @@ function DisplayError() {
 			<header>
 				<h1 id="error-title" className="error__title">{serverErrorStatus || error.status}</h1>
 			</header>
-			<img className="error__img" src="/images/error/Error.webp" alt="Image d'erreur" />
+			<img className="error__img" src="/Error.webp" alt="Image d'erreur" />
 			<p id="error-description" className="error__description">Désolé, une erreur inattendue est survenue.</p>
 			<article>
 				<p>
@@ -45,11 +45,3 @@ function DisplayError() {
 }
 
 export default DisplayError;
-{/* <div className="error">
-	<h1 className="error__title">{serverErrorStatus || error.status}</h1>
-	<img className="error__img" src="/images/error/Error.webp" alt="" />
-	<p className="error__description">Désolé, une erreur inattendue est survenue.</p>
-	<p>
-		<i className="error__message">{getErrorMessage(error)}</i>
-	</p>
-</div> */}

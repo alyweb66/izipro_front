@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Spinner from './Spinner';
 import '../../styles/installPWA.scss';
-// Déclare le type d'événement `beforeinstallprompt`
+
+// type of event `beforeinstallprompt`
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => void;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
@@ -23,17 +24,17 @@ const InstallPWA: React.FC = () => {
     // Verify if the app is installed as a PWA
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     if (isStandalone) {
-      console.log('L\'application est installée en tant qu\'application autonome');
+     // console.log('L\'application est installée en tant qu\'application autonome');
 
       setIsInstalled(true);
     } else {
-      console.log('L\'application n\'est pas installée en tant qu\'application autonome');
+     // console.log('L\'application n\'est pas installée en tant qu\'application autonome');
 
       // Check if the app is installed using getInstalledRelatedApps
       if ('getInstalledRelatedApps' in navigator) {
         (navigator as any).getInstalledRelatedApps().then((apps: any[]) => {
           if (apps.length > 0) {
-            console.log('L\'application est installée en tant qu\'application liée');
+          //  console.log('L\'application est installée en tant qu\'application liée');
 
             setIsInstalled(true);
           }
@@ -41,7 +42,7 @@ const InstallPWA: React.FC = () => {
       }
     }
 
-    // Détecter le type de navigateur
+    // Detect type of browser
     const userAgent = navigator.userAgent.toLowerCase();
     if (userAgent.indexOf('chrome') > -1) {
       setBrowserName('Chrome');
@@ -56,7 +57,7 @@ const InstallPWA: React.FC = () => {
     }
     // function to handle the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
-      console.log('handleBeforeInstallPrompt', e);
+     // console.log('handleBeforeInstallPrompt', e);
 
       e.preventDefault();
       const event = e as BeforeInstallPromptEvent;
@@ -69,15 +70,15 @@ const InstallPWA: React.FC = () => {
 
     // Verify if the browser supports the beforeinstallprompt event
     if ('onbeforeinstallprompt' in window) {
-      console.log('Le navigateur supporte l\'installation d\'applications');
+     // console.log('Le navigateur supporte l\'installation d\'applications');
 
 
       window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      // Vérifiez si l'événement n'a pas été déclenché après 5 secondes
+      // Verify if the event was triggered
       setIsLoading(true);
       setTimeout(() => {
         if (!eventTriggered) {
-          console.log('L\'événement beforeinstallprompt n\'a pas été déclenché. L\'application est peut-être déjà installée.');
+        //  console.log('L\'événement beforeinstallprompt n\'a pas été déclenché. L\'application est peut-être déjà installée.');
           setIsInstalled(true);
         }
         setIsLoading(false);
@@ -90,17 +91,17 @@ const InstallPWA: React.FC = () => {
     };
   }, []);
 
+  // Function to handle the installation of the app
   const handleInstallClick = () => {
-    console.log('handleInstallClick', deferredPrompt);
 
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
+      deferredPrompt.userChoice.then((/* choiceResult */) => {
+        /* if (choiceResult.outcome === 'accepted') {
           console.log("L'utilisateur a accepté d'installer l'application");
         } else {
           console.log("L'utilisateur a refusé l'installation");
-        }
+        } */
         setDeferredPrompt(null);
         setShowInstallButton(false);
         setIsInstalled(true);
@@ -112,10 +113,6 @@ const InstallPWA: React.FC = () => {
     <>
       {showInstallButton && (
         <>
-          {/* <MdInstallMobile className="install-button"
-            onClick={() => document.getElementById('install')?.click()}
-            aria-label='Joindre un fichier'
-          /> */}
           <div
             className="install-button"
             onClick={() => document.getElementById('install')?.click()}

@@ -1,5 +1,6 @@
 
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
+
 /* Notification.requestPermission().then(permission => {
     console.log('Notification permission:', permission);
 });
@@ -68,13 +69,6 @@ async function openUrl(url) {
 const CACHE_NAME = 'map-tiles-cache';
 const TILE_URL_PATTERN = /https:\/\/basemaps\.cartocdn\.com\/gl\/voyager-gl-style\/.*/;
 
-// Prepare cache for map tiles
-/* self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-    })
-  );
-}); */
 
 // Cache map tiles
 self.addEventListener('fetch', (event) => {
@@ -101,16 +95,8 @@ self.addEventListener('fetch', (event) => {
 	}
 });
 
-// Clear cache when user is not login
-/* self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'CLEAR_CACHE') {
-    caches.delete(CACHE_NAME).then(() => {
-    }).catch((error) => {
-      console.error('Error clearing cache:', error);
-    });
-  }
-}); */
 //* End cache map tiles
+// Clear cache
 self.addEventListener('message', (event) => {
 	if (event.data) {
 		switch (event.data.type) {
@@ -124,15 +110,61 @@ self.addEventListener('message', (event) => {
 	}
 });
 
+
 //* PWA
 // ======= Intégration du cache de vite-plugin-pwa =======
 cleanupOutdatedCaches();
-
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-/* self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING')
-    self.skipWaiting()
-}) */
-
 //* End PWA
+
+//* Cache API
+//const CACHE_NAME_SERVEUR = 'api-back-cache';
+//const API_URL_PATTERN = /^https:\/\/back\.betapoptest\.online\/.*/i;
+
+/* const CACHE_NAME_STATIC = 'app-static-cache-v1';
+const PRECACHE_URLS = [
+  '/',
+  '/index.html',
+  '/styles.css',
+  '/script.js',
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME_STATIC).then((cache) => {
+      return cache.addAll(PRECACHE_URLS);
+    })
+  );
+});
+// Ajoute une règle de mise en cache pour les requêtes d'API
+self.addEventListener('fetch', (event) => {
+	if (API_URL_PATTERN.test(event.request.url)) {
+	  console.log('Interception de la requête API : ', event.request.url);
+	  event.respondWith(
+		fetch(event.request)
+		  .then((response) => {
+			// Si la requête est réussie, on met à jour le cache
+			return caches.open(CACHE_NAME_SERVEUR).then((cache) => {
+			  console.log('Ajout de la réponse au cache pour:', event.request.url);
+			  cache.put(event.request, response.clone());
+			  return response;
+			});
+		  })
+		  .catch((error) => {
+			console.error('Récupération réseau échouée, utilisation du cache pour:', event.request.url);
+			// En cas d'erreur réseau, on cherche dans le cache
+			return caches.match(event.request).then((cachedResponse) => {
+			  if (cachedResponse) {
+				console.log('Réponse trouvée dans le cache:', event.request.url);
+				return cachedResponse;
+			  }
+			  // Si rien n'est trouvé dans le cache, renvoyer une erreur personnalisée ou une réponse par défaut
+			  return new Response('Ressource non disponible', { status: 503, statusText: 'Service Unavailable' });
+			});
+		  })
+	  );
+	}
+  }); */
+
+  //* End cache API

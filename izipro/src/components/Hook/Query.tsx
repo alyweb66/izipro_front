@@ -19,8 +19,6 @@ export const useQueryUserData = (getData: boolean) => {
 		throw new Error('Error while fetching user data');
 	}
 
-
-
 	return { loading, getUserData};
 };
 

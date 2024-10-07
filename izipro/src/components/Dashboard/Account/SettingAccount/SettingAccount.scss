@@ -104,6 +104,7 @@
                 color: red;
                 font-size: 1rem;
                 font-weight: 600;
+                transition: transform 0.1s ease;
 
                 /* For mouse */
                 @media (hover: hover) and (pointer: fine) {
@@ -115,7 +116,6 @@
                     cursor: default;
                 }
 
-                transition: transform 0.1s ease;
 
                 &:hover {
                     transform: scale(1.5);

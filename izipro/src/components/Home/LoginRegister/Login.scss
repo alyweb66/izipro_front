@@ -143,6 +143,9 @@
     align-items: center;
     gap: 0.5rem;
     position: relative;
+    font-size: 18px;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
     /* For mouse */
                 @media (hover: hover) and (pointer: fine) {
                     cursor: pointer; 
@@ -152,9 +155,6 @@
                 @media (hover: none) and (pointer: coarse) {
                     cursor: default; 
                 }
-    font-size: 18px;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
 
     /* Create a custom checkbox */
     .checkmark {

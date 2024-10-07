@@ -864,7 +864,7 @@ function Account() {
 							</div>
 							<button className="account__profile__button" type="submit" aria-label="Valider les modifications">Valider</button>
 							<div className="request__form__map">
-								<p className="request__title-map">Vérifiez votre adresse sur la carte (validez pour actualiser):</p>
+								{/* <p className="request__title-map">Vérifiez votre adresse sur la carte (validez pour actualiser):</p> */}
 								<div id="map" className="request__form__map__map">
 									{isLoading && <Spinner />}
 								</div>

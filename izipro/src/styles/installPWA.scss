@@ -13,6 +13,8 @@
     border-radius: 0.8rem;	
     font-size: 2rem;
     color: rgb(255, 255, 255);
+    box-shadow:  3px 2px 5px #cecece,
+             -3px -2px 5px #bebebe;
     /* For mouse */
                 @media (hover: hover) and (pointer: fine) {
                     cursor: pointer; 
@@ -22,8 +24,6 @@
                 @media (hover: none) and (pointer: coarse) {
                     cursor: default; 
                 }
-    box-shadow:  3px 2px 5px #cecece,
-             -3px -2px 5px #bebebe;
 }
 
 .message-PWA {

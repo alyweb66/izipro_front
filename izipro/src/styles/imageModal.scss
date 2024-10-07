@@ -21,15 +21,16 @@
         margin: 2rem 2rem 0.5rem auto;
         font-size: 4rem;
         color: v.$color-primary-orange;
-        /* For mouse */
-                @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer; 
-                }
 
-                /* For touch */
-                @media (hover: none) and (pointer: coarse) {
-                    cursor: default; 
-                }
+        /* For mouse */
+        @media (hover: hover) and (pointer: fine) {
+            cursor: pointer;
+        }
+
+        /* For touch */
+        @media (hover: none) and (pointer: coarse) {
+            cursor: default;
+        }
     }
 
     .react-modal__picture {
@@ -62,29 +63,22 @@
         &.back,
         &.forward {
             font-size: 7rem;
-            /* For mouse */
-                @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer; 
-                }
-
-                /* For touch */
-                @media (hover: none) and (pointer: coarse) {
-                    cursor: default; 
-                }
             position: fixed;
             top: 50%;
             transform: translateY(-50%);
-            /* For mouse */
-                @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer; 
-                }
-
-                /* For touch */
-                @media (hover: none) and (pointer: coarse) {
-                    cursor: default; 
-                }
             z-index: 10;
             font-size: 5rem;
+
+            /* For mouse */
+            @media (hover: hover) and (pointer: fine) {
+                cursor: pointer;
+            }
+
+            /* For touch */
+            @media (hover: none) and (pointer: coarse) {
+                cursor: default;
+            }
+
         }
 
         &.img {

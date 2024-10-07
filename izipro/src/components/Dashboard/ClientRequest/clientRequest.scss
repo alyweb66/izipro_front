@@ -55,10 +55,18 @@
       justify-content: center;}
     }
 
-
+    
     .client-request__list__detail__item {
       overflow: hidden;
       scrollbar-width: none;
+      display: flex;
+      flex-direction: column;
+      margin: 1rem;
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: -5px 0 10px #6666661c,
+        -5px 0 10px #ffffff17,
+        5px 0 10px #6666661c;
       /* For mouse */
                 @media (hover: hover) and (pointer: fine) {
                     cursor: pointer; 
@@ -68,14 +76,6 @@
                 @media (hover: none) and (pointer: coarse) {
                     cursor: default; 
                 }
-      display: flex;
-      flex-direction: column;
-      margin: 1rem;
-      background-color: white;
-      border-radius: 0.5rem;
-      box-shadow: -5px 0 10px #6666661c,
-        -5px 0 10px #ffffff17,
-        5px 0 10px #6666661c;
 
       &::-webkit-scrollbar {
         display: none;
