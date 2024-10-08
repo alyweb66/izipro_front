@@ -260,6 +260,7 @@
                         width: 70px;
                         height: 70px;
                         z-index: 10;
+                        object-fit: cover;
 
                         /* For mouse */
                         @media (hover: hover) and (pointer: fine) {

@@ -170,6 +170,16 @@
 
     }
 
+    .ErrorFallback {
+        padding: 0.8rem;
+        background-color: #f8d7da;
+        color: #721c24 ;
+        border: 1px solid #f5c6cb;
+        border-radius: 0.4rem ;
+        position: fixed;
+        top: 8rem;
+    }
+
 
 }
 
@@ -193,6 +203,15 @@
         height: 100vh;
         height: 100dvh;
 
+        .ErrorFallback {
+            padding: 0.8rem;
+            background-color: #f8d7da;
+            color: #721c24 ;
+            border: 1px solid #f5c6cb;
+            border-radius: 0.4rem ;
+            position: fixed;
+            top: 4rem;
+        }
         .__nav {
             display: flex;
             justify-content: center;

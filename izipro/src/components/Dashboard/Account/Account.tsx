@@ -399,6 +399,7 @@ function Account() {
 				}, 3000);
 				return;
 			}
+			
 		}
 
 		if ((file?.length ?? 0) > 0) {
@@ -792,7 +793,7 @@ function Account() {
 									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCityState(event.target.value)}
 									aria-label="Ville"
 									autoComplete="address-level2"
-									maxLength={20}
+									maxLength={100}
 									required
 								/>
 							</label>

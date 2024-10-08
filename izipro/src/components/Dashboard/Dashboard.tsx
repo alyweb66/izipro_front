@@ -570,6 +570,7 @@ function Dashboard() {
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
 
+
 			// add the new message to the message store
 			messageDataStore.setState(prevState => {
 				const newMessages = messageAdded.filter(
@@ -888,12 +889,15 @@ function Dashboard() {
 		let offlineTimeout: NodeJS.Timeout | null = null;
 	
 		const handleOffline = () => {
+			console.log('offline');
+			
 			offlineTimeout = setTimeout(() => {
 				setIsOffLine(true);
-			}, 5000); // 10 secondes
+			}, 5000); // 5 secondes
 		};
 	
 		const handleOnline = () => {
+			console.log('Online event triggered');
 			if (offlineTimeout) {
 				clearTimeout(offlineTimeout);
 				offlineTimeout = null;
@@ -903,7 +907,7 @@ function Dashboard() {
 	
 		window.addEventListener('offline', handleOffline);
 		window.addEventListener('online', handleOnline);
-	
+		
 		// Clean listeners
 		return () => {
 			if (offlineTimeout) {
@@ -914,13 +918,15 @@ function Dashboard() {
 		};
 	}, []);
 
+	// Error boundary
 	const ErrorFallback = () => {
 		return (
-		  <div style={{ padding: '10px', backgroundColor: '#f8d7da', color: '#721c24', border: '1px solid #f5c6cb', borderRadius: '4px', position: 'fixed', top: '4rem' }}>
+		  <div className="ErrorFallback">
 			<p>Impossible de charger l'élément</p>
 		  </div>
 		);
 	  };
+	  
 	return (
 		<>	
 			<div className='dashboard'>
@@ -958,11 +964,11 @@ function Dashboard() {
 					</div>
 					<ul className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Request' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('Request'); setIsOpen(!isOpen); }} aria-label="Ouvrir les demandes">DEMANDE
+							onClick={() => { if (!isOffLine) {setSelectedTab('Request'); setIsOpen(!isOpen); }}} aria-label="Ouvrir les demandes">DEMANDE
 							<div className="indicator"></div>
 						</li>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }} aria-label="Ouvrir mes demandes">
+							onClick={() => {if (!isOffLine) {setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }}} aria-label="Ouvrir mes demandes">
 							<div className="tab-content">
 
 								<span>MES DEMANDES</span>
@@ -974,7 +980,7 @@ function Dashboard() {
 						</li>
 						{role === 'pro' &&
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
-								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); setIsSkipClientRequest(false); }} aria-label="Ouvrir les demandes clients">
+								onClick={() => {if (!isOffLine) {setSelectedTab('Client request'); setIsOpen(!isOpen); setIsSkipClientRequest(false); }}} aria-label="Ouvrir les demandes clients">
 								<div className="tab-content">
 									<span>CLIENT</span>
 									{(notViewedRequestStore.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>
@@ -987,7 +993,7 @@ function Dashboard() {
 						}
 						{role === 'pro' &&
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
-								onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }} aria-label="Ouvrir mes conversations">
+								onClick={() => {if (!isOffLine) {setSelectedTab('My conversations'); setIsOpen(!isOpen); }}} aria-label="Ouvrir mes conversations">
 								<div className="tab-content">
 									<span>MES CONVERSATIONS</span>
 									{(viewedMyConversationState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
@@ -998,7 +1004,7 @@ function Dashboard() {
 							</li>
 						}
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My profile' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My profile'); setIsOpen(!isOpen); }} aria-label="Ouvrir mon compte">MON COMPTE
+							onClick={() => {if (!isOffLine) {setSelectedTab('My profile'); setIsOpen(!isOpen); }}} aria-label="Ouvrir mon compte">MON COMPTE
 							<div className="indicator"></div>
 						</li>
 						{!isFooter && <Footer />}

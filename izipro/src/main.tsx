@@ -128,30 +128,36 @@ const httpLink = createUploadLink({
 	headers: { 'Apollo-Require-Preflight': 'true' },
 });
 
-let wsLink;
-// Create a WebSocket link
+let wsLink = navigator.onLine
+	? new GraphQLWsLink(
+		createClient({
+			url: import.meta.env.MODE === 'production' ? import.meta.env.VITE_SERVER_SUBSCRIPTION : 'ws://localhost:3000/subscriptions',
+			retryAttempts: Infinity,
+			shouldRetry: () => true,
+			keepAlive: 10000,
+		})
+	)
+	: null;
+
+// Écoute les changements d'état de connexion
 window.addEventListener('online', () => {
 	wsLink = new GraphQLWsLink(
 		createClient({
 			url: import.meta.env.MODE === 'production' ? import.meta.env.VITE_SERVER_SUBSCRIPTION : 'ws://localhost:3000/subscriptions',
 			retryAttempts: Infinity,
-			shouldRetry: (errOrCloseEvent) => {
-				// Retry if the connection is closed by refreshing the page or other
-				// need return always true because if false that create an error on firefox 
-				if (errOrCloseEvent instanceof CloseEvent) {
-					return true;
-				}
-				return true;
-			},
+			shouldRetry: () => true,
 			keepAlive: 10000,
 		})
 	);
+	console.log('wsLink (online)', wsLink);
 });
 
 window.addEventListener('offline', () => {
 	wsLink = null;
+	console.log('wsLink (offline)', wsLink);
 });
-
+console.log('Initial navigator.onLine:', navigator.onLine);
+console.log('Initial wsLink:', wsLink);
 //const httpLinkWithLogout = errorLink.concat(httpLink);
 const httpLinkWithMiddleware = ApolloLink.from([userIdMiddleware, authMiddleware, errorLink, httpLink]);
 // The split function takes three parameters:
