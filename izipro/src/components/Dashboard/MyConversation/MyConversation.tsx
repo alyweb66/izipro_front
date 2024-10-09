@@ -53,6 +53,8 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import noPicture from '/no-picture.webp';
+import { formatMessageDate } from '../../Hook/Component';
+import { Virtuoso } from 'react-virtuoso';
 //import { VariableSizeList as List, ListChildComponentProps } from 'react-window';
 //import { useVirtualizer } from '@tanstack/react-virtual';
 type useQueryUserConversationsProps = {
@@ -97,7 +99,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 	//useRef
 	const conversationIdRef = useRef(0);
-	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
+	//const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -513,7 +515,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 					setIsListOpen(true);
 				}
 			}
-			endOfMessagesRef.current?.scrollIntoView();
+			/* endOfMessagesRef.current?.scrollIntoView(); */
 		};
 
 		// add event listener to check the size of the window
@@ -674,39 +676,12 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		};
 	}, []);
 
-	// useEffect to scroll to the end of the messages
-	useLayoutEffect(() => {
 
-		const scrollToEnd = (behavior: ScrollBehavior) => {
-			endOfMessagesRef.current?.scrollIntoView({ behavior });
-		};
-		const ensureScrollToEnd = () => {
-			const container = endOfMessagesRef.current?.parentElement;
-
-			if (container) {
-				// verify if we have reached the end of the messages
-				const hasReachedEnd = container.scrollTop + container.clientHeight >= container.scrollHeight;
-
-				if (!hasReachedEnd) {
-					// If we haven't reached the end, scroll to the end
-					scrollToEnd('auto');
-					setTimeout(ensureScrollToEnd, 0);
-				} else {
-					// If we have reached the end, scroll to the end smoothly
-					scrollToEnd('smooth');
-				}
-			}
-		};
-		// scroll to the end of the messages before painting browser with requestAnimationFrame
-		requestAnimationFrame(() => {
-			setTimeout(() => {
-				scrollToEnd('auto');
-				setTimeout(ensureScrollToEnd, 500);
-			}, 0);
-		});
-
-	}, [messageStore, isMessageOpen, selectedRequest]);
-
+	const filteredMessages = Array.isArray(messageStore)
+		? messageStore
+			.filter((message) => message.conversation_id === conversationIdState)
+			.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
+		: [];
 
 	return (
 		<div className="my-conversation">
@@ -809,7 +784,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 													}, 200);
 												}
 											}}
-											 aria-label="Retour à la liste des conversations"
+											aria-label="Retour à la liste des conversations"
 										/>
 										<img
 											className="my-conversation__message-list__user__header__detail img"
@@ -853,91 +828,98 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 						<div className="my-conversation__container">
 							<div className="my-conversation__background">
-								<div className="my-conversation__message-list__message">
-									{Array.isArray(messageStore) &&
-										messageStore
-											.filter((message) => message.conversation_id === conversationIdState)
-											.sort((a, b) => Number(a.created_at) - Number(b.created_at))
-											.map((message) => (
-												<div
-													className={`my-conversation__message-list__message__detail ${message.user_id === id ? 'me' : ''}`}
-													key={message.id}
-													aria-label={`Message de ${message.user_id === id ? 'vous' : 'l\'autre utilisateur'}`}
+								<div className="my-conversation__message-list__message" aria-label="Message de la conversation">
+									<Virtuoso
+										/* ref={virtuosoRef} */
+										key={conversationIdState}
+										style={{ height: '100%', scrollbarWidth: 'none' }}
+										data={filteredMessages}
+										totalCount={filteredMessages.length}
+										components={{ Footer: () => <div style={{ height: '0.5rem' }} /> }}
+										initialTopMostItemIndex={filteredMessages.length - 1}
+										itemContent={(index, message) => (
+											<div
+												className={`my-conversation__message-list__message__detail ${message.user_id === id ? 'me' : ''}`}
+												key={index}
+												aria-label={`Message de ${message.user_id === id ? 'vous' : 'l\'autre utilisateur'}`}
+											>
+												<motion.div
+													className={`content ${message.user_id === id ? 'me' : ''}`}
+													initial={{ opacity: 0, scale: 0.9 }}
+													animate={{ opacity: 1, scale: 1 }}
+													exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
+													transition={{ duration: 0.3, type: 'tween' }}
 												>
-													<motion.div
-														className={`content ${message.user_id === id ? 'me' : ''}`}
-														style={{ overflow: 'scroll' }}
-														initial={{ opacity: 0, scale: 0.9 }}
-														animate={{ opacity: 1, scale: 1 }}
-														exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-														transition={{ duration: 0.3, type: 'tween' }}
-													>
-														{message.media[0].url && (
-															<div className="my-conversation__message-list__message__detail__image-container">
-																<div className={`map ${message.content ? 'message' : ''}`}>
-																	{(() => {
-																		const imageUrls = message.media?.map(media => media.url) || [];
-																		return message.media?.map((media, index) => (
-																			media ? (
-																				media.name.endsWith('.pdf') ? (
-																					<a
-																						className="a-pdf"
-																						href={media.url}
-																						key={media.id}
-																						download={media.name}
-																						target="_blank"
-																						rel="noopener noreferrer"
-																						onClick={(event) => { event.stopPropagation(); }} 
-																						aria-label={`Télécharger le fichier PDF ${media.name}`}
-																						>
-																						<img
-																							className={`my-conversation__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																							src={pdfLogo}
-																							alt={media.name}
-																						/>
-																					</a>
-																				) : (
-																					<img
-																						className={`my-conversation__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																						key={media.id}
-																						src={media.url}
-																						loading="lazy"
-																						onClick={(event) => {
-																							setHasManyImages(false),
-																								openModal(imageUrls, index),
-																								imageUrls.length > 1 && setHasManyImages(true);
+													{message.media[0].url && (
+														<div className="my-conversation__message-list__message__detail__image-container">
+															<div className={`map ${message.content ? 'message' : ''}`}>
+																{message.media?.map((media, index) => (
+																	media ? (
+																		media.name.endsWith('.pdf') ? (
+																			<a
+																				className="a-pdf"
+																				href={media.url}
+																				key={media.id}
+																				download={media.name}
+																				target="_blank"
+																				rel="noopener noreferrer"
+																				onClick={(event) => { event.stopPropagation(); }}
+																				aria-label={`Télécharger le fichier PDF ${media.name}`}
+																			>
+																				<img
+																					className={`my-conversation__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																					src={pdfLogo}
+																					alt={media.name}
+																				/>
+																			</a>
+																		) : (
+																			<img
+																				className={`my-conversation__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																				key={media.id}
+																				src={media.url}
+																				loading="lazy"
+																				onClick={(event) => {
+																					const imageUrls = message.media?.map((m) => m.url) || [];
+																					setHasManyImages(false),
+																						openModal(imageUrls, index),
+																						imageUrls.length > 1 && setHasManyImages(true);
+																					event.stopPropagation();
+																				}}
+																				alt={media.name}
+																				onError={(event) => {
+																					event.currentTarget.src = noPicture;
+																				}}
+																			/>
+																		)
 
-																							event.stopPropagation();
-																						}}
-																						alt={media.name}
-																						onError={(event) => {
-																							event.currentTarget.src = noPicture;
-																						}}
-																					/>
-																				)
-
-																			) : null
-																		));
-																	})()}
-																</div>
+																	) : null
+																))
+																}
 															</div>
-														)}
-														{message.content && <div className="my-conversation__message-list__message__detail__texte">{message.content}</div>}
-													</motion.div>
-													<motion.time
-														className="my-conversation__message-list__message__detail__date"
-														style={{ overflow: 'scroll' }}
-														initial={{ opacity: 0, scale: 0.9 }}
-														animate={{ opacity: 1, scale: 1 }}
-														exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-														transition={{ duration: 0.3, type: 'tween' }}
-														dateTime={new Date(Number(message.created_at)).toISOString()}
-													>{new Date(Number(message.created_at)).toLocaleString()}
-													</motion.time>
-												</div>
-											))
-									}
-									<div ref={endOfMessagesRef} />
+														</div>
+													)}
+													{message.content && (
+														 <div className="my-conversation__message-list__message__detail__texte">{message.content}</div>
+													)}
+												</motion.div>
+												<motion.time
+													className="my-conversation__message-list__message__detail__date"
+													style={{ overflow: 'scroll' }}
+													initial={{ opacity: 0, scale: 0.9 }}
+													animate={{ opacity: 1, scale: 1 }}
+													exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
+													transition={{ duration: 0.3, type: 'tween' }}
+													dateTime={new Date(Number(message.created_at)).toISOString()}
+												>
+													{formatMessageDate(message.created_at)}
+												</motion.time>
+											</div>
+										)
+										}
+
+										followOutput={(isAtBottom) => isAtBottom} // scroll to the end of the messages if new messages are added
+									/>
+									{/* <div ref={endOfMessagesRef} /> */}
 								</div>
 							</div>
 						</div>
@@ -990,8 +972,8 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 									className="my-conversation__message-list__form__label__attach"
 									onClick={(event) => {
 										event.stopPropagation(),
-										event.preventDefault(),
-										document.getElementById('send-file')?.click()
+											event.preventDefault(),
+											document.getElementById('send-file')?.click()
 									}}
 									aria-label="Joindre un fichier"
 								/>
@@ -999,8 +981,8 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 									className="my-conversation__message-list__form__label__camera"
 									onClick={(event) => {
 										event.preventDefault(),
-										event.stopPropagation(),
-										document.getElementById('file-camera')?.click()
+											event.stopPropagation(),
+											document.getElementById('file-camera')?.click()
 									}}
 									aria-label="Prendre une photo"
 								/>
@@ -1019,7 +1001,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 								<MdSend
 									className="my-conversation__message-list__form__label__send"
 									onClick={(event) => { document.getElementById('send-message')?.click(), event.stopPropagation(); event?.preventDefault(); }}
-								aria-label="Envoyer le message"
+									aria-label="Envoyer le message"
 								/>
 							</label>
 							<input

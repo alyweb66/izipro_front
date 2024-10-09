@@ -46,6 +46,8 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import noPicture from '/no-picture.webp';
+import { formatMessageDate } from '../../Hook/Component';
+import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 
 
 // Configuration for React Modal
@@ -107,7 +109,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [isMessageConvIdFetched, setIsMessageConvIdFetched] = messageConvIdMyreqStore((state) => [state.convId, state.setConvId]);
 
 	//useRef
-	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
+	//const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 	const idRef = useRef<number>(0);
 	const selectedRequestRef = useRef<RequestProps | null>(null);
 
@@ -432,7 +434,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	};
 
-
 	// useEffect to check the size of the window and update the page visibility 
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	useLayoutEffect(() => {
@@ -472,7 +473,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 				}
 			}
-			endOfMessagesRef.current?.scrollIntoView();
 		};
 
 		// add event listener to check the size of the window
@@ -741,39 +741,41 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	}, [selectedUser]);
 
-	// useEffect to scroll to the end of the messages
-	useLayoutEffect(() => {
 
-		const scrollToEnd = (behavior: ScrollBehavior) => {
-			endOfMessagesRef.current?.scrollIntoView({ behavior });
-		};
-		const ensureScrollToEnd = () => {
-			const container = endOfMessagesRef.current?.parentElement;
+	// Filtrer les messages pour correspondre à la conversation en cours
+	const filteredMessages = Array.isArray(messageStore) && isUserMessageOpen
+		? messageStore
+			.filter((message) => message.conversation_id === conversationIdState)
+			.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
+		: [];
 
-			if (container) {
-				// verify if we have reached the end of the messages
-				const hasReachedEnd = container.scrollTop + container.clientHeight >= container.scrollHeight;
-
-				if (!hasReachedEnd) {
-					// If we haven't reached the end, scroll to the end
-					scrollToEnd('auto');
-					setTimeout(ensureScrollToEnd, 0);
-				} else {
-					// If we have reached the end, scroll to the end smoothly
-					scrollToEnd('smooth');
-				}
-			}
-		};
-		// scroll to the end of the messages before painting browser with requestAnimationFrame
-		requestAnimationFrame(() => {
-			setTimeout(() => {
-				scrollToEnd('auto');
-				setTimeout(ensureScrollToEnd, 500);
-			}, 0);
-		});
-
-	}, [messageStore, isMessageOpen, conversationIdState]);
-
+	const [isScrolling, setIsScrolling] = useState(false);
+	const virtuosoRef = useRef<VirtuosoHandle | null>(null);
+	const scrollerRef = useRef(null);
+	// Gestion de l'événement de scroll pour détecter le défilement
+	// Gestion de l'événement de scroll pour détecter le défilement
+	const scrollerRefCallback = (ref) => {
+		if (ref) {
+		  scrollerRef.current = ref;
+	
+		  // Ajouter l'événement de scroll uniquement lorsque le conteneur de défilement est défini
+		  const onScroll = () => {
+			setIsScrolling(true);
+			clearTimeout(scrollTimeout);
+			scrollTimeout = setTimeout(() => {
+			  setIsScrolling(false);
+			}, 150);
+		  };
+	
+		  let scrollTimeout: ReturnType<typeof setTimeout>;
+		  ref.addEventListener('scroll', onScroll);
+	
+		  // Nettoyage des écouteurs d'événements
+		  return () => {
+			ref.removeEventListener('scroll', onScroll);
+		  };
+		}
+	  };
 	return (
 		<div className="my-request">
 			<div
@@ -1134,83 +1136,97 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 									className="my-request__message-list__message"
 									aria-label="Message de la conversation"
 								>
-									{Array.isArray(messageStore) && isUserMessageOpen &&
-										messageStore
-											.filter((message) => message.conversation_id === conversationIdState)
-											.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
-											.map((message) => (
-												<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
+									<Virtuoso
+										ref={virtuosoRef}
+										//scrollerRef={scrollerRefCallback}
+										key={conversationIdState}
+										style={{ height: '100%', scrollbarWidth: 'none' }}
+										data={filteredMessages}
+										context={{isScrolling}}
+									//	isScrolling={setIsScrolling}
+										totalCount={filteredMessages.length}
+										components={{ Footer: () => <div style={{ height: '0.5rem' }} /> }}
+										initialTopMostItemIndex={filteredMessages.length - 1}
+										itemContent={(index, message) => {
+											return (
+												<div
+													className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`}
+													key={index}
+													aria-label={`Message de ${message.user_id === id ? 'vous' : 'l\'autre utilisateur'}`}
+												>
 													<motion.div
 														className={`content ${message.user_id === id ? 'me' : ''}`}
-														style={{ overflow: 'scroll' }}
 														initial={{ opacity: 0, scale: 0.9 }}
 														animate={{ opacity: 1, scale: 1 }}
 														exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 														transition={{ duration: 0.3, type: 'tween' }}
 													>
-														{message.media[0].url && (
+														{/* Affichage des médias */}
+														{message.media[0]?.url && (
 															<div className="my-request__message-list__message__detail__image-container">
 																<div className={`map ${message.content ? 'message' : ''}`}>
-																	{(() => {
-																		const imageUrls = message.media?.map(media => media.url) || [];
-																		return message.media?.map((media, index) => (
-																			media ? (
-																				media.name.endsWith('.pdf') ? (
-																					<a
-																						className="a-pdf"
-																						href={media.url}
-																						key={media.id}
-																						download={media.name}
-																						target="_blank"
-																						rel="noopener noreferrer"
-																						onClick={(event) => { event.stopPropagation(); }} >
-																						<img
-																							className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																							//key={media.id}
-																							src={pdfLogo}
-																							alt={media.name}
-																						/>
-																					</a>
-																				) : (
+																	{message.media?.map((media, index) => (
+																		media ? (
+																			media.name.endsWith('.pdf') ? (
+																				<a
+																					className="a-pdf"
+																					href={media.url}
+																					key={media.id}
+																					download={media.name}
+																					target="_blank"
+																					rel="noopener noreferrer"
+																					onClick={(event) => event.stopPropagation()}
+																				>
 																					<img
-																						className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																						key={media.id}
-																						src={media.url}
-																						loading="lazy"
-																						onClick={(event) => {
-																							setHasManyImages(false),
-																								openModal(imageUrls, index),
-																								imageUrls.length > 1 && setHasManyImages(true);
-																							event.stopPropagation();
-																						}}
+																						className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																						src={pdfLogo}
 																						alt={media.name}
-																						onError={(event) => {
-																							event.currentTarget.src = noPicture;
-																						}}
 																					/>
-																				)
-																			) : null
-																		));
-																	})()}
+																				</a>
+																			) : (
+																				<img
+																					className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
+																					key={media.id}
+																					src={!isScrolling ? media.url : logoProfile}
+																					loading="lazy"
+																					onClick={(event) => {
+																						const imageUrls = message.media?.map((m) => m.url) || [];
+																						setHasManyImages(false),
+																							openModal(imageUrls, index);
+																						imageUrls.length > 1 && setHasManyImages(true);
+																						event.stopPropagation();
+																					}}
+																					alt={media.name}
+																					onError={(event) => { event.currentTarget.src = noPicture; }}
+																				/>
+																			)
+																		) : null
+																	))}
 																</div>
 															</div>
 														)}
-														{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
+														{message.content && (
+															<div className="my-request__message-list__message__detail__texte">{message.content}</div>
+														)}
 													</motion.div>
+
+													{/* Date de message */}
 													<motion.time
 														className="my-request__message-list__message__detail__date"
-														style={{ overflow: 'scroll' }}
 														initial={{ opacity: 0, scale: 0.9 }}
 														animate={{ opacity: 1, scale: 1 }}
 														exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 														transition={{ duration: 0.3, type: 'tween' }}
 														dateTime={new Date(Number(message.created_at)).toISOString()}
-													>{new Date(Number(message.created_at)).toLocaleString()}
+													>
+														{formatMessageDate(message.created_at)}
 													</motion.time>
 												</div>
-											))
-									}
-									<div ref={endOfMessagesRef} aria-label="Dernier message visible" />
+											)
+										}}
+										followOutput={(isAtBottom) => isAtBottom} // scroll to the end of the messages if new messages are added
+									/>
+									{/* <div ref={endOfMessagesRef} aria-label="Dernier message visible"  /> */}
 								</div>
 							</div>
 						</div>
