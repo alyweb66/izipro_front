@@ -13,6 +13,7 @@ export const GET_MY_MESSAGES_BY_CONVERSATION = gql`
             id
             url
             name
+            thumbnail
           }
     }
   }
@@ -32,6 +33,7 @@ export const GET_MESSAGES_BY_CONVERSATION = gql`
             id
             url
             name
+            thumbnail
           }
         }
       }

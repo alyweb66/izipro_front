@@ -1,0 +1,286 @@
+@use './variables' as v;
+@use './mixins' as m;
+
+.message__container {
+    position: relative;
+    width: 100%;
+    flex-grow: 1;
+    overflow: hidden;
+    height: auto;
+    scrollbar-width: none;
+
+
+    .message__background {
+        overflow: auto;
+        scrollbar-width: none;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+
+
+        .message__message-list__message {
+            display: flex;
+            flex-direction: column;
+            margin: 0rem;
+            padding: 0 1rem;
+            overflow-y: auto;
+            scrollbar-width: none;
+            flex-grow: 1;
+            position: relative;
+            z-index: 1;
+            background: transparent;
+            // height: auto;
+            width: 100%;
+            padding-bottom: 0.5rem;
+
+            &::-webkit-scrollbar {
+                display: none;
+                /* For Chrome, Safari and Opera */
+            }
+
+            .message__message-list__message__detail {
+                display: flex;
+                flex-direction: column;
+                // margin: 0.5rem 0;
+                background: transparent;
+                width: 100%;
+                overflow: hidden;
+
+                &.me {
+                    justify-content: flex-end;
+
+                    .message__message-list__message__detail__date {
+                        display: flex;
+                        justify-content: flex-end;
+                        margin-right: 0.5rem;
+                        font-size: 0.8rem;
+                        font-weight: 500;
+                        color: v.$color-primary-orange;
+                    }
+                }
+
+                .message__message-list__message__detail__date {
+                    display: flex;
+                    justify-content: flex-start;
+                    margin-left: 0.5rem;
+                    font-size: 0.8rem;
+                    font-weight: 500;
+                    color: v.$color-primary-blue;
+                    scrollbar-width: none;
+
+                    &::-webkit-scrollbar {
+                        display: none;
+                        /* For Chrome, Safari and Opera */
+                    }
+                }
+
+                .content {
+                    display: flex;
+                    align-self: flex-start;
+                    flex-direction: column;
+                    background-color: v.$color-chat-blue;
+                    border-radius: 0 1rem 1rem 1rem;
+                    margin-top: 1rem;
+                    width: 80%;
+                    max-width: fit-content;
+                    scrollbar-width: none;
+
+                    &::-webkit-scrollbar {
+                        display: none;
+                        /* For Chrome, Safari and Opera */
+                    }
+
+                    &.me {
+                        border-radius: 1rem 1rem 0rem 1rem;
+                        align-self: flex-end;
+                        background-color: v.$color-chat-orange;
+                        margin-top: 1rem;
+
+                        .message__message-list__message__detail__image-container {
+
+                            display: flex;
+                            justify-content: flex-end;
+
+                            .map {
+                                justify-content: flex-end;
+
+                            }
+                        }
+
+                        .message__message-list__message__detail__texte {
+                            word-wrap: break-word;
+                            overflow-wrap: break-word;
+                            scrollbar-width: none;
+
+
+                        }
+                    }
+
+                    .message__message-list__message__detail__image-container {
+                        width: 100%;
+                        max-width: fit-content;
+
+                        .map {
+                            display: flex;
+                            flex-wrap: wrap;
+                            background-color: transparent;
+                            gap: 0.3rem;
+                            margin: 0.5rem 0.5rem;
+                            justify-content: flex-start;
+                            max-width: fit-content;
+
+                            .a-pdf {
+                                display: flex;
+                                justify-content: end;
+                                width: auto;
+                                border-radius: 0.5rem;
+
+                                .message__message-list__message__detail__image-pdf {
+                                    border-radius: 0.5rem;
+                                    object-fit: cover;
+                                    flex: 1;
+                                    width: auto;
+                                    min-width: 5rem;
+                                    height: auto;
+
+                                    /* For mouse */
+                                    @media (hover: hover) and (pointer: fine) {
+                                        cursor: pointer;
+                                    }
+
+                                    /* For touch */
+                                    @media (hover: none) and (pointer: coarse) {
+                                        cursor: default;
+                                    }
+
+
+                                    &.single {
+                                        width: fit-content;
+                                        max-width: 5rem;
+                                        height: auto;
+                                        border-radius: 0.5rem;
+                                    }
+
+                                    &.multiple {
+                                        width: 5rem;
+                                        height: auto;
+                                        object-fit: cover;
+                                    }
+
+                                    &.loading {
+                                        position: relative;
+                                    }
+                                }
+                            }
+
+                            .message__message-list__message__detail__image {
+                                border-radius: 0.5rem;
+                                object-fit: contain;
+                                flex: 1;
+                                width: auto;
+                                min-width: 5rem;
+                                height: auto;
+                                opacity: 1;
+                                transition: opacity 0.5s ease-in-out, filter 0.5s ease-in-out;
+                                /* For mouse */
+                                @media (hover: hover) and (pointer: fine) {
+                                    cursor: pointer;
+                                }
+
+                                /* For touch */
+                                @media (hover: none) and (pointer: coarse) {
+                                    cursor: default;
+                                }
+
+                                .message__message-list__message__detail__image.loaded {
+                                    opacity: 1;
+                                }
+                                
+                                .message__message-list__message__detail__image.loading {
+                                    opacity: 0; /* Hide thumbnail smoothly */
+                                    filter: blur(10px); 
+                                }
+
+                                &.single {
+                                    object-fit: contain;
+                                    max-height: 20rem;
+                                    width: fit-content;
+
+                                }
+
+                                &.multiple {
+                                    width: 5rem;
+                                    height: 5rem;
+                                    object-fit: cover;
+                                }
+
+                                &.loading {
+                                    position: relative;
+                                }
+                            }
+
+                            &.message {
+                                margin-bottom: 0;
+                            }
+
+                        }
+
+                    }
+
+                    .message__message-list__message__detail__texte {
+                        padding: 0.2rem 0.5rem;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+
+                    }
+                }
+            }
+        }
+    }
+
+    .message__background::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('/izipro-logo.svg') no-repeat center center;
+        background-size: contain;
+        opacity: 0.1;
+        z-index: -1;
+    }
+}
+
+.message__container::before,
+.message__container::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
+}
+
+.message__container::before {
+    top: 0;
+    z-index: 2;
+}
+
+.message__container::after {
+    bottom: 0;
+    z-index: 2;
+}
+
+@media (max-width: 1000px) {    
+                .message__message-list__message {
+                    overflow-y: auto;
+                    height: auto
+                }
+        
+}
+
+
+

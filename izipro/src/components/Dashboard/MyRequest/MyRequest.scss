@@ -6,7 +6,7 @@
     display: flex;
     //align-items: stretch;
     height: 100%;
-    overflow: hidden;
+    // overflow: hidden;
     scrollbar-width: none;
     padding-top: 0.5rem;
 
@@ -76,8 +76,8 @@
                 background-color: white;
                 border-radius: 0.5rem;
                 box-shadow: -5px 0 10px #6666661c,
-                -5px 0 10px #ffffff17,
-                5px 0 10px #6666661c;
+                    -5px 0 10px #ffffff17,
+                    5px 0 10px #6666661c;
 
                 /* For mouse */
                 @media (hover: hover) and (pointer: fine) {
@@ -464,6 +464,7 @@
         height: 100%;
         min-width: 40%;
         max-width: 40%;
+        height: 100%;
 
         &.loading {
             position: relative;
@@ -575,21 +576,244 @@
         }
 
 
-        .my-request__container {
-
+       /*  .my-request__container {
             position: relative;
             width: 100%;
             flex-grow: 1;
-            overflow: auto;
-            // height: 100%;
+            overflow: hidden;
+            height: auto;
+            scrollbar-width: none;
+
 
             .my-request__background {
+                overflow: auto;
+                scrollbar-width: none;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
                 z-index: 0;
 
+
+                .my-request__message-list__message {
+                    display: flex;
+                    flex-direction: column;
+                    margin: 0rem;
+                    padding: 0 1rem;
+                    overflow-y: auto;
+                    scrollbar-width: none;
+                    flex-grow: 1;
+                    position: relative;
+                    z-index: 1;
+                    background: transparent;
+                    // height: auto;
+                    width: 100%;
+                    padding-bottom: 0.5rem;
+
+                    &::-webkit-scrollbar {
+                        display: none;
+                  
+                    }
+
+                    .my-request__message-list__message__detail {
+                        display: flex;
+                        flex-direction: column;
+                        // margin: 0.5rem 0;
+                        background: transparent;
+                        width: 100%;
+                        overflow: hidden;
+
+                        &.me {
+                            justify-content: flex-end;
+
+                            .my-request__message-list__message__detail__date {
+                                display: flex;
+                                justify-content: flex-end;
+                                margin-right: 0.5rem;
+                                font-size: 0.8rem;
+                                font-weight: 500;
+                                color: v.$color-primary-orange;
+                            }
+                        }
+
+                        .my-request__message-list__message__detail__date {
+                            display: flex;
+                            justify-content: flex-start;
+                            margin-left: 0.5rem;
+                            font-size: 0.8rem;
+                            font-weight: 500;
+                            color: v.$color-primary-blue;
+                            scrollbar-width: none;
+
+                            &::-webkit-scrollbar {
+                                display: none;
+                          
+                            }
+                        }
+
+                        .content {
+                            display: flex;
+                            align-self: flex-start;
+                            flex-direction: column;
+                            background-color: v.$color-chat-blue;
+                            border-radius: 0 1rem 1rem 1rem;
+                            margin-top: 1rem;
+                            width: 80%;
+                            max-width: fit-content;
+                            scrollbar-width: none;
+
+                            &::-webkit-scrollbar {
+                                display: none;
+                          
+                            }
+
+                            &.me {
+                                border-radius: 1rem 1rem 0rem 1rem;
+                                align-self: flex-end;
+                                background-color: v.$color-chat-orange;
+                                margin-top: 1rem;
+
+                                .my-request__message-list__message__detail__image-container {
+
+                                    display: flex;
+                                    justify-content: flex-end;
+
+                                    .map {
+                                        justify-content: flex-end;
+
+                                    }
+                                }
+
+                                .my-request__message-list__message__detail__texte {
+                                    word-wrap: break-word;
+                                    overflow-wrap: break-word;
+                                    scrollbar-width: none;
+
+
+                                }
+                            }
+
+                            .my-request__message-list__message__detail__image-container {
+                                width: 100%;
+                                max-width: fit-content;
+
+                                .map {
+                                    display: flex;
+                                    flex-wrap: wrap;
+                                    background-color: transparent;
+                                    gap: 0.3rem;
+                                    margin: 0.5rem 0.5rem;
+                                    justify-content: flex-start;
+                                    max-width: fit-content;
+
+                                    .a-pdf {
+                                        display: flex;
+                                        justify-content: end;
+                                        width: auto;
+                                        border-radius: 0.5rem;
+
+                                        .my-request__message-list__message__detail__image-pdf {
+                                            border-radius: 0.5rem;
+                                            object-fit: cover;
+                                            flex: 1;
+                                            width: auto;
+                                            min-width: 5rem;
+                                            height: auto;
+
+                                     
+                                            @media (hover: hover) and (pointer: fine) {
+                                                cursor: pointer;
+                                            }
+
+                                      
+                                            @media (hover: none) and (pointer: coarse) {
+                                                cursor: default;
+                                            }
+
+
+                                            &.single {
+                                                width: fit-content;
+                                                max-width: 5rem;
+                                                height: auto;
+                                                border-radius: 0.5rem;
+                                            }
+
+                                            &.multiple {
+                                                width: 5rem;
+                                                height: auto;
+                                                object-fit: cover;
+                                            }
+
+                                            &.loading {
+                                                position: relative;
+                                            }
+                                        }
+                                    }
+
+                                    .my-request__message-list__message__detail__image {
+                                        border-radius: 0.5rem;
+                                        object-fit: contain;
+                                        flex: 1;
+                                        width: auto;
+                                        min-width: 5rem;
+                                        height: auto;
+                                        opacity: 1;
+                                        transition: opacity 0.5s ease-in-out, filter 0.5s ease-in-out;
+
+                                
+                                        @media (hover: hover) and (pointer: fine) {
+                                            cursor: pointer;
+                                        }
+
+                                        
+                                        @media (hover: none) and (pointer: coarse) {
+                                            cursor: default;
+                                        }
+
+                                        .my-request__message-list__message__detail__image.loaded {
+                                            opacity: 1;
+                                        }
+
+                                        .my-request__message-list__message__detail__image.loading {
+                                            opacity: 0;
+                                            filter: blur(10px);
+                                        }
+
+                                        &.single {
+                                            object-fit: contain;
+                                            max-height: 20rem;
+                                            width: fit-content;
+
+                                        }
+
+                                        &.multiple {
+                                            width: 5rem;
+                                            height: 5rem;
+                                            object-fit: cover;
+                                        }
+
+                                        &.loading {
+                                            position: relative;
+                                        }
+                                    }
+
+                                    &.message {
+                                        margin-bottom: 0;
+                                    }
+
+                                }
+
+                            }
+
+                            .my-request__message-list__message__detail__texte {
+                                padding: 0.2rem 0.5rem;
+                                word-wrap: break-word;
+                                overflow-wrap: break-word;
+
+                            }
+                        }
+                    }
+                }
             }
 
             .my-request__background::before {
@@ -603,216 +827,6 @@
                 background-size: contain;
                 opacity: 0.1;
                 z-index: -1;
-            }
-
-            .my-request__message-list__message {
-                display: flex;
-                flex-direction: column;
-                margin: 0rem;
-                padding: 0 1rem;
-                overflow-y: auto;
-                scrollbar-width: none;
-                flex-grow: 1;
-                position: relative;
-                z-index: 1;
-                background: transparent;
-                height: 100%;
-                width: 100%;
-
-                &::-webkit-scrollbar {
-                    display: none;
-                    /* For Chrome, Safari and Opera */
-                }
-
-                .my-request__message-list__message__detail {
-                    display: flex;
-                    flex-direction: column;
-                   // margin: 0.5rem 0;
-                    background: transparent;
-                    width: 100%;
-
-                    &.me {
-                        justify-content: flex-end;
-
-                        .my-request__message-list__message__detail__date {
-                            display: flex;
-                            justify-content: flex-end;
-                            margin-right: 0.5rem;
-                            font-size: 0.8rem;
-                            font-weight: 500;
-                            color: v.$color-primary-orange;
-                        }
-                    }
-
-
-
-                    .my-request__message-list__message__detail__date {
-                        display: flex;
-                        justify-content: flex-start;
-                        margin-left: 0.5rem;
-                        font-size: 0.8rem;
-                        font-weight: 500;
-                        color: v.$color-primary-blue;
-                        scrollbar-width: none;
-
-                        &::-webkit-scrollbar {
-                            display: none;
-                            /* For Chrome, Safari and Opera */
-                        }
-                    }
-
-                    .content {
-                        display: flex;
-                        align-self: flex-start;
-                        flex-direction: column;
-                        background-color: v.$color-chat-blue;
-                        border-radius: 0 1rem 1rem 1rem;
-                        margin-top: 1rem;
-                        width: 80%;
-                        max-width: fit-content;
-                        scrollbar-width: none;
-
-                        &::-webkit-scrollbar {
-                            display: none;
-                            /* For Chrome, Safari and Opera */
-                        }
-
-                        &.me {
-                            border-radius: 1rem 1rem 0rem 1rem;
-                            align-self: flex-end;
-                            background-color: v.$color-chat-orange;
-                            margin-top: 1rem;
-
-                            .my-request__message-list__message__detail__image-container {
-
-                                display: flex;
-                                justify-content: flex-end;
-
-                                .map {
-                                    justify-content: flex-end;
-
-                                }
-                            }
-
-                            .my-request__message-list__message__detail__texte {
-                                word-wrap: break-word;
-                                overflow-wrap: break-word;
-                                scrollbar-width: none;
-
-
-                            }
-                        }
-
-                        .my-request__message-list__message__detail__image-container {
-                            width: 100%;
-                            max-width: fit-content;
-
-                            .map {
-                                display: flex;
-                                flex-wrap: wrap;
-                                background-color: transparent;
-                                gap: 0.3rem;
-                                margin: 0.5rem 0.5rem;
-                                justify-content: flex-start;
-                                max-width: fit-content;
-
-                                .a-pdf {
-                                    display: flex;
-                                    justify-content: end;
-                                    width: auto;
-                                    border-radius: 0.5rem;
-
-                                    .my-request__message-list__message__detail__image-pdf {
-                                        border-radius: 0.5rem;
-                                        object-fit: cover;
-                                        flex: 1;
-                                        width: auto;
-                                        min-width: 5rem;
-                                        height: auto;
-
-                                        /* For mouse */
-                                        @media (hover: hover) and (pointer: fine) {
-                                            cursor: pointer;
-                                        }
-
-                                        /* For touch */
-                                        @media (hover: none) and (pointer: coarse) {
-                                            cursor: default;
-                                        }
-
-
-                                        &.single {
-                                            width: fit-content;
-                                            max-width: 5rem;
-                                            height: auto;
-                                            border-radius: 0.5rem;
-                                        }
-
-                                        &.multiple {
-                                            width: 5rem;
-                                            height: auto;
-                                            object-fit: cover;
-                                        }
-
-                                        &.loading {
-                                            position: relative;
-                                        }
-                                    }
-                                }
-
-                                .my-request__message-list__message__detail__image {
-                                    border-radius: 0.5rem;
-                                    object-fit: contain;
-                                    flex: 1;
-                                    width: auto;
-                                    min-width: 5rem;
-                                    height: auto;
-
-                                    /* For mouse */
-                                    @media (hover: hover) and (pointer: fine) {
-                                        cursor: pointer;
-                                    }
-
-                                    /* For touch */
-                                    @media (hover: none) and (pointer: coarse) {
-                                        cursor: default;
-                                    }
-
-
-                                    &.single {
-                                        object-fit: contain;
-                                        max-height: 20rem;
-                                        width: fit-content;
-
-                                    }
-
-                                    &.multiple {
-                                        width: 5rem;
-                                        height: 5rem;
-                                        object-fit: cover;
-                                    }
-
-                                    &.loading {
-                                        position: relative;
-                                    }
-                                }
-
-                                &.message {
-                                    margin-bottom: 0;
-                                }
-
-                            }
-
-                        }
-
-                        .my-request__message-list__message__detail__texte {
-                            padding: 0.2rem 0.5rem;
-                            word-wrap: break-word;
-                            overflow-wrap: break-word;
-
-                        }
-                    }
-                }
             }
         }
 
@@ -834,7 +848,7 @@
         .my-request__container::after {
             bottom: 0;
             z-index: 2;
-        }
+        } */
 
         .my-request__message-list__form {
             display: flex;
@@ -1010,6 +1024,12 @@
         width: 100%;
         height: 100%;
 
+        .my-request__message-list {
+            width: 100%;
+            max-width: 90%;
+            margin: auto;
+        }
+
         .my-request__list {
             display: none;
 
@@ -1084,7 +1104,7 @@
                 margin: 0 auto;
                 max-width: 80%;
                 width: 80%;
-                //max-height: 100vh;
+               
 
                 .my-request__message-list__user {
 
@@ -1102,12 +1122,12 @@
                                 font-size: 4rem;
                                 color: v.$color-primary-orange;
 
-                                /* For mouse */
+                               
                                 @media (hover: hover) and (pointer: fine) {
                                     cursor: pointer;
                                 }
 
-                                /* For touch */
+                             
                                 @media (hover: none) and (pointer: coarse) {
                                     cursor: default;
                                 }
@@ -1116,10 +1136,10 @@
                     }
                 }
 
-                .my-request__message-list__message {
+               /*  .my-request__message-list__message {
                     overflow-y: auto;
-                    height: 100%
-                }
+                    height: auto
+                } */
             }
 
         }
@@ -1140,6 +1160,10 @@
 @media (max-width: 480px) {
     .my-request {
         padding-top: 0;
+
+        .my-request__message-list {
+            margin: 0;
+        }
 
         .my-request__answer-list.open,
         .my-request__message-list.open,
@@ -1162,7 +1186,7 @@
             }
         }
 
-        .my-request__message-list {
+         .my-request__message-list {
             &.open {
                 margin-top: 0;
                 margin-bottom: 0;
@@ -1208,6 +1232,7 @@
                 }
             }
         }
+
     }
 }
 

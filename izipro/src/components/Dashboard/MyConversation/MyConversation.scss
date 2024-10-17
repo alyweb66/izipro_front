@@ -416,8 +416,7 @@
 
         }
 
-        .my-conversation__container {
-
+        /* .my-conversation__container {
             position: relative;
             width: 100%;
             flex-grow: 1;
@@ -459,10 +458,11 @@
                 background: transparent;
                 height: 100%;
                 width: 100%;
+                padding-bottom: 0.5rem;
 
                 &::-webkit-scrollbar {
                     display: none;
-                    /* For Chrome, Safari and Opera */
+                
                 }
 
                 .my-conversation__message-list__message__detail {
@@ -470,7 +470,7 @@
                     flex-direction: column;
                     // margin: 0.5rem 0;
                     background: transparent;
-                   // height: auto;
+                    height: auto;
                     width: 100%;
 
                     &.me {
@@ -499,7 +499,7 @@
 
                         &::-webkit-scrollbar {
                             display: none;
-                            /* For Chrome, Safari and Opera */
+                  
                         }
                     }
 
@@ -516,7 +516,7 @@
 
                         &::-webkit-scrollbar {
                             display: none;
-                            /* For Chrome, Safari and Opera */
+                   
                         }
 
 
@@ -548,12 +548,12 @@
                                         min-width: 5rem;
                                         height: auto;
 
-                                        /* For mouse */
+                                  
                                         @media (hover: hover) and (pointer: fine) {
                                             cursor: pointer;
                                         }
 
-                                        /* For touch */
+                                 
                                         @media (hover: none) and (pointer: coarse) {
                                             cursor: default;
                                         }
@@ -588,12 +588,12 @@
                                     min-width: 5rem;
                                     height: auto;
 
-                                    /* For mouse */
+            
                                     @media (hover: hover) and (pointer: fine) {
                                         cursor: pointer;
                                     }
 
-                                    /* For touch */
+
                                     @media (hover: none) and (pointer: coarse) {
                                         cursor: default;
                                     }
@@ -686,7 +686,7 @@
         .my-conversation__container::after {
             bottom: 0;
             z-index: 2;
-        }
+        } */
 
 
         .my-conversation__message-list__form {
@@ -956,11 +956,11 @@
                     }
                 }
 
-                .my-conversation__container {
+   /*              .my-conversation__container {
                     flex-grow: 1;
-                    /* Prend tout l'espace restant */
+               
                     overflow: auto;
-                }
+                } */
 
                 .my-conversation__message-list__form__label {
                     border-radius: 0;

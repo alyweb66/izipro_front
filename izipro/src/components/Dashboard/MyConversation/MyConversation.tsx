@@ -1,6 +1,6 @@
 
 // React hooks and components
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 
 // Apollo Client mutations
@@ -53,8 +53,11 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import noPicture from '/no-picture.webp';
-import { formatMessageDate } from '../../Hook/Component';
-import { Virtuoso } from 'react-virtuoso';
+//import { formatMessageDate } from '../../Hook/Component';
+//import { Virtuoso } from 'react-virtuoso';
+import { scrollList } from '../../Hook/ScrollList';
+import { MessageList } from '../../Hook/MessageList';
+
 //import { VariableSizeList as List, ListChildComponentProps } from 'react-window';
 //import { useVirtualizer } from '@tanstack/react-virtual';
 type useQueryUserConversationsProps = {
@@ -126,6 +129,18 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 	// file upload
 	const { fileError, file, urlFile, setUrlFile, setFile, setFileError, handleFileChange } = useFileHandler();
+
+	// Filtrer les messages pour correspondre à la conversation en cours
+	const filteredMessages = useMemo(() => {
+		return Array.isArray(messageStore)
+			? messageStore
+				.filter((message) => message.conversation_id === conversationIdState)
+				.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
+			: [];
+	}, [messageStore, conversationIdState]);
+
+	// Scroll to the last message
+	const { setIsEndViewed } = scrollList({});
 
 	// Function to send message
 	function sendMessage(updatedRequest?: RequestProps, newClientRequest = false) {
@@ -568,14 +583,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 			));
 			setConversationIdState(conversationId?.id ?? 0);
 
-			// get only conversation id who are not in the store
-			/* let conversationIdNotStore;
-			if (messageStore.length > 0) {
-				conversationIdNotStore = !messageStore.some(message => message.conversation_id === conversationId?.id);
-			} else {
-				conversationIdNotStore = true;
-			}
- */
 			// if the conversation id is not in the store and if the conv has not already been fetched  , fetch the message
 			if (conversationId?.id !== 0 && !isMessageConvIdFetched.some(convId => convId === conversationId?.id)) {
 
@@ -590,6 +597,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 					handleViewedMessage(convId);
 				}
 			}
+			setIsEndViewed(false);
 		}
 
 	}, [selectedRequest]);
@@ -677,11 +685,8 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	}, []);
 
 
-	const filteredMessages = Array.isArray(messageStore)
-		? messageStore
-			.filter((message) => message.conversation_id === conversationIdState)
-			.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
-		: [];
+
+
 
 	return (
 		<div className="my-conversation">
@@ -778,6 +783,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 											onClick={(event) => {
 												event.stopPropagation();
 												if (window.innerWidth < 780) {
+													setIsEndViewed(false);
 													setIsMessageOpen(false);
 													setTimeout(() => {
 														setIsListOpen(true);
@@ -825,104 +831,14 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							)}
 
 						</div>
-
-						<div className="my-conversation__container">
-							<div className="my-conversation__background">
-								<div className="my-conversation__message-list__message" aria-label="Message de la conversation">
-									<Virtuoso
-										/* ref={virtuosoRef} */
-										key={conversationIdState}
-										style={{ height: '100%', scrollbarWidth: 'none' }}
-										data={filteredMessages}
-										totalCount={filteredMessages.length}
-										components={{ Footer: () => <div style={{ height: '0.5rem' }} /> }}
-										initialTopMostItemIndex={filteredMessages.length - 1}
-										itemContent={(index, message) => (
-											<div
-												className={`my-conversation__message-list__message__detail ${message.user_id === id ? 'me' : ''}`}
-												key={index}
-												aria-label={`Message de ${message.user_id === id ? 'vous' : 'l\'autre utilisateur'}`}
-											>
-												<motion.div
-													className={`content ${message.user_id === id ? 'me' : ''}`}
-													initial={{ opacity: 0, scale: 0.9 }}
-													animate={{ opacity: 1, scale: 1 }}
-													exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-													transition={{ duration: 0.3, type: 'tween' }}
-												>
-													{message.media[0].url && (
-														<div className="my-conversation__message-list__message__detail__image-container">
-															<div className={`map ${message.content ? 'message' : ''}`}>
-																{message.media?.map((media, index) => (
-																	media ? (
-																		media.name.endsWith('.pdf') ? (
-																			<a
-																				className="a-pdf"
-																				href={media.url}
-																				key={media.id}
-																				download={media.name}
-																				target="_blank"
-																				rel="noopener noreferrer"
-																				onClick={(event) => { event.stopPropagation(); }}
-																				aria-label={`Télécharger le fichier PDF ${media.name}`}
-																			>
-																				<img
-																					className={`my-conversation__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																					src={pdfLogo}
-																					alt={media.name}
-																				/>
-																			</a>
-																		) : (
-																			<img
-																				className={`my-conversation__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																				key={media.id}
-																				src={media.url}
-																				loading="lazy"
-																				onClick={(event) => {
-																					const imageUrls = message.media?.map((m) => m.url) || [];
-																					setHasManyImages(false),
-																						openModal(imageUrls, index),
-																						imageUrls.length > 1 && setHasManyImages(true);
-																					event.stopPropagation();
-																				}}
-																				alt={media.name}
-																				onError={(event) => {
-																					event.currentTarget.src = noPicture;
-																				}}
-																			/>
-																		)
-
-																	) : null
-																))
-																}
-															</div>
-														</div>
-													)}
-													{message.content && (
-														 <div className="my-conversation__message-list__message__detail__texte">{message.content}</div>
-													)}
-												</motion.div>
-												<motion.time
-													className="my-conversation__message-list__message__detail__date"
-													style={{ overflow: 'scroll' }}
-													initial={{ opacity: 0, scale: 0.9 }}
-													animate={{ opacity: 1, scale: 1 }}
-													exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-													transition={{ duration: 0.3, type: 'tween' }}
-													dateTime={new Date(Number(message.created_at)).toISOString()}
-												>
-													{formatMessageDate(message.created_at)}
-												</motion.time>
-											</div>
-										)
-										}
-
-										followOutput={(isAtBottom) => isAtBottom} // scroll to the end of the messages if new messages are added
-									/>
-									{/* <div ref={endOfMessagesRef} /> */}
-								</div>
-							</div>
-						</div>
+						<MessageList 
+							conversationIdState={conversationIdState}
+							id={id}
+							filteredMessages={filteredMessages}
+							isMessageOpen={isMessageOpen}
+							openModal={openModal}
+							setHasManyImages={setHasManyImages}
+						/>
 
 						<form className="my-conversation__message-list__form" onSubmit={(event) => {
 							event.preventDefault();

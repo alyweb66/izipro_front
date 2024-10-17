@@ -274,6 +274,7 @@ function Footer() {
 					>
 						Cookies
 					</a>
+				<span className="footer-container__version">{import.meta.env.VITE_VERSION}</span>
 				</nav>
 			</footer>
 

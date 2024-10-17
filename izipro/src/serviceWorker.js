@@ -15,8 +15,11 @@ if ('serviceWorker' in navigator) {
 /* self.addEventListener('install', () => {
     self.skipWaiting();
 }); */
+const SW_VERSION = '1.0.0';
+console.log(`Service Worker Version: ${SW_VERSION}`);
 
 self.addEventListener('install', (event) => {
+	console.log(`Service Worker ${SW_VERSION} installed`);
 	self.skipWaiting(); // pour activer le service worker immédiatement
 	event.waitUntil(
 		caches.open(CACHE_NAME).then(() => {

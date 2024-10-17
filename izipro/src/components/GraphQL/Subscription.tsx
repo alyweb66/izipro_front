@@ -46,6 +46,7 @@ export const MESSAGE_SUBSCRIPTION = gql`
                 id
                 url
                 name
+                thumbnail
             }
         }
     }

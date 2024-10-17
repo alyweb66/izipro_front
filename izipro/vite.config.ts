@@ -23,7 +23,9 @@ export default defineConfig({
 			filename: 'serviceWorker.js',
 			manifest: false,
 			workbox: {
-				globPatterns: ['**/*.{tsx,js,scss,html,png,jpg,svg}'],
+				skipWaiting: true,
+				clientsClaim: true,
+				globPatterns: ['**/*.{tsx,js,scss,html,png,jpg,svg,webp}'],
 				runtimeCaching: [{
 					urlPattern: /^https:\/\/back\.betapoptest\.online\/.*/i,
 					handler: 'NetworkFirst',
@@ -38,8 +40,6 @@ export default defineConfig({
 						},
 					},
 				}],
-				skipWaiting: true, 
-				clientsClaim: true, 
 			},
 		}),
 	],

@@ -9,6 +9,7 @@ type MessageProps = {
             id: number
             url: string
             name: string
+            thumbnail: string
         }[]
     
 };
@@ -23,6 +24,7 @@ type MessageStoreProps = {
             id: number
             url: string
             name: string
+            thumbnail: string
         }[]
 };
 
