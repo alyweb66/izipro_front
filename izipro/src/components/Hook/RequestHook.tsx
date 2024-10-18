@@ -48,7 +48,7 @@ const RequestItem = ({
 	const idRef = useRef<number>(0);
 
 	return (
-		<motion.div
+		<motion.li
 			id={index === 0 ? 'first-user' : undefined}
 			className={`my-conversation__list__detail__item
 			${(request || requestByDate)?.urgent} 
@@ -204,7 +204,7 @@ const RequestItem = ({
 						event.stopPropagation();
 				}}
 			/>
-		</motion.div>
+		</motion.li>
 
 	);
 };

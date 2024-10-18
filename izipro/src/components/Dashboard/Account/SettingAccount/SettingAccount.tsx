@@ -180,7 +180,7 @@ function SettingAccount() {
 						<form className={`setting-account__form ${jobLoading ? 'loading' : ''}`} onSubmit={handleSubmitJob} aria-label="Formulaire de sélection de métiers">
 							{/* {jobLoading && <Spinner />} */}
 							<h1 className="setting-account__form__title">Options de recherche:</h1>
-							<h2 className="setting-account__subtitle">Séléctionnez un ou plusieurs métier:</h2>
+							<h2 className="setting-account__subtitle">Séléctionnez un ou plusieurs métiers:</h2>
 							<SelectBox
 								isSetting={true}
 								data={categoriesState}
@@ -202,7 +202,7 @@ function SettingAccount() {
 							/>
 
 							<ul className="setting-account__form__list" >
-								<h2 className="setting-account__subtitle">Métiers séléctionné:</h2>
+								<h2 className="setting-account__subtitle">Métiers séléctionnés:</h2>
 								<AnimatePresence>
 									{wishListJob && [...wishListJob].reverse().map((job: JobProps) => (
 										<motion.li
@@ -237,7 +237,7 @@ function SettingAccount() {
 							<ul className={`setting-account__form__list job ${(userJobLoading || deleteJobLoading || categoryLoading) ? 'loading' : ''}`}>
 								{(userJobLoading || categoryLoading) && <Spinner className="small-spinner" />}
 
-								<h2 className="setting-account__subtitle">Métiers actuel:</h2>
+								<h2 className="setting-account__subtitle">Métiers actuels:</h2>
 								<AnimatePresence>
 									{/* {jobDataLoading && <Spinner />} */}
 									{selectedJob && selectedJob.length > 0 ? selectedJob.map((job: JobProps) => (

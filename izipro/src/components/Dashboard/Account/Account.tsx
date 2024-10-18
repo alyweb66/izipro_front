@@ -140,22 +140,21 @@ function Account() {
 	const [isImgLoading, setIsImgLoading] = useState(true);
 	// state for mapBox
 	const [map, setMap] = useState<Map | null>(null);
-
 	// Message modification account
 	const [messageAccount, setMessageAccount] = useState('');
 	const [errorAccount, setErrorAccount] = useState('');
-
 	// Message modification password
 	const [messagePassword, setMessagePassword] = useState('');
 	const [errorPassword, setErrorPassword] = useState('');
-
 	// Set the changing user data
 	const [userData, setUserData] = useState({} as UserAccountDataProps);
+
+	// Ref
+	const mapContainerRef = useRef<HTMLDivElement>(null);
 
 	// Store data
 	const setAccount = userDataStore((state) => state.setAccount);
 	const role = userDataStore((state) => state.role);
-	//const [image, setImage] = userDataStore((state) => [state.image, state.setImage]);
 	const resetUserData = userDataStore((state) => state.resetUserData);
 
 	// Mutation to update the user data
@@ -399,7 +398,7 @@ function Account() {
 				}, 3000);
 				return;
 			}
-			
+
 		}
 
 		if ((file?.length ?? 0) > 0) {
@@ -497,32 +496,33 @@ function Account() {
 
 	// Map instance
 	useEffect(() => {
+		if (mapContainerRef.current) {
+			const MapInstance = new maplibregl.Map({
+				container: 'map',
+				style: import.meta.env.VITE_MAPLIBRE_URL,
+				center: [lng ?? 0, lat ?? 0],
+				zoom: 10,
+				scrollZoom: false, // Disable zooming with the scroll wheel
+				dragPan: false, // Disable dragging to pan the map
+				attributionControl: false,
 
-		const MapInstance = new maplibregl.Map({
-			container: 'map',
-			style: import.meta.env.VITE_MAPLIBRE_URL,
-			center: [lng ?? 0, lat ?? 0],
-			zoom: 10,
-			scrollZoom: false, // Disable zooming with the scroll wheel
-			dragPan: false, // Disable dragging to pan the map
-			attributionControl: false,
+			});
 
-		});
+			// Disable map interactions 
+			MapInstance.touchZoomRotate.disable();
+			MapInstance.doubleClickZoom.disable();
 
-		// Disable map interactions 
-		MapInstance.touchZoomRotate.disable();
-		MapInstance.doubleClickZoom.disable();
+			MapInstance.on('load', () => {
+				setIsLoading(false);
+				setMap(MapInstance);
+			});
 
-		MapInstance.on('load', () => {
-			setIsLoading(false);
-			setMap(MapInstance);
-		});
-
-		return () => {
-			if (map) {
-				map.remove();
-			}
-		};
+			return () => {
+				if (map) {
+					map.remove();
+				}
+			};
+		}
 	}, [lng, lat]);
 
 	// Adding options to the map
@@ -678,6 +678,7 @@ function Account() {
 							<FormGroup>
 								<FormControlLabel
 									control={<Switch
+										id="push-permission-switch"
 										color="warning"
 										checked={isNotificationEnabled}
 										onChange={handleSwitchChange}
@@ -693,6 +694,7 @@ function Account() {
 							<FormGroup>
 								<FormControlLabel
 									control={<Switch
+										id="email-notification-switch"
 										color="warning"
 										checked={notification}
 										onChange={handleNotification}
@@ -707,7 +709,7 @@ function Account() {
 					</div>
 					<div className="account_profile_container">
 						<form className={`account__profile__form ${updateUserLoading ? 'loading' : ''}`} onSubmit={handleAccountSubmit} >
-							{/* {updateUserLoading && <Spinner />} */}
+							{updateUserLoading && <Spinner />}
 							<h1 className="account__profile__form__title">Mes informations:</h1>
 							<div></div>
 							<label className="account__profile__form__label">
@@ -866,7 +868,7 @@ function Account() {
 							<button className="account__profile__button" type="submit" aria-label="Valider les modifications">Valider</button>
 							<div className="request__form__map">
 								{/* <p className="request__title-map">Vérifiez votre adresse sur la carte (validez pour actualiser):</p> */}
-								<div id="map" className="request__form__map__map">
+								<div id="map" ref={mapContainerRef} className="request__form__map__map">
 									{isLoading && <Spinner />}
 								</div>
 							</div>

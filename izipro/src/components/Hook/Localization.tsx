@@ -19,10 +19,8 @@ export const Localization = async (address: string, city: string, postal_code: s
 		if (address && city && postal_code) {
 			// transform address to coordinates with adresse.data.gouv.fr API
 			const formattedAddress = `${encodeURIComponent(trimmedAddress)}+${encodeURIComponent(trimmedPostalCode)}+${encodeURIComponent(trimmedCity)}`;
-			console.log('formattedAddress', formattedAddress);
 
 			const url = `${APIUrl}?q=${formattedAddress}`;
-			console.log('url', url);
 
 			let data;
 			try {

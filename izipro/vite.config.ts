@@ -18,28 +18,29 @@ export default defineConfig({
 		VitePWA({
 			registerType: 'autoUpdate',
 			includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
-			strategies: 'generateSW',
+			strategies: 'injectManifest',
 			srcDir: 'src',
 			filename: 'serviceWorker.js',
 			manifest: false,
 			workbox: {
 				skipWaiting: true,
 				clientsClaim: true,
+				cleanupOutdatedCaches: true,
 				globPatterns: ['**/*.{tsx,js,scss,html,png,jpg,svg,webp}'],
-				runtimeCaching: [{
-					urlPattern: /^https:\/\/back\.betapoptest\.online\/.*/i,
-					handler: 'NetworkFirst',
-					options: {
-						cacheName: 'api-back-cache',
-						expiration: {
-							maxEntries: 30,
-							maxAgeSeconds: 60 * 60 * 24 * 30, // 30 Days
-						},
-						cacheableResponse: {
-							statuses: [0, 200],
-						},
-					},
-				}],
+				//runtimeCaching: [{
+				//	urlPattern: /^https:\/\/back\.betapoptest\.online\/.*/i,
+				//	handler: 'NetworkFirst',
+				//	options: {
+				//		cacheName: 'api-back-cache',
+				//		expiration: {
+				//			maxEntries: 30,
+				//			maxAgeSeconds: 60 * 60 * 24 * 30, // 30 Days
+				//		},
+				//		cacheableResponse: {
+				//			statuses: [0, 200],
+				//		},
+				//	},
+				//}],
 			},
 		}),
 	],

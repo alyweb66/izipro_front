@@ -36,14 +36,12 @@ export const scrollList = ({ filteredMessages, conversationIdState, isListOpen }
             (entries) => {
                 const entry = entries[0];
                 if (entry.isIntersecting) {
-                    console.log('End of the list is visible');
                     
                     // L'élément est visible, on arrête l'observation.
                     observer.disconnect();
                 } else {
                     // Si l'élément n'est pas visible, on réexécute le scroll.
                     setTimeout(() => {
-                        console.log('scrolling again');
                         
                         endMessageListRef.current?.scrollIntoView({ behavior: 'auto' });
                     }, 0);

@@ -1,7 +1,7 @@
 @use '../../../styles/variables' as v;
 @use '../../../styles/mixins' as m;
 
-@keyframes blink {
+/* @keyframes blink {
     0% {
         color: red;
     }
@@ -13,7 +13,7 @@
     100% {
         color: red;
     }
-}
+} */
 
 .request {
     position: relative;
@@ -47,6 +47,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        padding-top: 2rem;
         @include m.select;
 
 
@@ -72,12 +73,13 @@
             font-size: 0.8rem;
         }
 
-        .urgent-button {
+        .urgent-switch {
+            font-family: v.$font;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 1.1rem;
-            color: v.$color-primary-blue;
+            color: red;
             font-weight: 500;
             border: none;
             background-color: transparent;
@@ -94,12 +96,12 @@
             }
 
 
-            .urgent-icon {
+           /*  .urgent-icon {
                 margin-left: 1rem;
                 font-size: 2rem;
-            }
+            } */
 
-            &.active {
+           /*  &.active {
                 background-color: transparent;
                 color: red;
 
@@ -110,7 +112,7 @@
                     animation: blink 1s linear infinite;
                 }
 
-            }
+            } */
 
         }
 

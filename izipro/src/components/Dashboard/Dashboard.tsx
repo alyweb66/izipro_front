@@ -28,7 +28,7 @@ import { useMyRequestMessageSubscriptions } from '../GraphQL/MyRequestSubscripti
 import { useClientRequestSubscriptions } from '../GraphQL/ClientRequestSubscription';
 import { useMyConversationSubscriptions } from '../GraphQL/MyConversationSubscription';
 import { useLogoutSubscription } from '../GraphQL/LogoutSubscription';
-import  OffLine  from '../Hook/OffLine';
+import OffLine from '../Hook/OffLine';
 
 
 // Mutation
@@ -231,7 +231,7 @@ function Dashboard() {
 	//* Query for MyRequest
 	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, (isSkipMyRequestRef.current || requestStore.length > 0));
 	const { loading: requestByIdLoading, requestById } = useQueryGetRequestById(requestByIdState);
-	console.log('id', id);
+	//console.log('id', id);
 
 	//*Query for ClientRequest
 	const { loading: getRequestByJobLoading, getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequest || clientRequestsStore.length > 0));
@@ -546,7 +546,6 @@ function Dashboard() {
 				setIsMultipleLogout(true);
 				setIsExpiredSession(true);
 			} else if (sessionId && sessionId === logoutSubscription.logout.session) {
-				console.log('logout', logoutSubscription.logout.session, sessionId);
 
 				setIsExpiredSession(true);
 			}
@@ -887,27 +886,24 @@ function Dashboard() {
 	// Check internet connection status to display a message
 	useEffect(() => {
 		let offlineTimeout: NodeJS.Timeout | null = null;
-	
+
 		const handleOffline = () => {
-			console.log('offline');
-			
 			offlineTimeout = setTimeout(() => {
 				setIsOffLine(true);
-			}, 5000); // 5 secondes
+			}, 2000); // 2 secondes
 		};
-	
+
 		const handleOnline = () => {
-			console.log('Online event triggered');
 			if (offlineTimeout) {
 				clearTimeout(offlineTimeout);
 				offlineTimeout = null;
 			}
 			setIsOffLine(false);
 		};
-	
+
 		window.addEventListener('offline', handleOffline);
 		window.addEventListener('online', handleOnline);
-		
+
 		// Clean listeners
 		return () => {
 			if (offlineTimeout) {
@@ -921,14 +917,15 @@ function Dashboard() {
 	// Error boundary
 	const ErrorFallback = () => {
 		return (
-		  <div className="ErrorFallback">
-			<p>Impossible de charger l'élément</p>
-		  </div>
+			<div className="ErrorFallback">
+				<p>Impossible de charger l'élément</p>
+			</div>
 		);
-	  };
-	  
+	};
+
+
 	return (
-		<>	
+		<>
 			<div className='dashboard'>
 				{userDataLoading
 					|| notViewedConversationLoading
@@ -964,11 +961,11 @@ function Dashboard() {
 					</div>
 					<ul className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Request' ? 'active' : ''}`}
-							onClick={() => { if (!isOffLine) {setSelectedTab('Request'); setIsOpen(!isOpen); }}} aria-label="Ouvrir les demandes">DEMANDE
+							onClick={() => { setSelectedTab('Request'); setIsOpen(!isOpen); }} aria-label="Ouvrir les demandes">DEMANDE
 							<div className="indicator"></div>
 						</li>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
-							onClick={() => {if (!isOffLine) {setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }}} aria-label="Ouvrir mes demandes">
+							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }} aria-label="Ouvrir mes demandes">
 							<div className="tab-content">
 
 								<span>MES DEMANDES</span>
@@ -980,7 +977,7 @@ function Dashboard() {
 						</li>
 						{role === 'pro' &&
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
-								onClick={() => {if (!isOffLine) {setSelectedTab('Client request'); setIsOpen(!isOpen); setIsSkipClientRequest(false); }}} aria-label="Ouvrir les demandes clients">
+								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); setIsSkipClientRequest(false); }} aria-label="Ouvrir les demandes clients">
 								<div className="tab-content">
 									<span>CLIENT</span>
 									{(notViewedRequestStore.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>
@@ -993,7 +990,7 @@ function Dashboard() {
 						}
 						{role === 'pro' &&
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
-								onClick={() => {if (!isOffLine) {setSelectedTab('My conversations'); setIsOpen(!isOpen); }}} aria-label="Ouvrir mes conversations">
+								onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }} aria-label="Ouvrir mes conversations">
 								<div className="tab-content">
 									<span>MES CONVERSATIONS</span>
 									{(viewedMyConversationState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
@@ -1004,7 +1001,7 @@ function Dashboard() {
 							</li>
 						}
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My profile' ? 'active' : ''}`}
-							onClick={() => {if (!isOffLine) {setSelectedTab('My profile'); setIsOpen(!isOpen); }}} aria-label="Ouvrir mon compte">MON COMPTE
+							onClick={() => { setSelectedTab('My profile'); setIsOpen(!isOpen); }} aria-label="Ouvrir mon compte">MON COMPTE
 							<div className="indicator"></div>
 						</li>
 						{!isFooter && <Footer />}
@@ -1012,22 +1009,32 @@ function Dashboard() {
 				</nav>
 
 
-				{isOffLine ? (<OffLine />) : (<div className="dashboard__content">
+				<div className="dashboard__content">
 					<Suspense fallback={<Spinner />}>
 						<ErrorBoundary FallbackComponent={ErrorFallback}>
-							{selectedTab === 'Request' && <Request />}
+							{selectedTab === 'Request' && (
+								<>
+									{isOffLine ? (
+										<OffLine />
+									) : (
+										<Request />
+
+									)}
+								</>
+							)}
 						</ErrorBoundary>
 						<ErrorBoundary FallbackComponent={ErrorFallback}>
-							{selectedTab === 'My requests' && <MyRequest
-								setIsHasMore={setIsMyRequestHasMore}
-								isHasMore={isMyRequestHasMore}
-								conversationIdState={conversationIdState}
-								setConversationIdState={setConversationIdState}
-								selectedRequest={selectedRequest}
-								setSelectedRequest={setSelectedRequest}
-								newUserId={newUserId}
-								setNewUserId={setNewUserId}
-							/>}
+							{selectedTab === 'My requests' &&
+								<MyRequest
+									setIsHasMore={setIsMyRequestHasMore}
+									isHasMore={isMyRequestHasMore}
+									conversationIdState={conversationIdState}
+									setConversationIdState={setConversationIdState}
+									selectedRequest={selectedRequest}
+									setSelectedRequest={setSelectedRequest}
+									newUserId={newUserId}
+									setNewUserId={setNewUserId}
+								/>}
 						</ErrorBoundary>
 						{selectedTab === 'My conversations' && <MyConversation
 							viewedMyConversationState={viewedMyConversationState}
@@ -1039,20 +1046,36 @@ function Dashboard() {
 							clientMessageSubscription={clientMessageSubscription}
 						/>}
 						<ErrorBoundary FallbackComponent={ErrorFallback}>
-							{selectedTab === 'My profile' && <Account />}
+							{selectedTab === 'My profile' && (
+								<>
+									{isOffLine ? (
+										<OffLine />
+									) : (
+										<Account />
+									)}
+								</>
+							)}
 						</ErrorBoundary>
 						<ErrorBoundary FallbackComponent={ErrorFallback}>
-							{selectedTab === 'Client request' && <ClientRequest
-								loading={getRequestByJobLoading}
-								offsetRef={clientRequestOffset}
-								setIsHasMore={setIsClientRequestHasMore}
-								isHasMore={isCLientRequestHasMore}
-								onDetailsClick={handleMyConvesationNavigate}
-								RangeFilter={RangeFilter}
-							/>}
+							{selectedTab === 'Client request' && (
+								<>
+									{isOffLine ? (
+										<OffLine />
+									) : (
+										<ClientRequest
+											loading={getRequestByJobLoading}
+											offsetRef={clientRequestOffset}
+											setIsHasMore={setIsClientRequestHasMore}
+											isHasMore={isCLientRequestHasMore}
+											onDetailsClick={handleMyConvesationNavigate}
+											RangeFilter={RangeFilter}
+										/>
+									)}
+								</>
+							)}
 						</ErrorBoundary>
 					</Suspense>
-				</div>)}
+				</div>
 
 				<DeleteItemModal
 					isMultipleLogout={isMultipleLogout}

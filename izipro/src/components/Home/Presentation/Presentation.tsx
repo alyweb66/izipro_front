@@ -12,23 +12,25 @@ function Presentation() {
 
   const imageParticular = [
     '/images/Overwhelmed-mother.webp',
-    '/images/Overwhelmed-men.webp'
+    '/images/Overwhelmed-men.webp',
+    '/images/Washing-machine.webp'
   ];
 
   const imagePro = [
     '/images/Welding-gate.webp',
-    '/images/Startup-woman.webp'
+    '/images/Startup-woman.webp',
+    '/images/Shake-hand.webp'
   ];
 
   // Image transition
   useEffect(() => {
     const intervalPro = setInterval(() => {
       setProIndex((prevProIndex) => (prevProIndex + 1) % imagePro.length);
-    }, 3000); // Change image every 3 seconds
+    }, 5000); // Change image every 3 seconds
 
     const interval = setInterval(() => {
       setIndex((prevIndex) => (prevIndex + 1) % imageParticular.length);
-    }, 3000); // Change image every 3 seconds
+    }, 5000); // Change image every 3 seconds
 
     return () => {
       clearInterval(interval);
@@ -83,7 +85,7 @@ function Presentation() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 2 }}
+                transition={{ duration: 3 }}
                 style={{
                   position: "absolute", // Ensure images overlap during transition
                   top: 0,
@@ -117,7 +119,7 @@ function Presentation() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 2 }}
+                  transition={{ duration: 3 }}
                   style={{
                     position: "absolute",
                     top: 0,
@@ -158,7 +160,7 @@ function Presentation() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 2 }}
+                  transition={{ duration: 3 }}
                   style={{
                     position: "absolute",
                     top: 0,

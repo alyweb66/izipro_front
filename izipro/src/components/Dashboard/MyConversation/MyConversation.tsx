@@ -693,7 +693,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 			{(hideRequestLoading || convLoading) && <Spinner />}
 			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
 				{requestByDate && (
-					<div className="my-conversation__list__detail" >
+					<ul className="my-conversation__list__detail" >
 						<AnimatePresence>
 							{isListOpen && request && request.id > 0 &&
 								<RequestItem
@@ -734,7 +734,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							))}
 						</AnimatePresence>
 
-					</div>
+					</ul>
 				)}
 				<div className="my-conversation__list__fetch-button">
 					{(isHasMore && requestByDate && requestByDate?.length > 0) ? (<button
@@ -843,7 +843,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 						<form className="my-conversation__message-list__form" onSubmit={(event) => {
 							event.preventDefault();
 							if (selectedRequest?.id && !selectedRequest.deleted_at) {
-
 								handleMessageSubmit(event, selectedRequest.id);
 							}
 						}}>
@@ -922,6 +921,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							</label>
 							<input
 								id="send-file"
+								name="send-file"
 								className="my-conversation__message-list__form__input"
 								type="file"
 								accept="image/*,.pdf"
@@ -932,6 +932,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							/>
 							<input
 								id="file-camera"
+								name="file-camera"
 								className="my-conversation__message-list__form__input medi"
 								type="file"
 								accept="image/*"

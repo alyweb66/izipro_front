@@ -61,7 +61,7 @@
         .my-request__list__detail {
             overflow: hidden;
             scrollbar-width: none;
-
+            padding-left: 0;
             &::-webkit-scrollbar {
                 display: none;
                 /* For Chrome, Safari and Opera */
@@ -1001,6 +1001,7 @@
                 @media (hover: none) and (pointer: coarse) {
                     cursor: default;
                 }
+                
 
             }
         }
@@ -1174,7 +1175,7 @@
 
         .my-request__answer-list {
             &.open {
-                margin: 0.5rem auto 0 auto;
+                margin: auto;
 
 
                 .my-request__answer-list__header {

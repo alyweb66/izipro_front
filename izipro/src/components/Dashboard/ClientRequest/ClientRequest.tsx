@@ -297,10 +297,10 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 					(<p className="client-request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>)}
 				{/* {!clientRequestsStore?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>} */}
 				{(address && city && postal_code && first_name && last_name) && (
-					<div className="client-request__list__detail">
+					<ul className="client-request__list__detail">
 						<AnimatePresence>
 							{clientRequestsStore.map((request) => (
-								<motion.div
+								<motion.li
 									className={`client-request__list__detail__item ${request.urgent} ${notViewedRequestStore.some(id => id === request.id) ? 'not-viewed' : ''} `}
 									data-request-id={request?.id}
 									key={request.id}
@@ -429,10 +429,10 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 										}}
 										aria-label={`Supprimer la demande ${request.title}`}
 									/>
-								</motion.div>
+								</motion.li>
 							))}
 						</AnimatePresence>
-					</div>
+					</ul>
 				)}
 				<div className="client-request__list__fetch-button">
 					{(isHasMore && clientRequestsStore.length > 0) ? (<button

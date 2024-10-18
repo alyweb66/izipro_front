@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 //import Map, { Layer, Marker, Source } from 'react-map-gl';
 import maplibregl, { Map } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -18,7 +18,7 @@ import { myRequestStore } from '../../../store/Request';
 // Types and icons
 import { CategoryPros, JobProps } from '../../../Type/Request';
 import pdfLogo from '/logo-pdf.webp';
-import { TbUrgent } from 'react-icons/tb';
+//import { TbUrgent } from 'react-icons/tb';
 import { FaCamera } from 'react-icons/fa';
 
 // Utilities and styles
@@ -36,7 +36,7 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import * as turf from '@turf/turf';
-import { Grow } from '@mui/material';
+import { FormControlLabel, FormGroup, Grow, Switch } from '@mui/material';
 
 
 
@@ -75,6 +75,8 @@ function Request() {
 	// File upload
 	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
 
+	// Ref
+	const mapContainerRef = useRef<HTMLDivElement>(null);
 
 	// Mutation
 	const [createRequest, { loading: createLoading, error: requestError }] = useMutation(REQUEST_MUTATION);
@@ -213,6 +215,7 @@ function Request() {
 
 	// Map instance
 	useEffect(() => {
+		if (mapContainerRef.current) {
 		const MapInstance = new maplibregl.Map({
 			container: 'map',
 			style: import.meta.env.VITE_MAPLIBRE_URL,
@@ -230,6 +233,7 @@ function Request() {
 		MapInstance.on('load', () => {
 			setIsLoading(false);
 			setMap(MapInstance);
+
 		});
 
 		return () => {
@@ -237,6 +241,7 @@ function Request() {
 				map.remove();
 			}
 		};
+	}
 	}, [lng, lat]);
 
 	// Adding options to the map
@@ -246,6 +251,7 @@ function Request() {
 			// Add markers, layers, sources, etc. as needed
 			new maplibregl.Marker({
 				color: "#f37c04",
+				scale: 0.8,
 			})
 				.setLngLat([lng ?? 0, lat ?? 0])
 				.addTo(map as maplibregl.Map);
@@ -329,8 +335,32 @@ function Request() {
 						aria-label="Formulaire de demande"
 
 					>
-						<h1 className="request__form__title urgent">Si votre demande est une urgence cliquez sur URGENT:</h1>
-						<button
+						{/* <h1 className="request__form__title urgent">Si votre demande est une urgence cliquez sur URGENT:</h1> */}
+						<FormGroup>
+							<FormControlLabel
+								control={<Switch
+									id="urgent-switch"
+									sx={{
+										'& .MuiSwitch-switchBase.Mui-checked': {
+											color: 'red',
+											'&:hover': {
+												backgroundColor: 'rgba(255, 0, 0, 0.08)',
+											},
+										},
+										'& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+											backgroundColor: 'red',
+										},
+									}}
+									checked={urgent}
+									onChange={(event) => setUrgent(event.target.checked)}
+									inputProps={{ 'aria-label': 'URGENT' }}
+								/>}
+								label="Demande urgente"
+								labelPlacement="start"
+								classes={{ label: 'urgent-switch' }}
+							/>
+						</FormGroup>
+						{/* <button
 							className={`urgent-button ${urgent ? 'active' : ''}`}
 							title="Marquer comme demande urgente"
 							onClick={(event) => {
@@ -339,7 +369,7 @@ function Request() {
 							}
 							}
 						>URGENT
-							<TbUrgent className="urgent-icon" aria-label="Icône de demande urgente" /></button>
+							<TbUrgent className="urgent-icon" aria-label="Icône de demande urgente" /></button> */}
 						<h1 className="request__form__title">Séléctionnez la catégorie et le métier concerné:</h1>
 						<SelectBox
 							data={categoriesState}
@@ -381,7 +411,7 @@ function Request() {
 								</label>
 								<div className="request__form__map">
 
-									<div id="map" className="request__form__map__map">
+									<div id="map" ref={mapContainerRef} className="request__form__map__map">
 										{isLoading && <Spinner />}
 									</div>
 								</div>

@@ -250,7 +250,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	};
 
 	// Function to handle the users viewedIds for the conversation
-	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLDivElement>) => {
+	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLElement>) => {
 		event?.preventDefault();
 
 		if (!request.conversation) {
@@ -767,10 +767,10 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			>
 				{requestLoading && <Spinner />}
 				{!requestByDate ? <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p> : (
-					<div className="my-request__list__detail" >
+					<ul className="my-request__list__detail" >
 						<AnimatePresence>
 							{isListOpen && requestByDate.map((request, index) => (
-								<motion.div
+								<motion.li
 									id={index === 0 ? 'first-request' : undefined}
 									className={`my-request__list__detail__item 
 									${request.urgent}
@@ -917,11 +917,11 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 												event.stopPropagation();
 										}}
 									/>
-								</motion.div>
+								</motion.li>
 							))}
 
 						</AnimatePresence>
-					</div>
+					</ul>
 				)}
 
 				<div className="my-request__list__fetch-button">

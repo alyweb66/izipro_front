@@ -22,7 +22,7 @@ export const MessageList: React.FC<MessageListProps> = ({ id, openModal, setHasM
     return (
 
         <div className="message__container" >
-            {!isEndViewed && <Spinner />}
+            {!isEndViewed && conversationIdState > 0 && <Spinner />}
             <div className="message__background" >
                 <ul
                     className="message__message-list__message"

@@ -149,15 +149,15 @@ window.addEventListener('online', () => {
 			keepAlive: 10000,
 		})
 	);
-	console.log('wsLink (online)', wsLink);
+	//console.log('wsLink (online)', wsLink);
 });
 
 window.addEventListener('offline', () => {
 	wsLink = null;
-	console.log('wsLink (offline)', wsLink);
+	//console.log('wsLink (offline)', wsLink);
 });
-console.log('Initial navigator.onLine:', navigator.onLine);
-console.log('Initial wsLink:', wsLink);
+//console.log('Initial navigator.onLine:', navigator.onLine);
+//console.log('Initial wsLink:', wsLink);
 //const httpLinkWithLogout = errorLink.concat(httpLink);
 const httpLinkWithMiddleware = ApolloLink.from([userIdMiddleware, authMiddleware, errorLink, httpLink]);
 // The split function takes three parameters:
@@ -227,10 +227,16 @@ const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
 
-/* // register the service worker
-if ('serviceWorker' in navigator) {
+/* if ('serviceWorker' in navigator) {
+	navigator.serviceWorker.addEventListener('controllerchange', () => {
+	  console.log('Nouveau service worker activé, rechargement de la page...');
+	  window.location.reload(); // Recharge la page pour utiliser la nouvelle version
+	});
+  } */
+// register the service worker
+/* if ('serviceWorker' in navigator) {
 	window.addEventListener('load', () => {
-		navigator.serviceWorker.register('/serviceWorker.js').then((registration) => {
+		navigator.serviceWorker.register('/serviceWorker.js', {type: 'module'}).then((registration) => {
 			console.log('Service Worker registered with scope:', registration.scope);
 		}, (error) => {
 			console.error('Service Worker registration failed:', error);
