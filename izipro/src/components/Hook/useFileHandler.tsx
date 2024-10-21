@@ -18,7 +18,7 @@ export function useFileHandler() {
 		const maxFileSize = 1.5e+7; // 1MB in bytes
 		// filter pdf files that are too large
 		const validFiles = Array.from(files!).filter(file => {
-console.log(file.size);
+
 
 			// check if file is too large
 			if (file.size > maxFileSize) {

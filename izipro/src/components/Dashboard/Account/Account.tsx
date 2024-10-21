@@ -53,6 +53,7 @@ import { UPDATE_NOTIFICATION_MUTATION } from '../../GraphQL/notificationMutation
 import { useNotificationStore } from '../../../store/Notification';
 import TextareaAutosize from 'react-textarea-autosize';
 import { Grow } from '@mui/material';
+import { serverErrorStore } from '../../../store/LoginRegister';
 //import '../../../styles/spinner.scss';
 
 
@@ -153,6 +154,7 @@ function Account() {
 	const mapContainerRef = useRef<HTMLDivElement>(null);
 
 	// Store data
+	const [serverErrorStatus, resetServerError, serverErrorStatusText] = serverErrorStore((state) => [state.status, state.resetServerError, state.statusText]);
 	const setAccount = userDataStore((state) => state.setAccount);
 	const role = userDataStore((state) => state.role);
 	const resetUserData = userDataStore((state) => state.resetUserData);
@@ -385,6 +387,7 @@ function Account() {
 	// Handle the profile picture change
 	const handleProfilePicture = (event: React.ChangeEvent<HTMLInputElement>) => {
 		event.preventDefault();
+		setErrorPicture('');
 
 		const file = event.target.files;
 
@@ -425,7 +428,14 @@ function Account() {
 				// Set the new user data to the store
 				setAccount(updateUser);
 				setErrorPicture('');
+				resetServerError();
 			});
+
+		}
+
+		if (updateUserError || serverErrorStatus === 500) {
+			setErrorPicture('Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png');
+			throw new Error('Error while updating user picture');
 		}
 
 	};
@@ -502,6 +512,14 @@ function Account() {
 	if (emailNotification === null) {
 		isGetNotificationRef.current = false;
 	}
+
+	// Error profile picture
+	useEffect(() => {
+		if (serverErrorStatus === 500 && serverErrorStatusText === 'INTERNAL_SERVER_FILES_ERROR') {
+			setErrorPicture('Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png');
+		
+		}
+	}, [serverErrorStatus, serverErrorStatusText]);
 
 	// Map instance
 	useEffect(() => {

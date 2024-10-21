@@ -24,6 +24,7 @@ type ErrorResponse = {
 	status: number;
 	statusText: string
 	setServerError: ({ status, statusText }: { status: number; statusText: string }) => void;
+	resetServerError: () => void;
 }
 
 
@@ -81,5 +82,6 @@ export const userFormStore = create<UserFormStore>((set) => ({
 export const serverErrorStore = create<ErrorResponse>((set) => ({
 	status: 0,
 	statusText: '',
-	setServerError: ({ status, statusText }: { status: number, statusText: string }) => set({ status, statusText })
+	setServerError: ({ status, statusText }: { status: number, statusText: string }) => set({ status, statusText }),
+	resetServerError: () => set({ status: 0, statusText: '' })
 }));
