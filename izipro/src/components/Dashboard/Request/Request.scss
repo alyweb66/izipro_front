@@ -1,7 +1,7 @@
 @use '../../../styles/variables' as v;
 @use '../../../styles/mixins' as m;
 
-@keyframes blink {
+/* @keyframes blink {
     0% {
         color: red;
     }
@@ -13,19 +13,27 @@
     100% {
         color: red;
     }
-}
+} */
 
 .request {
     position: relative;
     font-family: v.$font;
-    height: 81vh;
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+    touch-action: pan-y;
+    scrollbar-width: none;
 
+    &::-webkit-scrollbar {
+        display: none;
+        /* For Chrome, Safari and Opera */
+    }
 
     &.no-req {
         display: flex;
         justify-content: center;
         width: 100%;
-        margin: 3rem auto;
+        margin: 0.8rem auto;
         border-radius: 0.5rem;
         box-shadow: none;
         max-width: 90%;
@@ -35,52 +43,65 @@
     }
 
     .request__form {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding-top: 2rem;
         @include m.select;
 
-        .request__slider-container {
-            margin: auto;
-        }
 
         & {
             width: 80%;
             margin: auto;
-            margin-top: 1rem;
+            margin-top: 0rem;
             border-radius: 0.5rem;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
-
-
-
-        &.error {
-            width: 100%;
-            text-align: center;
-            font-size: 1rem;
-            color: v.$color-error;
-            box-shadow: none;
+        .request__slider-container {
+            margin: auto;
         }
 
-        .urgent-button {
+        .upload-message {
+            position: relative;
+            margin: auto;
+            margin-top: 0.2rem;
+            margin-bottom: 0.2rem;
+            font-size: 0.8rem;
+        }
+
+        .urgent-switch {
+            font-family: v.$font;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 1.1rem;
-            color: v.$color-primary-blue;
+            color: red;
             font-weight: 500;
             border: none;
             background-color: transparent;
             margin: 0 auto;
-            cursor: pointer;
 
-
-            .urgent-icon {
-                margin-left: 1rem;
-                font-size: 2rem;
+            /* For mouse */
+            @media (hover: hover) and (pointer: fine) {
+                cursor: pointer;
             }
 
-            &.active {
+            /* For touch */
+            @media (hover: none) and (pointer: coarse) {
+                cursor: default;
+            }
+
+
+           /*  .urgent-icon {
+                margin-left: 1rem;
+                font-size: 2rem;
+            } */
+
+           /*  &.active {
                 background-color: transparent;
                 color: red;
 
@@ -91,7 +112,7 @@
                     animation: blink 1s linear infinite;
                 }
 
-            }
+            } */
 
         }
 
@@ -142,6 +163,9 @@
         }
 
         .request__form__label-radius {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             margin: auto;
 
         }
@@ -179,8 +203,9 @@
         }
 
         .request__form__label {
-            width: auto;
-            margin: 0 20%;
+            width: 600px;
+            max-width: 100%;
+            margin: 0;
             padding: 0.5rem;
             background: white;
             box-shadow: -5px 0 10px #66666610,
@@ -227,7 +252,7 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            margin: 1rem auto;
+            margin: 1rem auto 1rem auto;
             gap: 1rem;
             border-radius: 0.5rem;
 
@@ -256,8 +281,18 @@
                 color: red;
                 font-size: 1rem;
                 font-weight: 600;
-                cursor: pointer;
                 transition: transform 0.1s ease;
+
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer;
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default;
+                }
+
 
                 &:hover {
                     transform: scale(1.5);
@@ -275,8 +310,18 @@
             &.camera-icone {
                 margin-bottom: 0;
                 font-size: 2rem;
-                cursor: pointer;
                 color: v.$color-primary-orange;
+                
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer;
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default;
+                }
+
 
             }
 
@@ -300,14 +345,23 @@
             text-align: center;
             padding: 5px;
             color: #404040;
-            cursor: pointer;
+
+            /* For mouse */
+            @media (hover: hover) and (pointer: fine) {
+                cursor: pointer;
+            }
+
+            /* For touch */
+            @media (hover: none) and (pointer: coarse) {
+                cursor: default;
+            }
         }
 
         .request__form__button {
             @include m.blue-button;
 
             & {
-                margin: 0rem auto 1rem;
+                margin: 0rem auto 1rem auto;
                 position: relative;
             }
         }
@@ -320,27 +374,37 @@
             margin-bottom: 0.5rem;
             font-size: 0.8rem;
             min-height: 50px;
-            /* margin: auto;
-            margin-top: 1rem;
 
-            font-size: 0.8rem; */
-
-            /* .message__error {
-                font-size: 1rem;
-                color: v.$color-error;
-            }
-
-            .message__success {
-                font-size: 1rem;
-                color: v.$color-validation;
-            } */
         }
 
     }
 }
 
+@media (max-width: 700px) {
+    .request {
+        height: 100%;
+
+        .request__form {
+            .request__form__select {
+                width: 70%;
+            }
+
+            .request__form__label {
+                margin: 0;
+            }
+
+            .request__form__title {
+                &.urgent {
+                    margin-top: 1rem;
+                }
+            }
+        }
+    }
+}
+
 @media (max-width: 480px) {
     .request {
+        height: 100%;
 
         .request__form {
             width: 90%;
@@ -349,36 +413,15 @@
                 width: 90%;
             }
 
-            .request__form__label {
-                margin: 0 10%;
-            }
+            /*  .request__form__label {
+                margin: 0;
+            } */
 
             .request__form__input-media {
                 &.container {
                     margin: 0;
                 }
             }
-
-
-        }
-    }
-}
-
-@media (max-width: 700px) {
-    .request {
-
-        .request__form {
-
-            .request__form__select {
-                width: 70%;
-            }
-
-            .request__form__title {
-                &.urgent {
-                    margin-top: 0rem;
-                }
-            }
-
         }
     }
 }

@@ -1,6 +1,6 @@
 
 // React hooks and components
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 
 // Apollo Client mutations
@@ -28,16 +28,17 @@ import {
 	clientRequestStore
 } from '../../../store/Request';
 import { userDataStore } from '../../../store/UserData';
-import { messageDataStore } from '../../../store/message';
+import { messageConvIdMyConvStore, messageDataStore } from '../../../store/message';
 import { SubscriptionStore, subscriptionDataStore } from '../../../store/subscription';
 import { notViewedConversation } from '../../../store/Viewed';
 
 // Types and assets
 import { RequestProps } from '../../../Type/Request';
 import { MessageProps, MessageStoreProps } from '../../../Type/message';
+
 import { SubscriptionProps } from '../../../Type/Subscription';
-import pdfLogo from '/logo/logo-pdf.jpg';
-import logoProfile from '/logo/logo profile.jpeg';
+import pdfLogo from '/logo-pdf.webp';
+import logoProfile from '/logo-profile.webp';
 
 // Components and utilities
 import './MyConversation.scss';
@@ -51,8 +52,14 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
+import noPicture from '/no-picture.webp';
+//import { formatMessageDate } from '../../Hook/Component';
+//import { Virtuoso } from 'react-virtuoso';
+import { scrollList } from '../../Hook/ScrollList';
+import { MessageList } from '../../Hook/MessageList';
 
-
+//import { VariableSizeList as List, ListChildComponentProps } from 'react-window';
+//import { useVirtualizer } from '@tanstack/react-virtual';
 type useQueryUserConversationsProps = {
 	loading: boolean;
 	data: { user: { requestsConversations: RequestProps[] } };
@@ -61,6 +68,7 @@ type useQueryUserConversationsProps = {
 };
 
 type ClientMessageProps = {
+	viewedMyConversationState: number[];
 	offsetRef: React.MutableRefObject<number>;
 	isHasMore: boolean;
 	setIsHasMore: (hasMore: boolean) => void;
@@ -70,7 +78,7 @@ type ClientMessageProps = {
 };
 
 
-function MyConversation({ clientMessageSubscription, conversationIdState, setConversationIdState, isHasMore, setIsHasMore, offsetRef }: ClientMessageProps) {
+function MyConversation({ viewedMyConversationState, clientMessageSubscription, conversationIdState, setConversationIdState, isHasMore, setIsHasMore, offsetRef }: ClientMessageProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -88,13 +96,13 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const [isSkipMessage, setIsSkipMessage] = useState(true);
 	const [fetchConvIdState, setFetchConvIdState] = useState(0);
 	const [hasManyImages, setHasManyImages] = useState(false);
-
+	const [uploadFileError, setUploadFileError] = useState('');
 
 	const limit = 4;
 
 	//useRef
 	const conversationIdRef = useRef(0);
-	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
+	//const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -106,6 +114,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	const role = userDataStore((state) => state.role);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
+	const [isMessageConvIdFetched, setIsMessageConvIdFetched] = messageConvIdMyConvStore((state) => [state.convId, state.setConvId]);
 
 	//mutation
 	const [conversation, { loading: convMutLoading, error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
@@ -120,6 +129,18 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	// file upload
 	const { fileError, file, urlFile, setUrlFile, setFile, setFileError, handleFileChange } = useFileHandler();
+
+	// Filtrer les messages pour correspondre à la conversation en cours
+	const filteredMessages = useMemo(() => {
+		return Array.isArray(messageStore)
+			? messageStore
+				.filter((message) => message.conversation_id === conversationIdState)
+				.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
+			: [];
+	}, [messageStore, conversationIdState]);
+
+	// Scroll to the last message
+	const { setIsEndViewed } = scrollList({});
 
 	// Function to send message
 	function sendMessage(updatedRequest?: RequestProps, newClientRequest = false) {
@@ -138,7 +159,9 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		// create message
 		// if the message is not empty or the file is not empty
 		if (conversationId ?? 0 > 0) {
+
 			if (messageValue.trim() !== '' || sendFile.length > 0) {
+
 				message({
 					variables: {
 						id: id,
@@ -179,6 +202,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 	// Function to send message and create conversation
 	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>, requestId: number) => {
 		event.preventDefault();
+
 		if (fileError) {
 			setFile([]);
 			setUrlFile([]);
@@ -420,7 +444,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	// remove file
 	const handleRemove = (index: number) => {
-
+		setUploadFileError('');
 		const newFiles = [...file];
 		newFiles.splice(index, 1);
 		setFile(newFiles);
@@ -428,6 +452,34 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		const newUrlFileList = [...urlFile];
 		newUrlFileList.splice(index, 1);
 		setUrlFile(newUrlFileList);
+	};
+
+	// Function to handle file upload
+	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+		event.preventDefault();
+		setUploadFileError('');
+
+		// Check if the number of files is less than 3
+		const remainingSlots = 4 - urlFile.length;
+
+		if ((event.target.files?.length ?? 0) > 4) {
+			setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+		}
+
+		if (event.target.files) {
+
+			if (remainingSlots > 0) {
+				const filesToUpload = Array.from(event.target.files).slice(0, remainingSlots);
+				handleFileChange(undefined, undefined, filesToUpload as File[]);
+
+				if (filesToUpload.length > 4) {
+					setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+				}
+			}
+			if (remainingSlots <= 0) {
+				setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+			}
+		}
 	};
 
 	// Function to remove viewed conversation
@@ -455,23 +507,30 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	};
 
+	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	// useEffect to check the size of the window
-	useEffect(() => {
+	useLayoutEffect(() => {
 		const handleResize = () => {
-			if (window.innerWidth < 780) {
-				if (selectedRequest && selectedRequest.id > 0) {
-					setIsListOpen(false);
-					setIsMessageOpen(true);
+			if (window.innerWidth !== windowWidth) {
+				setWindowWidth(window.innerWidth);
+
+				if (window.innerWidth < 780) {
+					if (selectedRequest && selectedRequest.id > 0) {
+						setIsListOpen(false);
+						setIsMessageOpen(true);
+
+					} else {
+
+						setIsMessageOpen(false);
+						setIsListOpen(true);
+					}
 
 				} else {
-					setIsMessageOpen(false);
+					setIsMessageOpen(true);
 					setIsListOpen(true);
 				}
-
-			} else {
-				setIsMessageOpen(true);
-				setIsListOpen(true);
 			}
+			/* endOfMessagesRef.current?.scrollIntoView(); */
 		};
 
 		// add event listener to check the size of the window
@@ -482,23 +541,20 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
-	}, []);
+	}, [windowWidth]);
 
 	// useEffect to set the new selected request
 	useEffect(() => {
-		if (request && window.innerWidth < 780) {
-			console.log('under 480');
-
+		if (request.id > 0 && window.innerWidth < 780) {
 			setSelectedRequest(request);
 			setIsListOpen(false);
 			setIsMessageOpen(true);
 		} else if (request && window.innerWidth > 780) {
-			console.log('over 480');
 			setSelectedRequest(request);
 		}
 	}, []);
 
-	// useEffect to update the message store
+	// useEffect to update the message store from database
 	useEffect(() => {
 		if (messageData) {
 
@@ -514,7 +570,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 					messages: [...prevState.messages, ...newMessages]
 				};
 			});
-
+			setIsMessageConvIdFetched([...isMessageConvIdFetched, conversationIdState]);
 			setIsSkipMessage(true);
 		}
 	}, [messageData]);
@@ -527,19 +583,21 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 			));
 			setConversationIdState(conversationId?.id ?? 0);
 
-			// get only conversation id who are not in the store
-			let conversationIdNotStore;
-			if (messageStore.length > 0) {
-				conversationIdNotStore = !messageStore.some(message => message.conversation_id === conversationId?.id);
-			} else {
-				conversationIdNotStore = true;
-			}
-
-			if (conversationIdNotStore && conversationId?.id !== 0) {
+			// if the conversation id is not in the store and if the conv has not already been fetched  , fetch the message
+			if (conversationId?.id !== 0 && !isMessageConvIdFetched.some(convId => convId === conversationId?.id)) {
 
 				setFetchConvIdState(conversationId?.id ?? 0);
 				setIsSkipMessage(false);
 			}
+
+			// to remove the request from the clientRequestStore
+			if (viewedMyConversationState.length > 0) {
+				const convId = selectedRequest?.conversation?.find(conv => conv.user_1 === id || conv.user_2 === id)?.id;
+				if (convId) {
+					handleViewedMessage(convId);
+				}
+			}
+			setIsEndViewed(false);
 		}
 
 	}, [selectedRequest]);
@@ -569,7 +627,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 		}
 	}, [requestsConversationStore]);
-
 
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
@@ -612,7 +669,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 
 	}, [clientMessageSubscription]);
 
-	// cleane the request store if the component is unmounted
+	// clean the request store if the component is unmounted
 	useEffect(() => {
 		return () => {
 			//if the request is in the requestsConversationStore and if there is a conversation with the user
@@ -624,17 +681,9 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 			//setRequestsConversationStore(removedRequest);
 			resetRequest();
 			setConversationIdState(0);
-
 		};
 	}, []);
 
-	// useEffect to scroll to the end of the messages
-	useEffect(() => {
-
-		setTimeout(() => {
-			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-		}, 200);
-	}, [messageStore, isMessageOpen, selectedRequest]);
 
 
 
@@ -643,15 +692,15 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 		<div className="my-conversation">
 			{(hideRequestLoading || convLoading) && <Spinner />}
 			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
+				
 				{requestByDate && (
-					<div className="my-conversation__list__detail" >
+					<ul className="my-conversation__list__detail" >
 						<AnimatePresence>
 							{isListOpen && request && request.id > 0 &&
 								<RequestItem
 									setHasManyImages={setHasManyImages}
 									request={request}
 									notViewedConversationStore={notViewedConversationStore}
-									handleViewedMessage={handleViewedMessage}
 									setIsMessageOpen={setIsMessageOpen}
 									resetRequest={resetRequest}
 									selectedRequest={selectedRequest!}
@@ -673,7 +722,6 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 									index={index}
 									notViewedConversationStore={notViewedConversationStore}
 									requestByDate={requestByDate}
-									handleViewedMessage={handleViewedMessage}
 									setIsMessageOpen={setIsMessageOpen}
 									selectedRequest={selectedRequest!}
 									setSelectedRequest={setSelectedRequest}
@@ -687,17 +735,18 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 							))}
 						</AnimatePresence>
 
-					</div>
+					</ul>
 				)}
 				<div className="my-conversation__list__fetch-button">
-					{isHasMore ? (<button
+					{(isHasMore && requestByDate && requestByDate?.length > 0) ? (<button
 						className="Btn"
 						onClick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
 							addRequest();
-						}
-						}>
+						}}
+						aria-label="Charger plus de conversations">
+
 						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
 						<span className="icon2"></span>
 						<span className="tooltip">Charger plus</span>
@@ -706,6 +755,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 						<p className="my-conversation__list no-req">Fin des résultats</p>
 					)}
 				</div>
+
 			</div>
 			<AnimatePresence>
 				{isMessageOpen && (
@@ -734,18 +784,20 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 											onClick={(event) => {
 												event.stopPropagation();
 												if (window.innerWidth < 780) {
+													setIsEndViewed(false);
 													setIsMessageOpen(false);
 													setTimeout(() => {
 														setIsListOpen(true);
 													}, 200);
 												}
 											}}
+											aria-label="Retour à la liste des conversations"
 										/>
 										<img
 											className="my-conversation__message-list__user__header__detail img"
 											src={selectedRequest.image ? selectedRequest.image : logoProfile}
 											onError={(event) => {
-												event.currentTarget.src = '/logo/no-picture.jpg';
+												event.currentTarget.src = noPicture;
 											}}
 											alt="" />
 										{selectedRequest.denomination ? (
@@ -780,76 +832,14 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 							)}
 
 						</div>
-						{/* <h2 className="my-request__message-list__title">Messages for {selectedRequest?.title}</h2> */}
-						<div className="my-conversation__container">
-							<div className="my-conversation__background">
-								<div /* id="scrollableMessageList" */ className="my-conversation__message-list__message">
-									{Array.isArray(messageStore) &&
-										messageStore
-											.filter((message) => message.conversation_id === conversationIdState)
-											.map((message, index, array) => (
-												<div className={`my-conversation__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
-													{index === array.length - 1 ? <div ref={endOfMessagesRef} /> : null}
-													<div className={`content ${message.user_id === id ? 'me' : ''}`}>
-														{message.media[0].url && (
-															<div className="my-conversation__message-list__message__detail__image-container">
-																<div className={`map ${message.content ? 'message' : ''}`}>
-																	{(() => {
-																		const imageUrls = message.media?.map(media => media.url) || [];
-																		return message.media?.map((media, index) => (
-																			media ? (
-																				media.name.endsWith('.pdf') ? (
-																					<a
-																						className="a-pdf"
-																						href={media.url}
-																						key={media.id}
-																						download={media.name}
-																						target="_blank"
-																						rel="noopener noreferrer"
-																						onClick={(event) => { event.stopPropagation(); }} >
-																						<img
-																							className={`my-conversation__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																							//key={media.id} 
-																							src={pdfLogo}
-																							alt={media.name}
-																						/>
-																					</a>
-																				) : (
-
-																					<img
-																						className={`my-conversation__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																						key={media.id}
-																						src={media.url}
-																						onClick={(event) => {
-																							setHasManyImages(false),
-																								openModal(imageUrls, index),
-																								imageUrls.length > 1 && setHasManyImages(true);
-
-																							event.stopPropagation();
-																						}}
-																						alt={media.name}
-																						onError={(event) => {
-																							event.currentTarget.src = '/logo/no-picture.jpg';
-																						}}
-																					/>
-																				)
-
-																			) : null
-																		));
-																	})()}
-																</div>
-															</div>
-														)}
-														{message.content && <div className="my-conversation__message-list__message__detail__texte">{message.content}</div>}
-													</div>
-													<div className="my-conversation__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
-												</div>
-											))
-
-									}
-								</div>
-							</div>
-						</div>
+						<MessageList 
+							conversationIdState={conversationIdState}
+							id={id}
+							filteredMessages={filteredMessages}
+							isMessageOpen={isMessageOpen}
+							openModal={openModal}
+							setHasManyImages={setHasManyImages}
+						/>
 
 						<form className="my-conversation__message-list__form" onSubmit={(event) => {
 							event.preventDefault();
@@ -866,6 +856,13 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 										</Fade>
 									)}
 								</Stack>
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{uploadFileError && (
+										<Fade in={!!uploadFileError} timeout={300}>
+											<Alert variant="filled" severity="error">{uploadFileError}</Alert>
+										</Fade>
+									)}
+								</Stack>
 							</div>
 							{urlFile.length > 0 && <div className="my-conversation__message-list__form__preview">
 								{urlFile.map((file, index) => (
@@ -879,6 +876,7 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 										<div
 											className="my-conversation__message-list__form__preview__container__remove"
 											onClick={() => handleRemove(index)}
+											aria-label="Supprimer le fichier"
 										>
 											X
 										</div>
@@ -888,46 +886,68 @@ function MyConversation({ clientMessageSubscription, conversationIdState, setCon
 							<label className="my-conversation__message-list__form__label">
 								<MdAttachFile
 									className="my-conversation__message-list__form__label__attach"
-									onClick={() => document.getElementById('send-file')?.click()}
+									onClick={(event) => {
+										event.stopPropagation(),
+											event.preventDefault(),
+											document.getElementById('send-file')?.click()
+									}}
+									aria-label="Joindre un fichier"
 								/>
 								<FaCamera
 									className="my-conversation__message-list__form__label__camera"
-									onClick={() => document.getElementById('file-camera')?.click()}
+									onClick={(event) => {
+										event.preventDefault(),
+											event.stopPropagation(),
+											document.getElementById('file-camera')?.click()
+									}}
+									aria-label="Prendre une photo"
 								/>
 								<TextareaAutosize
+									id="message-input"
+									name="message"
 									className="my-conversation__message-list__form__label__input"
 									value={messageValue}
 									onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}
 									placeholder="Tapez votre message ici..."
-									maxLength={500}
+									maxLength={1000}
 									minRows={1}
 									readOnly={selectedRequest && selectedRequest?.id > 0 ? false : true}
+									aria-label="Tapez votre message ici"
 								/>
 								<MdSend
 									className="my-conversation__message-list__form__label__send"
-									onClick={() => document.getElementById('send-message')?.click()}
+									onClick={(event) => { document.getElementById('send-message')?.click(), event.stopPropagation(); event?.preventDefault(); }}
+									aria-label="Envoyer le message"
 								/>
 							</label>
 							<input
 								id="send-file"
+								name="send-file"
 								className="my-conversation__message-list__form__input"
 								type="file"
 								accept="image/*,.pdf"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
 								multiple={true}
+								disabled={selectedRequest && selectedRequest?.id > 0 ? false : true}
+								aria-label="Joindre un fichier"
 							/>
 							<input
 								id="file-camera"
+								name="file-camera"
 								className="my-conversation__message-list__form__input medi"
 								type="file"
 								accept="image/*"
 								capture="environment"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
+								disabled={selectedRequest && selectedRequest?.id > 0 ? false : true}
+								aria-label="Prendre une photo"
 							/>
 							<button
 								id="send-message"
 								className="my-conversation__message-list__form__button"
 								type="submit"
+								disabled={selectedRequest && selectedRequest?.id > 0 ? false : true}
+								aria-label="Envoyer le message"
 							>
 								Send
 							</button>

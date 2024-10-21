@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../../styles/spinner.scss';
+import { motion } from 'framer-motion';
 
-const Spinner = ({ className = '', delay = 500 }) => {
-	console.log('className', className);
-	
+type SpinnerProps = {
+	className?: 'small-spinner' | '';
+	delay?: number;
+}
+
+const Spinner: React.FC<SpinnerProps> = ({ className = '', delay = 500 }) => {
+
 	const [show, setShow] = useState(false);
 
 	useEffect(() => {
@@ -14,9 +19,15 @@ const Spinner = ({ className = '', delay = 500 }) => {
 
 	if (!show) return null;
 	return (
-		<div className={`spinner ${className}`}>
+		<motion.div
+			className={`spinner ${className}`}
+			initial={{ opacity: 0, scale: 0.9 }}
+			animate={{ opacity: 1, scale: 1 }}
+			exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
+			transition={{ duration: 0.3, type: 'tween' }}
+		>
 			<span className="loader"></span>
-		</div>
+		</motion.div>
 	);
 
 };

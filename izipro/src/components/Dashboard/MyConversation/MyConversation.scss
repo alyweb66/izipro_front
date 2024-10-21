@@ -10,15 +10,19 @@
     align-items: stretch;
     height: 100%;
     background-color: transparent;
+    padding-top: 0.5rem;
 
 
 
     .my-conversation__list {
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+        touch-action: pan-y;
         scrollbar-width: none;
         width: 100%;
         max-width: 40%;
-        margin: 1rem 0.1rem 0 0.1rem;
+        margin: 0 0.1rem;
+        height: 100%;
 
         &::-webkit-scrollbar {
             display: none;
@@ -48,11 +52,10 @@
         }
 
         .my-conversation__list__detail {
-
+            padding-left: 0;
             .my-conversation__list__detail__item {
                 overflow: hidden;
                 scrollbar-width: none;
-                cursor: pointer;
                 display: flex;
                 flex-direction: column;
                 position: relative;
@@ -62,6 +65,17 @@
                 box-shadow: -5px 0 10px #6666661c,
                     -5px 0 10px #ffffff17,
                     5px 0 10px #6666661c;
+
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer;
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default;
+                }
+
 
                 &::-webkit-scrollbar {
                     display: none;
@@ -191,7 +205,6 @@
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
-                    cursor: pointer;
                     width: inherit;
                     border: none;
                     padding-left: 0.3rem;
@@ -204,6 +217,17 @@
                     font-weight: 400;
                     background-color: v.$color-light-blue;
                     z-index: 2;
+
+                    /* For mouse */
+                    @media (hover: hover) and (pointer: fine) {
+                        cursor: pointer;
+                    }
+
+                    /* For touch */
+                    @media (hover: none) and (pointer: coarse) {
+                        cursor: default;
+                    }
+
                 }
 
                 &.expanded {
@@ -220,9 +244,6 @@
                     flex-direction: column;
                     align-items: baseline;
                     margin-top: 0.5rem;
-
-
-
                 }
 
                 .my-conversation__list__detail__item__picture {
@@ -238,7 +259,19 @@
                         border-radius: 0.5rem;
                         width: 70px;
                         height: 70px;
-                        cursor: pointer;
+                        z-index: 10;
+                        object-fit: cover;
+
+                        /* For mouse */
+                        @media (hover: hover) and (pointer: fine) {
+                            cursor: pointer;
+                        }
+
+                        /* For touch */
+                        @media (hover: none) and (pointer: coarse) {
+                            cursor: default;
+                        }
+
 
                     }
                 }
@@ -252,8 +285,18 @@
                     font-size: 1.5rem;
                     margin: 1rem 1rem 1rem auto;
                     color: v.$color-error;
-                    cursor: pointer;
                     z-index: 2;
+
+                    /* For mouse */
+                    @media (hover: hover) and (pointer: fine) {
+                        cursor: pointer;
+                    }
+
+                    /* For touch */
+                    @media (hover: none) and (pointer: coarse) {
+                        cursor: default;
+                    }
+
                 }
             }
 
@@ -276,8 +319,9 @@
         display: flex;
         flex-direction: column;
         width: 100%;
-        margin: 1rem 0.1rem 0 0.1rem;
+        margin: 0 0.1rem;
         max-width: 45%;
+        height: 100%;
 
 
         &.loading {
@@ -292,9 +336,19 @@
                 flex-direction: column;
                 box-shadow: 0 1px 6px -2px rgba(0, 0, 0, 0.2);
                 background-color: white;
-                cursor: pointer;
                 position: relative;
                 border-radius: 0.3rem 0.3rem 0;
+
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer;
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default;
+                }
+
 
                 .my-conversation__message-list__user__header__detail {
                     display: flex;
@@ -358,29 +412,16 @@
                     }
                 }
 
-                /*   &.description {
-                    width: 98%;
-                    padding: 0.5rem;
-                    box-shadow: none;
-                    margin: 0.5rem;
-                    background-color: transparent;
-                    color: v.$color-primary-blue;
-                    font-size: 1rem;
-                    font-weight: 500;
-
-
-                } */
             }
 
         }
 
-        .my-conversation__container {
-
+        /* .my-conversation__container {
             position: relative;
             width: 100%;
             flex-grow: 1;
             overflow: auto;
-            // height: 100%;
+            height: 100%;
 
             .my-conversation__background {
                 top: 0;
@@ -416,18 +457,21 @@
                 z-index: 1;
                 background: transparent;
                 height: 100%;
+                width: 100%;
+                padding-bottom: 0.5rem;
 
                 &::-webkit-scrollbar {
                     display: none;
-                    /* For Chrome, Safari and Opera */
+                
                 }
 
                 .my-conversation__message-list__message__detail {
                     display: flex;
                     flex-direction: column;
-                    margin: 0.5rem 0;
+                    // margin: 0.5rem 0;
                     background: transparent;
-
+                    height: auto;
+                    width: 100%;
 
                     &.me {
                         justify-content: flex-end;
@@ -451,6 +495,12 @@
                         font-size: 0.8rem;
                         font-weight: 500;
                         color: v.$color-primary-blue;
+                        scrollbar-width: none;
+
+                        &::-webkit-scrollbar {
+                            display: none;
+                  
+                        }
                     }
 
                     .content {
@@ -462,7 +512,12 @@
                         margin-top: 1rem;
                         width: 80%;
                         max-width: fit-content;
+                        scrollbar-width: none;
 
+                        &::-webkit-scrollbar {
+                            display: none;
+                   
+                        }
 
 
 
@@ -487,12 +542,22 @@
 
                                     .my-conversation__message-list__message__detail__image-pdf {
                                         border-radius: 0.5rem;
-                                        cursor: pointer;
                                         object-fit: cover;
                                         flex: 1;
                                         width: auto;
                                         min-width: 5rem;
                                         height: auto;
+
+                                  
+                                        @media (hover: hover) and (pointer: fine) {
+                                            cursor: pointer;
+                                        }
+
+                                 
+                                        @media (hover: none) and (pointer: coarse) {
+                                            cursor: default;
+                                        }
+
 
                                         &.single {
                                             width: fit-content;
@@ -517,18 +582,29 @@
 
                                 .my-conversation__message-list__message__detail__image {
                                     border-radius: 0.5rem;
-                                    cursor: pointer;
                                     object-fit: cover;
                                     flex: 1;
                                     width: auto;
                                     min-width: 5rem;
                                     height: auto;
 
+            
+                                    @media (hover: hover) and (pointer: fine) {
+                                        cursor: pointer;
+                                    }
+
+
+                                    @media (hover: none) and (pointer: coarse) {
+                                        cursor: default;
+                                    }
+
+
 
                                     &.single {
                                         width: fit-content;
                                         max-width: 100%;
                                         height: auto;
+                                        max-height: 20rem;
                                         border-radius: 0.5rem;
                                     }
 
@@ -566,7 +642,7 @@
                                 justify-content: flex-end;
 
                                 .map {
-   
+
                                     justify-content: flex-end;
 
                                 }
@@ -587,7 +663,6 @@
                         }
                     }
                 }
-
 
             }
         }
@@ -611,7 +686,7 @@
         .my-conversation__container::after {
             bottom: 0;
             z-index: 2;
-        }
+        } */
 
 
         .my-conversation__message-list__form {
@@ -658,8 +733,18 @@
                         color: red;
                         font-size: 1rem;
                         font-weight: 600;
-                        cursor: pointer;
                         transition: transform 0.1s ease;
+
+                        /* For mouse */
+                        @media (hover: hover) and (pointer: fine) {
+                            cursor: pointer;
+                        }
+
+                        /* For touch */
+                        @media (hover: none) and (pointer: coarse) {
+                            cursor: default;
+                        }
+
 
                         &:hover {
                             transform: scale(1.5);
@@ -688,17 +773,35 @@
             .my-conversation__message-list__form__label__attach {
                 font-size: 2rem;
                 margin: 0.2rem 0.3rem;
-                cursor: pointer;
+
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer;
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default;
+                }
             }
 
             .my-conversation__message-list__form__label__camera {
                 font-size: 2rem;
                 margin: 0.2rem 0.3rem;
-                cursor: pointer;
+
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer;
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default;
+                }
             }
 
             .my-conversation__message-list__form__label__input {
-                overflow: none;
+                overflow: hidden;
                 scrollbar-width: none;
                 border-radius: 0.5rem;
                 width: 100%;
@@ -721,8 +824,20 @@
 
             .my-conversation__message-list__form__label__send {
                 margin: auto;
-                font-size: 2rem;
-                cursor: pointer;
+                font-size: 2.5rem;
+                margin-right: 0.5rem;
+                z-index: 10;
+
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer;
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default;
+                }
+
             }
         }
 
@@ -786,7 +901,16 @@
                                 display: block;
                                 font-size: 4rem;
                                 color: v.$color-primary-orange;
-                                cursor: pointer;
+
+                                /* For mouse */
+                                @media (hover: hover) and (pointer: fine) {
+                                    cursor: pointer;
+                                }
+
+                                /* For touch */
+                                @media (hover: none) and (pointer: coarse) {
+                                    cursor: default;
+                                }
                             }
                         }
                     }
@@ -802,6 +926,7 @@
 @media (max-width: 480px) {
 
     .my-conversation {
+        padding-top: 0;
 
         .my-conversation__message-list {
             &.open {
@@ -831,11 +956,11 @@
                     }
                 }
 
-                .my-conversation__container {
+   /*              .my-conversation__container {
                     flex-grow: 1;
-                    /* Prend tout l'espace restant */
+               
                     overflow: auto;
-                }
+                } */
 
                 .my-conversation__message-list__form__label {
                     border-radius: 0;

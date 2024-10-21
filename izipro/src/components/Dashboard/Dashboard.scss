@@ -1,6 +1,23 @@
 @use '../../styles/variables' as v;
 @use '../../styles/mixins' as m;
 
+// for burger notification
+@keyframes blinkBackground {
+    0% {
+        background-color: v.$color-primary-blue;
+    }
+
+    50% {
+        background-color: rgb(255, 0, 0);
+        box-shadow: 0 0 0px 0px rgba(255, 0, 0, 1), 0 0 0px 0px rgba(255, 0, 0, 0.8), 0 0 10px 1px rgba(255, 0, 0, 0.5);
+        //box-shadow: 0 0 0px 0px rgb(44, 161, 8), 0 0 0px 0px rgba(3, 155, 11, 0.8), 0 0 10px 5px rgba(180, 250, 158, 0.5);
+    }
+
+    100% {
+        background-color: v.$color-primary-blue;
+    }
+}
+
 .dashboard {
     position: relative;
     width: 100%;
@@ -8,27 +25,27 @@
     flex-direction: column;
     font-family: v.$font;
     height: 87vh;
+    height: 87dvh;
 
     .dashboard__content {
         flex: 1;
         background-color: transparent;
         overflow: auto;
         scrollbar-width: none;
+        /*    height: 87vh;
+        height: 87dvh; */
 
         &::-webkit-scrollbar {
             display: none;
             /* For Chrome, Safari and Opera */
         }
-
     }
 
     .indicator {
         display: none;
         position: absolute;
         bottom: -3px;
-
         width: 100%;
-
         height: 2px;
         background: linear-gradient(130deg, v.$color-primary-blue, v.$color-primary-orange);
         border-radius: 5px;
@@ -69,6 +86,8 @@
             justify-content: space-around;
             padding: 0;
             position: relative;
+            //background-color: rgba(255, 255, 255, 0.596);
+
 
             .dashboard__nav__menu__content__tab {
                 position: relative;
@@ -84,8 +103,11 @@
                 transition: 0.2s ease color;
 
                 .badge-container {
-                    min-width: 24px;
-                    height: 24px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-width: 2rem;
+                    height: 1.5rem;
                     visibility: hidden;
 
                     &.visible {
@@ -101,12 +123,21 @@
 
                 .notification-badge {
                     margin-top: 0;
-                    padding-bottom: 1rem;
+                    // padding-bottom: 1rem;
                 }
 
                 &:hover {
                     color: v.$color-primary-orange;
-                    cursor: pointer;
+
+                    /* For mouse */
+                    @media (hover: hover) and (pointer: fine) {
+                        cursor: pointer;
+                    }
+
+                    /* For touch */
+                    @media (hover: none) and (pointer: coarse) {
+                        cursor: default;
+                    }
 
                     .indicator {
                         display: block;
@@ -119,68 +150,8 @@
                     .indicator {
                         display: block;
                     }
-
-                    /*  &:before,
-                    &:after {
-                        content: "";
-                        position: absolute;
-                        border-radius: 50%;
-                        transform: scale(1);
-                        transition: 0.2s ease transform;
-                    }
-
-                    &:before {
-                        top: 0;
-                        left: 10px;
-                        width: 6px;
-                        height: 6px;
-                        background-color: v.$color-primary-orange;
-                    }
-
-                    &:after {
-                        top: 5px;
-                        left: 18px;
-                        width: 4px;
-                        height: 4px;
-                        background-color: v.$color-primary-blue;
-                    } */
-
                 }
             }
-
-
-            /* 
-            .dashboard__nav__menu__content__tab:before,
-            .dashboard__nav__menu__content__tab:after {
-                content: "";
-                position: absolute;
-                border-radius: 50%;
-                transform: scale(0);
-                transition: 0.2s ease transform;
-            }
-
-            .dashboard__nav__menu__content__tab:before {
-                top: 0;
-                left: 10px;
-                width: 6px;
-                height: 6px;
-                background-color: v.$color-primary-orange;
-            }
-
-            .dashboard__nav__menu__content__tab:after {
-                top: 5px;
-                left: 18px;
-                width: 4px;
-                height: 4px;
-                background-color: v.$color-primary-blue;
-            }
-
-
-            .dashboard__nav__menu__content__tab:hover:before,
-            .dashboard__nav__menu__content__tab:hover:after {
-                transform: scale(1);
-            } */
-
         }
 
         .dashboard__nav__menu::before {
@@ -197,9 +168,16 @@
             top: 0;
         }
 
-        /*  .dashboard__nav__menu::after {
-            bottom: 0;
-        } */
+    }
+
+    .ErrorFallback {
+        padding: 0.8rem;
+        background-color: #f8d7da;
+        color: #721c24 ;
+        border: 1px solid #f5c6cb;
+        border-radius: 0.4rem ;
+        position: fixed;
+        top: 8rem;
     }
 
 
@@ -207,10 +185,6 @@
 
 @media (max-width: 780px) {
     .dashboard {
-
-        /*  .dashboard__content {
-            height: 100%;
-        } */
         .__nav {
             .dashboard__nav__menu {
                 .dashboard__nav__menu__content__tab {
@@ -224,15 +198,28 @@
 
 @media (max-width: 480px) {
     .dashboard {
+        display: flex;
+        flex-direction: column;
         height: 100vh;
+        height: 100dvh;
 
+        .ErrorFallback {
+            padding: 0.8rem;
+            background-color: #f8d7da;
+            color: #721c24 ;
+            border: 1px solid #f5c6cb;
+            border-radius: 0.4rem ;
+            position: fixed;
+            top: 4rem;
+        }
         .__nav {
             display: flex;
             justify-content: center;
             width: 100%;
             margin: 0;
             z-index: 11;
-
+            height: 3.9rem;
+            background-color: rgba(255, 255, 255, 0.589);
 
             .dashboard__nav__burgerSelected {
                 display: block;
@@ -242,8 +229,7 @@
                 font-weight: 500;
                 text-align: center;
                 position: relative;
-                padding-bottom: 0.5rem;
-
+                height: 1.56rem;
             }
 
             .dashboard__nav__burgerSelected::before {
@@ -263,7 +249,9 @@
             .__burger {
                 width: 100%;
                 display: flex;
+                height: 100%;
                 flex-direction: column;
+                justify-content: space-between;
 
 
                 .__container {
@@ -271,17 +259,26 @@
                     flex-direction: row;
                     align-items: center;
                     width: 100%;
-                    height: 5vh;
-                    padding-top: 0.3rem;
-                    // justify-content: space-between;
+                    height: 2.37rem;
+                    /* height: 5vh;
+                    height: 5dvh; */
+                    padding-top: 0.5rem;
 
                     .__logo {
                         margin-left: 1rem;
-                        //  margin: 0.5rem 0 0 1rem;
                         display: inline-block;
                         width: 35px;
                         height: 35px;
-                        cursor: pointer;
+
+                        /* For mouse */
+                        @media (hover: hover) and (pointer: fine) {
+                            cursor: pointer;
+                        }
+
+                        /* For touch */
+                        @media (hover: none) and (pointer: coarse) {
+                            cursor: default;
+                        }
                     }
 
                     .__menu {
@@ -289,12 +286,20 @@
                         display: flex;
                         border: none;
                         background-color: transparent;
-                        cursor: pointer;
+
+                        /* For mouse */
+                        @media (hover: hover) and (pointer: fine) {
+                            cursor: pointer;
+                        }
+
+                        /* For touch */
+                        @media (hover: none) and (pointer: coarse) {
+                            cursor: default;
+                        }
 
                         .burger-icon {
                             width: 100%;
                             font-size: 2rem;
-                            // margin: 1rem;
                             display: flex;
                             flex-direction: column;
                             align-items: center;
@@ -314,6 +319,11 @@
                                 margin: 0.2rem;
                                 background-color: v.$color-primary-blue;
                                 border-radius: 1rem;
+
+                                &.notification {
+                                    background-color: v.$color-primary-blue;
+                                    animation: blinkBackground 2s infinite;
+                                }
                             }
 
                         }
@@ -333,13 +343,23 @@
                     position: absolute;
                     width: 100%;
                     z-index: 1;
-                    top: 4.4rem;
+                    top: 3.9rem;
                     left: 0;
                     border-radius: 0 0 0.5rem 0.5rem;
                     box-shadow: 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.1);
                     padding: 1rem 0.5rem;
                     font-weight: 500;
-                    cursor: pointer;
+
+                    /* For mouse */
+                    @media (hover: hover) and (pointer: fine) {
+                        cursor: pointer;
+                    }
+
+                    /* For touch */
+                    @media (hover: none) and (pointer: coarse) {
+                        cursor: default;
+                    }
+
                     flex-wrap: wrap;
 
                     .dashboard__nav__menu__content__tab {
@@ -350,6 +370,7 @@
                         transition: 0.1s;
                         list-style-type: none;
                         transition: transform 0.1s ease;
+
 
                         &:hover {
                             .indicator {
@@ -379,11 +400,33 @@
                 height: 1px;
             }
         }
+
+        .dashboard__content {
+            flex: 1;
+            height: auto;
+            /* height: 91vh;
+            height: 91dvh; */
+        }
     }
 }
 
-@media (max-height: 630px) {
+@media (max-height: 630px) and (max-width: 480px) {
     .dashboard {
-        height: 90vh;
+        height: 100vh;
+        height: 100dvh;
+    }
+}
+
+@media (max-height: 630px) and (max-width: 480px) {
+    .dashboard {
+        height: 100vh;
+        height: 100dvh;
+    }
+}
+
+@media (max-height: 630px) and (min-width: 480px) {
+    .dashboard {
+        height: 85vh;
+        height: 85dvh;
     }
 }

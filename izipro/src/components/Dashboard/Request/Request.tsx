@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
-import Map, { Layer, Marker, Source } from 'react-map-gl';
-// @ts-expect-error no types for mapbox-gl
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+//import Map, { Layer, Marker, Source } from 'react-map-gl';
+import maplibregl, { Map } from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 // Apollo Client
 import { useMutation } from '@apollo/client';
@@ -18,8 +17,8 @@ import { myRequestStore } from '../../../store/Request';
 
 // Types and icons
 import { CategoryPros, JobProps } from '../../../Type/Request';
-import pdfLogo from '/logo/logo-pdf.jpg';
-import { TbUrgent } from 'react-icons/tb';
+import pdfLogo from '/logo-pdf.webp';
+//import { TbUrgent } from 'react-icons/tb';
 import { FaCamera } from 'react-icons/fa';
 
 // Utilities and styles
@@ -30,19 +29,20 @@ import Spinner from '../../Hook/Spinner';
 import SelectBox from '../../Hook/SelectBox';
 import { subscriptionDataStore } from '../../../store/subscription';
 import { motion, AnimatePresence } from 'framer-motion';
-import { IoLocationSharp } from "react-icons/io5";
+//import { IoLocationSharp } from "react-icons/io5";
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
+import * as turf from '@turf/turf';
+import { FormControlLabel, FormGroup, Grow, Switch } from '@mui/material';
 
 
 
 function Request() {
-	const mapboxAccessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
-	//store
+	// Store
 	const id = userDataStore((state) => state.id);
 	const address = userDataStore((state) => state.address);
 	const city = userDataStore((state) => state.city);
@@ -54,7 +54,7 @@ function Request() {
 	const [myRequestsStore, setMyRequestsStore] = myRequestStore((state) => [state.requests, state.setMyRequestStore]);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 
-	//state
+	// State
 	const [urgent, setUrgent] = useState(false);
 	const [selectedCategory, setSelectedCategory] = useState(0);
 	const [selectedJob, setSelectedJob] = useState(0);
@@ -65,30 +65,30 @@ function Request() {
 	const [uploadFileError, setUploadFileError] = useState('');
 	const [categoriesState, setCategoriesState] = useState<CategoryPros[]>([]);
 	const [jobsState, setJobsState] = useState<JobProps[]>([]);
-	const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 450px)').matches);
+	//const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 450px)').matches);
 	const [isLoading, setIsLoading] = useState(true);
+	const [map, setMap] = useState<Map | null>(null);
+	// Map
+	const [radius, setRadius] = useState(0); // Radius in meters
+	//const [zoom, setZoom] = useState(10);
 
-	// file upload
+	// File upload
 	const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } = useFileHandler();
 
-	// map
-	const [radius, setRadius] = useState(0); // Radius in meters
-	//const [map, setMap] = useState<mapboxgl.Map | null>(null);
-	const [zoom, setZoom] = useState(10);
+	// Ref
+	const mapContainerRef = useRef<HTMLDivElement>(null);
 
-
-	// mutation
+	// Mutation
 	const [createRequest, { loading: createLoading, error: requestError }] = useMutation(REQUEST_MUTATION);
 
-	// fetch categories 
+	// Query
 	const { loading: categoryLoading, categoriesData } = useQueryCategory();
-
-	// fetch jobs
 	const { loading: JobDataLoading, jobData } = useQueryJobs(selectedCategory);
 
 	// remove file
 	const handleRemove = (index: number) => {
 		// Remove file from file list
+		setUploadFileError('');
 		const newFiles = [...file];
 		newFiles.splice(index, 1);
 		setFile(newFiles);
@@ -175,6 +175,7 @@ function Request() {
 					setUrlFile([]);
 					setRadius(0);
 					setSelectedCategory(0);
+					setErrorMessage('');
 					setSelectedJob(0);
 					setUrgent(false);
 
@@ -184,9 +185,120 @@ function Request() {
 
 		}
 		if (requestError) {
+			setErrorMessage('Erreur lors de la création de la demande');
 			throw new Error('Error while creating request');
 		}
 	};
+
+
+	// Handle file upload
+	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement> & React.DragEvent<HTMLLabelElement>) => {
+		event.preventDefault();
+		setUploadFileError('');
+
+		// Check if the number of files is less than 3
+		const remainingSlots = 3 - urlFile.length;
+
+		if ((event.target.files?.length ?? 0) > 3) {
+			setUploadFileError('Nombre de fichiers maximum atteint');
+		}
+
+		if (event.target.files) {
+
+			if (remainingSlots > 0) {
+				const filesToUpload = Array.from(event.target.files).slice(0, remainingSlots);
+				handleFileChange(undefined, undefined, filesToUpload as File[]);
+			}
+			if (remainingSlots <= 0) {
+				setUploadFileError('Nombre de fichiers maximum atteint');
+			}
+		}
+	};
+
+	// Map instance
+	useEffect(() => {
+		if (mapContainerRef.current) {
+		const MapInstance = new maplibregl.Map({
+			container: 'map',
+			style: import.meta.env.VITE_MAPLIBRE_URL,
+			center: [lng ?? 0, lat ?? 0],
+			zoom: 10,
+			dragPan: false, // Disable dragging to pan the map
+			scrollZoom: false, // Disable scroll zoom
+			attributionControl: false,
+		});
+
+		// Disable map interactions 
+		MapInstance.touchZoomRotate.disable();
+		MapInstance.doubleClickZoom.disable();
+
+		MapInstance.on('load', () => {
+			setIsLoading(false);
+			setMap(MapInstance);
+
+		});
+
+		return () => {
+			if (map) {
+				map.remove();
+			}
+		};
+	}
+	}, [lng, lat]);
+
+	// Adding options to the map
+	useLayoutEffect(() => {
+		if (map) {
+
+			// Add markers, layers, sources, etc. as needed
+			new maplibregl.Marker({
+				color: "#f37c04",
+				scale: 0.8,
+			})
+				.setLngLat([lng ?? 0, lat ?? 0])
+				.addTo(map as maplibregl.Map);
+
+			// Create a circle around the center point
+			let circle = null;
+			if (lng !== null && lat !== null) {
+				const center = turf.point([lng, lat]); // Crate center point
+				circle = turf.circle(center, radius / 1000, { steps: 100, units: 'kilometers' }); // Create a circle from the center point
+			}
+
+			// Add circle to the map
+			if (map.getSource('circle')) {
+				if (circle) {
+					(map.getSource('circle') as maplibregl.GeoJSONSource).setData(circle); // Update the circle data
+				}
+			} else {
+				map.addSource('circle', {
+					type: 'geojson',
+					data: circle || { type: 'FeatureCollection', features: [] },
+				});
+				// Show the circle on the map
+				map.addLayer({
+					id: 'circle-layer',
+					type: 'fill',
+					source: 'circle',
+					layout: {},
+					paint: {
+						'fill-color': '#028eef',
+						'fill-opacity': 0.3,
+					},
+				});
+			}
+			// Zoom ajust to circle
+			if (radius === 0) {
+				map.setZoom(10); // Set zoom to 12 if radius is 0
+
+			} else if (circle) {
+				const bounds = turf.bbox(circle).slice(0, 4) as [number, number, number, number]; // Get circle bounds
+				if (bounds) {
+					map.fitBounds(bounds, { padding: 20, duration: 500 });
+				}
+			}
+		}
+	}, [map, radius, lng, lat]);
 
 	// Update jobs when category changes
 	useEffect(() => {
@@ -203,53 +315,6 @@ function Request() {
 		}
 	}, [categoriesData]);
 
-	// Get map instance
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-
-	const handleMapLoaded = () => {
-		setIsLoading(false);
-	};
-
-	// Handle file upload
-	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-		event.preventDefault();
-		setUploadFileError('');
-
-		// Check if the number of files is less than 3
-		const remainingSlots = 3 - urlFile.length;
-
-		if (event.target.files) {
-
-			if (remainingSlots > 0) {
-				const filesToUpload = Array.from(event.target.files).slice(0, remainingSlots);
-				handleFileChange(undefined, undefined, filesToUpload as File[]);
-			}
-			if (remainingSlots <= 0) {
-				setUploadFileError('Nombre de fichiers maximum atteint');
-			}
-		}
-	};
-
-	// Handle file drop
-	const handleFileDrop = (event: React.DragEvent<HTMLLabelElement>) => {
-		event.preventDefault();
-		setUploadFileError('');
-
-		// Check if the number of files is less than 3
-		const remainingSlots = 3 - urlFile.length;
-
-		if (event.dataTransfer.files) {
-
-			if (remainingSlots > 0) {
-				const filesToUpload = Array.from(event.dataTransfer.files).slice(0, remainingSlots);
-				handleFileChange(undefined, undefined, filesToUpload as File[]);
-			}
-			if (remainingSlots <= 0) {
-				setUploadFileError('Nombre de fichiers maximum atteint');
-			}
-		}
-	};
-
 	// reset selected job when category changes
 	useEffect(() => {
 		if (selectedCategory) {
@@ -258,74 +323,46 @@ function Request() {
 	}, [selectedCategory]);
 
 
-	//* Mapping radius to zoom level
-	const radiusToZoomMapping = [
-		{ maxRadius: 5000, zoomMobile: 10.5, zoomDesktop: 11 },
-		{ maxRadius: 10000, zoomMobile: 9.5, zoomDesktop: 10 },
-		{ maxRadius: 15000, zoomMobile: 9, zoomDesktop: 9.5 },
-		{ maxRadius: 20000, zoomMobile: 8.5, zoomDesktop: 9 },
-		{ maxRadius: 25000, zoomMobile: 8.2, zoomDesktop: 8.5 },
-		{ maxRadius: 35000, zoomMobile: 7.9, zoomDesktop: 8 },
-		{ maxRadius: 40000, zoomMobile: 7.7, zoomDesktop: 8 },
-		{ maxRadius: 45000, zoomMobile: 7.5, zoomDesktop: 7.7 },
-		{ maxRadius: 50000, zoomMobile: 7.4, zoomDesktop: 7.5 },
-		{ maxRadius: 60000, zoomMobile: 6.9, zoomDesktop: 7 },
-		{ maxRadius: 100000, zoomMobile: 6.4, zoomDesktop: 6.8 },
-		{ maxRadius: Infinity, zoomMobile: 6, zoomDesktop: 7 }
-	];
-
-	// Calculate the zoom level based on the radius
-	const calculateZoomLevel = (radius: number, isMobile: boolean) => {
-		for (const { maxRadius, zoomMobile, zoomDesktop } of radiusToZoomMapping) {
-			if (radius <= maxRadius) {
-				return isMobile ? zoomMobile : zoomDesktop;
-			}
-		}
-	};
-
-	// Update the zoom level based on the radius and screen size
-	useEffect(() => {
-		const handleResize = () => setIsMobile(window.matchMedia('(max-width: 450px)').matches);
-		window.addEventListener('resize', handleResize);
-
-		return () => window.removeEventListener('resize', handleResize);
-	}, []);
-
-	// Update the zoom level when the radius or screen size changes
-	useEffect(() => {
-		const newZoom = calculateZoomLevel(radius, isMobile);
-		newZoom && setZoom(newZoom);
-	}, [radius, isMobile]);
-	//* end Mapping radius to zoom level
-
-
 	return (
-		<div className="request">
-			{categoryLoading || JobDataLoading && <Spinner />}
+		<Grow in={true} timeout={200}>
+			<div className="request">
+				{categoryLoading && <Spinner />}
 
-			{(!address && !city && !postal_code && !first_name && !last_name) &&
-				(<p className="request no-req">Veuillez renseigner les champs de &quot;Mes informations&quot; dans votre compte pour faire une demande</p>)}
-			<AnimatePresence>
+				{(!address && !city && !postal_code && !first_name && !last_name) &&
+					(<p className="request no-req">Veuillez renseigner les champs de &quot;Mes informations&quot; dans votre compte pour faire une demande</p>)}
 				{address && city && postal_code && first_name && last_name && (
-					<motion.form
+					<form
 						className="request__form"
 						onSubmit={handleSubmitRequest}
-						initial={{ opacity: 0, scale: 0.9 }}
-						animate={{ opacity: 1, scale: 1 }}
-						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-						transition={{ duration: 0.1, type: 'tween' }}
+						aria-label="Formulaire de demande"
+
 					>
-						<h2 className="request__form__title urgent">Si votre demande est une urgence cliquez sur URGENT:</h2>
-						<button
-							className={`urgent-button ${urgent ? 'active' : ''}`}
-							onClick={(event) => {
-								event.preventDefault();
-								setUrgent(!urgent);
-							}
-							}
-						>URGENT
-							<TbUrgent className="urgent-icon" /></button>
-						<h2 className="request__form__title">Séléctionnez la catégorie et le métier concerné:</h2>
+						{/* <h1 className="request__form__title urgent">Si votre demande est une urgence cliquez sur URGENT:</h1> */}
+						<FormGroup>
+							<FormControlLabel
+								control={<Switch
+									id="urgent-switch"
+									sx={{
+										'& .MuiSwitch-switchBase.Mui-checked': {
+											color: 'red',
+											'&:hover': {
+												backgroundColor: 'rgba(255, 0, 0, 0.08)',
+											},
+										},
+										'& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+											backgroundColor: 'red',
+										},
+									}}
+									checked={urgent}
+									onChange={(event) => setUrgent(event.target.checked)}
+									inputProps={{ 'aria-label': 'URGENT' }}
+								/>}
+								label="Demande urgente"
+								labelPlacement="start"
+								classes={{ label: 'urgent-switch' }}
+							/>
+						</FormGroup>
+						<h1 className="request__form__title">Séléctionnez la catégorie et le métier concerné:</h1>
 						<SelectBox
 							data={categoriesState}
 							selected={selectedCategory}
@@ -344,86 +381,41 @@ function Request() {
 
 						{lng && lat && (
 							<>
-								<h2 className="request__form__title radius">Séléctionnez une distance:</h2>
-								<label className="request__form__label-radius" htmlFor="radius">
+								<h1 className="request__form__title radius">Séléctionnez une distance:</h1>
+								<label className="request__form__label-radius">
 									{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
+									<Box className="request__slider-container" sx={{ width: 250 }}>
+										<Slider
+											aria-labelledby="radius-slider-label"
+											defaultValue={105}
+											aria-valuetext={radius === 0 ? 'Toute la France' : `${radius / 1000} Km autour de moi`}
+											aria-label="Distance de recherche"
+											valueLabelDisplay="auto"
+											value={radius === 0 ? 105 : radius / 1000}
+											step={5}
+											marks
+											min={5}
+											max={105}
+											onChange={(_, value) => setRadius((value as number) === 105 ? 0 : (value as number) * 1000)}
+											valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
+										/>
+									</Box>
 								</label>
-								<Box className="request__slider-container" sx={{ width: 250 }}>
-									<Slider
-										defaultValue={105}
-										aria-label="Distance d'action"
-										valueLabelDisplay="auto"
-										value={radius === 0 ? 105 : radius / 1000}
-										step={5}
-										marks
-										min={5}
-										max={105}
-										onChange={(_, value) => setRadius((value as number) === 105 ? 0 : (value as number) * 1000)}
-										valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
-									/>
-								</Box>
 								<div className="request__form__map">
 
-									<div className="request__form__map__map">
+									<div id="map" ref={mapContainerRef} className="request__form__map__map">
 										{isLoading && <Spinner />}
-										<Map
-											reuseMaps
-											mapboxAccessToken={mapboxAccessToken}
-											initialViewState={{
-												longitude: lng,
-												latitude: lat,
-												zoom: zoom
-											}}
-											zoom={zoom}
-											scrollZoom={false}
-											mapStyle="mapbox://styles/mapbox/streets-v12"
-											onLoad={handleMapLoaded}
-											dragRotate={false}
-											dragPan={false}
-										>
-											<Source
-												id="circle-data"
-												type="geojson"
-												data={{
-													type: 'Feature',
-													geometry: {
-														type: 'Point',
-														coordinates: [lng, lat]
-													}
-												}}
-											>
-												<Layer
-													id="circle-layer"
-													type="circle"
-													paint={{
-														'circle-radius': {
-															stops: [
-																[0, 0],
-																[15.8, radius] // Adjust the multiplier for scaling
-															],
-															base: 2
-														}, // Adjust the radius as needed
-														'circle-color': 'orange',
-														'circle-opacity': 0.4
-													}}
-												/>
-											</Source>
-											<Marker longitude={lng} latitude={lat}>
-												<div className="map-marker">
-													<IoLocationSharp className="map-marker__icon" />
-												</div>
-											</Marker>
-										</Map>
 									</div>
-
 								</div>
 							</>
 						)}
-						<h2 className="request__form__title">Saisissez le titre:</h2>
-
+						<h1 className="request__form__title">Saisissez le titre:</h1>
 						<label className="request__form__label">
 							<input
 								className="request__form__label__input title"
+								name="title"
+								aria-label="Titre de la demande"
+								title="Titre de la demande (50 caractères maximum)"
 								type="text"
 								placeholder="Titre de la demande (50 caractères maximum)"
 								value={titleRequest}
@@ -431,7 +423,7 @@ function Request() {
 								maxLength={50}
 							/>
 						</label>
-						<h2 className="request__form__title">Décrivez votre demande:</h2>
+						<h1 className="request__form__title">Décrivez votre demande:</h1>
 						<label className="request__form__label">
 							<TextareaAutosize
 								className="request__form__label__input textarea"
@@ -465,6 +457,7 @@ function Request() {
 											style={{ width: '100px', height: '100px', objectFit: 'cover' }}
 											src={file.type === 'application/pdf' ? pdfLogo : file.name}
 											alt={`Preview ${index}`}
+											title={`Prévisualisation du fichier ${index + 1}`}
 										/>
 										<div
 											className="request__form__input-media remove"
@@ -476,14 +469,25 @@ function Request() {
 								))}
 							</AnimatePresence>
 						</div>
-						<p className="request__form error">{uploadFileError}</p>
-						<h2 className="request__form__title media">Ajoutez des photos (3 maximum):</h2>
+						{/* <p className="request__form error">{uploadFileError}</p> */}
+						<div className="upload-message">
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{uploadFileError && (
+									<Fade in={!!uploadFileError} timeout={300}>
+										<Alert variant="filled" severity="error">{uploadFileError}</Alert>
+									</Fade>
+								)}
+							</Stack>
+						</div>
+						<h1 className="request__form__title media">Ajoutez des photos (3 maximum):</h1>
 						<label
 							htmlFor="file"
 							className="request__form__label-file"
 							onDragOver={(event) => event.preventDefault()}
 							onDragEnter={(event) => event.preventDefault()}
-							onDrop={handleFileDrop}
+							onDrop={handleFileUpload}
+							aria-label="Ajouter des fichiers"
+							title="Glissez et déposez vos fichiers ici ou cliquez pour les sélectionner"
 						>
 							<span>
 								<svg
@@ -496,6 +500,7 @@ function Request() {
 									width="60px"
 									height="60px"
 								>
+									<title id="upload-icon">Icône de téléchargement de fichier</title>
 									<g>
 										<g>
 											<g>
@@ -525,7 +530,7 @@ function Request() {
 									</g>
 								</svg>
 							</span>
-							<p>Glissez et déposez votre fichier ici ou cliquez pour sélectionner un fichier! (Format accepté : .jpg,.jpeg,.png,.pdf, pdf inférieur à 1Mo)</p>
+							<p>Glissez et déposez votre fichier ici ou cliquez pour sélectionner un fichier! (Format accepté : .jpg,.jpeg,.png,.pdf,.heic,.heif, pdf inférieur à 1Mo)</p>
 						</label>
 						<input
 							id="file"
@@ -534,7 +539,9 @@ function Request() {
 							type="file"
 							multiple={true}
 							onChange={handleFileUpload}
-							accept=".jpg,.jpeg,.png,.pdf"
+							accept=".jpg,.jpeg,.png,.pdf,.heic,.heif"
+							aria-label="Téléchargez plusieurs fichiers (formats acceptés : .jpg, .jpeg, .png, .heic, .heif, .pdf)"
+							title="Téléchargez des fichiers"
 						/>
 						<input
 							id="fileInput"
@@ -543,10 +550,14 @@ function Request() {
 							accept="image/*"
 							capture="environment"
 							onChange={handleFileUpload}
+							aria-label="Prendre une photo via la caméra"
+							title="Prendre une photo via la caméra"
 						/>
 						<FaCamera
 							className="request__form__input-media camera-icone "
 							onClick={() => document.getElementById('fileInput')?.click()}
+							aria-label="Icône de caméra pour prendre une photo"
+							title="Prendre une photo avec la caméra"
 						/>
 
 						<div className="message">
@@ -566,20 +577,22 @@ function Request() {
 										<Alert variant="filled" severity="error">{fileError}</Alert>
 									</Fade>
 								)}
-						{createLoading && <Spinner className="small-spinner" />}
+								{createLoading && <Spinner className="small-spinner" />}
 							</Stack>
 						</div>
 						<button
 							className="request__form__button"
 							type="submit"
 							disabled={createLoading}
-							>
+							aria-label="Envoyer le formulaire de demande"
+							title="Envoyer"
+						>
 							Envoyer
 						</button>
-					</motion.form>
+					</form>
 				)}
-			</AnimatePresence>
-		</div>
+			</div>
+		</Grow>
 	);
 }
 

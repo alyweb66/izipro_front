@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 // Apollo Client mutations
 import { useMutation } from '@apollo/client';
@@ -13,6 +13,7 @@ import {
 	useQueryUsersConversation,
 } from '../../Hook/Query';
 import { useFileHandler } from '../../Hook/useFileHandler';
+import { scrollList } from '../../Hook/ScrollList';
 // State management and stores
 import {
 	userDataStore,
@@ -21,7 +22,7 @@ import {
 import { myRequestStore } from '../../../store/Request';
 import { subscriptionDataStore, SubscriptionStore } from '../../../store/subscription';
 import { notViewedConversation } from '../../../store/Viewed';
-import { myMessageDataStore } from '../../../store/message';
+import { messageConvIdMyreqStore, myMessageDataStore } from '../../../store/message';
 
 // Types
 import { RequestProps } from '../../../Type/Request';
@@ -31,8 +32,8 @@ import { SubscriptionProps } from '../../../Type/Subscription';
 
 // Components and utilities
 import './MyRequest.scss';
-import pdfLogo from '/logo/logo-pdf.jpg';
-import logoProfile from '/logo/logo profile.jpeg';
+import pdfLogo from '/logo-pdf.webp';
+import logoProfile from '/logo-profile.webp';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt, FaCamera } from 'react-icons/fa';
 import { MdSend, MdAttachFile, MdKeyboardArrowLeft, MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
@@ -45,6 +46,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
+import noPicture from '/no-picture.webp';
+//import { formatMessageDate } from '../../Hook/Component';
+import { MessageList } from '../../Hook/MessageList';
 
 // Configuration for React Modal
 ReactModal.setAppElement('#root');
@@ -78,7 +82,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [selectedUser, setSelectedUser] = useState<UserDataProps | null>(null);
 	const [userDescription, setUserDescription] = useState<boolean>(false);
 	const [isListOpen, setIsListOpen] = useState<boolean>(true);
-	const [isAnswerOpen, setIsAnswerOpen] = useState<boolean>(false);
+	const [isAnswerOpen, setIsAnswerOpen] = useState<boolean>(window.innerWidth > 1000 ? true : false);
 	const [isMessageOpen, setIsMessageOpen] = useState<boolean>(window.innerWidth > 1000 ? true : false);
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
@@ -87,8 +91,11 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [isSkipRequest] = useState<boolean>(true);
 	const [isSkipMessage, setIsSkipMessage] = useState<boolean>(true);
 	const [fetchConvIdState, setFetchConvIdState] = useState<number>(0);
+	const [hasManyImages, setHasManyImages] = useState(false);
+	const [uploadFileError, setUploadFileError] = useState('');
+	const [isFetchingMore, setIsFetchingMore] = useState(false);
+	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	//const [isHandleClick, setIsHandleClick] = useState<boolean>(false);
-
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
@@ -100,9 +107,10 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [messageStore] = myMessageDataStore((state) => [state.messages, state.setMessageStore]);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
+	const [isMessageConvIdFetched, setIsMessageConvIdFetched] = messageConvIdMyreqStore((state) => [state.convId, state.setConvId]);
 
 	//useRef
-	const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
+	//const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 	const idRef = useRef<number>(0);
 	const selectedRequestRef = useRef<RequestProps | null>(null);
 
@@ -113,7 +121,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	//mutation
 	const [deleteRequest, { loading: deleteRequestLoading, error: deleteRequestError }] = useMutation(DELETE_REQUEST_MUTATION);
-	const [message, { error: createMessageError }] = useMutation(MESSAGE_MUTATION);
+	const [message, { loading: messageMutationLoading, error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
@@ -122,46 +130,365 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(fetchConvIdState, 0, 100, isSkipMessage);
 
-	// useEffect to check the size of the window
-	useEffect(() => {
-		const handleResize = () => {
-			///if (!isHandleClick) {
 
-			if (window.innerWidth < 1000) {
+	// Function to delete a request
+	const handleDeleteRequest = (requestId?: number) => {
 
-				if (isUserMessageOpen) {
+		deleteRequest({
+			variables:
+			{
+				input:
+				{
+					id: requestId,
+					user_id: id,
+				}
+			}
 
-					setIsMessageOpen(true);
-					setIsAnswerOpen(false);
-					setIsListOpen(false);
-				} else if (!isUserMessageOpen) {
+		}).then((response) => {
+			// Get the conversation ids of the request
+			const conversationIds = myRequestStore.getState().requests.find(request => request.id === requestId)?.conversation?.map(conversation => conversation.id);
 
-					setIsMessageOpen(false);
-					setIsAnswerOpen(false);
-					setIsListOpen(true);
+			if (response.data.deleteRequest) {
+				// Remove the request from the store
+				setMyRequestsStore(myRequestsStore.filter(request => request.id !== requestId));
+			}
+			setUserConvState([]);
+			setModalArgs(null);
+			setDeleteItemModalIsOpen(false);
 
-				} else {
-					if (isAnswerOpen) {
-						setIsMessageOpen(false);
-						setIsAnswerOpen(true);
-						setIsListOpen(false);
+			// remove subscription for this request
+			const subscription = subscriptionStore.find(subscription => subscription.subscriber === 'request');
+			const updatedSubscription = Array.isArray(subscription?.subscriber_id) ? subscription?.subscriber_id.filter(id => id !== requestId) : [];
+
+			subscriptionMutation({
+				variables: {
+					input: {
+						user_id: id,
+						subscriber: 'request',
+						subscriber_id: updatedSubscription
 					}
-					if (isListOpen) {
+				}
+			}).then((response) => {
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+
+				// replace the old subscription with the new one
+				subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
+					...prevState,
+					subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
+						subscription.subscriber === 'request' ? subscriptionWithoutTimestamps : subscription
+					)
+				}));
+
+				if (conversationIds) {
+					// remove subscription for this conversation
+					const conversationSubscription = subscriptionStore.find(subscription => subscription.subscriber === 'conversation');
+					const updatedConversationSubscription = Array.isArray(conversationSubscription?.subscriber_id) ? conversationSubscription?.subscriber_id.filter(id => !conversationIds.includes(id)) : [];
+
+					subscriptionMutation({
+						variables: {
+							input: {
+								user_id: id,
+								subscriber: 'conversation',
+								subscriber_id: updatedConversationSubscription
+							}
+						}
+					}).then((response) => {
+
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
+						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
+
+						// replace the old subscription with the new one
+						subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
+							...prevState,
+							subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
+								subscription.subscriber === 'conversation' ? subscriptionWithoutTimestamps : subscription
+							)
+						}));
+
+						// delete from message store all message with this conversation viewedIds
+						myMessageDataStore.setState(prevState => {
+							const newMessages = prevState.messages.filter(
+								(message: MessageProps) => !conversationIds.includes(message.conversation_id)
+							);
+							return {
+								...prevState,
+								messages: [...newMessages]
+							};
+						});
+
+						// remove the conversation id from the notViewedConversationStore and database
+						deleteNotViewedConversation({
+							variables: {
+								input: {
+									user_id: id,
+									conversation_id: conversationIds
+								}
+							}
+						}).then(() => {
+							// remove the conversation id from the notViewedConversationStore
+							setNotViewedConversationStore(notViewedConversationStore.filter(id => !conversationIds.includes(id)));
+						});
+
+						if (deleteNotViewedConversationError) {
+							throw new Error('Error updating conversation');
+						}
+
+					});
+
+					if (subscriptionError) {
+						throw new Error('Error while updating conversation subscription');
+					}
+				}
+			});
+		});
+
+		if (deleteRequestError) {
+			throw new Error('Error while deleting request');
+		}
+
+	};
+
+	// Function to handle the users viewedIds for the conversation
+	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLElement>) => {
+		event?.preventDefault();
+
+		if (!request.conversation) {
+
+			setUserConvState([]);
+
+		} else {
+			// Get the user viewedIds from the conversation
+			const viewedIds = request?.conversation?.map(conversation => {
+				return conversation.user_1 !== id ? conversation.user_1 : conversation.user_2;
+			});
+
+			// Filter out the user viewedIds that are already in the userConvStore
+			const idStore = userConvStore.map(user => user.id);
+			const newIds = viewedIds.filter(id => !idStore.includes(id));
+
+			if (newIds.length > 0) {
+				setUserIds(newIds || []); // Provide a default value of an empty array
+			}
+		}
+	};
+
+	// Function to handle the user message and update the conversation viewed status
+	const handleMessageConversation = (userId: number, event?: React.MouseEvent<HTMLDivElement>) => {
+		event?.preventDefault();
+
+		// find the conversation id for the message
+		const conversation = selectedRequest?.conversation?.find(conversation =>
+			(conversation.user_1 === id || conversation.user_2 === id) &&
+			(conversation.user_1 === userId || conversation.user_2 === userId)
+		);
+
+		const conversationId = conversation?.id;
+		setConversationIdState(conversationId || 0);
+
+		// get only conversation id who are not in the store
+		/* let conversationIdNotStore;
+		if (messageStore.length > 0) {
+			conversationIdNotStore = !messageStore.some(message => message.conversation_id === conversationId);
+		} else {
+			conversationIdNotStore = true;
+		} */
+
+		if (conversationId !== conversationIdState && !isMessageConvIdFetched.some(convId => convId === conversationId)) {
+
+			setFetchConvIdState(conversationId ?? 0);
+			setIsSkipMessage(false);
+		}
+
+		// remove the conversation id from the notViewedConversationStore and database
+		if (conversationId && notViewedConversationStore?.some(id => id === conversationId)) {
+
+			deleteNotViewedConversation({
+				variables: {
+					input: {
+						user_id: id,
+						conversation_id: [conversationId]
+					}
+				}
+			}).then(() => {
+				// remove the conversation id from the notViewedConversationStore
+				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
+
+			});
+
+			if (deleteNotViewedConversationError) {
+				throw new Error('Error updating conversation');
+			}
+		}
+	};
+
+	// Function to send message and create conversation
+	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+
+		// map file to send to graphql
+		const sendFile = file.map(file => ({
+			file,
+		}));
+		// create message
+		// if the message is not empty or the file is not empty
+		if (conversationIdState ?? 0 > 0) {
+
+			if (messageValue.trim() !== '' || sendFile.length > 0) {
+
+				message({
+					variables: {
+						id: id,
+						input: {
+							content: messageValue,
+							user_id: id,
+							conversation_id: conversationIdState,
+							media: sendFile
+						}
+					}
+				}).then(() => {
+
+					setMessageValue('');
+					setFile([]);
+					setUrlFile([]);
+				});
+			}
+		}
+		if (createMessageError) {
+			throw new Error('Error creating message');
+		}
+	};
+
+	// remove file
+	const handleRemove = (index: number) => {
+		// Remove file from file list
+		setUploadFileError('');
+		const newFiles = [...file];
+		newFiles.splice(index, 1);
+		setFile(newFiles);
+		// Remove file from urlFile list
+		const newUrlFileList = [...urlFile];
+		newUrlFileList.splice(index, 1);
+		setUrlFile(newUrlFileList);
+	};
+
+	// Function to fetchmore requests
+	const addRequest = () => {
+		if (fetchMore && !isFetchingMore) {
+			setIsFetchingMore(true);
+			fetchMore({
+				variables: {
+					offset: myRequestsStore.length // Next offset
+				},
+			}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
+
+
+				// remove request who is already in the store
+				const requestsIdsStore = myRequestsStore.map(request => request.id);
+
+				const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIdsStore.includes(request.id));
+
+
+				if (newRequests.length > 0) {
+					myRequestStore.setState(prevRequests => {
+						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
+					});
+
+					offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
+				}
+
+				// if there is no more request stop the infinite scroll
+				if (fetchMoreResult.data.user.requests.length < limit) {
+					setIsHasMore(false);
+				}
+				setIsFetchingMore(false);
+			});
+
+		}
+	};
+
+	// Function to handle file upload
+	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+		event.preventDefault();
+		setUploadFileError('');
+
+		// Check if the number of files is less than 3
+		const remainingSlots = 4 - urlFile.length;
+
+		if ((event.target.files?.length ?? 0) > 4) {
+			setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+		}
+
+		if (event.target.files) {
+
+			if (remainingSlots > 0) {
+				const filesToUpload = Array.from(event.target.files).slice(0, remainingSlots);
+				handleFileChange(undefined, undefined, filesToUpload as File[]);
+
+				if (filesToUpload.length > 4) {
+					setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+				}
+			}
+			if (remainingSlots <= 0) {
+				setUploadFileError('Nombre de fichiers maximum atteint (maximum 4 fichiers)');
+			}
+		}
+	};
+
+	// Filtrer les messages pour correspondre à la conversation en cours
+	const filteredMessages = useMemo(() => {
+		if (conversationIdState > 0) {
+			return Array.isArray(messageStore) && isUserMessageOpen
+				? messageStore
+					.filter((message) => message.conversation_id === conversationIdState)
+					.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
+				: [];
+		}
+	}, [messageStore, isUserMessageOpen, conversationIdState]);
+
+
+	// get state for scrollList
+	const { setIsEndViewed } = scrollList({});
+
+	// useEffect to check the size of the window and update the page visibility 
+	
+	useLayoutEffect(() => {
+		const handleResize = () => {
+
+			if (window.innerWidth !== windowWidth) {
+				setWindowWidth(window.innerWidth);
+
+				if (window.innerWidth < 1000) {
+					if (isUserMessageOpen) {
+						setIsMessageOpen(true);
+						setIsAnswerOpen(false);
+						setIsListOpen(false);
+					} else if (!isUserMessageOpen) {
 						setIsMessageOpen(false);
 						setIsAnswerOpen(false);
 						setIsListOpen(true);
+					} else {
+						if (isAnswerOpen) {
+							setIsMessageOpen(false);
+							setIsAnswerOpen(true);
+							setIsListOpen(false);
+						}
+						if (isListOpen) {
+							setIsMessageOpen(false);
+							setIsAnswerOpen(false);
+							setIsListOpen(true);
+						}
 					}
+
+				} else {
+
+					setIsMessageOpen(true);
+					setIsAnswerOpen(true);
+					setIsListOpen(true);
+
+
 				}
-
-			} else {
-
-				setIsMessageOpen(true);
-				setIsAnswerOpen(true);
-				setIsListOpen(true);
-
-
 			}
-			//}
 		};
 
 		// add event listener to check the size of the window
@@ -172,7 +499,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
-	}, [/* isMessageOpen, isAnswerOpen, isListOpen */]);
+	}, [windowWidth/* isMessageOpen, isAnswerOpen, isListOpen */]);
 
 	// useEffect to sort the requests by date and update the subscription
 	useEffect(() => {
@@ -350,8 +677,8 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			selectedRequestRef.current = selectedRequest;
 		}
 
-
-
+		setIsEndViewed(false);
+		
 	}, [userConvStore, selectedRequest]);
 
 	// useEffect to update the message store
@@ -380,7 +707,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					};
 				}
 			});
-
+			setIsMessageConvIdFetched([...isMessageConvIdFetched, conversationIdState]);
 			setIsSkipMessage(true);
 
 		}
@@ -412,15 +739,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	}, [usersConversationData]);
 
-	// useEffect to scroll to the end of the messages
-	useEffect(() => {
-
-		setTimeout(() => {
-			endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-		}, 200);
-
-	}, [messageStore, conversationIdState, isMessageOpen]);
-
 	//  set selected request at null when the component is unmounted
 	useEffect(() => {
 		return () => {
@@ -440,301 +758,19 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	}, [selectedUser]);
 
 
-	// Function to delete a request
-	const handleDeleteRequest = (requestId?: number) => {
-
-		deleteRequest({
-			variables:
-			{
-				input:
-				{
-					id: requestId,
-					user_id: id,
-				}
-			}
-
-		}).then((response) => {
-			// Get the conversation ids of the request
-			const conversationIds = myRequestStore.getState().requests.find(request => request.id === requestId)?.conversation?.map(conversation => conversation.id);
-
-			if (response.data.deleteRequest) {
-				// Remove the request from the store
-				setMyRequestsStore(myRequestsStore.filter(request => request.id !== requestId));
-			}
-			setUserConvState([]);
-			setModalArgs(null);
-			setDeleteItemModalIsOpen(false);
-
-			// remove subscription for this request
-			const subscription = subscriptionStore.find(subscription => subscription.subscriber === 'request');
-			const updatedSubscription = Array.isArray(subscription?.subscriber_id) ? subscription?.subscriber_id.filter(id => id !== requestId) : [];
-
-			subscriptionMutation({
-				variables: {
-					input: {
-						user_id: id,
-						subscriber: 'request',
-						subscriber_id: updatedSubscription
-					}
-				}
-			}).then((response) => {
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-
-				// replace the old subscription with the new one
-				subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
-					...prevState,
-					subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
-						subscription.subscriber === 'request' ? subscriptionWithoutTimestamps : subscription
-					)
-				}));
-
-				if (conversationIds) {
-					// remove subscription for this conversation
-					const conversationSubscription = subscriptionStore.find(subscription => subscription.subscriber === 'conversation');
-					const updatedConversationSubscription = Array.isArray(conversationSubscription?.subscriber_id) ? conversationSubscription?.subscriber_id.filter(id => !conversationIds.includes(id)) : [];
-
-					subscriptionMutation({
-						variables: {
-							input: {
-								user_id: id,
-								subscriber: 'conversation',
-								subscriber_id: updatedConversationSubscription
-							}
-						}
-					}).then((response) => {
-
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-
-						// replace the old subscription with the new one
-						subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
-							...prevState,
-							subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
-								subscription.subscriber === 'conversation' ? subscriptionWithoutTimestamps : subscription
-							)
-						}));
-
-						// delete from message store all message with this conversation viewedIds
-						myMessageDataStore.setState(prevState => {
-							const newMessages = prevState.messages.filter(
-								(message: MessageProps) => !conversationIds.includes(message.conversation_id)
-							);
-							return {
-								...prevState,
-								messages: [...newMessages]
-							};
-						});
-
-						// remove the conversation id from the notViewedConversationStore and database
-						deleteNotViewedConversation({
-							variables: {
-								input: {
-									user_id: id,
-									conversation_id: conversationIds
-								}
-							}
-						}).then(() => {
-							// remove the conversation id from the notViewedConversationStore
-							setNotViewedConversationStore(notViewedConversationStore.filter(id => !conversationIds.includes(id)));
-						});
-
-						if (deleteNotViewedConversationError) {
-							throw new Error('Error updating conversation');
-						}
-
-					});
-
-					if (subscriptionError) {
-						throw new Error('Error while updating conversation subscription');
-					}
-				}
-			});
-		});
-
-		if (deleteRequestError) {
-			throw new Error('Error while deleting request');
-		}
-
-	};
-
-	// Function to handle the users viewedIds for the conversation
-	const handleConversation = (request: RequestProps, event?: React.MouseEvent<HTMLDivElement>) => {
-		event?.preventDefault();
-
-		if (!request.conversation) {
-
-			setUserConvState([]);
-
-		} else {
-			// Get the user viewedIds from the conversation
-			const viewedIds = request?.conversation?.map(conversation => {
-				return conversation.user_1 !== id ? conversation.user_1 : conversation.user_2;
-			});
-
-			// Filter out the user viewedIds that are already in the userConvStore
-			const idStore = userConvStore.map(user => user.id);
-			const newIds = viewedIds.filter(id => !idStore.includes(id));
-
-			if (newIds.length > 0) {
-				setUserIds(newIds || []); // Provide a default value of an empty array
-			}
-		}
-	};
-
-	// Function to handle the user message and update the conversation viewed status
-	const handleMessageConversation = (userId: number, event?: React.MouseEvent<HTMLDivElement>) => {
-		event?.preventDefault();
-
-		// find the conversation id for the message
-		const conversation = selectedRequest?.conversation?.find(conversation =>
-			(conversation.user_1 === id || conversation.user_2 === id) &&
-			(conversation.user_1 === userId || conversation.user_2 === userId)
-		);
-
-		const conversationId = conversation?.id;
-		setConversationIdState(conversationId || 0);
-
-		// get only conversation id who are not in the store
-		let conversationIdNotStore;
-		if (messageStore.length > 0) {
-			conversationIdNotStore = !messageStore.some(message => message.conversation_id === conversationId);
-		} else {
-			conversationIdNotStore = true;
-		}
-
-		if (conversationIdNotStore && conversationId !== conversationIdState) {
-
-			setFetchConvIdState(conversationId ?? 0);
-			setIsSkipMessage(false);
-		}
-
-		// remove the conversation id from the notViewedConversationStore and database
-		if (conversationId && notViewedConversationStore?.some(id => id === conversationId)) {
-
-			deleteNotViewedConversation({
-				variables: {
-					input: {
-						user_id: id,
-						conversation_id: [conversationId]
-					}
-				}
-			}).then(() => {
-				// remove the conversation id from the notViewedConversationStore
-				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
-
-			});
-
-			if (deleteNotViewedConversationError) {
-				throw new Error('Error updating conversation');
-			}
-		}
-	};
-
-	// Function to send message and create conversation
-	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		// map file to send to graphql
-		const sendFile = file.map(file => ({
-			file,
-		}));
-		// create message
-		// if the message is not empty or the file is not empty
-		if (conversationIdState ?? 0 > 0) {
-			if (messageValue.trim() !== '' || sendFile.length > 0) {
-
-				message({
-					variables: {
-						id: id,
-						input: {
-							content: messageValue,
-							user_id: id,
-							conversation_id: conversationIdState,
-							media: sendFile
-						}
-					}
-				}).then(() => {
-					setMessageValue('');
-					setFile([]);
-					setUrlFile([]);
-				});
-			}
-		}
-		if (createMessageError) {
-			throw new Error('Error creating message');
-		}
-	};
-
-	// remove file
-	const handleRemove = (index: number) => {
-		// Remove file from file list
-		const newFiles = [...file];
-		newFiles.splice(index, 1);
-		setFile(newFiles);
-		// Remove file from urlFile list
-		const newUrlFileList = [...urlFile];
-		newUrlFileList.splice(index, 1);
-		setUrlFile(newUrlFileList);
-	};
-
-	// Function to fetchmore requests
-	const addRequest = () => {
-		if (fetchMore) {
-			fetchMore({
-				variables: {
-					offset: myRequestsStore.length // Next offset
-				},
-			}).then((fetchMoreResult: { data: { user: { requests: RequestProps[] } } }) => {
-
-				// remove request who is already in the store
-				const requestsIds = myRequestsStore.map(request => request.id);
-				const newRequests = fetchMoreResult.data.user.requests.filter((request: RequestProps) => !requestsIds.includes(request.id));
-
-				if (newRequests.length > 0) {
-					myRequestStore.setState(prevRequests => {
-						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
-					});
-
-					offsetRef.current = offsetRef.current + fetchMoreResult.data.user.requests.length;
-				}
-
-				// if there is no more request stop the infinite scroll
-				if (fetchMoreResult.data.user.requests.length < limit) {
-					setIsHasMore(false);
-				}
-
-			});
-		}
-	};
-
-const [hasManyImages, setHasManyImages] = useState(false);
-
-const [showButton, setShowButton] = useState(false);
-
-useEffect(() => {
-	const timer = setTimeout(() => {
-		setShowButton(true);
-	}, 1000); // Délai de 1 seconde
-
-	return () => clearTimeout(timer); // Nettoyage du timer
-}, []);
-
 	return (
 		<div className="my-request">
 			<div
 				id="scrollableRequest"
 				className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}
 				aria-label="Liste des demandes"
-
 			>
 				{requestLoading && <Spinner />}
 				{!requestByDate ? <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p> : (
-
-					<div className="my-request__list__detail" >
+					<ul className="my-request__list__detail" >
 						<AnimatePresence>
-
 							{isListOpen && requestByDate.map((request, index) => (
-								<motion.div
+								<motion.li
 									id={index === 0 ? 'first-request' : undefined}
 									className={`my-request__list__detail__item 
 									${request.urgent}
@@ -816,7 +852,7 @@ useEffect(() => {
 
 										{(() => {
 											const imageUrls = request.media?.map(media => media.url) || [];
-										
+
 											return request.media?.map((media, index) => (
 												media ? (
 													media.name.endsWith('.pdf') ? (
@@ -829,10 +865,12 @@ useEffect(() => {
 															onClick={(event) => { event.stopPropagation(); }}
 															aria-label={`PDF associé à la demande ${request.title}`}
 														>
+															{ }
 															<img
 																className="my-request__list__detail__item__picture img"
 																src={pdfLogo}
 																alt={`PDF associé à la demande ${request.title}`}
+
 															/>
 														</a>
 													) : (
@@ -840,15 +878,16 @@ useEffect(() => {
 															className="my-request__list__detail__item__picture img"
 															key={media.id}
 															src={media.url}
+															loading="lazy"
 															onClick={(event) => {
 																setHasManyImages(false),
-																openModal(imageUrls, index),
-																imageUrls.length > 1 && setHasManyImages(true);
+																	openModal(imageUrls, index),
+																	imageUrls.length > 1 && setHasManyImages(true);
 
-																	event.stopPropagation();
+																event.stopPropagation();
 															}}
 															onError={(event) => {
-																event.currentTarget.src = '/logo/no-picture.jpg';
+																event.currentTarget.src = noPicture;
 															}}
 															alt={`Image associée à la demande ${request.title}`}
 														/>
@@ -864,6 +903,7 @@ useEffect(() => {
 										type='button'
 										aria-label={`Supprimer la demande ${request.title}`}
 										onClick={(event) => {
+											event.preventDefault();
 											setDeleteItemModalIsOpen(true);
 											setModalArgs({ requestId: request.id, requestTitle: request.title }),
 												event.stopPropagation();
@@ -877,20 +917,22 @@ useEffect(() => {
 												event.stopPropagation();
 										}}
 									/>
-								</motion.div>
+								</motion.li>
 							))}
 
 						</AnimatePresence>
-					</div>
+					</ul>
 				)}
 
-				{showButton && <div className="my-request__list__fetch-button">
-					{isHasMore ? (<button
+				<div className="my-request__list__fetch-button">
+					{(isHasMore && requestByDate && requestByDate?.length > 0) ? (<button
 						className="Btn"
 						onClick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
-							addRequest();
+							if (!isFetchingMore) {
+								addRequest();
+							}
 						}
 						}>
 						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
@@ -900,7 +942,7 @@ useEffect(() => {
 					) : (
 						<p className="my-request__list no-req">Fin des résultats</p>
 					)}
-				</div>}
+				</div>
 			</div>
 
 			<AnimatePresence>
@@ -954,7 +996,6 @@ useEffect(() => {
 											}
 											key={user.id}
 											onClick={(event) => {
-
 												setSelectedUser(user);
 												handleMessageConversation(user.id, event);
 												if (window.innerWidth < 1000) {
@@ -963,7 +1004,7 @@ useEffect(() => {
 													setTimeout(() => {
 														setIsMessageOpen(true);
 														setIsListOpen(false);
-													}, 200);	
+													}, 200);
 												}
 
 											}}
@@ -981,7 +1022,7 @@ useEffect(() => {
 													className="my-request__answer-list__user__header img"
 													src={user.image ? user.image : logoProfile}
 													onError={(event) => {
-														event.currentTarget.src = '/logo/no-picture.jpg';
+														event.currentTarget.src = noPicture;
 													}}
 													alt={`Image de profil de ${user.first_name} ${user.last_name}`} />
 												{/* <img className="my-request__answer-list__user__header img" src={user.image} alt="" /> */}
@@ -1005,14 +1046,14 @@ useEffect(() => {
 			<AnimatePresence>
 				{isMessageOpen && (
 					<motion.div
-						className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${messageLoading ? 'loading' : ''}`}
+						className={`my-request__message-list ${isMessageOpen ? 'open' : ''} ${(messageLoading || messageMutationLoading) ? 'loading' : ''}`}
 						aria-label='Liste des messages'
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
-						{messageLoading && <Spinner />}
+						{(messageLoading || messageMutationLoading) && <Spinner />}
 						<div className="my-request__message-list__user" aria-label="Détails de l'utilisateur" >
 							<div
 								className="my-request__message-list__user__header"
@@ -1028,7 +1069,7 @@ useEffect(() => {
 										className="my-request__message-list__user__header__detail return"
 										onClick={(event) => {
 											if (window.innerWidth < 1000) {
-
+												setIsEndViewed(false);
 												setIsMessageOpen(false);
 												setTimeout(() => {
 													setIsListOpen(false);
@@ -1045,7 +1086,7 @@ useEffect(() => {
 										className="my-request__message-list__user__header__detail img"
 										src={selectedUser?.image ? selectedUser.image : logoProfile}
 										onError={(event) => {
-											event.currentTarget.src = '/logo/no-picture.jpg';
+											event.currentTarget.src = noPicture;
 										}}
 										alt={selectedUser?.denomination ? selectedUser.denomination : `${selectedUser?.first_name} ${selectedUser?.last_name}`} />
 									{selectedUser?.denomination ? (
@@ -1069,77 +1110,17 @@ useEffect(() => {
 								</div>
 								}
 							</div>
-							{/* 	)} */}
 
 						</div>
-						<div className="my-request__container">
-							<div className="my-request__background">
-								<div /* id="scrollableMessage" */ className="my-request__message-list__message" aria-label='Message de la conversation'>
-									{Array.isArray(messageStore) && isUserMessageOpen &&
-										messageStore
-											.filter((message) => message.conversation_id === conversationIdState)
-											.sort((a, b) => new Date(Number(a.created_at)).getTime() - new Date(Number(b.created_at)).getTime())
-											.map((message, index, array) => (
-												<div className={`my-request__message-list__message__detail ${message.user_id === id ? 'me' : ''}`} key={message.id}>
-													{index === array.length - 1 ? <div ref={endOfMessagesRef} aria-label="Dernier message visible" /> : null}
-													<div className={`content ${message.user_id === id ? 'me' : ''}`}>
-														{message.media[0].url && (
-															<div className="my-request__message-list__message__detail__image-container">
-																<div className={`map ${message.content ? 'message' : ''}`}>
-																	{(() => {
-																		const imageUrls = message.media?.map(media => media.url) || [];
-																		return message.media?.map((media, index) => (
-																			media ? (
-																				media.name.endsWith('.pdf') ? (
-																					<a
-																						className="a-pdf"
-																						href={media.url}
-																						key={media.id}
-																						download={media.name}
-																						target="_blank"
-																						rel="noopener noreferrer"
-																						onClick={(event) => { event.stopPropagation(); }} >
-																						<img
-																							className={`my-request__message-list__message__detail__image-pdf ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																							//key={media.id} 
-																							src={pdfLogo}
-																							alt={media.name}
-																						/>
-																					</a>
-																				) : (
-																					<img
-																						className={`my-request__message-list__message__detail__image ${message.media.length === 1 ? 'single' : 'multiple'}`}
-																						key={media.id}
-																						src={media.url}
-																						onClick={(event) => {
-																							setHasManyImages(false),
-																							openModal(imageUrls, index),
-																							imageUrls.length > 1 && setHasManyImages(true);
-							
-																								event.stopPropagation();
-																						}}
-																						alt={media.name}
-																						onError={(event) => {
-																							event.currentTarget.src = '/logo/no-picture.jpg';
-																						}}
-																					/>
-																				)
-																			) : null
-																		));
-																	})()}
-																</div>
-															</div>
-														)}
-														{message.content && <div className="my-request__message-list__message__detail__texte">{message.content}</div>}
-													</div>
-													<div className="my-request__message-list__message__detail__date">{new Date(Number(message.created_at)).toLocaleString()}</div>
-												</div>
-											))
-
-									}
-								</div>
-							</div>
-						</div>
+						<MessageList 
+							conversationIdState={conversationIdState}
+							id={id}
+							filteredMessages={filteredMessages}
+							isMessageOpen={isMessageOpen}
+							openModal={openModal}
+							setHasManyImages={setHasManyImages}
+						/>
+						
 
 						<form className="my-request__message-list__form" onSubmit={(event) => {
 							event.preventDefault();
@@ -1153,6 +1134,13 @@ useEffect(() => {
 									{fileError && (
 										<Fade in={!!fileError} timeout={300}>
 											<Alert variant="filled" severity="error">{fileError}</Alert>
+										</Fade>
+									)}
+								</Stack>
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{uploadFileError && (
+										<Fade in={!!uploadFileError} timeout={300}>
+											<Alert variant="filled" severity="error">{uploadFileError}</Alert>
 										</Fade>
 									)}
 								</Stack>
@@ -1179,30 +1167,40 @@ useEffect(() => {
 							<label className="my-request__message-list__form__label">
 								<MdAttachFile
 									className="my-request__message-list__form__label__attach"
-									onClick={() => document.getElementById('send-file')?.click()}
+									onClick={(event) => {
+										event.preventDefault(),
+											event.stopPropagation(),
+											document.getElementById('send-file')?.click()
+									}}
 									aria-label='Joindre un fichier'
 								/>
 								<FaCamera
 									className="my-request__message-list__form__label__camera"
-									onClick={() => document.getElementById('file-camera')?.click()}
+									onClick={(event) => {
+										event.preventDefault(),
+											event.stopPropagation(),
+											document.getElementById('file-camera')?.click()
+									}}
 									aria-label='Prendre une photo'
 
 								/>
 								<TextareaAutosize
-									//key={messageValue || 'empty'}
-									id='messageInput'
+									id="messageInput"
+									name="message"
 									className="my-request__message-list__form__label__input"
 									value={messageValue}
 									onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}
 									placeholder="Tapez votre message ici..."
 									aria-label='Tapez votre message'
-									maxLength={500}
+									maxLength={1000}
 									readOnly={selectedUser && selectedUser?.id > 0 ? false : true}
+									onClick={(event: React.MouseEvent) => { event.stopPropagation(); event?.preventDefault(); }}
 								/>
 								<MdSend
 									className="my-request__message-list__form__label__send"
-									onClick={() => document.getElementById('send-message')?.click()}
+									onClick={(event) => { document.getElementById('send-message')?.click(), event.stopPropagation(); event?.preventDefault(); }}
 									aria-label='Envoyer le message'
+
 								/>
 							</label>
 							<input
@@ -1210,8 +1208,10 @@ useEffect(() => {
 								className="my-request__message-list__form__input"
 								type="file"
 								accept="image/*,.pdf"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
 								multiple={true}
+								disabled={selectedUser && selectedUser?.id > 0 ? false : true}
+								aria-label="Envoyer un fichier"
 							/>
 							<input
 								id="file-camera"
@@ -1219,12 +1219,16 @@ useEffect(() => {
 								type="file"
 								accept="image/*"
 								capture="environment"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileChange(event)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
+								disabled={selectedUser && selectedUser?.id > 0 ? false : true}
+								aria-label="Prendre une photo"
 							/>
 							<button
 								id="send-message"
 								className="my-request__message-list__form__button"
 								type="submit"
+								disabled={selectedUser && selectedUser?.id > 0 ? false : true}
+								aria-label="Envoyer le message"
 							>
 								Send
 							</button>
@@ -1257,9 +1261,6 @@ useEffect(() => {
 }
 
 export default MyRequest;
-
-
-
 
 
 

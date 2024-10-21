@@ -1,5 +1,5 @@
 // React
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // Apollo Client mutations
 import { useMutation } from '@apollo/client';
@@ -19,7 +19,7 @@ import { notViewedRequest } from '../../../store/Viewed';
 // Types and assets
 import { RequestProps } from '../../../Type/Request';
 import { SubscriptionProps } from '../../../Type/Subscription';
-import pdfLogo from '/logo/logo-pdf.jpg';
+import pdfLogo from '/logo-pdf.webp';
 
 // Components and utilities
 import './clientRequest.scss';
@@ -28,6 +28,7 @@ import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { FaTrashAlt } from 'react-icons/fa';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import noPicture from '/no-picture.webp';
 
 
 type ExpandedState = {
@@ -53,6 +54,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	const [hasManyImages, setHasManyImages] = useState(false);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{requestId: number, requestTitle: string } | null>(null);
+	
 	/* 	const [isLoading, setIsLoading] = useState(false); */
 	// Create a ref for the scroll position
 	//const offsetRef = useRef(0);
@@ -89,6 +91,59 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 
 	// get requests by job
 	const { loading: requestJobLoading, fetchMore } = useQueryRequestByJob(jobs, 0, limit, clientRequestStore.length > 0);
+
+
+	// Function to hide a request
+	function handleHideRequest(requestId?: number) {
+
+		hideRequest({
+			variables: {
+				input: {
+					user_id: id,
+					request_id: requestId
+				}
+			}
+		}).then((response) => {
+
+			if (response.data.createHiddenClientRequest) {
+
+				setClientRequestsStore(clientRequestsStore.filter(request => request.id !== requestId));
+
+			}
+		});
+		if (hideRequestError) {
+			throw new Error('Error while hiding request');
+		}
+	};
+
+	// Function to load more requests 
+	function addRequest() {
+
+		fetchMore({
+			variables: {
+				offset: offsetRef.current, // Next offset
+			},
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		}).then(fetchMoreResult => {
+			const data = fetchMoreResult.data.requestsByJob;
+
+			//get all request who are not in the store
+			const newRequests = data?.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
+
+			if (newRequests.length > 0) {
+
+				RangeFilter(newRequests);
+				offsetRef.current = offsetRef.current + data.length;
+
+			}
+
+			// If there are no more requests, stop fetchmore
+			if (fetchMoreResult.data.requestsByJob.length < limit) {
+				setIsHasMore(false);
+			}
+		});
+
+	}
 
 	// add jobs to setSubscriptionJob if there are not already in, or have the same id
 	useEffect(() => {
@@ -162,7 +217,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	}, [jobs]);
 
 	// useEffect to see if the request is viewed
-	useEffect(() => {
+	useLayoutEffect(() => {
 		// Create an IntersectionObserver
 
 		const observer = new IntersectionObserver((entries) => {
@@ -234,70 +289,18 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 
 	});
 
-	// Function to hide a request
-	function handleHideRequest(requestId?: number) {
-
-		hideRequest({
-			variables: {
-				input: {
-					user_id: id,
-					request_id: requestId
-				}
-			}
-		}).then((response) => {
-
-			if (response.data.createHiddenClientRequest) {
-
-				setClientRequestsStore(clientRequestsStore.filter(request => request.id !== requestId));
-
-			}
-		});
-		if (hideRequestError) {
-			throw new Error('Error while hiding request');
-		}
-	};
-
-	// Function to load more requests 
-	function addRequest() {
-
-		fetchMore({
-			variables: {
-				offset: offsetRef.current, // Next offset
-			},
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		}).then(fetchMoreResult => {
-			const data = fetchMoreResult.data.requestsByJob;
-
-			//get all request who are not in the store
-			const newRequests = data.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
-
-			if (newRequests.length > 0) {
-
-				RangeFilter(newRequests);
-				offsetRef.current = offsetRef.current + data.length;
-
-			}
-
-			// If there are no more requests, stop fetchmore
-			if (fetchMoreResult.data.requestsByJob.length < limit) {
-				setIsHasMore(false);
-			}
-		});
-
-	}
-
 	return (
 		<div className="client-request">
 			<div id="scrollableClientRequest" className="client-request__list">
 				{(requestJobLoading || subscribeLoading || loading) && <Spinner />}
 				{(!address && !city && !postal_code && !first_name && !last_name) &&
-					(<p className="request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>)}
+					(<p className="client-request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>)}
 				{/* {!clientRequestsStore?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>} */}
 				{(address && city && postal_code && first_name && last_name) && (
-					<div className="client-request__list__detail">
+					<ul className="client-request__list__detail">
 						<AnimatePresence>
 							{clientRequestsStore.map((request) => (
-								<motion.div
+								<motion.li
 									className={`client-request__list__detail__item ${request.urgent} ${notViewedRequestStore.some(id => id === request.id) ? 'not-viewed' : ''} `}
 									data-request-id={request?.id}
 									key={request.id}
@@ -312,7 +315,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 									animate={{opacity: 1, scale: 1 }}
 									exit={{ opacity: 0, scale: 0.9 }}
 									transition={{duration: 0.2, type: 'Inertia', stiffness: 50 }}
-
+									aria-label={`Demande de ${request.first_name} ${request.last_name}`}
 								>
 									{hiddenLoading && modalArgs?.requestId === request.id && <Spinner />}
 									{request.urgent && <p className="client-request__list__detail__item urgent">URGENT</p>}
@@ -358,11 +361,11 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 
 											event.stopPropagation();
 										}}
+										aria-label={`Message de la demande ${request.title}`}
 									>
 										{request.message}
 									</p>
 									<div className="client-request__list__detail__item__picture">
-
 										{(() => {
 											const imageUrls = request.media?.map(media => media.url) || [];
 											return request.media?.map((media, index) => (
@@ -374,10 +377,11 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 															download={media.name}
 															target="_blank"
 															rel="noopener noreferrer"
-															onClick={(event) => { event.stopPropagation(); }} >
+															onClick={(event) => { event.stopPropagation(); }} 
+															aria-label={`Télécharger le fichier PDF ${media.name}`}
+															>
 															<img
 																className="client-request__list__detail__item__picture img"
-																//key={media.id} 
 																src={pdfLogo}
 																alt={media.name}
 															/>
@@ -396,7 +400,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 															}}
 															alt={media.name}
 															onError={(event) => {
-																event.currentTarget.src = '/logo/no-picture.jpg';
+																event.currentTarget.src = noPicture;
 															  }}
 														/>
 													)
@@ -405,7 +409,6 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 										})()}
 
 									</div>
-
 									<button
 										id={`delete-request-${request.id}`}
 										className="client-request__list__detail__item__delete"
@@ -414,7 +417,9 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 											setDeleteItemModalIsOpen(true);
 											setModalArgs({requestId: request.id, requestTitle: request.title});
 											event.stopPropagation();
-										}}>
+										}}
+										aria-label={`Supprimer la demande ${request.title}`}
+										>
 									</button>
 									<FaTrashAlt
 										className="client-request__list__detail__item__delete-FaTrashAlt"
@@ -422,28 +427,29 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 											document.getElementById(`delete-request-${request.id}`)?.click(),
 											event.stopPropagation();
 										}}
+										aria-label={`Supprimer la demande ${request.title}`}
 									/>
-								</motion.div>
+								</motion.li>
 							))}
 						</AnimatePresence>
-					</div>
+					</ul>
 				)}
 				<div className="client-request__list__fetch-button">
-					{isHasMore ? (<button
+					{(isHasMore && clientRequestsStore.length > 0) ? (<button
 						className="Btn"
 						onClick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
-
 							addRequest();
-						}
-						}>
+						}}
+						aria-label="Charger plus de demandes"
+						>
 						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
 						<span className="icon2"></span>
 						<span className="tooltip">Charger plus</span>
 					</button>
 					) : (
-						<p className="client-request__list no-req">Fin des résultats</p>
+						(address && city && postal_code && first_name && last_name) && <p className="client-request__list no-req">Fin des résultats</p>
 					)}
 				</div>
 			</div>

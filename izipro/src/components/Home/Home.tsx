@@ -19,27 +19,27 @@ function Home() {
 	const navigate = useNavigate();
 	const [isFooter, setIsFooter] = useState(false);
 
+
 	// check if user is logged in and if cookie consents are accepted
 	useEffect(() => {
 		// condition if user not logged in
 		const getItem = localStorage.getItem('login');
-		if (!getItem) {	
+		if (!getItem) {
 			return;
 		}
 		const decodeData = atob(getItem || '');
 		let isLogged;
-		
+
 		if (decodeData === 'session') {
 			isLogged = { value: true };
 		} else {
 			isLogged = JSON.parse(decodeData || '{}');
 		}
 		if (isLogged) {
-			navigate('/dashboard');
+			navigate('/dashboard', { replace: true });
 		}
-		
-	},[]);
 
+	}, []);
 
 	// useEffect to check the size of the window
 	useEffect(() => {
@@ -62,6 +62,18 @@ function Home() {
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
 	}, []);
+
+	// send a message to the service worker
+	function sendMessageToServiceWorker(message: { type: string }) {
+		if (navigator.serviceWorker.controller) {
+			navigator.serviceWorker.controller.postMessage(message);
+		}
+	}
+	
+	// clear the cache if the user is not logged in
+	if (!localStorage.getItem('login')) {
+		sendMessageToServiceWorker({ type: 'CLEAR_CACHE' });
+	}
 
 	return (
 		<div className="home">

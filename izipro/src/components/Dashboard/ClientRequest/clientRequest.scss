@@ -5,12 +5,29 @@
   width: 100%;
   height: 100%;
 
+  &.no-req {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+    border-radius: 0.5rem;
+    box-shadow: none;
+    max-width: 90%;
+    color: v.$color-primary-orange;
+    text-align: center;
+
+  }
+
   .client-request__list {
     position: relative;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+    touch-action: pan-y;
     scrollbar-width: none;
     max-width: 80%;
     height: 100%;
+    padding-top: 0.5rem;
     margin: 0 auto 1rem auto;
 
     &::-webkit-scrollbar {
@@ -23,13 +40,13 @@
       justify-content: center;
       width: 100%;
       height: auto;
-      margin: 1rem auto;
+      margin: 0 auto;
       border-radius: 0.5rem;
       box-shadow: none;
       max-width: 90%;
       color: v.$color-primary-orange;
       text-align: center;
-
+  
     }
 
     .client-request__list__fetch-button {
@@ -38,11 +55,10 @@
       justify-content: center;}
     }
 
-
+    
     .client-request__list__detail__item {
       overflow: hidden;
       scrollbar-width: none;
-      cursor: pointer;
       display: flex;
       flex-direction: column;
       margin: 1rem;
@@ -51,6 +67,15 @@
       box-shadow: -5px 0 10px #6666661c,
         -5px 0 10px #ffffff17,
         5px 0 10px #6666661c;
+      /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
 
       &::-webkit-scrollbar {
         display: none;
@@ -150,11 +175,6 @@
       }
 
       &.message {
-        // display: block;
-        // overflow: hidden;
-        // text-overflow: ellipsis;
-        // white-space: nowrap;
-        //cursor: pointer;
         border-radius: 0;
         width: inherit;
         border: none;
@@ -167,23 +187,11 @@
         font-weight: 400;
       }
 
-      /*  &.expanded {
-        white-space: normal;
-        max-width: none;
-      } */
-
-      /* &.false.selected {
-            border-radius: 1px solid v.$color-primary-blue;
-        } */
-
       .client-request__list__detail__item__footer {
         display: flex;
         flex-direction: column;
         align-items: baseline;
         margin-top: 0.5rem;
-
-
-
       }
 
       .client-request__list__detail__item__picture {
@@ -196,7 +204,16 @@
           border-radius: 0.5rem;
           width: 70px;
           height: 70px;
-          cursor: pointer;
+          object-fit: cover;
+          /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
 
 
         }
@@ -204,14 +221,23 @@
 
       .client-request__list__detail__item__delete {
         display: none;
-
+        
       }
-
+      
       .client-request__list__detail__item__delete-FaTrashAlt {
+        z-index: 10;
         font-size: 1.5rem;
         margin: 1rem 1rem 1rem auto;
         color: v.$color-error;
-        cursor: pointer;
+        /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
       }
     }
 
@@ -253,7 +279,15 @@
         .client-request__list__detail__item {
 
           &.message {
-            cursor: pointer;
+            /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
             display: block;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -276,13 +310,21 @@
   .client-request {
     .client-request__list {
       max-width: 100%;
-      height: 100vh;
+      height: 100%;
       margin: 0;
       box-shadow: none;
 
       .client-request__list__detail__item {
         &.message {
-          cursor: pointer;
+          /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
           display: block;
           overflow: hidden;
           text-overflow: ellipsis;

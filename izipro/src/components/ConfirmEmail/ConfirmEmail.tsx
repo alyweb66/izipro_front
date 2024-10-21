@@ -10,13 +10,19 @@ function ConfirmEmail() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const token = new URLSearchParams(location.search).get('token');
+	
 	//store
 	const setIsEmailConfirmed = confirmEmailStore((state) => state.setIsEmailConfirmed);
 	// Mutation
 	const [confirmRegisterEmail, {loading: confirmEmailLoading, error: confirmMailError}] = useMutation(CONFIRM_EMAIL_MUTATION);
 
+	
 	// send token to confirm email
 	useEffect(() =>{
+		//if no token redirect to home
+		if (!token){
+			navigate('/', { replace: true });
+		}
 		confirmRegisterEmail({
 			variables:{
 				input:{
@@ -25,14 +31,14 @@ function ConfirmEmail() {
 			}
 		}).then(() => {
 			setIsEmailConfirmed(true);
-			navigate('/');
+			navigate('/', { replace: true });
 		});
 
 		if (confirmMailError){
 			throw new Error('Bad request');
 		}
 
-	});
+	}, [confirmRegisterEmail, token, setIsEmailConfirmed, navigate, confirmMailError]);
 
 
 

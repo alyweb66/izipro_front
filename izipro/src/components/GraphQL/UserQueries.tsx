@@ -145,6 +145,7 @@ export const GET_USER_NOTIFICATION = gql`
         id
         user_id
         email_notification
+        endpoint
       }
     }
   }

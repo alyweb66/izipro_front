@@ -64,7 +64,7 @@ export const UPDATE_USER_MUTATION = gql`
 `;
 
 export const COOKIE_CONSENTS_MUTATION = gql`
-    mutation Mutation($input: CookieConsentInput!, $createCookieConsentsId: Int!) {
+    mutation CookieConsents($input: CookieConsentInput!, $createCookieConsentsId: Int!) {
     createCookieConsents(input: $input, id: $createCookieConsentsId) {
         id
         user_id
@@ -76,7 +76,7 @@ export const COOKIE_CONSENTS_MUTATION = gql`
 `;
 
 export const UPDATE_COOKIE_CONSENTS_MUTATION = gql`
-    mutation Mutation($input: CookieConsentInput!, $createCookieConsentsId: Int!) {
+    mutation UpdateCookieConsents($input: CookieConsentInput!, $createCookieConsentsId: Int!) {
     updateCookieConsents(input: $input, id: $createCookieConsentsId) {
         id
         user_id
@@ -94,7 +94,7 @@ export const CONFIRM_EMAIL_MUTATION = gql`
 `;
 
 export const FORGOT_PASSWORD_MUTATION = gql`
-    mutation ChangePassword($input: ForgotPasswordInput!) {
+    mutation ForgotPassword($input: ForgotPasswordInput!) {
         forgotPassword(input: $input)
 }
 `;

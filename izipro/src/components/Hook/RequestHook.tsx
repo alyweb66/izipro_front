@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { FaTrashAlt } from 'react-icons/fa';
-import pdfLogo from '/logo/logo-pdf.jpg';
+import pdfLogo from '/logo-pdf.webp';
 import { RequestProps } from '../../Type/Request';
 import React, { useRef } from 'react';
-//import { MessageProps } from '../../Type/message';
-import { userDataStore } from '../../store/UserData';
+import noPicture from '/no-picture.webp';
 import { motion } from 'framer-motion';
 
 type ExpandedState = {
@@ -15,7 +14,7 @@ const RequestItem = ({
 	index,
 	requestByDate,
 	notViewedConversationStore,
-	handleViewedMessage,
+//	handleViewedMessage,
 	setIsMessageOpen,
 	request,
 	resetRequest,
@@ -31,7 +30,7 @@ const RequestItem = ({
 }: {
 	index?: number,
 	requestByDate?: RequestProps,
-	handleViewedMessage: Function,
+	//handleViewedMessage: Function,
 	notViewedConversationStore?: number[],
 	setIsMessageOpen?: Function,
 	request?: RequestProps,
@@ -47,17 +46,14 @@ const RequestItem = ({
 	setHasManyImages: Function
 }) => {
 	const idRef = useRef<number>(0);
-	//store
-	const id = userDataStore((state) => state.id);
 
 	return (
-		<motion.div
+		<motion.li
 			id={index === 0 ? 'first-user' : undefined}
-			/* data-request-conv-id={(request || requestByDate)?.id}  */
 			className={`my-conversation__list__detail__item
 			${(request || requestByDate)?.urgent} 
 			${request ? 'new' : ''} 
-			${selectedRequest?.id === (request || requestByDate)?.id ? 'selected' : ''}
+			${selectedRequest?.id === (request || requestByDate)?.id && window.innerWidth > 800 ? 'selected' : ''}
 			${requestByDate?.deleted_at ? 'deleted' : ''}
 			${(request || requestByDate)?.conversation?.some(conv => notViewedConversationStore?.some(id => id === conv.id)) ? 'not-viewed' : ''}
 			` }
@@ -66,8 +62,8 @@ const RequestItem = ({
 				if ((request || requestByDate) && setSelectedRequest) {
 					setSelectedRequest && setSelectedRequest(request || requestByDate);
 				}
-				const convId = (request || requestByDate)?.conversation?.find(conv => conv.user_1 === id || conv.user_2 === id)?.id;
-				handleViewedMessage(convId);
+				//const convId = (request || requestByDate)?.conversation?.find(conv => conv.user_1 === id || conv.user_2 === id)?.id;
+				//handleViewedMessage(convId);
 				if (window.innerWidth < 780) {
 					//itemList();
 					setIsListOpen && setIsListOpen(false);
@@ -82,6 +78,8 @@ const RequestItem = ({
 			animate={{ opacity: 1, scale: 1 }}
 			exit={{ opacity: 0, scale: 0.9 }}
 			transition={{ duration: 0.1, type: 'tween' }}
+			role="listitem"
+			aria-labelledby={`request-title-${(request || requestByDate)?.id}`}
 		>
 			{requestByDate?.deleted_at && <p className="my-conversation__list__detail__item__deleted">SUPPRIMÉ PAR L&apos;UTILISATEUR</p>}
 			{(request || requestByDate)?.urgent && <p className="my-conversation__list__detail__item urgent">URGENT</p>}
@@ -143,7 +141,9 @@ const RequestItem = ({
 									download={media.name}
 									target="_blank"
 									rel="noopener noreferrer"
-									onClick={(event) => { event.stopPropagation(); }} >
+									onClick={(event) => { event.stopPropagation(); }} 
+									aria-label={`Télécharger ${media.name}`}
+									>
 									<img
 										className="my-conversation__list__detail__item__picture img"
 										src={pdfLogo}
@@ -155,6 +155,7 @@ const RequestItem = ({
 									className="my-conversation__list__detail__item__picture img"
 									key={media.id}
 									src={media.url}
+									loading="lazy"
 									onClick={(event) => {
 										setHasManyImages && setHasManyImages(false),
 											openModal && openModal(imageUrls, index),
@@ -164,7 +165,7 @@ const RequestItem = ({
 									}}
 									alt={media.name}
 									onError={(event) => {
-										event.currentTarget.src = '/logo/no-picture.jpg';
+										event.currentTarget.src = noPicture;
 									}}
 								/>
 							)
@@ -177,6 +178,7 @@ const RequestItem = ({
 				id={`delete-request-${(request || requestByDate)?.id ?? ''}`}
 				className="my-conversation__list__detail__item__delete"
 				type='button'
+				aria-label="Supprimer la demande"
 				onClick={(event) => {
 					event.stopPropagation();
 					if (request?.id) {
@@ -194,6 +196,7 @@ const RequestItem = ({
 			</button>
 			<FaTrashAlt
 				className="my-conversation__list__detail__item__delete-FaTrashAlt"
+				aria-label="Supprimer la demande"
 				onClick={(event) => {
 					document.getElementById(`delete-request-${(request || requestByDate)?.id}`)?.click(),
 
@@ -201,7 +204,7 @@ const RequestItem = ({
 						event.stopPropagation();
 				}}
 			/>
-		</motion.div>
+		</motion.li>
 
 	);
 };

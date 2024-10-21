@@ -1,0 +1,44 @@
+@use './variables' as v;
+
+.install-button {
+   // border: 1px solid v.$color-primary-blue;
+    background-color: white;
+    background-image: url('/android-chrome-192x192.png');
+    background-size: 80%;
+    background-repeat: no-repeat; // Assurez-vous que l'image ne se répète pas
+    background-position: center;
+    width: 3rem;
+    height: 2.8rem;
+    padding: 0.5rem 0;
+    border-radius: 0.8rem;	
+    font-size: 2rem;
+    color: rgb(255, 255, 255);
+    box-shadow:  3px 2px 5px #cecece,
+             -3px -2px 5px #bebebe;
+    /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
+}
+
+.message-PWA {
+    position: relative;
+    margin-bottom: 0.5rem;
+    padding: 0 1rem;
+
+    .content-PWA {
+    font-size: 1rem;
+    font-weight: 400;
+    text-align: center;
+    color: v.$color-primary-orange;
+
+    .strong-PWA {
+        font-weight: 500;
+    }
+    }
+}

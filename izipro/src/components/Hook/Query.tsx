@@ -5,6 +5,7 @@ import { GET_COOKIE_CONSENTS, GET_USERS_CONVERSATION, GET_USER_DATA, GET_USER_NO
 import { GET_CONVERSATION, GET_CONVERSATION_ID, NOT_VIEWED_CONVERSATIONS } from '../GraphQL/ConversationQueries';
 import { GET_MESSAGES_BY_CONVERSATION, GET_MY_MESSAGES_BY_CONVERSATION } from '../GraphQL/MessageQueries';
 
+
 import '../../styles/spinner.scss';
 
 
@@ -15,7 +16,6 @@ export const useQueryUserData = (getData: boolean) => {
 	});
 	
 	if (getUserError) {
-		
 		throw new Error('Error while fetching user data');
 	}
 
@@ -100,7 +100,7 @@ export const useQueryJobData = (jobId:{job_id: number}[], skip: boolean ) => {
 export const  useQueryUserRequests = (id: number, offset: number, limit: number, skip: boolean) => {
 	
 	const { loading, error: getUserRequestsError, data: getUserRequestsData, fetchMore } = useQuery(GET_USER_REQUESTS, {
-		fetchPolicy: 'network-only',
+		fetchPolicy: 'no-cache',
 		variables: {
 			requestsId: id,
 			offset: offset,
@@ -311,10 +311,12 @@ export const useQueryVAPIDKey = () => {
 
 export const useQueryGetNotification = (skip: boolean) => {
 	const { loading, error: notificationError, data: notificationData } = useQuery(GET_USER_NOTIFICATION, {
+		fetchPolicy: 'no-cache',
 		skip
 	});
 	if (notificationError) {
 		throw new Error('Error while fetching notifications');
 	}
+	
 	return {loading, notificationData};
 }

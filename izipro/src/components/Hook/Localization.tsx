@@ -1,47 +1,63 @@
 
-
 export const Localization = async (address: string, city: string, postal_code: string, setError: Function) => {
-	const mapboxAccessToken = import.meta.env.VITE_MAPBOX_TOKEN;
-	const mapboxUrl = import.meta.env.VITE_MAPBOX_URL;
+	// API URL
+	const APIUrl = import.meta.env.VITE_API_ADRESSE_URL;
 	// to use in local not in production
-
-	if (address && city && postal_code) {
-		// transform address to coordinates with Mapbox API
-
-		const formattedAddress = `country=fr&address_line1=${encodeURIComponent(address)}&postcode=${encodeURIComponent(postal_code)}&place=${encodeURIComponent(city)}`;
-		const url = `${mapboxUrl}${formattedAddress}&access_token=${mapboxAccessToken}`;
-		
-		const response = await fetch(url);
-		const data = await response.json();
-
-		// check if the city and postal code match the provided values
-		if (data.features && data.features.length > 0) {
-			const feature = data.features[0];
-			const [longitude, latitude] = feature.geometry.coordinates;
-
-			// Extract postal code and city from the formatted address
-			const placeFormatted = feature.properties.place_formatted;
-			//	get only the postal code 
-			const postalCodeMatch = placeFormatted.match(/(\d{5})/);
-
-			//	get only the city
-			const cityMatch = placeFormatted.match(/(\d{5})\s(.+),\sFrance/);
-			const extractedPostalCode = postalCodeMatch ? postalCodeMatch[1] : '';
-			const extractedCity = cityMatch ? cityMatch[2] : '';
+	const trimmedAddress = address.trim();
+    const trimmedCity = city.trim();
+    const trimmedPostalCode = postal_code.trim();
 
 
-			// Comparer les valeurs extraites avec celles fournies
-			if (extractedPostalCode === postal_code && extractedCity.toLowerCase() === city.toLowerCase()) {
+		// Normalize the string to compare the values
+		const normalizeString = (value: string) => {
+			return value
+				.normalize('NFD') // Canonical decomposition
+				.replace(/[\u0300-\u036f]/g, '') // Delete accents
+				.toLowerCase(); // Convert to lowercase
+		};
 
-				return { lng: longitude, lat: latitude };
+		if (address && city && postal_code) {
+			// transform address to coordinates with adresse.data.gouv.fr API
+			const formattedAddress = `${encodeURIComponent(trimmedAddress)}+${encodeURIComponent(trimmedPostalCode)}+${encodeURIComponent(trimmedCity)}`;
+
+			const url = `${APIUrl}?q=${formattedAddress}`;
+
+			let data;
+			try {
+				const response = await fetch(url);
+			  
+				// Vérifiez si la réponse est correcte
+				if (!response.ok) {
+				  throw new Error(`HTTP error! status: ${response.status}`);
+				}
+			  
+				data = await response.json();
+
+			  } catch (error) {
+				console.error('Fetch error:', error);
+			  }
+
+			// check if the city and postal code match the provided values
+			if (data.features && data.features.length > 0) {
+				const feature = data.features[0];
+				const [longitude, latitude] = feature.geometry.coordinates;
+
+				const { city: cityAPI, postcode: postcodeAPI, name: nameAPI } = feature.properties;
+				
+				// Comparer les valeurs extraites avec celles fournies
+				if (postcodeAPI.trim() === postal_code.trim() &&
+				normalizeString(cityAPI.trim()) === normalizeString(city.trim()) &&
+				normalizeString(nameAPI.trim()) === normalizeString(address.trim())) {
+
+					return { lng: longitude, lat: latitude };
+				} else {
+					setError(`Adresse non valide, voulez vous dire : "${feature.properties.label}" ?`)
+				}
 			} else {
-				setError('Adresse non valide')
-				throw new Error('City or postal code does not match the provided values');
+				throw Error('Unable to geocode address');
 			}
-		} else {
-			throw new Error('Unable to geocode address');
+
 		}
 
-	}
 };
 

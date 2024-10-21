@@ -19,15 +19,16 @@
         & {
             justify-content: space-around;
             width: 50vw;
-            height: 30vh;
+            height: initial;
             padding: 1rem;
         }
 
         .delete-item-modal__container__title {
-            margin: 0 auto;
+            margin:0 auto;
             font-size: 1.5rem;
             font-weight: 500;
             color: v.$color-primary-orange;
+            text-align: center;
 
 
         }
@@ -71,13 +72,24 @@
     }
 }
 
+.delete-item-modal__overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    backdrop-filter: blur(5px);
+}
+
 
 @media (max-width: 830px) {
 
     .delete-item-modal {
         .delete-item-modal__container {
             width: 80vw;
-            height: 30vh;
+            height: initial;
         }
     }
 
@@ -90,9 +102,9 @@
         .delete-item-modal__container {
             justify-content: space-evenly;
             width: 100%;
-            height: 30%;
+            height: initial;
             border-radius: 0;
-            padding: 1rem 1rem 0 1rem;
+            padding: 1rem 1rem 1rem 1rem;
         }
     }
 

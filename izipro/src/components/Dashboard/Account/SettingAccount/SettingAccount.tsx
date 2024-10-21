@@ -51,42 +51,10 @@ function SettingAccount() {
 	const { loading: jobLoading, jobData } = useQueryJobs(selectedCategory);
 	const { loading: jobDataLoading, jobs: jobDataName } = useQueryJobData(jobs ? jobs : [], skip);
 
-	// set job with the value from the database
-	useEffect(() => {
-		if (jobDataName) {
-			setSelectedJob(jobDataName);
-			setSkip(true);
-		}
-
-	}, [jobDataName, jobDataLoading]);
-
-	// Update jobs when category changes
-	useEffect(() => {
-		if (jobData) {
-			setJobsState(jobData.category.jobs);
-		}
-	}, [jobData]);
-
-	// Update categories when data is fetched
-	useEffect(() => {
-		if (categoriesData) {
-			setCategoriesState(categoriesData.categories);
-		}
-	}, [categoriesData]);
-
-
 	// mutation
 	const [createUserJob, { loading: userJobLoading, error: errorCreateUserJob }] = useMutation(USER_HAS_JOB_MUTATION);
 	const [deleteUserJob, { loading: deleteJobLoading, error: errorDeleteUserJob }] = useMutation(DELETE_USER_HAS_JOB_MUTATION);
 	const [userSetting, { loading: settingLoading, error: errorUserSetting }] = useMutation(USER_SETTING_MUTATION);
-
-	// function to remove wishlist job before submit
-	const handleRemoveListJob = (id: number, event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-		event.preventDefault();
-		event?.stopPropagation();
-		setWishListJob(wishListJob.filter((job) => job.id !== id));
-
-	};
 
 	// function to delete job in the database
 	const handleDeleteJob = (jobId: number, event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -172,14 +140,47 @@ function SettingAccount() {
 
 	};
 
+	// function to remove wishlist job before submit
+	const handleRemoveListJob = (id: number, event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		event.preventDefault();
+		event?.stopPropagation();
+		setWishListJob(wishListJob.filter((job) => job.id !== id));
+
+	};
+
+	// set job with the value from the database
+	useEffect(() => {
+		if (jobDataName) {
+			setSelectedJob(jobDataName);
+			setSkip(true);
+		}
+
+	}, [jobDataName, jobDataLoading]);
+
+	// Update jobs when category changes
+	useEffect(() => {
+		if (jobData) {
+			setJobsState(jobData.category.jobs);
+		}
+	}, [jobData]);
+
+	// Update categories when data is fetched
+	useEffect(() => {
+		if (categoriesData) {
+			setCategoriesState(categoriesData.categories);
+		}
+	}, [categoriesData]);
+
+
 	return (
 		<>
 			{role === 'pro' && (
 				<div className="setting-account">
 					<>
-						<form className={`setting-account__form ${jobLoading ? 'loading' : ''}`} onSubmit={handleSubmitJob}>
+						<form className={`setting-account__form ${jobLoading ? 'loading' : ''}`} onSubmit={handleSubmitJob} aria-label="Formulaire de sélection de métiers">
 							{/* {jobLoading && <Spinner />} */}
-							<h1 className="setting-account__form__title">Vos métiers:</h1>
+							<h1 className="setting-account__form__title">Options de recherche:</h1>
+							<h2 className="setting-account__subtitle">Séléctionnez un ou plusieurs métiers:</h2>
 							<SelectBox
 								isSetting={true}
 								data={categoriesState}
@@ -201,7 +202,7 @@ function SettingAccount() {
 							/>
 
 							<ul className="setting-account__form__list" >
-								<h2 className="setting-account__subtitle">Métiers séléctionné:</h2>
+								<h2 className="setting-account__subtitle">Métiers séléctionnés:</h2>
 								<AnimatePresence>
 									{wishListJob && [...wishListJob].reverse().map((job: JobProps) => (
 										<motion.li
@@ -220,18 +221,23 @@ function SettingAccount() {
 													restDelta: 0.001
 												}
 											}}
+											aria-label={`Métier sélectionné: ${job.name}`}
 										>
 											{job.name}
-											<button className="setting-account__form__list__delete__button" onClick={(event) => handleRemoveListJob(job.id, event)}>X</button>
+											<button 
+											className="setting-account__form__list__delete__button" 
+											onClick={(event) => handleRemoveListJob(job.id, event)}
+											aria-label={`Supprimer le métier ${job.name}`}
+											>X</button>
 										</motion.li>
 									))}
 								</AnimatePresence>
 							</ul>
-							<button className="setting-account__form__button" type='submit'>valider les métiers</button>
+							<button className="setting-account__form__button" type="submit" aria-label="Valider les métiers">valider les métiers</button>
 							<ul className={`setting-account__form__list job ${(userJobLoading || deleteJobLoading || categoryLoading) ? 'loading' : ''}`}>
-								{(userJobLoading || categoryLoading) && <Spinner className="small-spinner"/>}
+								{(userJobLoading || categoryLoading) && <Spinner className="small-spinner" />}
 
-								<h2 className="setting-account__subtitle">Métiers actuel:</h2>
+								<h2 className="setting-account__subtitle">Métiers actuels:</h2>
 								<AnimatePresence>
 									{/* {jobDataLoading && <Spinner />} */}
 									{selectedJob && selectedJob.length > 0 ? selectedJob.map((job: JobProps) => (
@@ -251,9 +257,14 @@ function SettingAccount() {
 													restDelta: 0.001
 												}
 											}}
+											aria-label={`Métier actuel: ${job.name}`}
 										>
 											{job.name}
-											<button className="setting-account__form__list__delete__button" onClick={(event) => handleDeleteJob(job.id, event)}>X</button>
+											<button 
+											className="setting-account__form__list__delete__button" 
+											onClick={(event) => handleDeleteJob(job.id, event)}
+											aria-label={`Supprimer le métier ${job.name}`}
+											>X</button>
 										</motion.li>
 									))
 										:
@@ -272,32 +283,34 @@ function SettingAccount() {
 								<span className="setting-account__radius__range">
 									{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
 								</span>
+
+								<Box className="slider-container" sx={{ width: 300 }}>
+									<Slider
+										aria-labelledby="radius-slider-label"
+										defaultValue={105}
+										aria-label="Distance d'action"
+										valueLabelDisplay="auto"
+										value={radius === 0 ? 105 : radius / 1000}
+										step={5}
+										marks
+										min={5}
+										max={105}
+										// transform 105 to 0 for condition in the function and database
+										onChange={(_, value) => setRadius((value as number) === 105 ? 0 : (value as number) * 1000)}
+										valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
+									/>
+								</Box>
+								<div className="message">
+									<Stack sx={{ width: '100%' }} spacing={2}>
+										{message && (
+											<Fade in={!!message} timeout={300}>
+												<Alert variant="filled" severity="success">{message}</Alert>
+											</Fade>
+										)}
+									</Stack>
+								</div>
+								<button className="setting-account__radius__button" onClick={handleValidateRange} aria-label="Valider la distance">Valider la distance</button>
 							</label>
-							<Box className="slider-container" sx={{ width: 300 }}>
-								<Slider
-									defaultValue={105}
-									aria-label="Distance d'action"
-									valueLabelDisplay="auto"
-									value={radius === 0 ? 105 : radius / 1000}
-									step={5}
-									marks
-									min={5}
-									max={105}
-									// transform 105 to 0 for condition in the function and database
-									onChange={(_, value) => setRadius((value as number) === 105 ? 0 : (value as number) * 1000)}
-									valueLabelFormat={(value) => value === 105 ? 'France' : `${value} Km`}
-								/>
-							</Box>
-							<div className="message">
-								<Stack sx={{ width: '100%' }} spacing={2}>
-									{message && (
-										<Fade in={!!message} timeout={300}>
-											<Alert variant="filled" severity="success">{message}</Alert>
-										</Fade>
-									)}
-								</Stack>
-							</div>
-							<button className="setting-account__radius__button" onClick={handleValidateRange}>Valider la distance</button>
 						</div>
 					</>
 				</div >

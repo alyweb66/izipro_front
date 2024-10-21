@@ -3,10 +3,6 @@ import Spinner from './Spinner';
 import { JobProps } from '../../Type/Request';
 
 type SelectBoxProps = {
-	/* value: string;
-	placeholder: string;
-	isPlaceholder: boolean;
-	name: string; */
 	isSetting?: boolean;
 	isWishList?: boolean;
 	wishListJob?: JobProps[];
@@ -16,14 +12,12 @@ type SelectBoxProps = {
 	loading: boolean;
 	selected?: number;
 	setSelected?: (value: number) => void;
-	//options: { name: string; value: string | number; isPlaceholder?: boolean }[];
 };
 
 
 const SelectBox = ({ setSelected, loading, isCategory, selected, data, wishListJob, setWishListJob, isWishList, isSetting }: SelectBoxProps) => {
 
 	const [isOpen, setIsOpen] = useState(false);
-
 	const selectRef = useRef<HTMLDivElement>(null);
 	const toggleOptions = () => setIsOpen(!isOpen);
 
@@ -40,6 +34,7 @@ const SelectBox = ({ setSelected, loading, isCategory, selected, data, wishListJ
 		};
 	}, []);
 
+
 	return (
 		<div className={`center ${isSetting ? 'setting' : ''}`} ref={selectRef} role="combobox" aria-haspopup="listbox" aria-expanded={isOpen}>
 			<div className="custom-select-wrapper">
@@ -48,7 +43,7 @@ const SelectBox = ({ setSelected, loading, isCategory, selected, data, wishListJ
 						{loading && <Spinner className="small-spinner" />}
 						{selected ? data.find(value => value.id === selected)?.name : isCategory ? 'Catégories' : 'Métiers'}
 					</div>
-					<div className="custom-options" style={{ display: isOpen ? 'block' : 'none' }} role="listbox">
+					<div className="custom-options" style={{ display: isOpen ? 'block' : 'none'}} role="listbox">
 						{data?.map((option, index) => (
 							<div
 								className={`custom-option ${selected === option.id ? 'selection' : ''}`}

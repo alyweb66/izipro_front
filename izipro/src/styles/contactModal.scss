@@ -16,9 +16,34 @@
         & {
             width: 60vw;
             height: 80vh;
+            justify-content: space-around;
+            scrollbar-width: none;
+            overflow: hidden;
+
+            &::-webkit-scrollbar {
+                display: none;
+                /* For Chrome, Safari and Opera */
+            }
         }
 
-        .contact-modal__container__content {
+        // .contact-modal__container__content {
+
+        .contact-modal__container__content__title {
+            color: v.$color-primary-orange;
+            font-weight: 500;
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        .contact-modal__container__content__subtitle {
+            color: v.$color-primary-blue;
+            font-weight: 400;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .contact-modal__container__content__section {
             overflow: auto;
             scrollbar-width: none;
             display: flex;
@@ -31,19 +56,6 @@
             &::-webkit-scrollbar {
                 display: none;
                 /* For Chrome, Safari and Opera */
-            }
-
-            .contact-modal__container__content__title {
-                color: v.$color-primary-orange;
-                font-weight: 500;
-                font-size: 2rem;
-            }
-
-            .contact-modal__container__content__subtitle {
-                color: v.$color-primary-blue;
-                font-weight: 400;
-                font-size: 1.2rem;
-                text-align: center;
             }
 
             .contact-modal__container__content__label {
@@ -64,6 +76,7 @@
                     margin-top: 2rem;
                     padding-top: 2rem;
                 }
+
                 &.email::before {
                     content: "";
                     position: absolute;
@@ -111,8 +124,9 @@
                 }
 
             }
-
         }
+
+        //  }
 
 
         .contact-modal__container__button {
@@ -149,6 +163,17 @@
     }
 }
 
+.contact-modal__overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    backdrop-filter: blur(5px);
+}
+
 @media (max-width: 800px) {
     .contact-modal {
         .contact-modal__container {
@@ -156,7 +181,7 @@
             width: 70vw;
             height: 80vh;
 
-            .contact-modal__container__content {
+            .contact-modal__container__content__section {
                 .contact-modal__container__content__label {
                     width: 90%;
                     max-width: 60%;
@@ -180,9 +205,9 @@
             border-radius: 0;
             padding: 1rem 1rem 0 1rem;
 
-            .contact-modal__container__button {
-                margin: auto;
-
+            .contact-modal__container__content__title {
+                margin-bottom: 1rem;
+               
             }
 
         }

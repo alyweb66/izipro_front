@@ -28,7 +28,8 @@ import { useMyRequestMessageSubscriptions } from '../GraphQL/MyRequestSubscripti
 import { useClientRequestSubscriptions } from '../GraphQL/ClientRequestSubscription';
 import { useMyConversationSubscriptions } from '../GraphQL/MyConversationSubscription';
 import { useLogoutSubscription } from '../GraphQL/LogoutSubscription';
-import useHandleLogout from '../Hook/HandleLogout';
+import OffLine from '../Hook/OffLine';
+
 
 // Mutation
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
@@ -48,6 +49,7 @@ import { messageDataStore, myMessageDataStore } from '../../store/message';
 import './Dashboard.scss';
 import { DeleteItemModal } from '../Hook/DeleteItemModal';
 
+
 const Request = lazy(() => import('./Request/Request'));
 const MyRequest = lazy(() => import('./MyRequest/MyRequest'));
 const MyConversation = lazy(() => import('./MyConversation/MyConversation'));
@@ -63,36 +65,88 @@ type useQueryUserConversationsProps = {
 };
 
 function Dashboard() {
+
 	const navigate = useNavigate();
-	const handleLogout = useHandleLogout();
 
-	// function to get the cookie value
-	function getCookieValue(name: string) {
-		const value = `; ${document.cookie}`;
-		const parts = value.split(`; ${name}=`);
-		if (parts.length === 2) return parts.pop()?.split(';').shift();
-		return null;
+	// Store at the top for id to use in the sendBeacon
+	const [id, role, lng, lat, settings, jobs, setAll] = userDataStore((state) => [state.id, state.role, state.lng, state.lat, state.settings, state.jobs, state.setAll]);
+
+	// condition if user not logged in
+	// decode the data
+	const getItem = localStorage.getItem('login');
+
+	let decodeData: string | { value: string };;
+	let isLogged: boolean;
+	try {
+		decodeData = JSON.parse(atob(getItem || ''));
+
+	} catch (error) {
+		decodeData = atob(getItem || '');
 	}
 
-	// function to delete the cookie
-	function deleteCookie(name: string) {
-		document.cookie = `${name}=; Max-Age=0; path=/; domain=${window.location.hostname};`;
+	if (decodeData && typeof decodeData === 'object' && ('value' in decodeData) && (decodeData.value === 'true' || decodeData.value === 'session')) {
+		isLogged = true
+	} else {
+		isLogged = false;
 	}
 
-	const cookies = document.cookie;
-	// useEffect to check if user is logged out by the server
+	// function to logout the user when the page is closed
+	const handleBeforeUnload = (_event: BeforeUnloadEvent, subscriptionLogout = false) => {
+		//event.preventDefault();
+		if (typeof decodeData === 'object' && (decodeData.value === 'session' || subscriptionLogout) && idRef.current) {
+
+			// create request to logout the user in the json format for sendbeacon
+			const query = `
+			mutation Logout($logoutId: Int!) {
+				  logout(id: $logoutId)
+			}
+		  `;
+
+			const variables = { logoutId: idRef.current };
+
+			// format data to send for sendBeacon
+			const data = JSON.stringify({
+				query,
+				variables
+			});
+
+			// use sendBeacon to send the request
+			const url = import.meta.env.MODE === 'production' ? import.meta.env.VITE_SERVER_URL : 'http://localhost:3000/';
+			const headers = { 'Content-Type': 'application/json' };
+
+			// Create a Blob object with the data
+			const blob = new Blob([data], { type: headers['Content-Type'] });
+
+			// send request to the server with sendBeacon
+			navigator.sendBeacon(url, blob);
+		}
+	};
+	// useEffect to check if user is logged in and use sendBeacon to logout the user
 	useEffect(() => {
-		if (cookies) {
-			// check if the user is logged out by the server
-			const logoutCookieValue = getCookieValue('logout');
-			if (logoutCookieValue === 'true') {
-				localStorage.removeItem('login');
-				navigate('/');
-				deleteCookie('logout');
+
+		// check if user is logged in
+		if (isLogged === false) {
+			// The data has expired
+			localStorage.removeItem('login')
+
+			if (window.location.pathname !== '/') {
+				navigate('/', { replace: true });
 			}
 		}
-	}, [cookies]);
 
+
+		// function to check if user is logged in and listener if close the page
+
+		//window.addEventListener('beforeunload', handleBeforeUnload);
+		window.addEventListener('beforeunload', handleBeforeUnload);
+
+
+
+		// clean event listener
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
+	}, [decodeData]);
 
 	// State
 	const [isOpen, setIsOpen] = useState(false);
@@ -105,6 +159,9 @@ function Dashboard() {
 	const [hasQueryConversationRun, setHasQueryConversationRun] = useState<boolean>(false);
 	const [requestByIdState, setRequestByIdState] = useState<number>(0);
 	const [isExpiredSession, setIsExpiredSession] = useState<boolean>(false);
+	const [isMultipleLogout, setIsMultipleLogout] = useState<boolean>(false);
+	const [isOffLine, setIsOffLine] = useState<boolean>(false);
+
 
 	//*state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
@@ -122,10 +179,10 @@ function Dashboard() {
 	const [isSkipClientRequest, setIsSkipClientRequest] = useState<boolean>(true);
 
 	//store
-	const [id, role, lng, lat, settings, jobs, setAll] = userDataStore((state) => [state.id, state.role, state.lng, state.lat, state.settings, state.jobs, state.setAll]);
 	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 	const [requestConversationIdStore, setRequestConversationsIdStore] = requestConversationIds((state) => [state.notViewed, state.setNotViewedStore]);
+
 
 	// Limit
 	const myRequestLimit = 5;
@@ -152,6 +209,15 @@ function Dashboard() {
 	const isSkipGetUserDataRef = useRef<boolean>(true);
 	const isSkipSubscriptionRef = useRef<boolean>(false);
 	const isSkipMyRequestRef = useRef<boolean>(true);
+	const idRef = useRef<number>(id);
+
+	// to keep id for the sendBeacon when the user leaves the page
+	useEffect(() => {
+		if (id) {
+			idRef.current = id;
+		}
+	}, [id]);
+
 
 
 	// Query 
@@ -165,8 +231,7 @@ function Dashboard() {
 	//* Query for MyRequest
 	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, (isSkipMyRequestRef.current || requestStore.length > 0));
 	const { loading: requestByIdLoading, requestById } = useQueryGetRequestById(requestByIdState);
-	console.log('id', id);
-
+	//console.log('id', id);
 
 	//*Query for ClientRequest
 	const { loading: getRequestByJobLoading, getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequest || clientRequestsStore.length > 0));
@@ -178,29 +243,86 @@ function Dashboard() {
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
 	// Subscription
+	const { logoutSubscription } = useLogoutSubscription();
 	const { messageSubscription } = useMyRequestMessageSubscriptions();
 	const { clientRequestSubscription } = useClientRequestSubscriptions((role !== 'pro'));
 	const { clientMessageSubscription } = useMyConversationSubscriptions((role !== 'pro'));
-	const { logoutSubscription } = useLogoutSubscription();
 
-	// condition if user not logged in
-	//let isLogged;
+	// For indacating the tab under the burger menu
+	const tabLabels: { [key: string]: string } = {
+		'Request': 'DEMANDE',
+		'My requests': 'MES DEMANDES',
+		'Client request': 'CLIENT',
+		'My conversations': 'MES CONVERSATIONS',
+		'My profile': 'MON COMPTE'
+	};
 
-	// decode the data
-	const getItem = localStorage.getItem('login');
-	let decodeData: string | { value: string };
-	let isLogged: boolean;
-	try {
-        decodeData = JSON.parse(atob(getItem || ''));
-    } catch (error) {
-        decodeData = atob(getItem || '');
-    }
+	// function to handle navigation to my conversation
+	const handleMyConvesationNavigate = () => {
+		setSelectedTab('My conversations');
+	};
 
-	if (decodeData &&((typeof decodeData === 'object' && decodeData.value === 'true') || decodeData === 'session')) {
-			isLogged = true
-	}  else {
-		isLogged = false;
+	// function to range request by request location
+	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
+
+		// Define the two points for each request and filter them
+		const filteredRequests = requests.filter((request: RequestProps) => {
+			const requestPoint = turf.point([request.lng, request.lat]);
+			const userPoint = turf.point([lng ?? 0, lat ?? 0]);
+			const distance = turf.distance(requestPoint, userPoint);
+
+			return (
+				(distance < request.range / 1000 || request.range === 0) &&
+				(distance < settings[0].range / 1000 || settings[0].range === 0) &&
+				(request.conversation === null || request.conversation === undefined ||
+					!request.conversation.some(conversation =>
+						(conversation.user_1 !== null && conversation.user_2 !== null) &&
+						(conversation.user_1 === id || conversation.user_2 === id)
+					)
+				)
+			);
+		});
+
+
+		// Get all requests that are not in the store
+		const newRequests = filteredRequests.filter((request: RequestProps) =>
+			clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id)
+		);
+
+
+		// Add the new requests to the appropriate place in the list
+		if (newRequests && newRequests.length > 0) {
+			if (fromSubscribeToMore) {
+
+				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
+
+				// Add request.id to the viewedRequestStore
+				if (notViewedRequestStore.length === 0 || notViewedRequestStore.some(id => id !== newRequests[0].id)) {
+					setNotViewedRequestStore([...notViewedRequestStore, newRequests[0].id]);
+				}
+			} else {
+
+				setClientRequestsStore([...(clientRequestsStore || []), ...newRequests]);
+
+			}
+		}
 	}
+
+	// burger menu
+	const toggleMenu = () => {
+		// only if screen is less than 480px
+		if (window.innerWidth < 480) {
+			setIsOpen(!isOpen);
+		}
+	};
+
+	// function to redirect to home page when session is expired by serveur
+	const RedirectExpiredSession = () => {
+		handleBeforeUnload(new Event('beforeunload') as BeforeUnloadEvent, true);
+		sessionStorage.clear();
+		localStorage.removeItem('login');
+		navigate('/', { replace: true });
+	};
 
 	// useEffect to check the size of the window
 	useEffect(() => {
@@ -223,37 +345,6 @@ function Dashboard() {
 		// remove the event listener when the component unmount
 		return () => window.removeEventListener('resize', handleResize);
 	}, []);
-
-	// function to check if user is logged in and listener if close the page
-	useEffect(() => {
-		// clear local storage and session storage when user leaves the page if local storage is set to session
-		const handleBeforeUnload = (event: { preventDefault: () => void; returnValue: string; }) => {
-			event.preventDefault();
-			event.returnValue = '';
-			if (decodeData === 'session') {
-				// clear local storage,session storage and cookie
-				handleLogout(id);
-
-			}
-		};
-		window.addEventListener('beforeunload', handleBeforeUnload);
-
-
-		// check if user is logged in
-		if (isLogged === false) {
-			// The data has expired
-			localStorage.removeItem('login')
-
-			if (window.location.pathname !== '/') {
-				navigate('/');
-			}
-		}
-
-		// clean event listener
-		return () => {
-			window.removeEventListener('beforeunload', handleBeforeUnload);
-		};
-	}, [decodeData]);
 
 	// set the new request from requestById to myRequestStore 
 	useEffect(() => {
@@ -401,6 +492,7 @@ function Dashboard() {
 
 			// If offset is 0, it's the first query, so just replace the queries
 			if (requestStore.length === 0) {
+
 				// check if requests are already in the store
 				const requestsIds = requestStore.map(request => request.id);
 				const newRequests = getUserRequestsData.user.requests?.filter((request: RequestProps) => !requestsIds.includes(request.id));
@@ -445,8 +537,18 @@ function Dashboard() {
 
 	// useEffect to check if user is logged out by serveur
 	useEffect(() => {
-		if (logoutSubscription && logoutSubscription.logout.value === true) {
-			setIsExpiredSession(true);
+
+		const sessionCookie = document.cookie.split(';').find(cookie => cookie.includes('session-id'));
+		const sessionId = sessionCookie?.split('=')[1].trim();
+
+		if (logoutSubscription && logoutSubscription.logout?.value === true) {
+			if (logoutSubscription.logout.multiple && (sessionId && sessionId === logoutSubscription.logout.session)) {
+				setIsMultipleLogout(true);
+				setIsExpiredSession(true);
+			} else if (sessionId && sessionId === logoutSubscription.logout.session) {
+
+				setIsExpiredSession(true);
+			}
 		}
 	}, [logoutSubscription]);
 
@@ -466,6 +568,7 @@ function Dashboard() {
 			const messageAdded: MessageProps[] = clientMessageSubscription.messageAdded;
 			const date = new Date(Number(messageAdded[0].created_at));
 			const newDate = date.toISOString();
+
 
 			// add the new message to the message store
 			messageDataStore.setState(prevState => {
@@ -544,8 +647,8 @@ function Dashboard() {
 	// useEffect subscribe to new client Clientrequest
 	useEffect(() => {
 
-		if (clientRequestSubscription) {
-			const requestAdded = clientRequestSubscription.requestAdded[0];
+		if (clientRequestSubscription && clientRequestSubscription.requestAdded) {
+			const requestAdded = clientRequestSubscription?.requestAdded[0];
 
 
 			if (clientRequestsStore.length === 0 || clientRequestsStore.some(prevRequest => prevRequest.id !== requestAdded.id)) {
@@ -754,8 +857,6 @@ function Dashboard() {
 	// useEffect to count the number of conversation that are not viewed message in MyRequest
 	useEffect(() => {
 
-		//if (notViewedConversationStore.length > 0) {
-
 		// count the number of conversation that are not viewed message
 		const unviewedConversationIds = notViewedConversationStore.filter(id => requestConversationIdStore && requestConversationIdStore.includes(id));
 
@@ -765,8 +866,6 @@ function Dashboard() {
 		} else {
 			setViewedMessageState([]);
 		}
-
-		//}
 
 	}, [notViewedConversationStore, requestConversationIdStore]);
 
@@ -784,73 +883,46 @@ function Dashboard() {
 
 	}, [notViewedConversationStore, requestConversationIdStore]);
 
-	// function to handle navigation to my conversation
-	const handleMyConvesationNavigate = () => {
-		setSelectedTab('My conversations');
-	};
+	// Check internet connection status to display a message
+	useEffect(() => {
+		let offlineTimeout: NodeJS.Timeout | null = null;
 
+		const handleOffline = () => {
+			offlineTimeout = setTimeout(() => {
+				setIsOffLine(true);
+			}, 2000); // 2 secondes
+		};
 
-	// function to range request by request location
-	function RangeFilter(requests: RequestProps[], fromSubscribeToMore = false) {
-
-		// Define the two points for each request and filter them
-		const filteredRequests = requests.filter((request: RequestProps) => {
-			const requestPoint = turf.point([request.lng, request.lat]);
-			const userPoint = turf.point([lng ?? 0, lat ?? 0]);
-			const distance = turf.distance(requestPoint, userPoint);
-
-			return (
-				(distance < request.range / 1000 || request.range === 0) &&
-				(distance < settings[0].range / 1000 || settings[0].range === 0) &&
-				(request.conversation === null || request.conversation === undefined ||
-					!request.conversation.some(conversation =>
-						(conversation.user_1 !== null && conversation.user_2 !== null) &&
-						(conversation.user_1 === id || conversation.user_2 === id)
-					)
-				)
-			);
-		});
-
-
-		// Get all requests that are not in the store
-		const newRequests = filteredRequests.filter((request: RequestProps) =>
-			clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id)
-		);
-
-
-		// Add the new requests to the appropriate place in the list
-		if (newRequests && newRequests.length > 0) {
-			if (fromSubscribeToMore) {
-
-				setClientRequestsStore([...newRequests, ...(clientRequestsStore || [])]);
-
-				// Add request.id to the viewedRequestStore
-				if (notViewedRequestStore.length === 0 || notViewedRequestStore.some(id => id !== newRequests[0].id)) {
-					setNotViewedRequestStore([...notViewedRequestStore, newRequests[0].id]);
-				}
-			} else {
-
-				setClientRequestsStore([...(clientRequestsStore || []), ...newRequests]);
-
+		const handleOnline = () => {
+			if (offlineTimeout) {
+				clearTimeout(offlineTimeout);
+				offlineTimeout = null;
 			}
-		}
-	}
+			setIsOffLine(false);
+		};
 
-	// burger menu
-	const toggleMenu = () => {
-		// only if screen is less than 480px
-		if (window.innerWidth < 480) {
-			setIsOpen(!isOpen);
-		}
+		window.addEventListener('offline', handleOffline);
+		window.addEventListener('online', handleOnline);
+
+		// Clean listeners
+		return () => {
+			if (offlineTimeout) {
+				clearTimeout(offlineTimeout);
+			}
+			window.removeEventListener('offline', handleOffline);
+			window.removeEventListener('online', handleOnline);
+		};
+	}, []);
+
+	// Error boundary
+	const ErrorFallback = () => {
+		return (
+			<div className="ErrorFallback">
+				<p>Impossible de charger l'élément</p>
+			</div>
+		);
 	};
 
-	// function to redirect to home page when session is expired by serveur
-	const RedirectExpiredSession = () => {
-		setIsExpiredSession(false);
-		sessionStorage.clear();
-		localStorage.removeItem('login');
-		navigate('/');
-	};
 
 	return (
 		<>
@@ -860,50 +932,57 @@ function Dashboard() {
 					|| myConversationIdsLoading
 					|| requestMyConversationLoading
 					&& <Spinner />}
-				<nav className="__nav">
+				<nav className="__nav" aria-label="Navigation principale">
 					<div className="__burger" >
 						<div className="__container">
-							<img className="__logo" src="/izipro-logo.svg" alt="Izipro logo" onClick={() => window.location.reload()} />
+							<img
+								className="__logo"
+								src="/izipro-logo.svg"
+								alt="Izipro logo"
+								role="button"
+								aria-label="Recharger la page"
+								onClick={() => window.location.reload()} />
 							<button className="__menu" onClick={toggleMenu}>
 								<div className='burger-icon'>
 									<div className="burger-icon__line"></div>
-									<div className="burger-icon__middle"></div>
+									<div className={`burger-icon__middle ${notViewedRequestStore.length > 0
+										|| viewedMessageState.length > 0
+										|| viewedMyConversationState.length > 0
+										? 'notification' : ''
+										}`}></div>
 									<div className="burger-icon__line"></div>
 								</div>
 							</button>
 							{isLogged && <Logout />}
 						</div>
-						<span className="dashboard__nav__burgerSelected">{
-							selectedTab === 'Request' ? 'DEMANDE' : ''
-								|| selectedTab === 'My requests' ? 'MES DEMANDES' : ''
-									|| selectedTab === 'Client request' ? 'CLIENT' : ''
-										|| selectedTab === 'My conversations' ? 'MES CONVERSATIONS' : ''
-											|| selectedTab === 'My profile' ? 'MON COMPTE' : ''
-						}</span>
+						<span className="dashboard__nav__burgerSelected">
+							{tabLabels[selectedTab] || ''}
+						</span>
 					</div>
 					<ul className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Request' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('Request'); setIsOpen(!isOpen); }}>DEMANDE
+							onClick={() => { setSelectedTab('Request'); setIsOpen(!isOpen); }} aria-label="Ouvrir les demandes">DEMANDE
 							<div className="indicator"></div>
 						</li>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }}>
+							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }} aria-label="Ouvrir mes demandes">
 							<div className="tab-content">
+
 								<span>MES DEMANDES</span>
-								<div className={`badge-container ${viewedMessageState.length > 0 ? 'visible' : ''}`}>
+								{(viewedMessageState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMessageState.length > 0 ? 'visible' : ''}`}>
 									{viewedMessageState.length > 0 && <Badge count={viewedMessageState.length} />}
-								</div>
+								</div>)}
 							</div>
 							<div className="indicator"></div>
 						</li>
 						{role === 'pro' &&
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
-								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); setIsSkipClientRequest(false); }}>
+								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); setIsSkipClientRequest(false); }} aria-label="Ouvrir les demandes clients">
 								<div className="tab-content">
 									<span>CLIENT</span>
-									<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>
+									{(notViewedRequestStore.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>
 										{notViewedRequestStore.length > 0 && <Badge count={notViewedRequestStore.length} />}
-									</div>
+									</div>)}
 								</div>
 								{/* {notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />} */}
 								<div className="indicator"></div>
@@ -911,18 +990,18 @@ function Dashboard() {
 						}
 						{role === 'pro' &&
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
-								onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }}>
+								onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }} aria-label="Ouvrir mes conversations">
 								<div className="tab-content">
 									<span>MES CONVERSATIONS</span>
-									<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
+									{(viewedMyConversationState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
 										{viewedMyConversationState.length > 0 && <Badge count={viewedMyConversationState.length} />}
-									</div>
+									</div>)}
 								</div>
 								<div className="indicator"></div>
 							</li>
 						}
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My profile' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My profile'); setIsOpen(!isOpen); }}>MON COMPTE
+							onClick={() => { setSelectedTab('My profile'); setIsOpen(!isOpen); }} aria-label="Ouvrir mon compte">MON COMPTE
 							<div className="indicator"></div>
 						</li>
 						{!isFooter && <Footer />}
@@ -932,22 +1011,33 @@ function Dashboard() {
 
 				<div className="dashboard__content">
 					<Suspense fallback={<Spinner />}>
-						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
-							{selectedTab === 'Request' && <Request />}
+						<ErrorBoundary FallbackComponent={ErrorFallback}>
+							{selectedTab === 'Request' && (
+								<>
+									{isOffLine ? (
+										<OffLine />
+									) : (
+										<Request />
+
+									)}
+								</>
+							)}
 						</ErrorBoundary>
-						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
-							{selectedTab === 'My requests' && <MyRequest
-								setIsHasMore={setIsMyRequestHasMore}
-								isHasMore={isMyRequestHasMore}
-								conversationIdState={conversationIdState}
-								setConversationIdState={setConversationIdState}
-								selectedRequest={selectedRequest}
-								setSelectedRequest={setSelectedRequest}
-								newUserId={newUserId}
-								setNewUserId={setNewUserId}
-							/>}
+						<ErrorBoundary FallbackComponent={ErrorFallback}>
+							{selectedTab === 'My requests' &&
+								<MyRequest
+									setIsHasMore={setIsMyRequestHasMore}
+									isHasMore={isMyRequestHasMore}
+									conversationIdState={conversationIdState}
+									setConversationIdState={setConversationIdState}
+									selectedRequest={selectedRequest}
+									setSelectedRequest={setSelectedRequest}
+									newUserId={newUserId}
+									setNewUserId={setNewUserId}
+								/>}
 						</ErrorBoundary>
 						{selectedTab === 'My conversations' && <MyConversation
+							viewedMyConversationState={viewedMyConversationState}
 							isHasMore={isMyConversationHasMore}
 							setIsHasMore={setIsMyConversationHasMore}
 							offsetRef={myConversationOffsetRef}
@@ -955,26 +1045,43 @@ function Dashboard() {
 							setConversationIdState={setMyConversationIdState}
 							clientMessageSubscription={clientMessageSubscription}
 						/>}
-						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
-							{selectedTab === 'My profile' && <Account />}
+						<ErrorBoundary FallbackComponent={ErrorFallback}>
+							{selectedTab === 'My profile' && (
+								<>
+									{isOffLine ? (
+										<OffLine />
+									) : (
+										<Account />
+									)}
+								</>
+							)}
 						</ErrorBoundary>
-						<ErrorBoundary fallback={<p>Impossible de charger l'élément</p>}>
-							{selectedTab === 'Client request' && <ClientRequest
-								loading={getRequestByJobLoading}
-								offsetRef={clientRequestOffset}
-								setIsHasMore={setIsClientRequestHasMore}
-								isHasMore={isCLientRequestHasMore}
-								onDetailsClick={handleMyConvesationNavigate}
-								RangeFilter={RangeFilter}
-							/>}
+						<ErrorBoundary FallbackComponent={ErrorFallback}>
+							{selectedTab === 'Client request' && (
+								<>
+									{isOffLine ? (
+										<OffLine />
+									) : (
+										<ClientRequest
+											loading={getRequestByJobLoading}
+											offsetRef={clientRequestOffset}
+											setIsHasMore={setIsClientRequestHasMore}
+											isHasMore={isCLientRequestHasMore}
+											onDetailsClick={handleMyConvesationNavigate}
+											RangeFilter={RangeFilter}
+										/>
+									)}
+								</>
+							)}
 						</ErrorBoundary>
 					</Suspense>
 				</div>
 
 				<DeleteItemModal
-					isSessionExpired={true}
+					isMultipleLogout={isMultipleLogout}
+					isSessionExpired={isMultipleLogout ? false : true}
 					setDeleteItemModalIsOpen={setIsExpiredSession}
-					deleteItemModalIsOpen={isExpiredSession}
+					deleteItemModalIsOpen={isMultipleLogout || isExpiredSession}
 					handleDeleteItem={RedirectExpiredSession}
 				/>
 			</div>

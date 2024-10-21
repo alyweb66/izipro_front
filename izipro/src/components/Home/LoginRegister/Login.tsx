@@ -18,15 +18,17 @@ import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 
 // State management and stores
 import { confirmEmailStore } from '../../../store/LoginRegister';
-import { changeForgotPasswordStore } from '../../../store/UserData';
-
-
+import { changeForgotPasswordStore, cookieConsents, userConversation, userDataStore } from '../../../store/UserData';
+import { clientRequestStore, myRequestStore, requestConversationStore, requestDataStore } from '../../../store/Request';
+import { messageConvIdMyConvStore, messageConvIdMyreqStore, messageDataStore, myMessageDataStore } from '../../../store/message';
+import { subscriptionDataStore } from '../../../store/subscription';
+import { notViewedConversation, notViewedRequest, notViewedRequestRef, requestConversationIds } from '../../../store/Viewed';
 
 import './Login.scss';
-// secret key for encryption
-
+import { useNotificationStore } from '../../../store/Notification';
 
 function Login() {
+	const navigate = useNavigate();
 
 	// State
 	const [email, setEmail] = useState('');
@@ -38,11 +40,28 @@ function Login() {
 	const [emailModal, setEmailModal] = useState(false);
 	const [isLogo, setIsLogo] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
+	const [errorForgotPassword, setErrorForgotPassword] = useState('');
 
 	// Store
 	const [isEmailConfirmed, setIsEmailConfirmed] = confirmEmailStore((state) => [state.isEmailConfirmed, state.setIsEmailConfirmed]);
 	const [isChangePassword, setIsChangePassword] = changeForgotPasswordStore((state) => [state.isChangePassword, state.setIsChangePassword]);
-	const navigate = useNavigate();
+	const resetUserData = userDataStore((state) => state.resetUserData);
+	const resetRequest = requestDataStore((state) => state.resetRequest);
+	const resetMessage = messageDataStore((state) => state.resetMessage);
+	const resetMyMessage = myMessageDataStore((state) => state.resetMessage);
+	const resetRequestConversation = requestConversationStore((state) => state.resetRequestConversation);
+	const resetMyrequest = myRequestStore((state) => state.resetMyRequest);
+	const resetSubscription = subscriptionDataStore((state) => state.resetSubscription);
+	const resetClientRequest = clientRequestStore((state) => state.resetClientRequest);
+	const resetUsers = userConversation((state) => state.resetUsers);
+	const resetCookieConsents = cookieConsents((state) => state.resetCookieConsents);
+	const resetrequestConversationIds = requestConversationIds((state) => state.resetBotViewed);
+	const resetNotViewedConv = notViewedConversation((state) => state.resetBotViewed);
+	const resetNotViewedRequestRef = notViewedRequestRef((state) => state.resetBotViewed);
+	const resetNotViewedRequest = notViewedRequest((state) => state.resetBotViewed);
+	const resetMessageMyConvId = messageConvIdMyConvStore((state) => state.resetMessageMyConvId);
+	const resetMessageMyReqConvId = messageConvIdMyreqStore((state) => state.resetMessageMyReqConvId);
+	const resetNotification = useNotificationStore((state) => state.resetNotification);
 
 	// Mutation
 	const [login, { error }] = useMutation(LOGIN_USER_MUTATION);
@@ -96,6 +115,24 @@ function Login() {
 	// send login request
 	const handleLogin = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		// reset all the stores
+		resetUserData();
+		resetRequest();
+		resetMessage();
+		resetMyMessage();
+		resetRequestConversation();
+		resetMyrequest();
+		resetSubscription();
+		resetClientRequest();
+		resetUsers();
+		resetCookieConsents();
+		resetrequestConversationIds();
+		resetNotViewedConv();
+		resetNotViewedRequestRef();
+		resetNotViewedRequest();
+		resetNotification();
+		resetMessageMyReqConvId && resetMessageMyReqConvId();
+		resetMessageMyConvId && resetMessageMyConvId();
 
 		login({
 			variables: {
@@ -106,22 +143,20 @@ function Login() {
 				},
 			},
 		}).then((response) => {
+			const userId = response.data?.login;
 			// if login is successful, redirect to dashboard
-			if (response.data?.login === true) {
-				// if user wants to keep the session active, store the hash in local storage
-				if (activeSession) {
-					const data = {
-						value: 'true',
-					};
-					const encodeData = btoa(JSON.stringify(data));
-					localStorage.setItem('login', encodeData);
-				} else {
-					const value = btoa('session');
-					localStorage.setItem('login', value);
-				}
+			if (userId && userId > 0) {
+				// set id to the store for headers in main.tsx
+				userDataStore.setState({ id: userId });
+				const valueSession = activeSession ? 'true' : 'session';
+				const data = { value: valueSession};
+				const encodeData = btoa(JSON.stringify(data));
+				localStorage.setItem('login', encodeData);
+
 				setIsChangePassword(false);
 				setIsEmailConfirmed(false);
-				navigate('/dashboard');
+
+				navigate('/dashboard', { replace: true });
 			}
 		});
 
@@ -133,10 +168,10 @@ function Login() {
 
 		//check if the email is valid
 		if (!validator.isEmail(forgotPasswordEmail)) {
-			setMessageError('Adresse e-mail invalide');
+			setErrorForgotPassword('Adresse e-mail invalide');
 
 			setTimeout(() => {
-				setMessageError('');
+				setErrorForgotPassword('');
 			}, 15000);
 			return;
 		}
@@ -169,13 +204,6 @@ function Login() {
 			</div>}
 			<p className="login-container__title"> Se connecter</p>
 			<div className="message">
-				<Stack sx={{ width: '100%' }} spacing={2}>
-					{message && (
-						<Fade in={!!message} timeout={300}>
-							<Alert variant="filled" severity="info">{message}</Alert>
-						</Fade>
-					)}
-				</Stack>
 				<Stack sx={{ width: '100%' }} spacing={2}>
 					{isChangePassword && (
 						<Fade in={!!isChangePassword} timeout={300}>
@@ -223,38 +251,8 @@ function Login() {
 					</span>
 				</div>
 
-				{/* <TextField
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    value={password}
-                    className="custom-input"
-                    placeholder="Mot de passe"
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
-                    aria-label="Mot de passe"
-                    //maxLength={60}
-                    required
-                    fullWidth
-                    margin="normal"
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <IconButton
-                                    aria-label="toggle password visibility"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    edge="end"
-                                >
-                                    {showPassword ? <MdOutlineVisibilityOff />: <MdOutlineVisibility />}
-                                </IconButton>
-                            </InputAdornment>
-                        ),
-                    }}
-					
-                /> */}
 				<button type="submit" className='login-container__form button'>Se connecter</button>
 			</form>
-		{/* 	<button className="show-password" onClick={() => setShowPassword(!showPassword)}>
-				{showPassword ? 'Cacher les mots de passe' : 'Afficher les mots de passe'}
-			</button> */}
 			<div className="message">
 				<Stack sx={{ width: '100%' }} spacing={2}>
 					{messageError && (
@@ -296,6 +294,22 @@ function Login() {
 								required
 							/>
 						</label>
+						<div className="message">
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{errorForgotPassword && (
+									<Fade in={!!errorForgotPassword} timeout={300}>
+										<Alert variant="filled" severity="error">{errorForgotPassword}</Alert>
+									</Fade>
+								)}
+							</Stack>
+							<Stack sx={{ width: '100%' }} spacing={2}>
+								{message && (
+									<Fade in={!!message} timeout={300}>
+										<Alert variant="filled" severity="info">{message}</Alert>
+									</Fade>
+								)}
+							</Stack>
+						</div>
 						<button type="submit" className="email-modal__forgot-password-form button">Valider</button>
 					</form>
 				</div>
@@ -306,3 +320,4 @@ function Login() {
 }
 
 export default Login;
+

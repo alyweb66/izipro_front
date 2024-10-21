@@ -6,13 +6,14 @@ import '../../styles/deleteItemModal.scss';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
-interface ModalArgs {
+type ModalArgs = {
 	//event: React.MouseEvent;
 	requestId: number;
 	requestTitle: string;
 }
 
-interface DeleteItemModalProps {
+type DeleteItemModalProps = {
+	isMultipleLogout?: boolean;
 	isSessionExpired?: boolean;
 	isDeleteUser?: boolean;
 	modalArgs?: ModalArgs | null;
@@ -23,6 +24,7 @@ interface DeleteItemModalProps {
 }
 
 export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
+	isMultipleLogout,
 	isSessionExpired,
 	isDeleteUser,
 	modalArgs,
@@ -33,17 +35,17 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 }) => {
 
 	const [isVisible, setIsVisible] = useState(deleteItemModalIsOpen);
-    // useEffect to stop scrolling when the modal is open
+	// useEffect to stop scrolling when the modal is open
 	useEffect(() => {
 		if (deleteItemModalIsOpen) {
 			setIsVisible(true);
-			document.body.style.overflow = 'hidden'; 
+			document.body.style.overflow = 'hidden';
 		} else {
-		  document.body.style.overflow = ''; 
+			document.body.style.overflow = '';
 		}
 		// Cleanup function to reset the overflow style
 		return () => {
-		  document.body.style.overflow = ''; 
+			document.body.style.overflow = '';
 		};
 	}, [deleteItemModalIsOpen]);
 
@@ -59,9 +61,11 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 		<ReactModal
 			className="delete-item-modal"
 			isOpen={deleteItemModalIsOpen}
-			contentLabel="Delete Account"
+			contentLabel="Delete Item Modal"
 			shouldCloseOnOverlayClick={false}
-			aria-label="supprimer mon compte"
+			aria-labelledby="delete-item-modal-title"
+			aria-describedby="delete-item-modal-description"
+			overlayClassName="delete-item-modal__overlay"
 		>
 			<AnimatePresence>
 				{isVisible && (
@@ -73,34 +77,43 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 						exit={{ opacity: 0, scale: 0.9 }}
 						transition={{ duration: 0.2, type: 'Inertia', stiffness: 50 }}
 					>
-						{isSessionExpired ? (
+						<header>
+						{isMultipleLogout || isSessionExpired ? (
 							<h1 className="delete-item-modal__container__title">VOTRE SESSION A EXPIRÉ</h1>
 						) : (
 							<h1 className="delete-item-modal__container__title">ATTENTION!!</h1>
 						)}
-						{isDeleteUser &&
+						</header>
+						<section>
+						{isDeleteUser && (
 							<p className="delete-item-modal__container__description">Vous allez supprimer votre compte definitevement, êtes vous sur?</p>
-						}
-						{isSessionExpired &&
-							<p className="delete-item-modal__container__description">Par mesure de sécurité, vous allez être redirigés vers l&apos;accueil pour vous identifier</p>
-						}
-						{!isDeleteUser && !isSessionExpired &&
+						)}
+						{isMultipleLogout && (
+							<p className="delete-item-modal__container__description">Connexion à 2 comptes impossible sur le même navigateur. Vous serez redirigé vers l&apos;accueil pour vous reconnecter.</p>
+						)}
+						{isSessionExpired && (
+							<p className="delete-item-modal__container__description">Un problème est survenu, par mesure de sécurité vous allez être redirigés vers l&apos;accueil pour vous identifier</p>
+						)}
+						{!isDeleteUser && (isMultipleLogout || !isSessionExpired) && (
 							<p className="delete-item-modal__container__description">Vous allez supprimer la demande <span className="modal-args">{modalArgs?.requestTitle}</span> , êtes vous sur?</p>
-						}
-						{isSessionExpired ? (
+						)}
+						</section>
+						<footer>
+						{isMultipleLogout || isSessionExpired ? (
 							<div className="delete-item-modal__container__container__button">
-							<button
-								className="delete-item-modal__container__container__button__cancel"
-								onClick={(event) => {
-									event.stopPropagation();
-									event.preventDefault();
-									handleDeleteItem();
-									closeModal();
-								}}
-							>
-								Ok
-							</button>
-						</div>	
+								<button
+									className="delete-item-modal__container__container__button__cancel"
+									onClick={(event) => {
+										event.stopPropagation();
+										event.preventDefault();
+										handleDeleteItem();
+										closeModal();
+									}}
+									aria-label="Confirmer la suppression"
+								>
+									Ok
+								</button>
+							</div>
 						) : (
 							<div className="delete-item-modal__container__container__button">
 								<button
@@ -113,6 +126,7 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 											closeModal();
 										}
 									}}
+									aria-label="Supprimer la demande"
 								>
 									Supprimer
 								</button>
@@ -125,12 +139,14 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 										setModalArgs && setModalArgs(null);
 										closeModal();
 									}}
+									aria-label="Annuler la suppression"
 								>
 									Annuler
 								</button>
 							</div>
-							
+
 						)}
+						</footer>
 					</motion.div>
 				)}
 			</AnimatePresence>

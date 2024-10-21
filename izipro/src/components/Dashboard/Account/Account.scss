@@ -11,7 +11,11 @@
     display: flex;
     align-items: center;
     flex-direction: column;
-
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+    touch-action: pan-y;
+    height: 100%;
+    
     .account__profile {
         position: relative;
         width: 100%;
@@ -19,13 +23,16 @@
         align-items: center;
         flex-wrap: wrap;
         justify-content: center;
+        overflow: auto;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+        touch-action: pan-y;
+        height: 100%;
+      
 
         .notification-container {
             position: relative;
             width: 100%;
-            // display: flex;
-            //flex-wrap: wrap;
-            // justify-content: center;
             gap: 2rem;
 
             .notification {
@@ -48,7 +55,6 @@
         .message {
             width: 90%;
             max-width: fit-content;
-            // max-width: clamp(30rem, 100%, 50rem); // to adapt to the screen size
             margin: 0.5rem auto 0 auto;
 
 
@@ -62,13 +68,21 @@
 
 
             .account__profile__picture__img {
-                // @include m.border;
                 margin: auto;
                 width: 8rem;
                 height: 8rem;
                 border-radius: 1rem;
                 box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
                 object-fit: cover;
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
             }
 
             .account__profile__picture__delete {
@@ -81,7 +95,15 @@
                 color: v.$color-primary-orange;
                 font-size: 1rem;
                 font-weight: 500;
-                cursor: pointer;
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
 
                 &:hover {
                     color: v.$color-primary-blue;
@@ -101,8 +123,9 @@
                 flex-direction: column;
                 justify-content: space-around;
                 margin: 1rem 0rem 2rem 0rem;
-                padding: 0 2rem 2rem 2rem;
+                padding: 0 2rem 0rem 2rem;
                 border-radius: 0.5rem;
+                flex-grow: 1;
 
 
 
@@ -220,8 +243,8 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding-bottom: 5rem;
-            padding-top: 3.5rem;
+            padding-bottom: 3rem;
+            padding-top: 1rem;
 
             .__password {
                 display: flex;
@@ -292,22 +315,30 @@
                     @include m.show-password;
                 }
             }
+
         }
-
-
         .account__profile__delete {
-            position: absolute;
-            bottom: 10px;
-            right: 50px;
+            margin-right: 0;
             background-color: transparent;
             border: none;
+            width: 100%;
+            margin-bottom: 1rem;
+            text-align: right;
             color: v.$color-primary-orange;
-            display: flex;
-            justify-content: center;
             text-decoration: underline;
-            cursor: pointer;
+            /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
 
         }
+
+
 
         .account__profile__modification-error {
             margin: auto;
@@ -331,36 +362,6 @@
 
 }
 
-/* 
-.modal-info{
-    height: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: v.$font;
-    font-weight: 500;
-
-    .modal__container{
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        background-color: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow:  20px 20px 60px #bebebe,
-             -20px -20px 60px #ffffff;
-
-        .modal__container__error{
-            margin: 1rem auto;
-            color: v.$color-error;
-        }
-        .modal__container__message{
-            margin: 1rem auto;
-            color: v.$color-validation;
-            
-        }
-    }
-} */
 
 @media (max-width: 830px) {
     .account {
@@ -383,7 +384,29 @@
 
             .account-profile__setting-password {
                 width: 80%;
+                padding-bottom: 1rem;
+
             }
+            .account__profile__delete {
+                position: relative ;
+                background-color: transparent;
+                border: none;
+                color: v.$color-primary-orange;
+                margin-top: 1rem;
+                margin-left: auto;
+                margin-right: 0.5rem;
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer; 
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default; 
+                }
+    
+            }
+
         }
 
 
@@ -416,6 +439,8 @@
             .account-profile__setting-password {
                 width: 100%;
             }
+            
+          
         }
     }
 
