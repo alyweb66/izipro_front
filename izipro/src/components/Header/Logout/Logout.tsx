@@ -8,6 +8,17 @@ function Logout() {
 	const  id = userDataStore((state) => state.id);
 	const handleLogout = useHandleLogout();
 
+	const confirmLogout = (id: number) => {
+
+		if (window.innerWidth < 480) {
+			const userConfirmed = window.confirm('Voulez-vous vraiment vous déconnecter ?');
+			if (userConfirmed) {
+				handleLogout(id);
+			}
+		} else {
+			handleLogout(id);
+		}
+	}
 	
 	return (
 		<div className="logout" >
@@ -18,7 +29,7 @@ function Logout() {
 			/>
 			<button
 				className="logout__button"
-				onClick={() => handleLogout(id)}
+				onClick={() => confirmLogout(id)}
 				aria-label='Déconnexion'
 			>Déconnexion
 			</button>

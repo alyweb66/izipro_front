@@ -391,14 +391,23 @@ function Account() {
 		// Check if the file is .jpg, .jpeg or .png
 		if (file && file[0]) {
 			const extension = file[0].name.split('.').pop()?.toLowerCase();
-			if (extension && !['jpg', 'jpeg', 'png'].includes(extension)) {
-				setErrorPicture('Seuls les fichiers .jpg, .jpeg et .png sont autorisés');
+			if (extension && !['jpg', 'jpeg', 'png', 'heic', 'heif'].includes(extension)) {
+				setErrorPicture('Seuls les fichiers .jpg, .jpeg, .heic, .heif et .png sont autorisés');
 				setTimeout(() => {
 					setErrorAccount('');
 				}, 3000);
 				return;
 			}
 
+		}
+
+		// check file size
+		if (file && file[0] && file[0].size > 1.5e+7) {
+			setErrorPicture('Fichier trop volumineux, veuillez choisir un fichier de moins de 15MB');
+			setTimeout(() => {
+				setErrorPicture('');
+			}, 3000);
+			return;
 		}
 
 		if ((file?.length ?? 0) > 0) {
@@ -651,7 +660,7 @@ function Account() {
 							ref={fileInput}
 							onChange={handleProfilePicture}
 							style={{ display: 'none' }}
-							accept=".jpg,.jpeg,.png"
+							accept=".jpg,.jpeg,.png,heic,heif"
 							aria-label="Sélectionner une nouvelle photo de profil"
 						/>
 						<div className="message">

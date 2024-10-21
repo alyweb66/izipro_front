@@ -175,6 +175,7 @@ function Request() {
 					setUrlFile([]);
 					setRadius(0);
 					setSelectedCategory(0);
+					setErrorMessage('');
 					setSelectedJob(0);
 					setUrgent(false);
 
@@ -184,6 +185,7 @@ function Request() {
 
 		}
 		if (requestError) {
+			setErrorMessage('Erreur lors de la création de la demande');
 			throw new Error('Error while creating request');
 		}
 	};
@@ -360,16 +362,6 @@ function Request() {
 								classes={{ label: 'urgent-switch' }}
 							/>
 						</FormGroup>
-						{/* <button
-							className={`urgent-button ${urgent ? 'active' : ''}`}
-							title="Marquer comme demande urgente"
-							onClick={(event) => {
-								event.preventDefault();
-								setUrgent(!urgent);
-							}
-							}
-						>URGENT
-							<TbUrgent className="urgent-icon" aria-label="Icône de demande urgente" /></button> */}
 						<h1 className="request__form__title">Séléctionnez la catégorie et le métier concerné:</h1>
 						<SelectBox
 							data={categoriesState}
@@ -538,7 +530,7 @@ function Request() {
 									</g>
 								</svg>
 							</span>
-							<p>Glissez et déposez votre fichier ici ou cliquez pour sélectionner un fichier! (Format accepté : .jpg,.jpeg,.png,.pdf, pdf inférieur à 1Mo)</p>
+							<p>Glissez et déposez votre fichier ici ou cliquez pour sélectionner un fichier! (Format accepté : .jpg,.jpeg,.png,.pdf,.heic,.heif, pdf inférieur à 1Mo)</p>
 						</label>
 						<input
 							id="file"
@@ -547,8 +539,8 @@ function Request() {
 							type="file"
 							multiple={true}
 							onChange={handleFileUpload}
-							accept=".jpg,.jpeg,.png,.pdf"
-							aria-label="Téléchargez plusieurs fichiers (formats acceptés : .jpg, .jpeg, .png, .pdf)"
+							accept=".jpg,.jpeg,.png,.pdf,.heic,.heif"
+							aria-label="Téléchargez plusieurs fichiers (formats acceptés : .jpg, .jpeg, .png, .heic, .heif, .pdf)"
 							title="Téléchargez des fichiers"
 						/>
 						<input

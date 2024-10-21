@@ -692,6 +692,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		<div className="my-conversation">
 			{(hideRequestLoading || convLoading) && <Spinner />}
 			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
+				
 				{requestByDate && (
 					<ul className="my-conversation__list__detail" >
 						<AnimatePresence>
