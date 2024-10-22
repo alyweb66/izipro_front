@@ -184,5 +184,15 @@ export const cookieConsents = create<CookieConsentStore>((set) => ({
 	})
 }));
 
+type IsLoggedOutStore = {
+	isLoggedOut: boolean;
+	setIsLoggedOut: (isLoggedOut: boolean) => void;
+}
+
+export const isLoggedOutStore = create<IsLoggedOutStore>((set) => ({
+	isLoggedOut: false,
+	setIsLoggedOut: (isLoggedOut) => set({ isLoggedOut })
+}));
+
 
 

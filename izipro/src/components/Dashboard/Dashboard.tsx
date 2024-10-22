@@ -39,7 +39,7 @@ import { RequestProps } from '../../Type/Request';
 import { MessageProps } from '../../Type/message';
 
 // Store
-import { userConversation, userDataStore } from '../../store/UserData';
+import { isLoggedOutStore, userConversation, userDataStore } from '../../store/UserData';
 import { subscriptionDataStore } from '../../store/subscription';
 import { notViewedRequest, notViewedConversation, requestConversationIds } from '../../store/Viewed';
 import { clientRequestStore, myRequestStore, requestConversationStore } from '../../store/Request';
@@ -179,6 +179,7 @@ function Dashboard() {
 	const [isSkipClientRequest, setIsSkipClientRequest] = useState<boolean>(true);
 
 	//store
+	const isLoggedOut = isLoggedOutStore((state) => state.isLoggedOut);
 	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 	const [requestConversationIdStore, setRequestConversationsIdStore] = requestConversationIds((state) => [state.notViewed, state.setNotViewedStore]);
@@ -537,10 +538,16 @@ function Dashboard() {
 
 	// useEffect to check if user is logged out by serveur
 	useEffect(() => {
+		// logout from main.tsx
+		if (isLoggedOut) {
+			setIsExpiredSession(true);
+		}
 
+		// get the session id from the cookie
 		const sessionCookie = document.cookie.split(';').find(cookie => cookie.includes('session-id'));
 		const sessionId = sessionCookie?.split('=')[1].trim();
 
+		// check if the user is logged out by the server
 		if (logoutSubscription && logoutSubscription.logout?.value === true) {
 			if (logoutSubscription.logout.multiple && (sessionId && sessionId === logoutSubscription.logout.session)) {
 				setIsMultipleLogout(true);
@@ -550,7 +557,7 @@ function Dashboard() {
 				setIsExpiredSession(true);
 			}
 		}
-	}, [logoutSubscription]);
+	}, [logoutSubscription, isLoggedOut]);
 
 	// set user data to the store
 	useEffect(() => {

@@ -14,7 +14,7 @@ import { ErrorResponse, onError } from "@apollo/client/link/error";
 import './styles/index.scss';
 import { serverErrorStore } from './store/LoginRegister';
 import { setContext } from '@apollo/client/link/context';
-import { userDataStore } from './store/UserData';
+import { isLoggedOutStore, userDataStore } from './store/UserData';
 //import ReloadPrompt from './Prompt';
 import { registerSW } from 'virtual:pwa-register'
 
@@ -52,10 +52,13 @@ registerSW({
 		console.error("Erreur lors de l'enregistrement du Service Worker:", error);
 	},
 });
+
 // store
 const setServerError = (serverError: { status: number; statusText: string }) => {
 	serverErrorStore.getState().setServerError(serverError);
 };
+
+
 
 // Middleware to add the userId to the headers
 const userIdMiddleware = setContext((_, { headers }) => {
@@ -112,6 +115,36 @@ const errorLink = onError((error: ErrorResponse) => {
 	console.error('Error', serverErrorStore.getState(), error.response);
 });
 
+// get X-Session-ID cookie in headers to compare with navigator session-id cookie
+// if they are different, the user is logged out
+// Custom link to intercept responses and get headers
+// Middleware pour capturer le header X-Session-ID
+const captureSessionIdLink =  new ApolloLink((operation, forward) => {
+	return forward(operation).map((response) => {
+		const context = operation.getContext();
+		// Verify that the context has a response
+		const { response: httpResponse } = context;
+		if (httpResponse && httpResponse.headers) {
+			// Get le X-Session-ID from the headers
+			const sessionId = httpResponse.headers.get('X-Session-ID');
+			console.log('sessionId:', sessionId);
+
+			if (sessionId) {
+				const sessionCookie = document.cookie.split(';').find(cookie => cookie.includes('session-id'));
+				const sessionIdCookie = sessionCookie?.split('=')[1].trim();
+
+				if (sessionIdCookie !== sessionId) {
+					isLoggedOutStore.setState({ isLoggedOut: true });
+					isLoggedOut = true;
+				}
+			}
+		}
+
+		return response;
+	});
+});
+
+
 // Middleware to check if the user is logged out before making requests
 const authMiddleware = new ApolloLink((operation, forward) => {
 	if (isLoggedOut) {
@@ -159,7 +192,7 @@ window.addEventListener('offline', () => {
 //console.log('Initial navigator.onLine:', navigator.onLine);
 //console.log('Initial wsLink:', wsLink);
 //const httpLinkWithLogout = errorLink.concat(httpLink);
-const httpLinkWithMiddleware = ApolloLink.from([userIdMiddleware, authMiddleware, errorLink, httpLink]);
+const httpLinkWithMiddleware = ApolloLink.from([userIdMiddleware, authMiddleware, errorLink, captureSessionIdLink, httpLink]);
 // The split function takes three parameters:
 // * A function that's called for each operation to execute
 // * The Link to use for an operation if the function returns a "truthy" value
@@ -227,22 +260,6 @@ const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
 
-/* if ('serviceWorker' in navigator) {
-	navigator.serviceWorker.addEventListener('controllerchange', () => {
-	  console.log('Nouveau service worker activé, rechargement de la page...');
-	  window.location.reload(); // Recharge la page pour utiliser la nouvelle version
-	});
-  } */
-// register the service worker
-/* if ('serviceWorker' in navigator) {
-	window.addEventListener('load', () => {
-		navigator.serviceWorker.register('/serviceWorker.js', {type: 'module'}).then((registration) => {
-			console.log('Service Worker registered with scope:', registration.scope);
-		}, (error) => {
-			console.error('Service Worker registration failed:', error);
-		});
-	});
-} */
 
 // render element in the DOM
 root.render(
