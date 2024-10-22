@@ -15,7 +15,7 @@
     -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
     touch-action: pan-y;
     height: 100%;
-    
+
     .account__profile {
         position: relative;
         width: 100%;
@@ -28,7 +28,7 @@
         -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
         touch-action: pan-y;
         height: 100%;
-      
+
 
         .notification-container {
             position: relative;
@@ -57,7 +57,18 @@
             max-width: fit-content;
             margin: 0.5rem auto 0 auto;
 
+            .alert-errorLocation {
 
+                /* For mouse */
+                @media (hover: hover) and (pointer: fine) {
+                    cursor: pointer;
+                }
+
+                /* For touch */
+                @media (hover: none) and (pointer: coarse) {
+                    cursor: default;
+                }
+            }
         }
 
         .account__picture {
@@ -74,14 +85,15 @@
                 border-radius: 1rem;
                 box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
                 object-fit: cover;
+
                 /* For mouse */
                 @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer; 
+                    cursor: pointer;
                 }
 
                 /* For touch */
                 @media (hover: none) and (pointer: coarse) {
-                    cursor: default; 
+                    cursor: default;
                 }
             }
 
@@ -95,14 +107,15 @@
                 color: v.$color-primary-orange;
                 font-size: 1rem;
                 font-weight: 500;
+
                 /* For mouse */
                 @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer; 
+                    cursor: pointer;
                 }
 
                 /* For touch */
                 @media (hover: none) and (pointer: coarse) {
-                    cursor: default; 
+                    cursor: default;
                 }
 
                 &:hover {
@@ -317,6 +330,7 @@
             }
 
         }
+
         .account__profile__delete {
             margin-right: 0;
             background-color: transparent;
@@ -326,15 +340,16 @@
             text-align: right;
             color: v.$color-primary-orange;
             text-decoration: underline;
-            /* For mouse */
-                @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer; 
-                }
 
-                /* For touch */
-                @media (hover: none) and (pointer: coarse) {
-                    cursor: default; 
-                }
+            /* For mouse */
+            @media (hover: hover) and (pointer: fine) {
+                cursor: pointer;
+            }
+
+            /* For touch */
+            @media (hover: none) and (pointer: coarse) {
+                cursor: default;
+            }
 
         }
 
@@ -387,24 +402,26 @@
                 padding-bottom: 1rem;
 
             }
+
             .account__profile__delete {
-                position: relative ;
+                position: relative;
                 background-color: transparent;
                 border: none;
                 color: v.$color-primary-orange;
                 margin-top: 1rem;
                 margin-left: auto;
                 margin-right: 0.5rem;
+
                 /* For mouse */
                 @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer; 
+                    cursor: pointer;
                 }
 
                 /* For touch */
                 @media (hover: none) and (pointer: coarse) {
-                    cursor: default; 
+                    cursor: default;
                 }
-    
+
             }
 
         }
@@ -439,8 +456,8 @@
             .account-profile__setting-password {
                 width: 100%;
             }
-            
-          
+
+
         }
     }
 

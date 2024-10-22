@@ -54,7 +54,7 @@ import { userNotificationStore } from '../../../store/Notification';
 import TextareaAutosize from 'react-textarea-autosize';
 import { Grow } from '@mui/material';
 import { serverErrorStore } from '../../../store/LoginRegister';
-import { set } from 'date-fns';
+
 //import '../../../styles/spinner.scss';
 
 
@@ -239,7 +239,7 @@ function Account() {
 		if (address !== addressState || cityStore !== cityState || postal_code !== postal_codeState) {
 			// fetch the location
 			if (addressState && cityState && postal_codeState) {
-				const location = await Localization(addressState, cityState, postal_codeState, setErrorAccount);
+				const location = await Localization(addressState, cityState, postal_codeState);
 				console.log(location);
 				if (location && location.label) {
 					setErrorLocation(`Adresse non valide, voulez vous dire : "${location?.label}" ?`);
@@ -914,7 +914,7 @@ function Account() {
 									)}
 									{errorLocation && (
 										<Fade in={!!errorLocation} /* timeout={300} */>
-											<Alert variant="filled" severity="warning" onClick={addressCorrection}>{errorLocation}</Alert>
+											<Alert className="alert-errorLocation" variant="filled" severity="warning" onClick={addressCorrection}>{errorLocation}</Alert>
 										</Fade>
 									)}
 									{ChangeEmail && (

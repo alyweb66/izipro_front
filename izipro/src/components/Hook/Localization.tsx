@@ -1,5 +1,5 @@
 
-export const Localization = async (address: string, city: string, postal_code: string, setError: Function) => {
+export const Localization = async (address: string, city: string, postal_code: string) => {
 	// API URL
 	const APIUrl = import.meta.env.VITE_API_ADRESSE_URL;
 	// to use in local not in production
