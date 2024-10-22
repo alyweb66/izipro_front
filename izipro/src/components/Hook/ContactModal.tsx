@@ -65,11 +65,15 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 			contactEmail({
 				variables: {
 					input: {
-						first_name,
-						last_name,
+						first_name: DOMPurify.sanitize(first_name),
+						last_name: DOMPurify.sanitize(last_name),
+						enterprise: DOMPurify.sanitize(enterprise),
+						email: DOMPurify.sanitize(email),
+						description: DOMPurify.sanitize(description)
+						/* last_name,
 						enterprise,
 						email,
-						description
+						description */
 					}
 				}
 			}).then(() => {

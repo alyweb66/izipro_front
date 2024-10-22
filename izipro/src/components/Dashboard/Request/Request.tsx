@@ -423,7 +423,7 @@ function Request() {
 								type="text"
 								placeholder="Titre de la demande (50 caractères maximum)"
 								value={titleRequest}
-								onChange={(event) => setTitleRequest(event.target.value)}
+								onChange={(event) => setTitleRequest(DOMPurify.sanitize(event.target.value))}
 								maxLength={50}
 							/>
 						</label>
@@ -437,7 +437,7 @@ function Request() {
 								value={descriptionRequest}
 								maxLength={500}
 								aria-label="Description de la demande 500 caractères maximum"
-								onChange={(event) => setDescriptionRequest(event.target.value)}
+								onChange={(event) => setDescriptionRequest(DOMPurify.sanitize(event.target.value))}
 							>
 							</TextareaAutosize>
 							<p className="request__form__label__input length">{descriptionRequest?.length}/500</p>

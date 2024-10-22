@@ -50,7 +50,7 @@ import Fade from '@mui/material/Fade';
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 import { useQueryGetNotification } from '../../Hook/Query';
 import { UPDATE_NOTIFICATION_MUTATION } from '../../GraphQL/notificationMutation';
-import { useNotificationStore } from '../../../store/Notification';
+import { userNotificationStore } from '../../../store/Notification';
 import TextareaAutosize from 'react-textarea-autosize';
 import { Grow } from '@mui/material';
 import { serverErrorStore } from '../../../store/LoginRegister';
@@ -105,7 +105,7 @@ function Account() {
 		endpointStore,
 		setEnpointStore,
 		setEmailNotification
-	] = useNotificationStore((state) => [
+	] = userNotificationStore((state) => [
 		state.email_notification,
 		state.endpoint,
 		state.setEndpoint,
@@ -390,12 +390,10 @@ function Account() {
 		setErrorPicture('');
 		resetServerError();
 		const file = event.target.files;
-console.log('file', file);
 
 		// Check if the file is .jpg, .jpeg or .png
 		if (file && file[0]) {
 			const extension = file[0].name.split('.').pop()?.toLowerCase();
-			console.log('extension', extension);
 			
 			if (extension && !['jpg', 'jpeg', 'png', 'heic', 'heif'].includes(extension)) {
 				setErrorPicture('Seuls les fichiers .jpg, .jpeg, .heic, .heif et .png sont autorisés');
@@ -750,7 +748,7 @@ console.log('file', file);
 									name="first_name"
 									value={first_nameState || ''}
 									placeholder={first_nameState || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstNameState(event.target.value)}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstNameState(DOMPurify.sanitize(event.target.value))}
 									aria-label="Prénom"
 									maxLength={50}
 									autoComplete="given-name"
@@ -765,7 +763,7 @@ console.log('file', file);
 									name="last_name"
 									value={last_nameState || ''}
 									placeholder={last_nameState || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastNameState(event.target.value)}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastNameState(DOMPurify.sanitize(event.target.value))}
 									aria-label="Nom"
 									maxLength={50}
 									autoComplete="family-name"
@@ -780,7 +778,7 @@ console.log('file', file);
 									name="email"
 									value={emailState || ''}
 									placeholder={emailState || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmailState(event.target.value)}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmailState(DOMPurify.sanitize(event.target.value))}
 									aria-label="Email"
 									maxLength={50}
 									autoComplete="email"
@@ -795,7 +793,7 @@ console.log('file', file);
 									name="address"
 									value={addressState || ''}
 									placeholder={addressState || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddressState(event.target.value)}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setAddressState(DOMPurify.sanitize(event.target.value))}
 									aria-label="Adresse"
 									maxLength={100}
 									autoComplete="street-address"
@@ -810,7 +808,7 @@ console.log('file', file);
 									name="postal_code"
 									value={postal_codeState || ''}
 									placeholder={postal_codeState || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCodeState(event.target.value)}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPostalCodeState(DOMPurify.sanitize(event.target.value))}
 									aria-label="Code postal"
 									autoComplete="postal-code"
 									maxLength={10}
@@ -825,7 +823,7 @@ console.log('file', file);
 									name="city"
 									value={cityState || ''}
 									placeholder={cityState || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCityState(event.target.value)}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setCityState(DOMPurify.sanitize(event.target.value))}
 									aria-label="Ville"
 									autoComplete="address-level2"
 									maxLength={100}
@@ -838,7 +836,7 @@ console.log('file', file);
 										Siret*
 										<input
 											className="account__profile__form__label__input"
-											type="text"
+											type="number"
 											name="siret"
 											value={siretState || ''}
 											placeholder={siretState || ''}
@@ -857,7 +855,7 @@ console.log('file', file);
 											name="denomination"
 											value={denominationState || ''}
 											placeholder={denominationState || ''}
-											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenominationState(event.target.value)}
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDenominationState(DOMPurify.sanitize(event.target.value))}
 											aria-label="Dénomination"
 											autoComplete="organization"
 											maxLength={50}
@@ -872,7 +870,7 @@ console.log('file', file);
 											id="description"
 											placeholder="Exprimez-vous 200 caractères maximum"
 											value={descriptionState}
-											onChange={(event) => setDescriptionState(event.target.value)}
+											onChange={(event) => setDescriptionState(DOMPurify.sanitize(event.target.value))}
 											aria-label="Exprimez-vous 200 caractères maximum"
 											maxLength={200}
 										>

@@ -18,14 +18,14 @@ import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 
 // State management and stores
 import { confirmEmailStore } from '../../../store/LoginRegister';
-import { changeForgotPasswordStore, cookieConsents, userConversation, userDataStore } from '../../../store/UserData';
+import { changeForgotPasswordStore, cookieConsents, isLoggedOutStore, userConversation, userDataStore } from '../../../store/UserData';
 import { clientRequestStore, myRequestStore, requestConversationStore, requestDataStore } from '../../../store/Request';
 import { messageConvIdMyConvStore, messageConvIdMyreqStore, messageDataStore, myMessageDataStore } from '../../../store/message';
 import { subscriptionDataStore } from '../../../store/subscription';
 import { notViewedConversation, notViewedRequest, notViewedRequestRef, requestConversationIds } from '../../../store/Viewed';
 
 import './Login.scss';
-import { useNotificationStore } from '../../../store/Notification';
+import { userNotificationStore } from '../../../store/Notification';
 
 function Login() {
 	const navigate = useNavigate();
@@ -61,7 +61,8 @@ function Login() {
 	const resetNotViewedRequest = notViewedRequest((state) => state.resetBotViewed);
 	const resetMessageMyConvId = messageConvIdMyConvStore((state) => state.resetMessageMyConvId);
 	const resetMessageMyReqConvId = messageConvIdMyreqStore((state) => state.resetMessageMyReqConvId);
-	const resetNotification = useNotificationStore((state) => state.resetNotification);
+	const resetNotification = userNotificationStore((state) => state.resetNotification);
+	const resetIsLoggedOut = isLoggedOutStore((state) => state.resetIsLoggedOut);
 
 	// Mutation
 	const [login, { error }] = useMutation(LOGIN_USER_MUTATION);
@@ -116,6 +117,7 @@ function Login() {
 	const handleLogin = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		// reset all the stores
+		resetIsLoggedOut();
 		resetUserData();
 		resetRequest();
 		resetMessage();

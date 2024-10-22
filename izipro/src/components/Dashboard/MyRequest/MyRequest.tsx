@@ -1227,7 +1227,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 								id="send-message"
 								className="my-request__message-list__form__button"
 								type="submit"
-								disabled={selectedUser && selectedUser?.id > 0 ? false : true}
+								disabled={!selectedUser || selectedUser?.id <= 0 || messageMutationLoading}
 								aria-label="Envoyer le message"
 							>
 								Send

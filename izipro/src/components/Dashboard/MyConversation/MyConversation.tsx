@@ -946,7 +946,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 								id="send-message"
 								className="my-conversation__message-list__form__button"
 								type="submit"
-								disabled={selectedRequest && selectedRequest?.id > 0 ? false : true}
+								disabled={!selectedRequest || selectedRequest?.id <= 0 || messageMutLoading}
 								aria-label="Envoyer le message"
 							>
 								Send
