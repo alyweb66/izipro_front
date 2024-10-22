@@ -4,7 +4,7 @@ import ReactModal from 'react-modal';
 import Spinner from './Spinner';
 
 // Hooks React
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // Apollo Client
 import { useMutation } from '@apollo/client';
@@ -22,6 +22,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
+import { userDataStore } from '../../store/UserData';
+
 
 ReactModal.setAppElement('#root');
 
@@ -38,16 +40,21 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 
 	// Mutation 
 	const [contactEmail, { loading: contactEmailLoading, error: contactEmailError }] = useMutation(CONTACT_MUTATION);
+	const [firstName, lastName, denomination, emailStore] = userDataStore((state) => [state.first_name, state.last_name, state.denomination, state.email]);
 	//state
 	const [description, setDescription] = useState<string>('');
-	const [first_name, setFirstName] = useState<string>('');
-	const [last_name, setLastName] = useState<string>('');
-	const [enterprise, setEnterprise] = useState<string>('');
-	const [email, setEmail] = useState<string>('');
+	const [first_name, setFirstName] = useState<string>(firstName || '');
+	const [last_name, setLastName] = useState<string>(lastName || '');
+	const [enterprise, setEnterprise] = useState<string>(denomination || '');
+	const [email, setEmail] = useState<string>(emailStore || '');
 	const [errorMessage, setErrorMessage] = useState<string>('');
 	const [confirmationMessage, setConfirmationMessage] = useState<string>('');
 
-	const handleAccept = (description: string, email: string, first_name?: string, last_name?: string, enterprise?: string) => {
+	// Store
+
+	const handleAccept = (event: React.FormEvent<HTMLFormElement>/* description: string, email: string, first_name?: string, last_name?: string, enterprise?: string */) => {
+		event.preventDefault();
+		console.log('send email');
 		if ((first_name && last_name || enterprise) && description && email) {
 
 			if (!validator.isEmail(email)) {
@@ -58,11 +65,11 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 			contactEmail({
 				variables: {
 					input: {
-						...(first_name ? { first_name: DOMPurify.sanitize(first_name) } : {}),
-						...(last_name ? { last_name: DOMPurify.sanitize(last_name) } : {}),
-						...(enterprise ? { enterprise: DOMPurify.sanitize(enterprise) } : {}),
-						email: DOMPurify.sanitize(email),
-						description: DOMPurify.sanitize(description)
+						first_name,
+						last_name,
+						enterprise,
+						email,
+						description
 					}
 				}
 			}).then(() => {
@@ -101,6 +108,8 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 	}, [isOpenModal]);
 
 	const closeModal = () => {
+		console.log('close modal');
+		
 		setConfirmationMessage('');
 		setErrorMessage('');
 		setIsVisible(false);
@@ -122,12 +131,13 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 		>
 			<AnimatePresence>
 				{isVisible && (
-					<motion.div
+					<motion.form
 						className="contact-modal__container"
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0.9 }}
 						transition={{ duration: 0.2, type: 'Inertia', stiffness: 50 }}
+						onSubmit={(event) => handleAccept(event)}
 					>
 						{contactEmailLoading && <Spinner />}
 						{/* <div className="contact-modal__container__content"> */}
@@ -137,71 +147,71 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 						</header>
 						<section className="contact-modal__container__content__section">
 							<label className="contact-modal__container__content__label">
-								Nom:
+								Nom
 								<input
 									className="contact-modal__container__content__label__input"
 									type="text"
 									name="last_name"
 									value={last_name || ''}
 									placeholder={'Nom'}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(event.target.value)}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setLastName(DOMPurify.sanitize(event.target.value))}
 									aria-label="Nom"
 									maxLength={50}
 								/>
 							</label>
 							<label className="contact-modal__container__content__label">
-								Prénom:
+								Prénom
 								<input
 									className="contact-modal__container__content__label__input"
 									type="text"
 									name="first_name"
 									value={first_name || ''}
 									placeholder={'Prénom'}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(event.target.value)}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setFirstName(DOMPurify.sanitize(event.target.value))}
 									aria-label="Prénom"
 									maxLength={50}
 								/>
 							</label>
 							<p className="contact-modal__container__content__subtitle">Ou</p>
 							<label className="contact-modal__container__content__label">
-								Société:
+								Société
 								<input
 									className="contact-modal__container__content__label__input"
 									type="text"
 									name="enterprise"
 									value={enterprise || ''}
 									placeholder={'Société'}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEnterprise(event.target.value)}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEnterprise(DOMPurify.sanitize(event.target.value))}
 									aria-label="Société"
 									maxLength={50}
 								/>
 							</label>
 							<label className="contact-modal__container__content__label email">
-								Email:
+								Email
 								<input
 									className="contact-modal__container__content__label__input "
 									type="text"
 									name="email"
 									value={email || ''}
 									placeholder={'Email'}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(DOMPurify.sanitize(event.target.value))}
 									aria-label="Email"
 									maxLength={50}
-									required
+									//required
 								/>
 							</label>
 							<label className="contact-modal__container__content__label textarea">
-								Message:
+								Message
 								<TextareaAutosize
 									className="contact-modal__container__content__label__input textarea"
 									name="description"
 									id="description"
 									placeholder="Exprimez-vous 1000 caractères maximum"
 									value={description || ''}
-									onChange={(event) => setDescription(event.target.value)}
+									onChange={(event) => setDescription(DOMPurify.sanitize(event.target.value))}
 									aria-label="Exprimez-vous 1000 caractères maximum"
 									maxLength={1000}
-									required
+								
 								>
 								</TextareaAutosize>
 								<p>{description?.length}/1000</p>
@@ -228,6 +238,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 						<footer className="contact-modal__container__button">
 							<button
 								className="contact-modal__close"
+								type='button'
 								onClick={() => {
 									closeModal();
 								}}
@@ -236,16 +247,13 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 							</button>
 							<button
 								className="contact-modal__accept"
-								onClick={() => {
-									handleAccept(description, email, first_name, last_name, enterprise);
-
-								}}
+								type="submit"
 							>
 								Envoyer
 							</button>
 
 						</footer>
-					</motion.div>
+					</motion.form>
 				)}
 			</AnimatePresence>
 		</ReactModal>
