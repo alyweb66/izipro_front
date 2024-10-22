@@ -70,6 +70,8 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 		city,
 		first_name,
 		last_name,
+		role,
+		denomination,
 		postal_code] = userDataStore((state) => [
 		state.id,
 		state.jobs,
@@ -77,6 +79,8 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 		state.city, 
 		state.first_name, 
 		state.last_name, 
+		state.role,
+		state.denomination,
 		state.postal_code]);
 	const setRequest = requestDataStore((state) => state.setRequest);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
@@ -293,7 +297,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 		<div className="client-request">
 			<div id="scrollableClientRequest" className="client-request__list">
 				{(requestJobLoading || subscribeLoading || loading) && <Spinner />}
-				{(!address && !city && !postal_code && !first_name && !last_name) &&
+				{(!address && !city && !postal_code && (role === 'pro' ? !denomination : !first_name && !last_name )) &&
 					(<p className="client-request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>)}
 				{/* {!clientRequestsStore?.length && <p className="client-request__list no-req">Vous n&apos;avez pas de demande</p>} */}
 				{(address && city && postal_code && first_name && last_name) && (

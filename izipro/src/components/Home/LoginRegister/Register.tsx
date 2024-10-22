@@ -340,7 +340,7 @@ function Register() {
 								value={siret}
 								className="register-container__form__form input siret"
 								placeholder="Siret (14 chiffres)"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value.replace(/\s+/g, ''))}
 								aria-label="Siret"
 								maxLength={14}
 								required

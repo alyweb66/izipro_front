@@ -43,14 +43,18 @@ import { FormControlLabel, FormGroup, Grow, Switch } from '@mui/material';
 function Request() {
 
 	// Store
-	const id = userDataStore((state) => state.id);
-	const address = userDataStore((state) => state.address);
-	const city = userDataStore((state) => state.city);
-	const lng = userDataStore((state) => state.lng);
-	const lat = userDataStore((state) => state.lat);
-	const first_name = userDataStore((state) => state.first_name);
-	const last_name = userDataStore((state) => state.last_name);
-	const postal_code = userDataStore((state) => state.postal_code);
+	const { id, role, address, city, lng, denomination, lat, first_name, last_name, postal_code } = userDataStore((state) => ({
+		id: state.id,
+		role: state.role,
+		address: state.address,
+		city: state.city,
+		lng: state.lng,
+		denomination: state.denomination,
+		lat: state.lat,
+		first_name: state.first_name,
+		last_name: state.last_name,
+		postal_code: state.postal_code
+	}));
 	const [myRequestsStore, setMyRequestsStore] = myRequestStore((state) => [state.requests, state.setMyRequestStore]);
 	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 
@@ -328,7 +332,7 @@ function Request() {
 			<div className="request">
 				{categoryLoading && <Spinner />}
 
-				{(!address && !city && !postal_code && !first_name && !last_name) &&
+				{(!address && !city && !postal_code && (role === 'pro' ? !denomination : !first_name && !last_name )) &&
 					(<p className="request no-req">Veuillez renseigner les champs de &quot;Mes informations&quot; dans votre compte pour faire une demande</p>)}
 				{address && city && postal_code && first_name && last_name && (
 					<form

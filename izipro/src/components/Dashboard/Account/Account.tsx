@@ -388,12 +388,15 @@ function Account() {
 	const handleProfilePicture = (event: React.ChangeEvent<HTMLInputElement>) => {
 		event.preventDefault();
 		setErrorPicture('');
-
+		resetServerError();
 		const file = event.target.files;
+console.log('file', file);
 
 		// Check if the file is .jpg, .jpeg or .png
 		if (file && file[0]) {
 			const extension = file[0].name.split('.').pop()?.toLowerCase();
+			console.log('extension', extension);
+			
 			if (extension && !['jpg', 'jpeg', 'png', 'heic', 'heif'].includes(extension)) {
 				setErrorPicture('Seuls les fichiers .jpg, .jpeg, .heic, .heif et .png sont autorisés');
 				setTimeout(() => {
@@ -740,7 +743,7 @@ function Account() {
 							<h1 className="account__profile__form__title">Mes informations:</h1>
 							<div></div>
 							<label className="account__profile__form__label">
-								Prénom:
+								Prénom{role === 'user' && '*'}
 								<input
 									className="account__profile__form__label__input"
 									type="text"
@@ -751,10 +754,11 @@ function Account() {
 									aria-label="Prénom"
 									maxLength={50}
 									autoComplete="given-name"
+									required={role === 'user'}
 								/>
 							</label>
 							<label className="account__profile__form__label">
-								Nom:
+								Nom{role === 'user' && '*'}
 								<input
 									className="account__profile__form__label__input"
 									type="text"
@@ -765,10 +769,11 @@ function Account() {
 									aria-label="Nom"
 									maxLength={50}
 									autoComplete="family-name"
+									required={role === 'user'}
 								/>
 							</label>
 							<label className="account__profile__form__label">
-								Email:
+								Email*
 								<input
 									className="account__profile__form__label__input"
 									type="text"
@@ -779,10 +784,11 @@ function Account() {
 									aria-label="Email"
 									maxLength={50}
 									autoComplete="email"
+									required
 								/>
 							</label>
 							<label className="account__profile__form__label">
-								Adresse:
+								Adresse*
 								<input
 									className="account__profile__form__label__input"
 									type="text"
@@ -797,7 +803,7 @@ function Account() {
 								/>
 							</label>
 							<label className="account__profile__form__label">
-								Code postal:
+								Code postal*
 								<input
 									className="account__profile__form__label__input"
 									type="text"
@@ -812,7 +818,7 @@ function Account() {
 								/>
 							</label>
 							<label className="account__profile__form__label">
-								Ville:
+								Ville*
 								<input
 									className="account__profile__form__label__input"
 									type="text"
@@ -829,21 +835,22 @@ function Account() {
 							{role === 'pro' && (
 								<>
 									<label className="account__profile__form__label">
-										Siret:
+										Siret*
 										<input
 											className="account__profile__form__label__input"
 											type="text"
 											name="siret"
 											value={siretState || ''}
 											placeholder={siretState || ''}
-											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiretState(event.target.value)}
+											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiretState(event.target.value.replace(/\s+/g, ''))}
 											aria-label="Siret"
 											autoComplete="off"
 											maxLength={14}
+											required
 										/>
 									</label>
 									<label className="account__profile__form__label">
-										Dénomination:
+										Dénomination*
 										<input
 											className="account__profile__form__label__input"
 											type="text"
@@ -854,10 +861,11 @@ function Account() {
 											aria-label="Dénomination"
 											autoComplete="organization"
 											maxLength={50}
+											required
 										/>
 									</label>
 									<label className="account__profile__form__label">
-										Description:
+										Description
 										<TextareaAutosize
 											className="account__profile__form__label__input textarea"
 											name="description"
@@ -894,7 +902,7 @@ function Account() {
 							</div>
 							<button className="account__profile__button" type="submit" aria-label="Valider les modifications">Valider</button>
 							<div className="request__form__map">
-								{/* <p className="request__title-map">Vérifiez votre adresse sur la carte (validez pour actualiser):</p> */}
+								<p className="request__title-map">Vérifiez votre adresse sur la carte (après validation)</p>
 								<div id="map" ref={mapContainerRef} className="request__form__map__map">
 									{isLoading && <Spinner />}
 								</div>
@@ -910,8 +918,8 @@ function Account() {
 								aria-label="Formulaire de changement de mot de passe"
 							>
 								{changepasswordLoading && <Spinner />}
-								<h1 className="__title">Changer le mot de passe:</h1>
-								<label className="__label"> Ancien mot de passe:
+								<h1 className="__title">Changer le mot de passe </h1>
+								<label className="__label"> Ancien mot de passe 
 									<div className="show-password">
 										<input
 											type={showOldPassword ? 'text' : 'password'}
@@ -933,7 +941,7 @@ function Account() {
 										</span>
 									</div>
 								</label>
-								<label className="__label">Nouveau mot de passe:
+								<label className="__label">Nouveau mot de passe 
 									<div className="show-password">
 										<input
 											type={showPassword ? 'text' : 'password'}
@@ -955,7 +963,7 @@ function Account() {
 										</span>
 									</div>
 								</label>
-								<label className="__label">Confirmer le nouveau mot de passe:
+								<label className="__label">Confirmer le nouveau mot de passe 
 									<div className="show-password">
 										<input
 											type={showConfirmPassword ? 'text' : 'password'}
