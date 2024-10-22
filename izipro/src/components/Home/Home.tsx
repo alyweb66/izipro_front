@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react';
 function Home() {
 	const navigate = useNavigate();
 	const [isFooter, setIsFooter] = useState(false);
+	const [loginVisibility, setLoginVisibility] = useState(true);
 
 
 	// check if user is logged in and if cookie consents are accepted
@@ -77,8 +78,8 @@ function Home() {
 
 	return (
 		<div className="home">
-			<Login />
-			<Register />
+			{window.innerWidth < 480 ? loginVisibility && <Login /> : <Login />}
+			<Register setLoginVisibility={setLoginVisibility} loginVisibility={loginVisibility} />
 			<Presentation />
 			{isFooter && <Footer />}
 		</div>

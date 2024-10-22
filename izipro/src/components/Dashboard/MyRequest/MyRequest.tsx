@@ -303,6 +303,8 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		// remove the conversation id from the notViewedConversationStore and database
 		if (conversationId && notViewedConversationStore?.some(id => id === conversationId)) {
 
+			setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
+
 			deleteNotViewedConversation({
 				variables: {
 					input: {
@@ -310,11 +312,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						conversation_id: [conversationId]
 					}
 				}
-			}).then(() => {
-				// remove the conversation id from the notViewedConversationStore
-				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
-
-			});
+			})
 
 			if (deleteNotViewedConversationError) {
 				throw new Error('Error updating conversation');
@@ -756,6 +754,79 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		}
 	}, [selectedUser]);
+
+	// useEffect to see if the request is viewed
+/* 	useLayoutEffect(() => {
+		// Create an IntersectionObserver
+
+		const observer = new IntersectionObserver((entries) => {
+
+			const messageIdsInView = entries
+				.filter(entry => entry.isIntersecting)
+				.map(entry => {
+					const messageIdString = entry.target.getAttribute('data-message-id');
+					return messageIdString !== null ? parseInt(messageIdString) : null;
+				})
+				.filter(messageId => messageId !== null && notViewedConversationStore.includes(messageId));
+
+			if (messageIdsInView.length > 0) {
+				// check if the id is in the notViewedRequestStore
+				const isAnyIdInViewInStore = messageIdsInView.some(id => notViewedConversationStore.includes(id as number));
+
+				setTimeout(() => {
+					// remove all requestIdsInView from the viewedClientRequestStore at once
+					if (isAnyIdInViewInStore) {
+
+						notViewedConversation.setState(prevState => ({ notViewed: prevState.notViewed.filter(value => !messageIdsInView.includes(value)) }));
+						//setNotViewedRequestStore(notViewedRequestStore.filter(value => !requestIdsInView.includes(value)));
+					}
+					//notViewedRequest.setState({ notViewed: notViewedRequestStore.filter(value => !requestIdsInView.includes(value)) });
+
+					// remove not viewed request from the database
+					if (messageIdsInView.length > 0) {
+
+						deleteNotViewedConversation({
+							variables: {
+								input: {
+									user_id: id,
+									conversation_id: [Number(messageIdsInView)]
+								}
+							}
+						})
+
+						if (deleteNotViewedConversationError) {
+							throw new Error('Error while deleting viewed Clientrequests');
+						}
+					}
+				}, 0);
+
+			}
+		});
+
+
+		// Observe all elements with a data-request-id attribute
+		const elements = document.querySelectorAll('[data-message-id]');
+		elements.forEach(element => observer.observe(element));
+
+		// Function to handle visibility change
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === 'visible') {
+				elements.forEach(element => observer.observe(element));
+			} else {
+				elements.forEach(element => observer.unobserve(element));
+			}
+		};
+
+		// Listen for visibility change events
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+
+		// Clean up
+		return () => {
+			elements.forEach(element => observer.unobserve(element));
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+		};
+
+	}); */
 
 
 	return (

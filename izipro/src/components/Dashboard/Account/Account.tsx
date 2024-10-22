@@ -54,6 +54,7 @@ import { userNotificationStore } from '../../../store/Notification';
 import TextareaAutosize from 'react-textarea-autosize';
 import { Grow } from '@mui/material';
 import { serverErrorStore } from '../../../store/LoginRegister';
+import { set } from 'date-fns';
 //import '../../../styles/spinner.scss';
 
 
@@ -139,6 +140,8 @@ function Account() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [notification, setNotification] = useState(emailNotification === null ? false : emailNotification);
 	const [isImgLoading, setIsImgLoading] = useState(true);
+	const [location, setLocation] = useState({ city: '', postcode: '', name: '' });
+	const [errorLocation, setErrorLocation] = useState('');
 	// state for mapBox
 	const [map, setMap] = useState<Map | null>(null);
 	// Message modification account
@@ -229,13 +232,20 @@ function Account() {
 		setErrorAccount('');
 		setMessageAccount('');
 		setChangeEmail('');
+		setErrorLocation('');
+		setLocation({ city: '', postcode: '', name: '' });
 
 		let newUserData = {} as UserAccountDataProps;
 		if (address !== addressState || cityStore !== cityState || postal_code !== postal_codeState) {
 			// fetch the location
 			if (addressState && cityState && postal_codeState) {
 				const location = await Localization(addressState, cityState, postal_codeState, setErrorAccount);
-
+				console.log(location);
+				if (location && location.label) {
+					setErrorLocation(`Adresse non valide, voulez vous dire : "${location?.label}" ?`);
+					setLocation({ city: location.city, postcode: location.postcode, name: location.name });
+					return
+				}
 				if (!location) {
 					return;
 				}
@@ -318,6 +328,9 @@ function Account() {
 				// Set the new user data to the store
 				setAccount(updateUser);
 
+				setErrorLocation('');
+				setLocation({ city: '', postcode: '', name: '' });
+
 				if (changedFields.email) {
 					setChangeEmail('Un email de confirmation a été envoyé, le nouvel email sera effectif après confirmation');
 					setTimeout(() => {
@@ -333,6 +346,7 @@ function Account() {
 
 					}, 15000);
 				}
+				
 			});
 
 			if (updateUserError) {
@@ -394,7 +408,7 @@ function Account() {
 		// Check if the file is .jpg, .jpeg or .png
 		if (file && file[0]) {
 			const extension = file[0].name.split('.').pop()?.toLowerCase();
-			
+
 			if (extension && !['jpg', 'jpeg', 'png', 'heic', 'heif'].includes(extension)) {
 				setErrorPicture('Seuls les fichiers .jpg, .jpeg, .heic, .heif et .png sont autorisés');
 				setTimeout(() => {
@@ -509,6 +523,13 @@ function Account() {
 		setIsNotificationEnabled(!isNotificationEnabled);
 	};
 
+	const addressCorrection = () => {
+		if (location.city && location.postcode && location.name) {
+			setAddressState(location.name);
+			setCityState(location.city);
+			setPostalCodeState(location.postcode);
+		}
+	};
 
 	if (emailNotification === null) {
 		isGetNotificationRef.current = false;
@@ -518,7 +539,7 @@ function Account() {
 	useEffect(() => {
 		if (serverErrorStatus === 500 && serverErrorStatusText === 'INTERNAL_SERVER_FILES_ERROR') {
 			setErrorPicture('Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png');
-		
+
 		}
 	}, [serverErrorStatus, serverErrorStatusText]);
 
@@ -891,6 +912,11 @@ function Account() {
 											<Alert variant="filled" severity="error">{errorAccount}</Alert>
 										</Fade>
 									)}
+									{errorLocation && (
+										<Fade in={!!errorLocation} /* timeout={300} */>
+											<Alert variant="filled" severity="warning" onClick={addressCorrection}>{errorLocation}</Alert>
+										</Fade>
+									)}
 									{ChangeEmail && (
 										<Fade in={!!ChangeEmail} timeout={300}>
 											<Alert variant="filled" severity="success">{ChangeEmail}</Alert>
@@ -917,7 +943,7 @@ function Account() {
 							>
 								{changepasswordLoading && <Spinner />}
 								<h1 className="__title">Changer le mot de passe </h1>
-								<label className="__label"> Ancien mot de passe 
+								<label className="__label"> Ancien mot de passe
 									<div className="show-password">
 										<input
 											type={showOldPassword ? 'text' : 'password'}
@@ -939,7 +965,7 @@ function Account() {
 										</span>
 									</div>
 								</label>
-								<label className="__label">Nouveau mot de passe 
+								<label className="__label">Nouveau mot de passe
 									<div className="show-password">
 										<input
 											type={showPassword ? 'text' : 'password'}
@@ -961,7 +987,7 @@ function Account() {
 										</span>
 									</div>
 								</label>
-								<label className="__label">Confirmer le nouveau mot de passe 
+								<label className="__label">Confirmer le nouveau mot de passe
 									<div className="show-password">
 										<input
 											type={showConfirmPassword ? 'text' : 'password'}

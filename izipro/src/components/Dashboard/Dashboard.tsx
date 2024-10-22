@@ -929,6 +929,9 @@ function Dashboard() {
 			</div>
 		);
 	};
+console.log('viewedMessageState', viewedMessageState);
+console.log('viewedMyConversationState', viewedMyConversationState);
+
 
 
 	return (

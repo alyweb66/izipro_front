@@ -17,9 +17,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import './Register.scss';
 import Spinner from '../../Hook/Spinner';
 
+type RegisterProps = {
+	loginVisibility: boolean;
+	setLoginVisibility: (value: boolean) => void;
+}
 
 
-function Register() {
+function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 	// State
 	const [email, setEmail] = useState('');
 	const [proEmail, setProEmail] = useState('');
@@ -44,8 +48,8 @@ function Register() {
 	};
 
 	// Mutation to register a user
-	const [createUser, {loading: userLoading, error: userError }] = useMutation(REGISTER_USER_MUTATION);
-	const [createProUser, {loading: proUserLoading, error: proUserError }] = useMutation(REGISTER_PRO_USER_MUTATION);
+	const [createUser, { loading: userLoading, error: userError }] = useMutation(REGISTER_USER_MUTATION);
+	const [createProUser, { loading: proUserLoading, error: proUserError }] = useMutation(REGISTER_PRO_USER_MUTATION);
 
 	// function to handle the registration of a pro user
 	const handleProRegister = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -93,7 +97,7 @@ function Register() {
 		}
 
 		try {
-			const response = await createProUser({
+			createProUser({
 				variables: {
 					input: {
 						email: DOMPurify.sanitize(proEmail),
@@ -101,17 +105,19 @@ function Register() {
 						siret: Number(DOMPurify.sanitize(siret))
 					}
 				}
-			})
-
-			if (response.data.createProUser.id) {
-				setProCreated(true);
-			}
-			setProEmail('');
-			setProPassword('');
-			setProConfirmPassword('');
-			setSiret('');
-			setIsProError('');
-
+			}).then((response) => {
+				if (response.data.createProUser.__typename === 'ExistingSiret') {
+					setIsProError('Erreur de SIRET');
+				}
+				if (response.data.createProUser.id) {
+					setProCreated(true);
+					setProEmail('');
+					setProPassword('');
+					setProConfirmPassword('');
+					setSiret('');
+					setIsProError('');
+				}
+			});
 			if (proUserError) {
 				setIsProError('Erreur lors de la création de l\'utilisateur');
 				setTimeout(() => {
@@ -174,6 +180,7 @@ function Register() {
 				}
 			});
 
+
 			if (response.data.createUser.id) {
 				setUserCreated(true);
 			}
@@ -200,7 +207,7 @@ function Register() {
 
 	return (
 		<div className="register-container" >
-			<p className="register-container title" ><span onClick={toggleRegisterVisibility}> Créer un compte </span></p>
+			<p className="register-container title" ><span onClick={() => { toggleRegisterVisibility(); (window.innerWidth < 480 && setLoginVisibility(!loginVisibility)); }}> Créer un compte </span></p>
 			<AnimatePresence>
 				{isRegisterVisible && (
 					<motion.div
@@ -211,7 +218,7 @@ function Register() {
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
 						<form className="register-container__form__form" onSubmit={(event) => handleRegister(event)}>
-						{userLoading && <Spinner />}
+							{userLoading && <Spinner />}
 							<p className="register-container__form__form category">Particulier</p>
 							<input
 								type="email"
@@ -282,7 +289,7 @@ function Register() {
 							<button type="submit" className="register-container__form__form button">Enregistrer</button>
 						</form>
 						<form className="register-container__form__form" onSubmit={(event) => handleProRegister(event)}>
-						{proUserLoading && <Spinner />}
+							{proUserLoading && <Spinner />}
 							<p className="register-container__form__form category">Professionnel</p>
 							<input
 								type="email"

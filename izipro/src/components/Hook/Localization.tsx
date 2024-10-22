@@ -51,7 +51,8 @@ export const Localization = async (address: string, city: string, postal_code: s
 
 					return { lng: longitude, lat: latitude };
 				} else {
-					setError(`Adresse non valide, voulez vous dire : "${feature.properties.label}" ?`)
+					//setError(`Adresse non valide, voulez vous dire : "${feature.properties.label}" ?`)
+					return { city: cityAPI, postcode: postcodeAPI, name: nameAPI, label: feature.properties.label };
 				}
 			} else {
 				throw Error('Unable to geocode address');
