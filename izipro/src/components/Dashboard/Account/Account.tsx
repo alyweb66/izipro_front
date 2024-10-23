@@ -240,7 +240,6 @@ function Account() {
 			// fetch the location
 			if (addressState && cityState && postal_codeState) {
 				const location = await Localization(addressState, cityState, postal_codeState);
-				console.log(location);
 				if (location && location.label) {
 					setErrorLocation(`Adresse non valide, voulez vous dire : "${location?.label}" ?`);
 					setLocation({ city: location.city, postcode: location.postcode, name: location.name });
@@ -759,7 +758,7 @@ function Account() {
 					<div className="account_profile_container">
 						<form className={`account__profile__form ${updateUserLoading ? 'loading' : ''}`} onSubmit={handleAccountSubmit} >
 							{updateUserLoading && <Spinner />}
-							<h1 className="account__profile__form__title">Mes informations:</h1>
+							<h1 className="account__profile__form__title">Mes informations</h1>
 							<div></div>
 							<label className="account__profile__form__label">
 								Prénom{role === 'user' && '*'}

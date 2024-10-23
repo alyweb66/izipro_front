@@ -162,6 +162,7 @@ function Dashboard() {
 	const [isMultipleLogout, setIsMultipleLogout] = useState<boolean>(false);
 	const [isOffLine, setIsOffLine] = useState<boolean>(false);
 
+console.log('id', id);
 
 	//*state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
@@ -232,7 +233,6 @@ function Dashboard() {
 	//* Query for MyRequest
 	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, (isSkipMyRequestRef.current || requestStore.length > 0));
 	const { loading: requestByIdLoading, requestById } = useQueryGetRequestById(requestByIdState);
-	//console.log('id', id);
 
 	//*Query for ClientRequest
 	const { loading: getRequestByJobLoading, getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequest || clientRequestsStore.length > 0));
@@ -929,10 +929,6 @@ function Dashboard() {
 			</div>
 		);
 	};
-console.log('viewedMessageState', viewedMessageState);
-console.log('viewedMyConversationState', viewedMyConversationState);
-
-
 
 	return (
 		<>

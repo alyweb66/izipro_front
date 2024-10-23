@@ -50,11 +50,10 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 	const [errorMessage, setErrorMessage] = useState<string>('');
 	const [confirmationMessage, setConfirmationMessage] = useState<string>('');
 
-	// Store
 
 	const handleAccept = (event: React.FormEvent<HTMLFormElement>/* description: string, email: string, first_name?: string, last_name?: string, enterprise?: string */) => {
 		event.preventDefault();
-		console.log('send email');
+
 		if ((first_name && last_name || enterprise) && description && email) {
 
 			if (!validator.isEmail(email)) {
@@ -70,10 +69,6 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 						enterprise: DOMPurify.sanitize(enterprise),
 						email: DOMPurify.sanitize(email),
 						description: DOMPurify.sanitize(description)
-						/* last_name,
-						enterprise,
-						email,
-						description */
 					}
 				}
 			}).then(() => {
@@ -96,6 +91,15 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 	};
 
 	const [isVisible, setIsVisible] = useState(isOpenModal);
+    // Effect to update state when modal opens
+    useEffect(() => {
+        if (isOpenModal) {
+            setFirstName(firstName || '');
+            setLastName(lastName || '');
+            setEnterprise(denomination || '');
+            setEmail(emailStore || '');
+        }
+    }, [isOpenModal, firstName, lastName, denomination, emailStore]);
 
 	useEffect(() => {
 		if (isOpenModal) {
@@ -112,7 +116,6 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
 	}, [isOpenModal]);
 
 	const closeModal = () => {
-		console.log('close modal');
 		
 		setConfirmationMessage('');
 		setErrorMessage('');

@@ -83,11 +83,13 @@
 
         .dashboard__nav__menu {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
+            gap:1rem;
             padding: 0;
             position: relative;
             //background-color: rgba(255, 255, 255, 0.596);
-
+           // box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1), 0px 0px 0px 0px rgba(0, 0, 0, 0.1);
+            z-index: 10;
 
             .dashboard__nav__menu__content__tab {
                 position: relative;
@@ -103,6 +105,9 @@
                 transition: 0.2s ease color;
 
                 .badge-container {
+                    position: absolute;
+                   // top: 0.2rem;
+                    right: -1.3rem;
                     display: flex;
                     justify-content: center;
                     align-items: center;

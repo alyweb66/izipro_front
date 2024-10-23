@@ -15,7 +15,8 @@ export function useFileHandler() {
 		} else {
 			files = (event as React.ChangeEvent<HTMLInputElement>).target.files;
 		}
-		const maxFileSize = 1.5e+7; // 1MB in bytes
+		const maxFileSize = 1.5e+7; // 15MB in bytes
+		const maxPdfFileSize = 1024; // 1MB in bytes
 		// filter pdf files that are too large
 		const validFiles = Array.from(files!).filter(file => {
 
@@ -26,6 +27,15 @@ export function useFileHandler() {
 				setTimeout(() => {
 					setFileError('');
 				}, 15000);
+				return false;
+			}
+
+			if (file.name.endsWith('.pdf') && file.size > maxPdfFileSize) {
+				setFileError(`Fichier ${file.name} est trop grand, veuillez choisir un PDF de moins de 1MB.`);
+				setTimeout(() => {
+					setFileError('');
+				}, 15000);
+				return false;
 			}
 
 			// check if format is a valid file

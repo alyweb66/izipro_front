@@ -49,6 +49,7 @@ import Fade from '@mui/material/Fade';
 import noPicture from '/no-picture.webp';
 //import { formatMessageDate } from '../../Hook/Component';
 import { MessageList } from '../../Hook/MessageList';
+//import { Id } from '@turf/turf';
 
 // Configuration for React Modal
 ReactModal.setAppElement('#root');
@@ -68,6 +69,8 @@ type MyRequestProps = {
 	newUserId: number[];
 	setNewUserId: (id: number[]) => void;
 };
+
+
 
 function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserId, conversationIdState, setConversationIdState, setIsHasMore, isHasMore }: MyRequestProps) {
 
@@ -130,6 +133,11 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(fetchConvIdState, 0, 100, isSkipMessage);
 
+	console.log('messageStore', messageStore);
+	console.log('myRequestsStore', myRequestsStore);
+	console.log('subscriptionStore', subscriptionStore);
+
+
 
 	// Function to delete a request
 	const handleDeleteRequest = (requestId?: number) => {
@@ -145,102 +153,67 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			}
 
 		}).then((response) => {
-			// Get the conversation ids of the request
-			const conversationIds = myRequestStore.getState().requests.find(request => request.id === requestId)?.conversation?.map(conversation => conversation.id);
-
+			
 			if (response.data.deleteRequest) {
+				setUserConvState([]);
+				setModalArgs(null);
+				setDeleteItemModalIsOpen(false);
+
 				// Remove the request from the store
 				setMyRequestsStore(myRequestsStore.filter(request => request.id !== requestId));
+
+				// remove subscription for this request
+				const subscription = subscriptionStore?.find(subscription => subscription?.subscriber === 'request');
+				// remove the request id from the subscription
+				const updatedSubscription = Array.isArray(subscription?.subscriber_id) ? subscription?.subscriber_id.filter(id => id !== requestId) : [];
+				// update the subscription
+				const newSubscription = { ...subscription, subscriber_id: updatedSubscription };
+
+					subscriptionDataStore.setState((prevState) => ({
+						...prevState,
+						subscription: prevState.subscription?.map(subscription =>
+							subscription?.subscriber === 'request' ? newSubscription : subscription
+						)
+					}) as Partial<SubscriptionStore>);
+				
+
+				// remove subscription for this conversation
+				const conversationSubscription = subscriptionStore.find(subscription => subscription.subscriber === 'conversation');
+				// get array of conversation ids of request id
+				const conversationIds = myRequestsStore.find(request => request.id === requestId)?.conversation;
+
+				// remove the conversation id from the subscription
+				const updatedConversationSubscription = Array.isArray(conversationSubscription?.subscriber_id) ?
+					conversationSubscription?.subscriber_id.filter(id => !conversationIds?.some(conv => conv.id === id))
+				: [];
+				// update the subscription
+				const newConversationSubscription = { ...conversationSubscription, subscriber_id: updatedConversationSubscription };
+
+					subscriptionDataStore.setState((prevState) => ({
+						...prevState,
+						subscription: prevState.subscription?.map(subscription =>
+							subscription?.subscriber === 'conversation' ? newConversationSubscription : subscription
+						)
+					}) as Partial<SubscriptionStore>);
+				
+
+				// delete from message store all message with this conversation viewedIds
+				myMessageDataStore.setState(prevState => {
+					const newMessages = prevState.messages.filter(
+						(message: MessageProps) => !conversationIds?.some(conv => conv.id === message.conversation_id)
+					);
+					return {
+						...prevState,
+						messages: [...newMessages]
+					};
+				});
+				// remove the conversation id from the notViewedConversationStore
+				setNotViewedConversationStore(notViewedConversationStore.filter(id => !conversationIds?.some(conv => conv.id === id)));
+
+			} else {
+
+				throw new Error('Error while deleting request');
 			}
-			setUserConvState([]);
-			setModalArgs(null);
-			setDeleteItemModalIsOpen(false);
-
-			// remove subscription for this request
-			const subscription = subscriptionStore.find(subscription => subscription.subscriber === 'request');
-			const updatedSubscription = Array.isArray(subscription?.subscriber_id) ? subscription?.subscriber_id.filter(id => id !== requestId) : [];
-
-			subscriptionMutation({
-				variables: {
-					input: {
-						user_id: id,
-						subscriber: 'request',
-						subscriber_id: updatedSubscription
-					}
-				}
-			}).then((response) => {
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-
-				// replace the old subscription with the new one
-				subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
-					...prevState,
-					subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
-						subscription.subscriber === 'request' ? subscriptionWithoutTimestamps : subscription
-					)
-				}));
-
-				if (conversationIds) {
-					// remove subscription for this conversation
-					const conversationSubscription = subscriptionStore.find(subscription => subscription.subscriber === 'conversation');
-					const updatedConversationSubscription = Array.isArray(conversationSubscription?.subscriber_id) ? conversationSubscription?.subscriber_id.filter(id => !conversationIds.includes(id)) : [];
-
-					subscriptionMutation({
-						variables: {
-							input: {
-								user_id: id,
-								subscriber: 'conversation',
-								subscriber_id: updatedConversationSubscription
-							}
-						}
-					}).then((response) => {
-
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-
-						// replace the old subscription with the new one
-						subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
-							...prevState,
-							subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
-								subscription.subscriber === 'conversation' ? subscriptionWithoutTimestamps : subscription
-							)
-						}));
-
-						// delete from message store all message with this conversation viewedIds
-						myMessageDataStore.setState(prevState => {
-							const newMessages = prevState.messages.filter(
-								(message: MessageProps) => !conversationIds.includes(message.conversation_id)
-							);
-							return {
-								...prevState,
-								messages: [...newMessages]
-							};
-						});
-
-						// remove the conversation id from the notViewedConversationStore and database
-						deleteNotViewedConversation({
-							variables: {
-								input: {
-									user_id: id,
-									conversation_id: conversationIds
-								}
-							}
-						}).then(() => {
-							// remove the conversation id from the notViewedConversationStore
-							setNotViewedConversationStore(notViewedConversationStore.filter(id => !conversationIds.includes(id)));
-						});
-
-						if (deleteNotViewedConversationError) {
-							throw new Error('Error updating conversation');
-						}
-
-					});
-
-					if (subscriptionError) {
-						throw new Error('Error while updating conversation subscription');
-					}
-				}
-			});
 		});
 
 		if (deleteRequestError) {
@@ -449,7 +422,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { setIsEndViewed } = scrollList({});
 
 	// useEffect to check the size of the window and update the page visibility 
-	
+
 	useLayoutEffect(() => {
 		const handleResize = () => {
 
@@ -595,6 +568,8 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 				//add new request to subscription
 				if (updatedRequestIds && updatedRequestIds.length > 0) {
+
+
 					subscriptionMutation({
 						variables: {
 							input: {
@@ -635,6 +610,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		}
 	}, [myRequestsStore]);
+	console.log('subscriptionStore', subscriptionStore);
 
 	// useEffect to update user conversation by date
 	useEffect(() => {
@@ -676,7 +652,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 
 		setIsEndViewed(false);
-		
+
 	}, [userConvStore, selectedRequest]);
 
 	// useEffect to update the message store
@@ -756,77 +732,77 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	}, [selectedUser]);
 
 	// useEffect to see if the request is viewed
-/* 	useLayoutEffect(() => {
-		// Create an IntersectionObserver
-
-		const observer = new IntersectionObserver((entries) => {
-
-			const messageIdsInView = entries
-				.filter(entry => entry.isIntersecting)
-				.map(entry => {
-					const messageIdString = entry.target.getAttribute('data-message-id');
-					return messageIdString !== null ? parseInt(messageIdString) : null;
-				})
-				.filter(messageId => messageId !== null && notViewedConversationStore.includes(messageId));
-
-			if (messageIdsInView.length > 0) {
-				// check if the id is in the notViewedRequestStore
-				const isAnyIdInViewInStore = messageIdsInView.some(id => notViewedConversationStore.includes(id as number));
-
-				setTimeout(() => {
-					// remove all requestIdsInView from the viewedClientRequestStore at once
-					if (isAnyIdInViewInStore) {
-
-						notViewedConversation.setState(prevState => ({ notViewed: prevState.notViewed.filter(value => !messageIdsInView.includes(value)) }));
-						//setNotViewedRequestStore(notViewedRequestStore.filter(value => !requestIdsInView.includes(value)));
-					}
-					//notViewedRequest.setState({ notViewed: notViewedRequestStore.filter(value => !requestIdsInView.includes(value)) });
-
-					// remove not viewed request from the database
-					if (messageIdsInView.length > 0) {
-
-						deleteNotViewedConversation({
-							variables: {
-								input: {
-									user_id: id,
-									conversation_id: [Number(messageIdsInView)]
-								}
-							}
-						})
-
-						if (deleteNotViewedConversationError) {
-							throw new Error('Error while deleting viewed Clientrequests');
+	/* 	useLayoutEffect(() => {
+			// Create an IntersectionObserver
+	
+			const observer = new IntersectionObserver((entries) => {
+	
+				const messageIdsInView = entries
+					.filter(entry => entry.isIntersecting)
+					.map(entry => {
+						const messageIdString = entry.target.getAttribute('data-message-id');
+						return messageIdString !== null ? parseInt(messageIdString) : null;
+					})
+					.filter(messageId => messageId !== null && notViewedConversationStore.includes(messageId));
+	
+				if (messageIdsInView.length > 0) {
+					// check if the id is in the notViewedRequestStore
+					const isAnyIdInViewInStore = messageIdsInView.some(id => notViewedConversationStore.includes(id as number));
+	
+					setTimeout(() => {
+						// remove all requestIdsInView from the viewedClientRequestStore at once
+						if (isAnyIdInViewInStore) {
+	
+							notViewedConversation.setState(prevState => ({ notViewed: prevState.notViewed.filter(value => !messageIdsInView.includes(value)) }));
+							//setNotViewedRequestStore(notViewedRequestStore.filter(value => !requestIdsInView.includes(value)));
 						}
-					}
-				}, 0);
-
-			}
-		});
-
-
-		// Observe all elements with a data-request-id attribute
-		const elements = document.querySelectorAll('[data-message-id]');
-		elements.forEach(element => observer.observe(element));
-
-		// Function to handle visibility change
-		const handleVisibilityChange = () => {
-			if (document.visibilityState === 'visible') {
-				elements.forEach(element => observer.observe(element));
-			} else {
+						//notViewedRequest.setState({ notViewed: notViewedRequestStore.filter(value => !requestIdsInView.includes(value)) });
+	
+						// remove not viewed request from the database
+						if (messageIdsInView.length > 0) {
+	
+							deleteNotViewedConversation({
+								variables: {
+									input: {
+										user_id: id,
+										conversation_id: [Number(messageIdsInView)]
+									}
+								}
+							})
+	
+							if (deleteNotViewedConversationError) {
+								throw new Error('Error while deleting viewed Clientrequests');
+							}
+						}
+					}, 0);
+	
+				}
+			});
+	
+	
+			// Observe all elements with a data-request-id attribute
+			const elements = document.querySelectorAll('[data-message-id]');
+			elements.forEach(element => observer.observe(element));
+	
+			// Function to handle visibility change
+			const handleVisibilityChange = () => {
+				if (document.visibilityState === 'visible') {
+					elements.forEach(element => observer.observe(element));
+				} else {
+					elements.forEach(element => observer.unobserve(element));
+				}
+			};
+	
+			// Listen for visibility change events
+			document.addEventListener('visibilitychange', handleVisibilityChange);
+	
+			// Clean up
+			return () => {
 				elements.forEach(element => observer.unobserve(element));
-			}
-		};
-
-		// Listen for visibility change events
-		document.addEventListener('visibilitychange', handleVisibilityChange);
-
-		// Clean up
-		return () => {
-			elements.forEach(element => observer.unobserve(element));
-			document.removeEventListener('visibilitychange', handleVisibilityChange);
-		};
-
-	}); */
+				document.removeEventListener('visibilitychange', handleVisibilityChange);
+			};
+	
+		}); */
 
 
 	return (
@@ -1183,7 +1159,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							</div>
 
 						</div>
-						<MessageList 
+						<MessageList
 							conversationIdState={conversationIdState}
 							id={id}
 							filteredMessages={filteredMessages}
@@ -1191,7 +1167,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							openModal={openModal}
 							setHasManyImages={setHasManyImages}
 						/>
-						
+
 
 						<form className="my-request__message-list__form" onSubmit={(event) => {
 							event.preventDefault();

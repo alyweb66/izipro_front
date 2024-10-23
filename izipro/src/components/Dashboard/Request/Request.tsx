@@ -83,11 +83,22 @@ function Request() {
 	const mapContainerRef = useRef<HTMLDivElement>(null);
 
 	// Mutation
-	const [createRequest, { loading: createLoading, error: requestError }] = useMutation(REQUEST_MUTATION);
+	const [createRequest, { loading: createLoading, error: requestError }] = useMutation(REQUEST_MUTATION, {
+		onError: (error) => {
+			if (error) {
+				setErrorMessage('Erreur lors de la création de la demande');
+				setTimeout(() => {
+					setErrorMessage('');
+				}, 10000); // 10000ms = 10s
+			}
+
+		}
+	});
 
 	// Query
 	const { loading: categoryLoading, categoriesData } = useQueryCategory();
 	const { loading: JobDataLoading, jobData } = useQueryJobs(selectedCategory);
+
 
 	// remove file
 	const handleRemove = (index: number) => {
@@ -140,6 +151,12 @@ function Request() {
 					}
 				}
 			}).then((response) => {
+				if (!response.data.createRequest) {
+					setErrorMessage('Erreur lors de la création de la demande');
+					setTimeout(() => {
+						setErrorMessage('');
+					}, 10000); // 10000ms = 10s
+				}
 
 				if (response.data.createRequest) {
 
@@ -164,6 +181,7 @@ function Request() {
 
 						setSubscriptionStore(newSubscription);
 					} else {
+						// Create new subscription
 						setSubscriptionStore([...subscriptionStore, { subscriber: 'request', subscriber_id: [newRequest.id], user_id: id, created_at: new Date().toISOString() }]);
 					}
 
@@ -222,32 +240,32 @@ function Request() {
 	// Map instance
 	useEffect(() => {
 		if (mapContainerRef.current) {
-		const MapInstance = new maplibregl.Map({
-			container: 'map',
-			style: import.meta.env.VITE_MAPLIBRE_URL,
-			center: [lng ?? 0, lat ?? 0],
-			zoom: 10,
-			dragPan: false, // Disable dragging to pan the map
-			scrollZoom: false, // Disable scroll zoom
-			attributionControl: false,
-		});
+			const MapInstance = new maplibregl.Map({
+				container: 'map',
+				style: import.meta.env.VITE_MAPLIBRE_URL,
+				center: [lng ?? 0, lat ?? 0],
+				zoom: 10,
+				dragPan: false, // Disable dragging to pan the map
+				scrollZoom: false, // Disable scroll zoom
+				attributionControl: false,
+			});
 
-		// Disable map interactions 
-		MapInstance.touchZoomRotate.disable();
-		MapInstance.doubleClickZoom.disable();
+			// Disable map interactions 
+			MapInstance.touchZoomRotate.disable();
+			MapInstance.doubleClickZoom.disable();
 
-		MapInstance.on('load', () => {
-			setIsLoading(false);
-			setMap(MapInstance);
+			MapInstance.on('load', () => {
+				setIsLoading(false);
+				setMap(MapInstance);
 
-		});
+			});
 
-		return () => {
-			if (map) {
-				map.remove();
-			}
-		};
-	}
+			return () => {
+				if (map) {
+					map.remove();
+				}
+			};
+		}
 	}, [lng, lat]);
 
 	// Adding options to the map
@@ -326,15 +344,15 @@ function Request() {
 		}
 	}, [selectedCategory]);
 
-
 	return (
 		<Grow in={true} timeout={200}>
 			<div className="request">
 				{categoryLoading && <Spinner />}
 
-				{(!address && !city && !postal_code && (role === 'pro' ? !denomination : !first_name && !last_name )) &&
-					(<p className="request no-req">Veuillez renseigner les champs de &quot;Mes informations&quot; dans votre compte pour faire une demande</p>)}
-				{address && city && postal_code && first_name && last_name && (
+				{(!address || !city || !postal_code || (role === 'pro' ? !denomination : (!first_name || !last_name))) ? (
+					<p className="request no-req">Veuillez renseigner les champs de &quot;Mes informations&quot; dans votre compte pour faire une demande</p>
+
+				) : (
 					<form
 						className="request__form"
 						onSubmit={handleSubmitRequest}
@@ -534,7 +552,7 @@ function Request() {
 									</g>
 								</svg>
 							</span>
-							<p>Glissez et déposez votre fichier ici ou cliquez pour sélectionner un fichier! (Format accepté : .jpg,.jpeg,.png,.pdf,.heic,.heif, pdf inférieur à 1Mo)</p>
+							<p>Glissez et déposez votre fichier ici ou cliquez pour sélectionner un fichier! (Format accepté : jpg, jpeg, png, pdf, heic, heif, pdf inférieur à 1Mo)</p>
 						</label>
 						<input
 							id="file"

@@ -14,7 +14,7 @@
   font-weight: 500;
   box-shadow: none;
   letter-spacing: 0.02rem;
-  
+
 
   /* For mouse */
   @media (hover: hover) and (pointer: fine) {
@@ -351,7 +351,7 @@
 
     .custom-options {
       max-height: 50vh;
-      scrollbar-width: none;
+      scrollbar-width: thin;
       overflow: auto;
       position: absolute;
       display: block;
@@ -371,10 +371,10 @@
       pointer-events: none;
       transform: translateY(-15px);
 
-      &::-webkit-scrollbar {
+      /* &::-webkit-scrollbar {
         display: none;
-        /* For Chrome, Safari and Opera */
-      }
+        
+      } */
     }
 
     .custom-select.opened .custom-options {
@@ -451,22 +451,23 @@
     .center {
       width: 100%;
 
+
       .custom-options {
         position: fixed;
-        top: 3.7rem;
+        top: 3.8rem;
         left: 0;
         width: 100%;
         margin-top: 0;
         height: fit-content;
         max-height: 70dvh;
         display: block;
-        z-index: 1000;
         overflow-y: auto;
         background-color: white;
+        border-radius: 0 0 0.5rem 0.5rem;
+        box-shadow: 0 4px 6px 5px rgba(0, 0, 0, 0.15);
       }
 
-
-      .custom-options::before,
+      /* .custom-options::before,
       .custom-options::after {
         content: "";
         position: absolute;
@@ -476,6 +477,7 @@
         background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
       }
 
+
       .custom-options::before {
         transform: none;
         top: 0;
@@ -483,10 +485,13 @@
 
       .custom-options::after {
         bottom: 0;
-      }
+      } */
+
+      
     }
 
   }
+
 }
 
 @mixin urgent-item {
