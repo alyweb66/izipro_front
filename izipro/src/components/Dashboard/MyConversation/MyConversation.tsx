@@ -1,12 +1,11 @@
 
 // React hooks and components
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 
 // Apollo Client mutations
 import { useMutation } from '@apollo/client';
 import {
-	CONVERSATION_MUTATION,
 	DELETE_NOT_VIEWED_CONVERSATION_MUTATION,
 } from '../../GraphQL/ConversationMutation'; // Assuming these mutations are from ConversationMutation
 import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations'; // Vérifiez le chemin correct
@@ -20,6 +19,12 @@ import {
 
 } from '../../Hook/Query';
 import { useFileHandler } from '../../Hook/useFileHandler';
+import { scrollList } from '../../Hook/ScrollList';
+import { MessageList } from '../../Hook/MessageList';
+import Spinner from '../../Hook/Spinner';
+import RequestItem from '../../Hook/RequestHook'; 
+import { useModal, ImageModal } from '../../Hook/ImageModal';
+import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 
 // State management and stores
 import {
@@ -32,6 +37,7 @@ import { messageConvIdMyConvStore, messageDataStore } from '../../../store/messa
 import { SubscriptionStore, subscriptionDataStore } from '../../../store/subscription';
 import { notViewedConversation } from '../../../store/Viewed';
 
+
 // Types and assets
 import { RequestProps } from '../../../Type/Request';
 import { MessageProps, MessageStoreProps } from '../../../Type/message';
@@ -42,24 +48,19 @@ import logoProfile from '/logo-profile.webp';
 
 // Components and utilities
 import './MyConversation.scss';
-import RequestItem from '../../Hook/RequestHook'; // Assuming RequestItem is imported correctly
-import { useModal, ImageModal } from '../../Hook/ImageModal';
+
 import { FaCamera } from 'react-icons/fa';
 import { MdAttachFile, MdKeyboardArrowLeft, MdSend, MdKeyboardArrowRight, MdKeyboardArrowDown } from 'react-icons/md';
-import Spinner from '../../Hook/Spinner';
-import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+
 import { AnimatePresence, motion } from 'framer-motion';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import noPicture from '/no-picture.webp';
-//import { formatMessageDate } from '../../Hook/Component';
-//import { Virtuoso } from 'react-virtuoso';
-import { scrollList } from '../../Hook/ScrollList';
-import { MessageList } from '../../Hook/MessageList';
 
-//import { VariableSizeList as List, ListChildComponentProps } from 'react-window';
-//import { useVirtualizer } from '@tanstack/react-virtual';
+import { UpdateMyConvMessage }  from '../../Hook/UpdateMyConvMessage'; 
+
+
 type useQueryUserConversationsProps = {
 	loading: boolean;
 	data: { user: { requestsConversations: RequestProps[] } };
@@ -82,6 +83,8 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
+	const { manageMessage } = UpdateMyConvMessage();
+
 	const [request] = requestDataStore((state) => [state.request, state.setRequest]);
 	//state
 	const [messageValue, setMessageValue] = useState('');
@@ -98,11 +101,8 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const [hasManyImages, setHasManyImages] = useState(false);
 	const [uploadFileError, setUploadFileError] = useState('');
 
+	// limit of requests to fetch
 	const limit = 4;
-
-	//useRef
-	const conversationIdRef = useRef(0);
-	//const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
 
 	//store
 	const id = userDataStore((state) => state.id);
@@ -110,14 +110,14 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const resetRequest = requestDataStore((state) => state.resetRequest);
 	const [requestsConversationStore, setRequestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 	const [messageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
-	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
-	const role = userDataStore((state) => state.role);
+	const [subscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
+	//const role = userDataStore((state) => state.role);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 	const [isMessageConvIdFetched, setIsMessageConvIdFetched] = messageConvIdMyConvStore((state) => [state.convId, state.setConvId]);
 
 	//mutation
-	const [conversation, { loading: convMutLoading, error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
+	//const [conversation, { loading: convMutLoading, error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
 	const [message, { loading: messageMutLoading, error: createMessageError }] = useMutation(MESSAGE_MUTATION);
 	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
@@ -129,6 +129,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 	// file upload
 	const { fileError, file, urlFile, setUrlFile, setFile, setFileError, handleFileChange } = useFileHandler();
+	
 
 	// Filtrer les messages pour correspondre à la conversation en cours
 	const filteredMessages = useMemo(() => {
@@ -143,14 +144,16 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const { setIsEndViewed } = scrollList({});
 
 	// Function to send message
-	function sendMessage(updatedRequest?: RequestProps, newClientRequest = false) {
-		// find conversation id where request is equal to the request id if newclientRequest is false
-		let conversationId;
-		if (!newClientRequest) {
-			conversationId = conversationIdState;  // requestsConversationStore?.find((request) => request.id === requestId)?.conversation[0].id;
-		} else if (newClientRequest) {
-			conversationId = conversationIdRef.current;
+	function sendMessage(event: React.FormEvent<HTMLFormElement>, requestId: number) {
+		event.preventDefault();
+
+		if (fileError) {
+			setFile([]);
+			setUrlFile([]);
+			setFileError('');
 		}
+
+		const isNewConversation = requestId === request.id
 
 		// map file to send to graphql
 		const sendFile = file.map(file => ({
@@ -158,7 +161,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		}));
 		// create message
 		// if the message is not empty or the file is not empty
-		if (conversationId ?? 0 > 0) {
+		if (isNewConversation || conversationIdState > 0) {
 
 			if (messageValue.trim() !== '' || sendFile.length > 0) {
 
@@ -168,21 +171,23 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 						input: {
 							content: messageValue,
 							user_id: id,
-							conversation_id: conversationId,
+							...(isNewConversation && { user_request_id: request.user_id }),
+							...(isNewConversation && { request_id: requestId }),
+							...(conversationIdState && { conversation_id: conversationIdState }),
 							media: sendFile
 						}
 					}
-				}).then(() => {
+				}).then((response) => {
 
 					setMessageValue('');
-					conversationIdRef.current = 0;
-					// if the request is a new client request, add the request to the requestsConversationStore
-					if (newClientRequest) {
-						if (!updatedRequest) return;
 
-						const addNewRequestConversation = [updatedRequest, ...requestsConversationStore];
-						requestConversationStore.setState({ requests: addNewRequestConversation });
-						//setRequestsConversationStore(addNewRequestConversation);
+					if (!response.data.createMessage?.success) {
+						const newMessage = response.data.createMessage;
+						// if the request is a new client request
+						if (isNewConversation) {
+							manageMessage({newMessage, setConversationIdState, isNewConversation: true, requestId})
+
+						}
 					}
 
 					// remove request from clientRequestStore
@@ -199,135 +204,8 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		}
 	}
 
-	// Function to send message and create conversation
-	const handleMessageSubmit = (event: React.FormEvent<HTMLFormElement>, requestId: number) => {
-		event.preventDefault();
 
-		if (fileError) {
-			setFile([]);
-			setUrlFile([]);
-			setFileError('');
-		}
-
-		// create conversation 
-		if (request.id === requestId && role === 'pro') {
-
-			conversation({
-				variables: {
-					id: id,
-					input: {
-						user_1: id,
-						user_2: request.user_id,
-						request_id: requestId,
-					}
-				}
-
-			}).then((response) => {
-				let updateRequest: RequestProps;
-				if (response.data.createConversation) {
-
-					const conversation: RequestProps['conversation'] = [response.data.createConversation];
-					conversationIdRef.current = conversation[0].id;
-
-					// put the conversation data in the request
-					updateRequest = { ...request, conversation: conversation };
-
-					requestDataStore.setState((prevState) => ({
-						...prevState,
-						request: updateRequest
-					})),
-						//setRequest(updateRequest);
-						setSelectedRequest(updateRequest);
-
-				}
-
-				// update the subscription store
-				// replace the old subscription with the new one
-				if (!subscriptionStore.some(subscription => subscription.subscriber === 'clientConversation')) {
-
-					subscriptionMutation({
-						variables: {
-							input: {
-								user_id: id,
-								subscriber: 'clientConversation',
-								subscriber_id: [conversationIdRef.current]
-							}
-						}
-
-					}).then((response) => {
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-						// replace the old subscription with the new one
-						const messageRequestSubscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
-						// If there are no subscriptions, add the new conversation id in the array of subscription.subscriber_id
-						if (!messageRequestSubscription) {
-
-
-							const currentSubscriptions = subscriptionDataStore.getState().subscription;
-							const newSubscriptions = [...currentSubscriptions, subscriptionWithoutTimestamps];
-							subscriptionDataStore.getState().setSubscription(newSubscriptions);
-
-						} else {
-							// replace the old subscription with the new one
-							subscriptionStore.map((subscription: SubscriptionProps) =>
-								subscription.subscriber === 'clientConversation' ? subscriptionWithoutTimestamps : subscription
-							);
-						}
-
-						const newClientRequest = true;
-						sendMessage(updateRequest, newClientRequest);
-					});
-
-					if (subscriptionError) {
-						throw new Error('Error while subscribing to conversation');
-					}
-				} else if (subscriptionStore.some(subscription => subscription.subscriber === 'clientConversation')) {
-
-					// recover the old subscription and add the new conversation id in the array of subscription.subscriber_id
-					let newSubscriptionIds;
-					const conversation = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
-					if (conversation && Array.isArray(conversation.subscriber_id)) {
-						newSubscriptionIds = [...conversation.subscriber_id, conversationIdRef.current];
-					}
-
-					subscriptionMutation({
-						variables: {
-							input: {
-								user_id: id,
-								subscriber: 'clientConversation',
-								subscriber_id: newSubscriptionIds
-							}
-						}
-
-					}).then((response) => {
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-						// replace the old subscription with the new one
-						const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
-							subscription.subscriber === 'clientConversation' ? subscriptionWithoutTimestamps : subscription
-						);
-
-						if (addSubscriptionStore) {
-							setSubscriptionStore(addSubscriptionStore);
-						}
-
-						const newClientRequest = true;
-						sendMessage(updateRequest, newClientRequest);
-					});
-				}
-
-
-			});
-
-			if (createConversationError) {
-				throw new Error('Error creating conversation',);
-			}
-		}
-
-		sendMessage();
-	};
-
-	// Function to load more requests with infinite scroll
+	// Function to load more requests with fetchMore
 	function addRequest() {
 		if (fetchMore) {
 
@@ -634,36 +512,8 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		// check if the message is already in the store
 		if (clientMessageSubscription?.messageAdded) {
 			const messageAdded: MessageProps[] = clientMessageSubscription.messageAdded;
-			const date = new Date(Number(messageAdded[0].created_at));
-			const newDate = date.toISOString();
 
-			// add the new message to the message store
-			messageDataStore.setState(prevState => {
-				const newMessages = messageAdded.filter(
-					(newMessage: MessageProps) => !prevState.messages.find((existingMessage) => existingMessage.id === newMessage.id)
-				);
-
-				return {
-					...prevState,
-					messages: [...prevState.messages, ...newMessages]
-				};
-
-			});
-
-			// add updated_at to the request.conversation
-			requestConversationStore.setState(prevState => {
-				const updatedRequest = prevState.requests.map((request: RequestProps) => {
-					const updatedConversation = request.conversation?.map((conversation) => {
-						if (conversation.id === messageAdded[0].conversation_id) {
-							return { ...conversation, updated_at: newDate };
-						}
-						return conversation;
-					});
-
-					return { ...request, conversation: updatedConversation };
-				});
-				return { requests: updatedRequest };
-			});
+			manageMessage({newMessage: messageAdded[0], isNewConversation: false });
 
 		}
 
@@ -685,14 +535,11 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	}, []);
 
 
-
-
-
 	return (
 		<div className="my-conversation">
 			{(hideRequestLoading || convLoading) && <Spinner />}
 			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
-				
+
 				{requestByDate && (
 					<ul className="my-conversation__list__detail" >
 						<AnimatePresence>
@@ -760,13 +607,13 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 			<AnimatePresence>
 				{isMessageOpen && (
 					<motion.div
-						className={`my-conversation__message-list ${isMessageOpen ? 'open' : ''} ${(messageLoading || messageMutLoading || convMutLoading) ? 'loading' : ''}`}
+						className={`my-conversation__message-list ${isMessageOpen ? 'open' : ''} ${(messageLoading || messageMutLoading ) ? 'loading' : ''}`}
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
-						{(messageLoading || messageMutLoading || convMutLoading) && <Spinner />}
+						{(messageLoading || messageMutLoading ) && <Spinner />}
 						<div className="my-conversation__message-list__user">
 							{selectedRequest && (
 								<div
@@ -832,7 +679,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							)}
 
 						</div>
-						<MessageList 
+						<MessageList
 							conversationIdState={conversationIdState}
 							id={id}
 							filteredMessages={filteredMessages}
@@ -844,7 +691,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 						<form className="my-conversation__message-list__form" onSubmit={(event) => {
 							event.preventDefault();
 							if (selectedRequest?.id && !selectedRequest.deleted_at) {
-								handleMessageSubmit(event, selectedRequest.id);
+								sendMessage(event, selectedRequest.id);
 							}
 						}}>
 

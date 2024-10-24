@@ -7,7 +7,7 @@ type RequestStore = RequestSoreProps & {
 	resetRequest: () => void;
 }
 
-type RequestConversationStore = {
+export type RequestConversationStore = {
 	requests: RequestProps[];
 	setRequestConversation: (data: RequestProps[]) => void;
 	resetRequestConversation: () => void;
