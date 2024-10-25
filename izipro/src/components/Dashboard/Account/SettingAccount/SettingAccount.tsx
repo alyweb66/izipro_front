@@ -26,6 +26,8 @@ import Slider from '@mui/material/Slider';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
+import { subscriptionDataStore } from '../../../../store/subscription';
+import { SubscriptionProps } from '../../../../Type/Subscription';
 
 
 function SettingAccount() {
@@ -35,6 +37,7 @@ function SettingAccount() {
 	const [jobs, setJobs] = userDataStore((state) => [state.jobs || [], state.setJobs]);
 	const [settings, setSettings] = userDataStore((state) => [state.settings || [], state.setSettings]);
 	const role = userDataStore((state) => state.role);
+	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 
 	// State
 	const [selectedCategory, setSelectedCategory] = useState(0);
@@ -64,6 +67,7 @@ function SettingAccount() {
 		// update selectedJob and jobs
 		setSelectedJob(selectedJob.filter((job) => job.id !== jobId));
 		setJobs(jobs.filter((job) => job.job_id !== jobId));
+		console.log('jobId', jobId);
 
 		deleteUserJob({
 			variables: {
@@ -73,6 +77,22 @@ function SettingAccount() {
 				}
 			}
 		});
+
+		// Update subscription store if exist
+		if (subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest' && id > 0)) {
+
+			subscriptionStore.forEach((subscription) => {
+				if (subscription.subscriber === 'jobRequest' && Array.isArray(subscription.subscriber_id)) {
+					// replace the old subscription with the new one
+					const newSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
+						subscription.subscriber === 'jobRequest' ? { ...subscription, subscriber_id: subscription.subscriber_id.filter((id: number) => id !== jobId) } : subscription
+					);
+					if (newSubscriptionStore) {
+						setSubscriptionStore(newSubscriptionStore);
+					}
+				}
+			});
+		}
 
 		if (errorDeleteUserJob) {
 			throw new Error('Error while deleting job');
@@ -94,7 +114,13 @@ function SettingAccount() {
 		// Update jobs in the store
 		setJobs([...jobs, ...newJobIds.map((id) => ({ job_id: id }))]);
 
+
 		// add job to the database
+		if (newJobIds.length === 0) {
+			setWishListJob([]);
+			setSelectedCategory(0);
+			return;
+		}
 		createUserJob({
 			variables: {
 				input: {
@@ -106,6 +132,28 @@ function SettingAccount() {
 
 			setWishListJob([]);
 			setSelectedCategory(0);
+			// Update subscription store if exist
+			if (subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest') && id > 0) {
+
+				subscriptionStore.forEach((subscription) => {
+					if (subscription.subscriber === 'jobRequest' && Array.isArray(subscription.subscriber_id)) {
+
+						// replace the old subscription with the new one
+						const newSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
+							subscription.subscriber === 'jobRequest'
+								? { ...subscription, subscriber_id: [...subscription.subscriber_id, ...newJobIds] }
+								: subscription
+						);
+						if (newSubscriptionStore) {
+							setSubscriptionStore(newSubscriptionStore);
+						}
+					}
+				});
+			} else if (!subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest') && id > 0) {
+				// Create a new subscription
+				setSubscriptionStore([...subscriptionStore, { subscriber: 'jobRequest', subscriber_id: newJobIds, user_id: id, created_at: new Date().toISOString() }]);
+			};
+
 
 		});
 
@@ -113,6 +161,9 @@ function SettingAccount() {
 			throw new Error('Error while adding job');
 		}
 	};
+
+	console.log('subscription', subscriptionStore);
+
 
 	// function to validate the range
 	const handleValidateRange = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -224,10 +275,10 @@ function SettingAccount() {
 											aria-label={`Métier sélectionné: ${job.name}`}
 										>
 											{job.name}
-											<button 
-											className="setting-account__form__list__delete__button" 
-											onClick={(event) => handleRemoveListJob(job.id, event)}
-											aria-label={`Supprimer le métier ${job.name}`}
+											<button
+												className="setting-account__form__list__delete__button"
+												onClick={(event) => handleRemoveListJob(job.id, event)}
+												aria-label={`Supprimer le métier ${job.name}`}
 											>X</button>
 										</motion.li>
 									))}
@@ -260,10 +311,10 @@ function SettingAccount() {
 											aria-label={`Métier actuel: ${job.name}`}
 										>
 											{job.name}
-											<button 
-											className="setting-account__form__list__delete__button" 
-											onClick={(event) => handleDeleteJob(job.id, event)}
-											aria-label={`Supprimer le métier ${job.name}`}
+											<button
+												className="setting-account__form__list__delete__button"
+												onClick={(event) => handleDeleteJob(job.id, event)}
+												aria-label={`Supprimer le métier ${job.name}`}
 											>X</button>
 										</motion.li>
 									))

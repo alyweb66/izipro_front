@@ -133,11 +133,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { loading: conversationLoading, usersConversationData } = useQueryUsersConversation(newUserId.length !== 0 ? newUserId : userIds, 0, 0);
 	const { loading: messageLoading, messageData } = useQueryMyMessagesByConversation(fetchConvIdState, 0, 100, isSkipMessage);
 
-	console.log('messageStore', messageStore);
-	console.log('myRequestsStore', myRequestsStore);
-	console.log('subscriptionStore', subscriptionStore);
-
-
 
 	// Function to delete a request
 	const handleDeleteRequest = (requestId?: number) => {
@@ -259,13 +254,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		const conversationId = conversation?.id;
 		setConversationIdState(conversationId || 0);
 
-		// get only conversation id who are not in the store
-		/* let conversationIdNotStore;
-		if (messageStore.length > 0) {
-			conversationIdNotStore = !messageStore.some(message => message.conversation_id === conversationId);
-		} else {
-			conversationIdNotStore = true;
-		} */
 
 		if (conversationId !== conversationIdState && !isMessageConvIdFetched.some(convId => convId === conversationId)) {
 
@@ -730,6 +718,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		}
 	}, [selectedUser]);
+console.log('subscriptionStore myRequest', subscriptionStore);
 
 	return (
 		<div className="my-request">

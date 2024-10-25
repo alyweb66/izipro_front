@@ -106,7 +106,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 	//store
 	const id = userDataStore((state) => state.id);
-
 	const resetRequest = requestDataStore((state) => state.resetRequest);
 	const [requestsConversationStore, setRequestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 	const [messageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
@@ -262,22 +261,22 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 				const subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
 				const newSubscriptionIds = Array.isArray(subscription?.subscriber_id) ? subscription.subscriber_id.filter((id: number) => id !== conversationId) : [];
 
-				
-					// update the subscription store
-					subscriptionDataStore.setState((prevState: SubscriptionStore): Partial<SubscriptionStore> => ({
-						...prevState,
-						subscription: prevState.subscription.map(subscription =>
-							subscription.subscriber === 'clientConversation' ? { ...subscription, subscriber_id: newSubscriptionIds } : subscription
-						)
-					}));
 
-					// remove the conversation id from the message store
-					messageDataStore.setState((prevState) => ({
-						...prevState,
-						messages: prevState.messages.filter((message: MessageStoreProps) => message.conversation_id !== conversationId)
-					}));
+				// update the subscription store
+				subscriptionDataStore.setState((prevState: SubscriptionStore): Partial<SubscriptionStore> => ({
+					...prevState,
+					subscription: prevState.subscription.map(subscription =>
+						subscription.subscriber === 'clientConversation' ? { ...subscription, subscriber_id: newSubscriptionIds } : subscription
+					)
+				}));
 
-		
+				// remove the conversation id from the message store
+				messageDataStore.setState((prevState) => ({
+					...prevState,
+					messages: prevState.messages.filter((message: MessageStoreProps) => message.conversation_id !== conversationId)
+				}));
+
+
 				// remove the conversation id from the notViewedConversationStore
 				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
 			}
@@ -454,6 +453,8 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		if (requestsConversationStore.length > 0) {
 
 			const sortedRequests = [...requestsConversationStore].sort((a, b) => {
+				if (a.id === request.id) return -1;
+				if (b.id === request.id) return 1;
 
 				if (!a.conversation?.length) return 1;
 				if (!b.conversation?.length) return -1;
@@ -503,6 +504,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		};
 	}, []);
 
+console.log('subscriptions my conv', subscriptionStore);
 
 	return (
 		<div className="my-conversation">
@@ -511,7 +513,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 				{(requestByDate || request.id > 0) && (
 					<ul className="my-conversation__list__detail" >
-						<AnimatePresence >
+						{/* <AnimatePresence >
 							{isListOpen && request && request.id > 0 &&
 								<RequestItem
 									setHasManyImages={setHasManyImages}
@@ -529,7 +531,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 									openModal={openModal}
 								/>
 							}
-						</AnimatePresence>
+						</AnimatePresence> */}
 						<AnimatePresence>
 							{isListOpen && requestByDate?.map((requestByDate, index) => (
 								<RequestItem

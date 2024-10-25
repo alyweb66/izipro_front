@@ -99,7 +99,6 @@ function Request() {
 	const { loading: categoryLoading, categoriesData } = useQueryCategory();
 	const { loading: JobDataLoading, jobData } = useQueryJobs(selectedCategory);
 
-
 	// remove file
 	const handleRemove = (index: number) => {
 		// Remove file from file list
@@ -112,6 +111,7 @@ function Request() {
 		newUrlFileList.splice(index, 1);
 		setUrlFile(newUrlFileList);
 	};
+
 	// Submit request
 	const handleSubmitRequest = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -166,6 +166,7 @@ function Request() {
 
 					// update subscriptionStore with the new request id
 					if (subscriptionStore.some(subscription => subscription.subscriber === 'request')) {
+						
 						const newSubscription = subscriptionStore.map(subscription => {
 							if (subscription.subscriber === 'request' && Array.isArray(subscription.subscriber_id) && !subscription.subscriber_id.includes(newRequest.id)) {
 
@@ -211,7 +212,7 @@ function Request() {
 			throw new Error('Error while creating request');
 		}
 	};
-
+console.log('subscriptionStore', subscriptionStore);
 
 	// Handle file upload
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement> & React.DragEvent<HTMLLabelElement>) => {

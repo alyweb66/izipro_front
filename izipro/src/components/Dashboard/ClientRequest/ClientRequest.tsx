@@ -1,10 +1,10 @@
 // React
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 
 // Apollo Client mutations
 import { useMutation } from '@apollo/client';
 import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
-import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
+//import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 import { DELETE_NOT_VIEWED_REQUEST_MUTATION } from '../../GraphQL/NotViewedRequestMutation';
 
 // Custom hooks and queries
@@ -12,13 +12,13 @@ import { useQueryRequestByJob } from '../../Hook/Query';
 
 // State management
 import { userDataStore } from '../../../store/UserData';
-import { requestDataStore, clientRequestStore } from '../../../store/Request';
-import { subscriptionDataStore } from '../../../store/subscription';
+import { requestDataStore, clientRequestStore, requestConversationStore } from '../../../store/Request';
+//import { subscriptionDataStore } from '../../../store/subscription';
 import { notViewedRequest } from '../../../store/Viewed';
 
 // Types and assets
 import { RequestProps } from '../../../Type/Request';
-import { SubscriptionProps } from '../../../Type/Subscription';
+//import { SubscriptionProps } from '../../../Type/Subscription';
 import pdfLogo from '/logo-pdf.webp';
 
 // Components and utilities
@@ -53,8 +53,8 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [hasManyImages, setHasManyImages] = useState(false);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
-	const [modalArgs, setModalArgs] = useState<{requestId: number, requestTitle: string } | null>(null);
-	
+	const [modalArgs, setModalArgs] = useState<{ requestId: number, requestTitle: string } | null>(null);
+
 	/* 	const [isLoading, setIsLoading] = useState(false); */
 	// Create a ref for the scroll position
 	//const offsetRef = useRef(0);
@@ -73,24 +73,25 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 		role,
 		denomination,
 		postal_code] = userDataStore((state) => [
-		state.id,
-		state.jobs,
-		state.address, 
-		state.city, 
-		state.first_name, 
-		state.last_name, 
-		state.role,
-		state.denomination,
-		state.postal_code]);
-	const setRequest = requestDataStore((state) => state.setRequest);
-	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
+			state.id,
+			state.jobs,
+			state.address,
+			state.city,
+			state.first_name,
+			state.last_name,
+			state.role,
+			state.denomination,
+			state.postal_code]);
+	const [setRequest] = requestDataStore((state) => [state.setRequest]);
+//	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 	const [notViewedRequestStore] = notViewedRequest((state) => [state.notViewed]);
+	const [requestsConversationStore, setRequestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 
 
 	// mutation
 	const [hideRequest, { loading: hiddenLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
-	const [subscriptionMutation, { loading: subscribeLoading, error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
+	//const [subscriptionMutation, { loading: subscribeLoading, error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [deleteNotViewedRequest, { error: deleteNotViewedRequestError }] = useMutation(DELETE_NOT_VIEWED_REQUEST_MUTATION);
 
 	// get requests by job
@@ -149,76 +150,12 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 
 	}
 
-	// add jobs to setSubscriptionJob if there are not already in, or have the same id
-	useEffect(() => {
+	function setClientRequest(request: RequestProps) {
 
-		// If there are subscriptions, check if the jobs are in the subscription
-		if (subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest') && id > 0) {
+		setRequestsConversationStore([...requestsConversationStore, request]);
 
-			subscriptionStore.forEach((subscription) => {
-				if (subscription.subscriber === 'jobRequest' && Array.isArray(subscription.subscriber_id)) {
-					const jobIds = jobs.map((job) => job.job_id);
-					const subscriptionIds = new Set(subscription.subscriber_id);
+	}
 
-					// Check if all jobs are in the subscription
-					const allJobsInSubscription = jobIds.every((id) => subscriptionIds.has(id));
-					// Check if all subscriptions are in the jobs
-					const allSubscriptionsInJobs = subscription.subscriber_id.every((id) => jobIds.includes(id));
-
-					// If not, add the new jobs array to the subscription
-					if (!allJobsInSubscription || !allSubscriptionsInJobs) {
-						subscriptionMutation({
-							variables: {
-								input: {
-									user_id: id,
-									subscriber: 'jobRequest',
-									subscriber_id: jobIds
-								}
-							}
-						}).then((response) => {
-							// eslint-disable-next-line @typescript-eslint/no-unused-vars
-							const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-							// replace the old subscription with the new one
-							const newSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
-								subscription.subscriber === 'jobRequest' ? subscriptionWithoutTimestamps : subscription
-							);
-							if (newSubscriptionStore) {
-								setSubscriptionStore(newSubscriptionStore);
-							}
-						});
-
-						if (subscriptionError) {
-							throw new Error('Error while subscribing to jobs');
-						}
-					}
-				}
-			});
-		}
-		// If there are no subscriptions, add the new jobs array to the subscription
-		if (jobs.length > 0 && !subscriptionStore.some(subscription => subscription.subscriber === 'jobRequest')) {
-			const jobIds = jobs.map((job) => job.job_id);
-			subscriptionMutation({
-				variables: {
-					input: {
-						user_id: id,
-						subscriber: 'jobRequest',
-						subscriber_id: jobIds
-					}
-				}
-			}).then((response) => {
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-				if (subscriptionWithoutTimestamps) {
-					setSubscriptionStore([subscriptionWithoutTimestamps]);
-				}
-			});
-
-			if (subscriptionError) {
-				throw new Error('Error while subscribing to jobs');
-			}
-		}
-
-	}, [jobs]);
 
 	// useEffect to see if the request is viewed
 	useLayoutEffect(() => {
@@ -296,10 +233,10 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	return (
 		<div className="client-request">
 			<div id="scrollableClientRequest" className="client-request__list">
-				{(requestJobLoading || subscribeLoading || loading) && <Spinner />}
+				{(requestJobLoading || loading) && <Spinner />}
 				{(!address || !city || !postal_code || (role === 'pro' ? !denomination : (!first_name || !last_name))) ? (
 					<p className="client-request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>
-				):(
+				) : (
 					<ul className="client-request__list__detail">
 						<AnimatePresence>
 							{clientRequestsStore.map((request) => (
@@ -309,16 +246,17 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 									key={request.id}
 									onClick={(event) => {
 										setRequest(request),
-										onDetailsClick(),
-										event.preventDefault();
+											setClientRequest(request),
+											onDetailsClick(),
+											event.preventDefault();
 										event.stopPropagation();
 									}}
 									layout
 									style={{ overflow: 'scroll' }}
 									initial={{ opacity: 0, scale: 0.9 }}
-									animate={{opacity: 1, scale: 1 }}
+									animate={{ opacity: 1, scale: 1 }}
 									exit={{ opacity: 0, scale: 0.9 }}
-									transition={{duration: 0.2, type: 'Inertia', stiffness: 50 }}
+									transition={{ duration: 0.2, type: 'Inertia', stiffness: 50 }}
 									aria-label={`Demande de ${request.first_name} ${request.last_name}`}
 								>
 									{hiddenLoading && modalArgs?.requestId === request.id && <Spinner />}
@@ -326,34 +264,34 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 									<div className="client-request__list__detail__item__header">
 										<p className="client-request__list__detail__item__header date" >
 											<span className="client-request__list__detail__item__header date-span">
-											Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
+												Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
 										</p>
 										<p className="client-request__list__detail__item__header city" >
 											<span className="client-request__list__detail__item__header city-span">
-											Ville:</span>&nbsp;{request.city}
+												Ville:</span>&nbsp;{request.city}
 										</p>
 										<h2 className="client-request__list__detail__item__header job" >
 											<span className="client-request__list__detail__item__header job-span">
-											Métier:</span>&nbsp;{request.job}
+												Métier:</span>&nbsp;{request.job}
 										</h2>
 										{request.denomination ? (
 											<p className="client-request__list__detail__item__header name" >
 												<span className="client-request__list__detail__item__header name-span">
-												Entreprise:</span>&nbsp;{request.denomination}
+													Entreprise:</span>&nbsp;{request.denomination}
 											</p>
 										) : (
 											<p className="client-request__list__detail__item__header name" >
 												<span className="client-request__list__detail__item__header name-span">
-												Nom:</span>&nbsp;{request.first_name} {request.last_name}
+													Nom:</span>&nbsp;{request.first_name} {request.last_name}
 											</p>
 										)}
 									</div>
 									<h1 className="client-request__list__detail__item title" >{request.title}</h1>
 									<p
-									//@ts-expect-error con't resolve this type
+										//@ts-expect-error con't resolve this type
 										className={`client-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
 										onClick={(event: React.MouseEvent) => {
-										//to open the message when the user clicks on it just for the selected request 
+											//to open the message when the user clicks on it just for the selected request 
 											idRef.current = request?.id ?? 0; // check if request or requestByDate is not undefined
 
 											if (idRef.current !== undefined && setIsMessageExpanded) {
@@ -381,9 +319,9 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 															download={media.name}
 															target="_blank"
 															rel="noopener noreferrer"
-															onClick={(event) => { event.stopPropagation(); }} 
+															onClick={(event) => { event.stopPropagation(); }}
 															aria-label={`Télécharger le fichier PDF ${media.name}`}
-															>
+														>
 															<img
 																className="client-request__list__detail__item__picture img"
 																src={pdfLogo}
@@ -397,15 +335,15 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 															src={media.url}
 															onClick={(event) => {
 																setHasManyImages(false),
-																openModal(imageUrls, index),
-																imageUrls.length > 1 && setHasManyImages(true);
+																	openModal(imageUrls, index),
+																	imageUrls.length > 1 && setHasManyImages(true);
 
-																	event.stopPropagation();
+																event.stopPropagation();
 															}}
 															alt={media.name}
 															onError={(event) => {
 																event.currentTarget.src = noPicture;
-															  }}
+															}}
 														/>
 													)
 												) : null
@@ -419,17 +357,17 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 										type='button'
 										onClick={(event) => {
 											setDeleteItemModalIsOpen(true);
-											setModalArgs({requestId: request.id, requestTitle: request.title});
+											setModalArgs({ requestId: request.id, requestTitle: request.title });
 											event.stopPropagation();
 										}}
 										aria-label={`Supprimer la demande ${request.title}`}
-										>
+									>
 									</button>
 									<FaTrashAlt
 										className="client-request__list__detail__item__delete-FaTrashAlt"
 										onClick={(event) => {
 											document.getElementById(`delete-request-${request.id}`)?.click(),
-											event.stopPropagation();
+												event.stopPropagation();
 										}}
 										aria-label={`Supprimer la demande ${request.title}`}
 									/>
@@ -447,13 +385,13 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 							addRequest();
 						}}
 						aria-label="Charger plus de demandes"
-						>
+					>
 						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
 						<span className="icon2"></span>
 						<span className="tooltip">Charger plus</span>
 					</button>
 					) : (
-						(address || city || postal_code || (role === 'pro' ? denomination : (first_name || last_name))) && (<p className="client-request__list no-req">Fin des résultats</p>) 
+						(address || city || postal_code || (role === 'pro' ? denomination : (first_name || last_name))) && (<p className="client-request__list no-req">Fin des résultats</p>)
 					)}
 				</div>
 			</div>

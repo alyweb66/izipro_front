@@ -47,26 +47,22 @@ export const UpdateMyConvMessage = () => {
 
 
         if (isNewConversation) {
-            // Chek if the conversation is already in the request
-            const existingConversation = request.conversation?.some(conversation => conversation.id === newMessage.conversation_id);
-
-            // insert the new conversation in the request
-            let newRequest: RequestProps = { ...request, conversation: request.conversation || [] };
-            if (!existingConversation) {
-                newRequest = { ...request, conversation: [...(request.conversation || []), newConversation] };
-            }
-
-            // insert the new request in the request store
+   
+            // insert new conversation in the request store
             requestConversationStore.setState((prevState: RequestConversationStore): Partial<RequestConversationStore> => {
-                const requests = prevState.requests || [];  // Sur to be an array
-                const existingRequest = requests.some(request => request.id === requestId);
+                const updatedRequest = prevState.requests.map((request: RequestProps) => {
+                    if (request.id === requestId) {
+                        // check if the conversation already exists
+                        const conversationExists = request.conversation?.some(conversation => conversation.id === newMessage.conversation_id);
+                        if (conversationExists) {
+                            return request;
+                        }
+                        return { ...request, conversation: [newConversation] };
+                    }
+                    return request;
+                });
 
-                if (!existingRequest) {
-                    const updatedRequests = [...requests, newRequest];  // Keep the previous requests and add the new one
-                    return { requests: updatedRequests };
-                }
-
-                return prevState;  // Return the previous state if the request already exists
+                return { requests: updatedRequest };
             });
             // set the conversation id state to see the new message
             setConversationIdState && setConversationIdState(newMessage.conversation_id);

@@ -113,21 +113,13 @@ export const CHANGE_PASSWORD_MUTATION = gql`
 
 export const USER_HAS_JOB_MUTATION = gql`
     mutation UserHasJob($input: UserJobInput!) {
-        createUserJob(input: $input) {
-            id
-            user_id
-            job_id
-        }
+        createUserJob(input: $input) 
     }
 `;
 
 export const DELETE_USER_HAS_JOB_MUTATION = gql`
     mutation DeleteUserHasJob($input: UserJobInput!) {
-        deleteUserJob(input: $input) {
-            id
-            user_id
-            job_id
-        }
+        deleteUserJob(input: $input) 
     }
 `;
 
