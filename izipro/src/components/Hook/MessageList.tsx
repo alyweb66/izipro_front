@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { scrollList } from "./ScrollList";
+import { ScrollList } from "./ScrollList";
 import Spinner from "./Spinner";
 import pdfLogo from '/logo-pdf.webp'
 import noPicture from '/no-picture.webp'
@@ -18,7 +18,9 @@ type MessageListProps = {
 
 export const MessageList: React.FC<MessageListProps> = ({ id, openModal, setHasManyImages, filteredMessages, conversationIdState, isMessageOpen }) => {
     // Scroll to the last message
-    const { endMessageListRef, imageRefs, isEndViewed } = scrollList({ filteredMessages, conversationIdState, isListOpen: isMessageOpen });
+    const { endMessageListRef, imageRefs, isEndViewed } = ScrollList({ filteredMessages, conversationIdState, isListOpen: isMessageOpen });
+console.log('conversationIdState', conversationIdState);
+
     return (
 
         <div className="message__container" >

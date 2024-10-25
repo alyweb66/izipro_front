@@ -310,6 +310,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 									onClick={(event) => {
 										setRequest(request),
 										onDetailsClick(),
+										event.preventDefault();
 										event.stopPropagation();
 									}}
 									layout
@@ -452,7 +453,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 						<span className="tooltip">Charger plus</span>
 					</button>
 					) : (
-						(address && city && postal_code && first_name && last_name) && <p className="client-request__list no-req">Fin des résultats</p>
+						(address || city || postal_code || (role === 'pro' ? denomination : (first_name || last_name))) && (<p className="client-request__list no-req">Fin des résultats</p>) 
 					)}
 				</div>
 			</div>

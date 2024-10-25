@@ -45,6 +45,7 @@ export const UpdateMyConvMessage = () => {
 
         });
 
+
         if (isNewConversation) {
             // Chek if the conversation is already in the request
             const existingConversation = request.conversation?.some(conversation => conversation.id === newMessage.conversation_id);
@@ -93,17 +94,18 @@ export const UpdateMyConvMessage = () => {
             // add updated_at to the request.conversation
             requestConversationStore.setState((prevState: RequestConversationStore): Partial<RequestConversationStore> => {
                 const updatedRequest = prevState.requests.map((request: RequestProps) => {
-                    if (request.id === newConversation.request_id) {
-                        const conversationExists = request.conversation?.some(conversation => conversation.id === newConversation.id);
+                    
+                    if (request.id === newMessage.request_id) {
+                        const conversationExists = request.conversation?.some(conversation => conversation.id === newMessage.conversation_id);
 
                         const updatedConversation = conversationExists
                             ? request.conversation.map(conversation => {
-                                if (conversation.id === newConversation.id) {
+                                if (conversation.id === newMessage.conversation_id) {
                                     return { ...conversation, updated_at: newDate };
                                 }
                                 return conversation;
                             })
-                            : [...(request.conversation || []), newConversation];
+                            : [...(request.conversation || [])];
 
                         return { ...request, conversation: updatedConversation };
                     }

@@ -8,7 +8,6 @@ import { useMutation } from '@apollo/client';
 import {
 	DELETE_NOT_VIEWED_CONVERSATION_MUTATION,
 } from '../../GraphQL/ConversationMutation'; // Assuming these mutations are from ConversationMutation
-import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations'; // Vérifiez le chemin correct
 import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
 import { MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
 
@@ -19,10 +18,10 @@ import {
 
 } from '../../Hook/Query';
 import { useFileHandler } from '../../Hook/useFileHandler';
-import { scrollList } from '../../Hook/ScrollList';
+import { ScrollList } from '../../Hook/ScrollList';
 import { MessageList } from '../../Hook/MessageList';
 import Spinner from '../../Hook/Spinner';
-import RequestItem from '../../Hook/RequestHook'; 
+import RequestItem from '../../Hook/RequestHook';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 
@@ -58,7 +57,7 @@ import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import noPicture from '/no-picture.webp';
 
-import { UpdateMyConvMessage }  from '../../Hook/UpdateMyConvMessage'; 
+import { UpdateMyConvMessage } from '../../Hook/UpdateMyConvMessage';
 
 
 type useQueryUserConversationsProps = {
@@ -100,6 +99,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const [fetchConvIdState, setFetchConvIdState] = useState(0);
 	const [hasManyImages, setHasManyImages] = useState(false);
 	const [uploadFileError, setUploadFileError] = useState('');
+	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
 	// limit of requests to fetch
 	const limit = 4;
@@ -111,15 +111,12 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const [requestsConversationStore, setRequestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
 	const [messageStore] = messageDataStore((state) => [state.messages, state.setMessageStore]);
 	const [subscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
-	//const role = userDataStore((state) => state.role);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 	const [isMessageConvIdFetched, setIsMessageConvIdFetched] = messageConvIdMyConvStore((state) => [state.convId, state.setConvId]);
 
 	//mutation
-	//const [conversation, { loading: convMutLoading, error: createConversationError }] = useMutation(CONVERSATION_MUTATION);
 	const [message, { loading: messageMutLoading, error: createMessageError }] = useMutation(MESSAGE_MUTATION);
-	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [hideRequest, { loading: hideRequestLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
@@ -129,7 +126,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 	// file upload
 	const { fileError, file, urlFile, setUrlFile, setFile, setFileError, handleFileChange } = useFileHandler();
-	
+
 
 	// Filtrer les messages pour correspondre à la conversation en cours
 	const filteredMessages = useMemo(() => {
@@ -141,7 +138,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	}, [messageStore, conversationIdState]);
 
 	// Scroll to the last message
-	const { setIsEndViewed } = scrollList({});
+	const { setIsEndViewed } = ScrollList({});
 
 	// Function to send message
 	function sendMessage(event: React.FormEvent<HTMLFormElement>, requestId: number) {
@@ -185,7 +182,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 						const newMessage = response.data.createMessage;
 						// if the request is a new client request
 						if (isNewConversation) {
-							manageMessage({newMessage, setConversationIdState, isNewConversation: true, requestId})
+							manageMessage({ newMessage, setConversationIdState, isNewConversation: true, requestId })
 
 						}
 					}
@@ -203,7 +200,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 			throw new Error('Error creating message');
 		}
 	}
-
 
 	// Function to load more requests with fetchMore
 	function addRequest() {
@@ -247,7 +243,8 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 			variables: {
 				input: {
 					user_id: id,
-					request_id: requestId
+					request_id: requestId,
+					isWithConversation: true
 				}
 			}
 		}).then((response) => {
@@ -257,63 +254,33 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 			const conversationId = requestConversation?.conversation.find(conversation => conversation.user_1 === id || conversation.user_2 === id)?.id;
 
 			if (response.data.createHiddenClientRequest) {
+				// remove the request from the clientRequestStore
 				setRequestsConversationStore(requestsConversationStore.filter(request => request.id !== requestId));
-			}
 
-			// remove subscription for this conversation
-			const subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
-			const newSubscriptionIds = Array.isArray(subscription?.subscriber_id) ? subscription.subscriber_id.filter((id: number) => id !== conversationId) : [];
 
-			subscriptionMutation({
-				variables: {
-					input: {
-						user_id: id,
-						subscriber: 'clientConversation',
-						subscriber_id: newSubscriptionIds
-					}
-				}
-			}).then((response) => {
-				if (response.data.createSubscription) {
+				// remove subscription for this conversation
+				const subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
+				const newSubscriptionIds = Array.isArray(subscription?.subscriber_id) ? subscription.subscriber_id.filter((id: number) => id !== conversationId) : [];
+
+				
 					// update the subscription store
-					// eslint-disable-next-line @typescript-eslint/no-unused-vars
-					const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-
-					subscriptionDataStore.setState((prevState: SubscriptionStore) => ({
+					subscriptionDataStore.setState((prevState: SubscriptionStore): Partial<SubscriptionStore> => ({
 						...prevState,
-						subscription: prevState.subscription.map((subscription: SubscriptionProps) =>
-							subscription.subscriber === 'clientConversation' ? subscriptionWithoutTimestamps : subscription
+						subscription: prevState.subscription.map(subscription =>
+							subscription.subscriber === 'clientConversation' ? { ...subscription, subscriber_id: newSubscriptionIds } : subscription
 						)
 					}));
 
+					// remove the conversation id from the message store
 					messageDataStore.setState((prevState) => ({
 						...prevState,
 						messages: prevState.messages.filter((message: MessageStoreProps) => message.conversation_id !== conversationId)
 					}));
 
-				}
-
-				// delete the conversation from the notViewedConversationStore and database
-				deleteNotViewedConversation({
-					variables: {
-						input: {
-							user_id: id,
-							conversation_id: conversationId
-						}
-					}
-				}).then(() => {
-					// remove the conversation id from the notViewedConversationStore
-					setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
-				});
-
-				if (deleteNotViewedConversationError) {
-					throw new Error('Error updating conversation');
-				}
-			});
-
-			if (subscriptionError) {
-				throw new Error('Error while updating conversation subscription');
+		
+				// remove the conversation id from the notViewedConversationStore
+				setNotViewedConversationStore(notViewedConversationStore.filter(id => id !== conversationId));
 			}
-
 		});
 		if (hideRequestError) {
 			throw new Error('Error while hiding request');
@@ -385,7 +352,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 	};
 
-	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	// useEffect to check the size of the window
 	useLayoutEffect(() => {
 		const handleResize = () => {
@@ -459,30 +425,33 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 			const conversationId = selectedRequest.conversation?.find(conversation => (
 				conversation.user_1 === id || conversation.user_2 === id
 			));
+
 			setConversationIdState(conversationId?.id ?? 0);
 
 			// if the conversation id is not in the store and if the conv has not already been fetched  , fetch the message
 			if (conversationId?.id !== 0 && !isMessageConvIdFetched.some(convId => convId === conversationId?.id)) {
-
 				setFetchConvIdState(conversationId?.id ?? 0);
 				setIsSkipMessage(false);
 			}
 
-			// to remove the request from the clientRequestStore
+			// to remove the viewed request from the notViewedConversationStore and database
 			if (viewedMyConversationState.length > 0) {
+
 				const convId = selectedRequest?.conversation?.find(conv => conv.user_1 === id || conv.user_2 === id)?.id;
 				if (convId) {
 					handleViewedMessage(convId);
 				}
 			}
 			setIsEndViewed(false);
+
 		}
 
 	}, [selectedRequest]);
 
 	// useEffect to sort the requests by date
 	useEffect(() => {
-		if (requestsConversationStore) {
+
+		if (requestsConversationStore.length > 0) {
 
 			const sortedRequests = [...requestsConversationStore].sort((a, b) => {
 
@@ -503,18 +472,18 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 			setRequestByDate(sortedRequests);
 
+		} else {
+			setRequestByDate(null);
 		}
 	}, [requestsConversationStore]);
 
 	// useEffect to subscribe to new message requests
 	useEffect(() => {
-
-		// check if the message is already in the store
+		// manage new message
 		if (clientMessageSubscription?.messageAdded) {
 			const messageAdded: MessageProps[] = clientMessageSubscription.messageAdded;
 
-			manageMessage({newMessage: messageAdded[0], isNewConversation: false });
-
+			manageMessage({ newMessage: messageAdded[0], isNewConversation: false });
 		}
 
 	}, [clientMessageSubscription]);
@@ -540,9 +509,9 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 			{(hideRequestLoading || convLoading) && <Spinner />}
 			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
 
-				{requestByDate && (
+				{(requestByDate || request.id > 0) && (
 					<ul className="my-conversation__list__detail" >
-						<AnimatePresence>
+						<AnimatePresence >
 							{isListOpen && request && request.id > 0 &&
 								<RequestItem
 									setHasManyImages={setHasManyImages}
@@ -562,7 +531,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							}
 						</AnimatePresence>
 						<AnimatePresence>
-							{isListOpen && requestByDate.map((requestByDate, index) => (
+							{isListOpen && requestByDate?.map((requestByDate, index) => (
 								<RequestItem
 									setHasManyImages={setHasManyImages}
 									key={requestByDate.id}
@@ -607,13 +576,13 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 			<AnimatePresence>
 				{isMessageOpen && (
 					<motion.div
-						className={`my-conversation__message-list ${isMessageOpen ? 'open' : ''} ${(messageLoading || messageMutLoading ) ? 'loading' : ''}`}
+						className={`my-conversation__message-list ${isMessageOpen ? 'open' : ''} ${(messageLoading || messageMutLoading) ? 'loading' : ''}`}
 						initial={{ opacity: 0, scale: 0.9 }}
 						animate={{ opacity: 1, scale: 1 }}
 						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
-						{(messageLoading || messageMutLoading ) && <Spinner />}
+						{(messageLoading || messageMutLoading) && <Spinner />}
 						<div className="my-conversation__message-list__user">
 							{selectedRequest && (
 								<div
