@@ -28,6 +28,7 @@ import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import { subscriptionDataStore } from '../../../../store/subscription';
 import { SubscriptionProps } from '../../../../Type/Subscription';
+import { set } from 'date-fns';
 
 
 function SettingAccount() {
@@ -48,6 +49,7 @@ function SettingAccount() {
 	const [skip, setSkip] = useState(false);
 	const [categoriesState, setCategoriesState] = useState<CategoryPros[]>([]);
 	const [jobsState, setJobsState] = useState<JobProps[]>([]);
+	const [jobError, setJobError] = useState('');
 
 	// query
 	const { loading: categoryLoading, categoriesData } = useQueryCategory();
@@ -100,14 +102,26 @@ function SettingAccount() {
 
 	};
 
+	console.log('selectedJob', selectedJob);
 	// function to submit job
 	const handleSubmitJob = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+
 		// Filter wishListJob to get only the jobs whose IDs are not already in jobs
 		const newJobIds = wishListJob
 			.filter((job) => !jobs.some((jobStore) => jobStore.job_id === job.id))
 			.map((job) => job.id);
 
+		const totalJob = [...selectedJob || [], ...wishListJob.filter((job) => newJobIds.includes(job.id))];
+
+		if (totalJob.length >= 6) {
+			setJobError('Vous ne pouvez pas séléctionner plus de 5 métiers');
+			/* setTimeout(() => {
+				setJobError('');
+			}, 6000); */
+			return;
+
+		}
 		// Add new jobs to selectedJob
 		setSelectedJob([...selectedJob || [], ...wishListJob.filter((job) => newJobIds.includes(job.id))]);
 
@@ -129,7 +143,7 @@ function SettingAccount() {
 				}
 			}
 		}).then(() => {
-
+			setJobError('');
 			setWishListJob([]);
 			setSelectedCategory(0);
 			// Update subscription store if exist
@@ -253,7 +267,7 @@ function SettingAccount() {
 							/>
 
 							<ul className="setting-account__form__list" >
-								<h2 className="setting-account__subtitle">Métiers séléctionnés:</h2>
+								<h2 className="setting-account__subtitle">Métiers à ajouter (max 5):</h2>
 								<AnimatePresence>
 									{wishListJob && [...wishListJob].reverse().map((job: JobProps) => (
 										<motion.li
@@ -284,11 +298,20 @@ function SettingAccount() {
 									))}
 								</AnimatePresence>
 							</ul>
+							<div className="message">
+								<Stack sx={{ width: '100%' }} spacing={2}>
+									{jobError && (
+										<Fade in={!!jobError} timeout={300}>
+											<Alert variant="filled" severity="error">{jobError}</Alert>
+										</Fade>
+									)}
+								</Stack>
+							</div>
 							<button className="setting-account__form__button" type="submit" aria-label="Valider les métiers">valider les métiers</button>
 							<ul className={`setting-account__form__list job ${(userJobLoading || deleteJobLoading || categoryLoading) ? 'loading' : ''}`}>
 								{(userJobLoading || categoryLoading) && <Spinner className="small-spinner" />}
 
-								<h2 className="setting-account__subtitle">Métiers actuels:</h2>
+								<h2 className="setting-account__subtitle">Métiers séléctionnés:</h2>
 								<AnimatePresence>
 									{/* {jobDataLoading && <Spinner />} */}
 									{selectedJob && selectedJob.length > 0 ? selectedJob.map((job: JobProps) => (

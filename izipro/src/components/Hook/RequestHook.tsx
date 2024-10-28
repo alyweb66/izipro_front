@@ -5,18 +5,32 @@ import { RequestProps } from '../../Type/Request';
 import React, { useRef } from 'react';
 import noPicture from '/no-picture.webp';
 import { motion } from 'framer-motion';
+import { formatMessageDate } from './Component';
+import '../../styles/requestHook.scss';
+import Spinner from './Spinner';
+import { Badge } from './Badge';
 
 type ExpandedState = {
 	[key: number]: boolean;
 };
 
 const RequestItem = ({
-	index,
+	//index,
 	requestByDate,
-	notViewedConversationStore,
-//	handleViewedMessage,
+	notViewedStore,
+	isMyrequest,
+	isClientRequest,
+	isMyConversation,
+	handleConversation,
+	setIsAnswerOpen,
+	selectedRequestRef,
 	setIsMessageOpen,
 	request,
+	setRequest,
+	setClientRequest,
+	onDetailsClick,
+	hiddenLoading,
+	modalArgs,
 	resetRequest,
 	selectedRequest,
 	setSelectedRequest,
@@ -29,11 +43,21 @@ const RequestItem = ({
 	setHasManyImages
 }: {
 	index?: number,
-	requestByDate?: RequestProps,
-	//handleViewedMessage: Function,
-	notViewedConversationStore?: number[],
+	requestByDate: RequestProps,
+	isMyrequest?: boolean,
+	isClientRequest?: boolean,
+	isMyConversation?: boolean,
+	handleConversation?: Function,
+	setIsAnswerOpen?: Function,
+	selectedRequestRef?: React.MutableRefObject<RequestProps | null>,
+	notViewedStore?: number[],
 	setIsMessageOpen?: Function,
 	request?: RequestProps,
+	setRequest?: Function,
+	setClientRequest?: Function,
+	onDetailsClick?: Function,
+	hiddenLoading?: boolean,
+	modalArgs?: { requestId: number, requestTitle: string } | null,
 	resetRequest?: Function,
 	selectedRequest?: RequestProps,
 	setSelectedRequest?: Function,
@@ -46,30 +70,62 @@ const RequestItem = ({
 	setHasManyImages: Function
 }) => {
 	const idRef = useRef<number>(0);
+console.log('notViewedStore', notViewedStore);
 
 	return (
 		<motion.li
-			id={index === 0 ? 'first-user' : undefined}
-			className={`my-conversation__list__detail__item
-			${(request || requestByDate)?.urgent} 
-			${request ? 'new' : ''} 
-			${selectedRequest?.id === (request || requestByDate)?.id && window.innerWidth > 800 ? 'selected' : ''}
-			${requestByDate?.deleted_at ? 'deleted' : ''}
-			${(request || requestByDate)?.conversation?.some(conv => notViewedConversationStore?.some(id => id === conv.id)) ? 'not-viewed' : ''}
+			//id={index === 0 ? 'first-user' : undefined}
+			className={`item
+			${requestByDate?.urgent} 
+			${''/* request ? 'new' : '' */} 
+			${isMyConversation && (selectedRequest?.id === requestByDate?.id && window.innerWidth > 800 ? 'selected' : '')}
+			${isMyrequest && (selectedRequest?.id === requestByDate?.id ? 'selected' : '')}
+			${isMyConversation && (requestByDate?.deleted_at ? 'deleted' : '')}
+			${(isMyConversation || isMyrequest) && (requestByDate?.conversation?.some(conv => notViewedStore?.some(id => id === conv.id))) ? 'not-viewed' : ''}
+			${isClientRequest && (notViewedStore?.some(id => id === requestByDate.id)) ? 'not-viewed' : ''}
 			` }
-			key={((request || requestByDate)?.id)?.toString()}
-			onClick={() => {
-				if ((request || requestByDate) && setSelectedRequest) {
-					setSelectedRequest && setSelectedRequest(request || requestByDate);
+			data-request-id={isClientRequest && requestByDate?.id}
+			key={requestByDate?.id?.toString()}
+			onClick={(event) => {
+
+				if (isClientRequest && isClientRequest) {
+					setRequest && setRequest(requestByDate),
+					setClientRequest && setClientRequest(requestByDate),
+					onDetailsClick && onDetailsClick(),
+					event.stopPropagation();
 				}
-				//const convId = (request || requestByDate)?.conversation?.find(conv => conv.user_1 === id || conv.user_2 === id)?.id;
-				//handleViewedMessage(convId);
-				if (window.innerWidth < 780) {
-					//itemList();
-					setIsListOpen && setIsListOpen(false);
-					setTimeout(() => {
-						setIsMessageOpen && setIsMessageOpen(true);
-					}, 200);
+				
+				if (isMyrequest && isMyrequest) {
+					handleConversation && handleConversation(requestByDate, event);
+					setSelectedRequest && setSelectedRequest(requestByDate);
+
+
+					if (window.innerWidth < 1000) {
+						setIsListOpen && setIsListOpen(false);
+						setTimeout(() => {
+							setIsAnswerOpen && setIsAnswerOpen(true);
+							setIsMessageOpen && setIsMessageOpen(false);
+						}, 200);
+					}
+
+					if (!selectedRequest) {
+						if (selectedRequestRef && requestByDate) {
+							selectedRequestRef.current = requestByDate;
+						}
+					}
+				}
+
+				if (isMyConversation && isMyConversation) {
+					if (requestByDate && setSelectedRequest) {
+						setSelectedRequest && setSelectedRequest;
+					}
+					if (window.innerWidth < 780) {
+						//itemList();
+						setIsListOpen && setIsListOpen(false);
+						setTimeout(() => {
+							setIsMessageOpen && setIsMessageOpen(true);
+						}, 200);
+					}
 				}
 			}}
 			layout
@@ -79,40 +135,42 @@ const RequestItem = ({
 			exit={{ opacity: 0, scale: 0.9 }}
 			transition={{ duration: 0.1, type: 'tween' }}
 			role="listitem"
-			aria-labelledby={`request-title-${(request || requestByDate)?.id}`}
+			aria-labelledby={`item-title-${requestByDate?.id}`}
 		>
-			{requestByDate?.deleted_at && <p className="my-conversation__list__detail__item__deleted">SUPPRIMÉ PAR L&apos;UTILISATEUR</p>}
-			{(request || requestByDate)?.urgent && <p className="my-conversation__list__detail__item urgent">URGENT</p>}
-			<div className="my-conversation__list__detail__item__header">
-				<p className="my-conversation__list__detail__item__header date" >
-					<span className="my-conversation__list__detail__item__header date-span">
-						Date:</span>&nbsp;{new Date(Number((request || requestByDate)?.created_at)).toLocaleString()}
+			{isMyrequest && (requestByDate.conversation?.length > 0 && <Badge count={requestByDate?.conversation?.length} />)}
+			{isClientRequest && ((hiddenLoading && modalArgs?.requestId === requestByDate.id) && <Spinner />)}
+			{isMyConversation && (requestByDate?.deleted_at && <p className="item__deleted">SUPPRIMÉ PAR L&apos;UTILISATEUR</p>)}
+			{requestByDate?.urgent && <p className="item urgent">URGENT</p>}
+			<div className="item__header">
+				<p className="item__header date" >
+					<span className="item__header date-span">
+						Date:</span>&nbsp;{formatMessageDate(requestByDate?.created_at)}
 				</p>
-				<p className="my-conversation__list__detail__item__header city" >
-					<span className="my-conversation__list__detail__item__header city-span">
-						Ville:</span>&nbsp;{(request || requestByDate)?.city}
+				<p className="item__header city" >
+					<span className="item__header city-span">
+						Ville:</span>&nbsp;{requestByDate?.city}
 				</p>
-				<h2 className="my-conversation__list__detail__item__header job" >
-					<span className="my-conversation__list__detail__item__header job-span">
-						Métier:</span>&nbsp;{(request || requestByDate)?.job}
+				<h2 className="item__header job" >
+					<span className="item__header job-span">
+						Métier:</span>&nbsp;{requestByDate?.job}
 				</h2>
-				{(request || requestByDate)?.denomination ? (
-					<p className="my-conversation__list__detail__item__header name" >
-						<span className="my-conversation__list__detail__item__header name-span">
-							Entreprise:</span>&nbsp;{(request || requestByDate)?.denomination}
+				{requestByDate?.denomination ? (
+					<p className="item__header name" >
+						<span className="item__header name-span">
+							Entreprise:</span>&nbsp;{requestByDate?.denomination}
 					</p>
 				) : (
-					<p className="my-conversation__list__detail__item__header name" >
-						<span className="my-conversation__list__detail__item__header name-span">
-							Nom:</span>&nbsp;{(request || requestByDate)?.first_name} {(request || requestByDate)?.last_name}
+					<p className="item__header name" >
+						<span className="item__header name-span">
+							Nom:</span>&nbsp;{requestByDate?.first_name} {requestByDate?.last_name}
 					</p>
 				)}
 
 			</div>
-			<h1 className="my-conversation__list__detail__item title" >{(request || requestByDate)?.title}</h1>
+			<h1 className="item title" >{requestByDate?.title}</h1>
 			<p
 				//@ts-expect-error no type here
-				className={`my-conversation__list__detail__item message ${isMessageExpanded && isMessageExpanded[idRef.current] ? 'expanded' : ''}`}
+				className={`item message ${isMessageExpanded && isMessageExpanded[idRef.current] ? 'expanded' : ''}`}
 				onClick={(event) => {
 					//to open the message when the user clicks on it just for the selected request 
 					idRef.current = (request?.id ?? requestByDate?.id) ?? 0; // check if request or requestByDate is not undefined
@@ -126,13 +184,13 @@ const RequestItem = ({
 					event.stopPropagation();
 				}}
 			>
-				{(request || requestByDate)?.message}
+				{requestByDate?.message}
 			</p>
-			<div className={`my-conversation__list__detail__item__picture ${requestByDate?.deleted_at ? 'deleted' : ''}`}>
+			<div className={`item__picture ${isMyConversation && (requestByDate?.deleted_at ? 'deleted' : '')}`}>
 
 				{(() => {
-					const imageUrls = (request || requestByDate)?.media?.map(media => media.url) || [];
-					return (request || requestByDate)?.media?.map((media, index) => (
+					const imageUrls = requestByDate?.media?.map(media => media.url) || [];
+					return requestByDate?.media?.map((media, index) => (
 						media ? (
 							media.name.endsWith('.pdf') ? (
 								<a
@@ -141,18 +199,18 @@ const RequestItem = ({
 									download={media.name}
 									target="_blank"
 									rel="noopener noreferrer"
-									onClick={(event) => { event.stopPropagation(); }} 
+									onClick={(event) => { event.stopPropagation(); }}
 									aria-label={`Télécharger ${media.name}`}
-									>
+								>
 									<img
-										className="my-conversation__list__detail__item__picture img"
+										className="item__picture img"
 										src={pdfLogo}
 										alt={media.name}
 									/>
 								</a>
 							) : (
 								<img
-									className="my-conversation__list__detail__item__picture img"
+									className="item__picture img"
 									key={media.id}
 									src={media.url}
 									loading="lazy"
@@ -163,10 +221,10 @@ const RequestItem = ({
 
 										event.stopPropagation();
 									}}
-									alt={media.name}
 									onError={(event) => {
 										event.currentTarget.src = noPicture;
 									}}
+									alt={`Image associée à la demande ${requestByDate.title}`}
 								/>
 							)
 						) : null
@@ -175,13 +233,14 @@ const RequestItem = ({
 
 			</div>
 			<button
-				id={`delete-request-${(request || requestByDate)?.id ?? ''}`}
-				className="my-conversation__list__detail__item__delete"
+				id={`delete-request-${requestByDate?.id ?? ''}`}
+				className="item__delete"
 				type='button'
-				aria-label="Supprimer la demande"
+				aria-label={`Supprimer la demande ${requestByDate.title}`}
 				onClick={(event) => {
 					event.stopPropagation();
-					if (request?.id) {
+					event.preventDefault();
+					if (request?.id && isMyConversation) {
 						resetRequest && resetRequest();
 					} else {
 						setDeleteItemModalIsOpen(true);
@@ -195,12 +254,10 @@ const RequestItem = ({
 				}}>
 			</button>
 			<FaTrashAlt
-				className="my-conversation__list__detail__item__delete-FaTrashAlt"
+				className="item__delete-FaTrashAlt"
 				aria-label="Supprimer la demande"
 				onClick={(event) => {
-					document.getElementById(`delete-request-${(request || requestByDate)?.id}`)?.click(),
-
-
+					document.getElementById(`delete-request-${requestByDate?.id}`)?.click(),
 						event.stopPropagation();
 				}}
 			/>

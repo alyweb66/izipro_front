@@ -446,6 +446,8 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		}
 
 	}, [selectedRequest]);
+console.log('requestsConversationStore', requestsConversationStore);
+console.log('request', request);
 
 	// useEffect to sort the requests by date
 	useEffect(() => {
@@ -513,34 +515,15 @@ console.log('subscriptions my conv', subscriptionStore);
 
 				{(requestByDate || request.id > 0) && (
 					<ul className="my-conversation__list__detail" >
-						{/* <AnimatePresence >
-							{isListOpen && request && request.id > 0 &&
-								<RequestItem
-									setHasManyImages={setHasManyImages}
-									request={request}
-									notViewedConversationStore={notViewedConversationStore}
-									setIsMessageOpen={setIsMessageOpen}
-									resetRequest={resetRequest}
-									selectedRequest={selectedRequest!}
-									setSelectedRequest={setSelectedRequest}
-									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
-									isMessageExpanded={isMessageExpanded}
-									setIsMessageExpanded={setIsMessageExpanded}
-									setIsListOpen={setIsListOpen}
-									setModalArgs={setModalArgs}
-									openModal={openModal}
-								/>
-							}
-						</AnimatePresence> */}
 						<AnimatePresence>
-							{isListOpen && requestByDate?.map((requestByDate, index) => (
+							{isListOpen && requestByDate?.map((requestByDate) => (
 								<RequestItem
 									setHasManyImages={setHasManyImages}
 									key={requestByDate.id}
-									index={index}
-									notViewedConversationStore={notViewedConversationStore}
+									notViewedStore={notViewedConversationStore}
 									requestByDate={requestByDate}
 									setIsMessageOpen={setIsMessageOpen}
+									isMyConversation={true}
 									selectedRequest={selectedRequest!}
 									setSelectedRequest={setSelectedRequest}
 									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}

@@ -49,6 +49,9 @@ import Fade from '@mui/material/Fade';
 import noPicture from '/no-picture.webp';
 //import { formatMessageDate } from '../../Hook/Component';
 import { MessageList } from '../../Hook/MessageList';
+import { formatMessageDate } from '../../Hook/Component';
+import { Badge } from '../../Hook/Badge';
+import RequestItem from '../../Hook/RequestHook';
 //import { Id } from '@turf/turf';
 
 // Configuration for React Modal
@@ -148,7 +151,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			}
 
 		}).then((response) => {
-			
+
 			if (response.data.deleteRequest) {
 				setUserConvState([]);
 				setModalArgs(null);
@@ -164,13 +167,13 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				// update the subscription
 				const newSubscription = { ...subscription, subscriber_id: updatedSubscription };
 
-					subscriptionDataStore.setState((prevState) => ({
-						...prevState,
-						subscription: prevState.subscription?.map(subscription =>
-							subscription?.subscriber === 'request' ? newSubscription : subscription
-						)
-					}) as Partial<SubscriptionStore>);
-				
+				subscriptionDataStore.setState((prevState) => ({
+					...prevState,
+					subscription: prevState.subscription?.map(subscription =>
+						subscription?.subscriber === 'request' ? newSubscription : subscription
+					)
+				}) as Partial<SubscriptionStore>);
+
 
 				// remove subscription for this conversation
 				const conversationSubscription = subscriptionStore.find(subscription => subscription.subscriber === 'conversation');
@@ -180,17 +183,17 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				// remove the conversation id from the subscription
 				const updatedConversationSubscription = Array.isArray(conversationSubscription?.subscriber_id) ?
 					conversationSubscription?.subscriber_id.filter(id => !conversationIds?.some(conv => conv.id === id))
-				: [];
+					: [];
 				// update the subscription
 				const newConversationSubscription = { ...conversationSubscription, subscriber_id: updatedConversationSubscription };
 
-					subscriptionDataStore.setState((prevState) => ({
-						...prevState,
-						subscription: prevState.subscription?.map(subscription =>
-							subscription?.subscriber === 'conversation' ? newConversationSubscription : subscription
-						)
-					}) as Partial<SubscriptionStore>);
-				
+				subscriptionDataStore.setState((prevState) => ({
+					...prevState,
+					subscription: prevState.subscription?.map(subscription =>
+						subscription?.subscriber === 'conversation' ? newConversationSubscription : subscription
+					)
+				}) as Partial<SubscriptionStore>);
+
 
 				// delete from message store all message with this conversation viewedIds
 				myMessageDataStore.setState(prevState => {
@@ -718,7 +721,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		}
 	}, [selectedUser]);
-console.log('subscriptionStore myRequest', subscriptionStore);
+	console.log('subscriptionStore myRequest', subscriptionStore);
 
 	return (
 		<div className="my-request">
@@ -731,155 +734,26 @@ console.log('subscriptionStore myRequest', subscriptionStore);
 				{!requestByDate ? <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p> : (
 					<ul className="my-request__list__detail" >
 						<AnimatePresence>
-							{isListOpen && requestByDate.map((request, index) => (
-								<motion.li
-									id={index === 0 ? 'first-request' : undefined}
-									className={`my-request__list__detail__item 
-									${request.urgent}
-									${selectedRequest?.id === request?.id ? 'selected' : ''} 
-									${request.conversation?.some(conv => notViewedConversationStore?.some(id => id === conv.id)) ? 'not-viewed' : ''} `}
-
-									key={request.id}
-									onClick={(event) => {
-										handleConversation(request, event);
-										setSelectedRequest(request);
-
-										if (window.innerWidth < 1000) {
-											setIsListOpen(false);
-											setTimeout(() => {
-												setIsAnswerOpen(true);
-												setIsMessageOpen(false);
-											}, 200);
-										}
-
-										if (!selectedRequest) {
-											selectedRequestRef.current = request;
-										}
-									}}
-									aria-label={`Détails de la demande ${request.title}`}
-									layout
-									style={{ overflow: 'scroll' }}
-									initial={{ opacity: 0, scale: 0.9 }}
-									animate={{ opacity: 1, scale: 1 }}
-									exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-									transition={{ duration: 0.1, type: 'tween' }}
-								>
-									{deleteRequestLoading && modalArgs?.requestId === request.id && <Spinner />}
-									{request.urgent && <p className="my-request__list__detail__item urgent">URGENT</p>}
-									<div className="my-request__list__detail__item__header">
-										<p className="my-request__list__detail__item__header date" >
-											<span className="my-request__list__detail__item__header date-span">
-												Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
-										</p>
-										<p className="my-request__list__detail__item__header city" >
-											<span className="my-request__list__detail__item__header city-span">
-												Ville:</span>&nbsp;{request.city}
-										</p>
-										<h2 className="my-request__list__detail__item__header job" >
-											<span className="my-request__list__detail__item__header job-span">
-												Métier:</span>&nbsp;{request.job}
-										</h2>
-										{request.denomination ? (
-											<p className="my-request__list__detail__item__header name" >
-												<span className="my-request__list__detail__item__header name-span">
-													Entreprise:</span>&nbsp;{request.denomination}
-											</p>
-										) : (
-											<p className="my-request__list__detail__item__header name" >
-												<span className="my-request__list__detail__item__header name-span">
-													Nom:</span>&nbsp;{request.first_name} {request.last_name}
-											</p>
-										)}
-									</div>
-									<h1 className="my-request__list__detail__item title" >{request.title}</h1>
-									<p
-										//@ts-expect-error con't resolve this type
-										className={`my-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
-										onClick={(event) => {
-											//to open the message when the user clicks on it just for the selected request 
-											idRef.current = request?.id ?? 0; // check if request or requestByDate is not undefined
-
-											if (idRef.current !== undefined && setIsMessageExpanded) {
-												setIsMessageExpanded((prevState: ExpandedState) => ({
-													...prevState,
-													[idRef.current as number]: !prevState[idRef.current]
-												}));
-											}
-											event.stopPropagation();
-										}}
-									>
-										{request.message}
-									</p>
-									<div className="my-request__list__detail__item__picture">
-
-										{(() => {
-											const imageUrls = request.media?.map(media => media.url) || [];
-
-											return request.media?.map((media, index) => (
-												media ? (
-													media.name.endsWith('.pdf') ? (
-														<a
-															href={media.url}
-															key={media.id}
-															download={media.name}
-															target="_blank"
-															rel="noopener noreferrer"
-															onClick={(event) => { event.stopPropagation(); }}
-															aria-label={`PDF associé à la demande ${request.title}`}
-														>
-															{ }
-															<img
-																className="my-request__list__detail__item__picture img"
-																src={pdfLogo}
-																alt={`PDF associé à la demande ${request.title}`}
-
-															/>
-														</a>
-													) : (
-														<img
-															className="my-request__list__detail__item__picture img"
-															key={media.id}
-															src={media.url}
-															loading="lazy"
-															onClick={(event) => {
-																setHasManyImages(false),
-																	openModal(imageUrls, index),
-																	imageUrls.length > 1 && setHasManyImages(true);
-
-																event.stopPropagation();
-															}}
-															onError={(event) => {
-																event.currentTarget.src = noPicture;
-															}}
-															alt={`Image associée à la demande ${request.title}`}
-														/>
-													)
-												) : null
-											));
-										})()}
-
-									</div>
-									<button
-										id={`delete-request-${request.id}`}
-										className="my-request__list__detail__item__delete"
-										type='button'
-										aria-label={`Supprimer la demande ${request.title}`}
-										onClick={(event) => {
-											event.preventDefault();
-											setDeleteItemModalIsOpen(true);
-											setModalArgs({ requestId: request.id, requestTitle: request.title }),
-												event.stopPropagation();
-										}}
-									>
-									</button>
-									<FaTrashAlt
-										className="my-request__list__detail__item__delete-FaTrashAlt"
-										onClick={(event) => {
-											document.getElementById(`delete-request-${request.id}`)?.click(),
-												event.stopPropagation();
-										}}
-									/>
-								</motion.li>
+							{isListOpen && requestByDate.map((requestByDate) => (
+								<RequestItem
+									setHasManyImages={setHasManyImages}
+									key={requestByDate.id}
+									notViewedStore={notViewedConversationStore}
+									requestByDate={requestByDate}
+									setIsMessageOpen={setIsMessageOpen}
+									isMyrequest={true}
+									handleConversation={handleConversation}
+									setIsAnswerOpen={setIsAnswerOpen}
+									selectedRequestRef={selectedRequestRef}
+									selectedRequest={selectedRequest!}
+									setSelectedRequest={setSelectedRequest}
+									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+									isMessageExpanded={isMessageExpanded}
+									setIsMessageExpanded={setIsMessageExpanded}
+									setIsListOpen={setIsListOpen}
+									setModalArgs={setModalArgs}
+									openModal={openModal}
+								/>
 							))}
 
 						</AnimatePresence>

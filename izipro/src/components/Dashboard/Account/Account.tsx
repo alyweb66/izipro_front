@@ -527,6 +527,8 @@ function Account() {
 			setAddressState(location.name);
 			setCityState(location.city);
 			setPostalCodeState(location.postcode);
+
+			setErrorLocation('');
 		}
 	};
 

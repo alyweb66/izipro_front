@@ -1,5 +1,5 @@
 // React
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 
 // Apollo Client mutations
 import { useMutation } from '@apollo/client';
@@ -19,21 +19,16 @@ import { notViewedRequest } from '../../../store/Viewed';
 // Types and assets
 import { RequestProps } from '../../../Type/Request';
 //import { SubscriptionProps } from '../../../Type/Subscription';
-import pdfLogo from '/logo-pdf.webp';
 
 // Components and utilities
 import './clientRequest.scss';
 import Spinner from '../../Hook/Spinner';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
-import { FaTrashAlt } from 'react-icons/fa';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
-import { motion, AnimatePresence } from 'framer-motion';
-import noPicture from '/no-picture.webp';
+import { AnimatePresence } from 'framer-motion';
 
+import RequestItem from '../../Hook/RequestHook';
 
-type ExpandedState = {
-	[key: number]: boolean;
-};
 
 type clientRequestProps = {
 	loading?: boolean;
@@ -55,10 +50,6 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ requestId: number, requestTitle: string } | null>(null);
 
-	/* 	const [isLoading, setIsLoading] = useState(false); */
-	// Create a ref for the scroll position
-	//const offsetRef = useRef(0);
-	const idRef = useRef<number>(0);
 
 	const limit = 5;
 
@@ -180,9 +171,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 					if (isAnyIdInViewInStore) {
 
 						notViewedRequest.setState(prevState => ({ notViewed: prevState.notViewed.filter(value => !requestIdsInView.includes(value)) }));
-						//setNotViewedRequestStore(notViewedRequestStore.filter(value => !requestIdsInView.includes(value)));
 					}
-					//notViewedRequest.setState({ notViewed: notViewedRequestStore.filter(value => !requestIdsInView.includes(value)) });
 
 					// remove not viewed request from the database
 					if (requestIdsInView.length > 0) {
@@ -239,139 +228,26 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 				) : (
 					<ul className="client-request__list__detail">
 						<AnimatePresence>
-							{clientRequestsStore.map((request) => (
-								<motion.li
-									className={`client-request__list__detail__item ${request.urgent} ${notViewedRequestStore.some(id => id === request.id) ? 'not-viewed' : ''} `}
-									data-request-id={request?.id}
-									key={request.id}
-									onClick={(event) => {
-										setRequest(request),
-											setClientRequest(request),
-											onDetailsClick(),
-											event.preventDefault();
-										event.stopPropagation();
-									}}
-									layout
-									style={{ overflow: 'scroll' }}
-									initial={{ opacity: 0, scale: 0.9 }}
-									animate={{ opacity: 1, scale: 1 }}
-									exit={{ opacity: 0, scale: 0.9 }}
-									transition={{ duration: 0.2, type: 'Inertia', stiffness: 50 }}
-									aria-label={`Demande de ${request.first_name} ${request.last_name}`}
-								>
-									{hiddenLoading && modalArgs?.requestId === request.id && <Spinner />}
-									{request.urgent && <p className="client-request__list__detail__item urgent">URGENT</p>}
-									<div className="client-request__list__detail__item__header">
-										<p className="client-request__list__detail__item__header date" >
-											<span className="client-request__list__detail__item__header date-span">
-												Date:</span>&nbsp;{new Date(Number(request.created_at)).toLocaleString()}
-										</p>
-										<p className="client-request__list__detail__item__header city" >
-											<span className="client-request__list__detail__item__header city-span">
-												Ville:</span>&nbsp;{request.city}
-										</p>
-										<h2 className="client-request__list__detail__item__header job" >
-											<span className="client-request__list__detail__item__header job-span">
-												Métier:</span>&nbsp;{request.job}
-										</h2>
-										{request.denomination ? (
-											<p className="client-request__list__detail__item__header name" >
-												<span className="client-request__list__detail__item__header name-span">
-													Entreprise:</span>&nbsp;{request.denomination}
-											</p>
-										) : (
-											<p className="client-request__list__detail__item__header name" >
-												<span className="client-request__list__detail__item__header name-span">
-													Nom:</span>&nbsp;{request.first_name} {request.last_name}
-											</p>
-										)}
-									</div>
-									<h1 className="client-request__list__detail__item title" >{request.title}</h1>
-									<p
-										//@ts-expect-error con't resolve this type
-										className={`client-request__list__detail__item message ${isMessageExpanded && isMessageExpanded[request?.id] ? 'expanded' : ''}`}
-										onClick={(event: React.MouseEvent) => {
-											//to open the message when the user clicks on it just for the selected request 
-											idRef.current = request?.id ?? 0; // check if request or requestByDate is not undefined
-
-											if (idRef.current !== undefined && setIsMessageExpanded) {
-												setIsMessageExpanded((prevState: ExpandedState) => ({
-													...prevState,
-													[idRef.current as number]: !prevState[idRef.current]
-												}));
-											}
-
-											event.stopPropagation();
-										}}
-										aria-label={`Message de la demande ${request.title}`}
-									>
-										{request.message}
-									</p>
-									<div className="client-request__list__detail__item__picture">
-										{(() => {
-											const imageUrls = request.media?.map(media => media.url) || [];
-											return request.media?.map((media, index) => (
-												media ? (
-													media.name.endsWith('.pdf') ? (
-														<a
-															href={media.url}
-															key={media.id}
-															download={media.name}
-															target="_blank"
-															rel="noopener noreferrer"
-															onClick={(event) => { event.stopPropagation(); }}
-															aria-label={`Télécharger le fichier PDF ${media.name}`}
-														>
-															<img
-																className="client-request__list__detail__item__picture img"
-																src={pdfLogo}
-																alt={media.name}
-															/>
-														</a>
-													) : (
-														<img
-															className="client-request__list__detail__item__picture img"
-															key={media.id}
-															src={media.url}
-															onClick={(event) => {
-																setHasManyImages(false),
-																	openModal(imageUrls, index),
-																	imageUrls.length > 1 && setHasManyImages(true);
-
-																event.stopPropagation();
-															}}
-															alt={media.name}
-															onError={(event) => {
-																event.currentTarget.src = noPicture;
-															}}
-														/>
-													)
-												) : null
-											));
-										})()}
-
-									</div>
-									<button
-										id={`delete-request-${request.id}`}
-										className="client-request__list__detail__item__delete"
-										type='button'
-										onClick={(event) => {
-											setDeleteItemModalIsOpen(true);
-											setModalArgs({ requestId: request.id, requestTitle: request.title });
-											event.stopPropagation();
-										}}
-										aria-label={`Supprimer la demande ${request.title}`}
-									>
-									</button>
-									<FaTrashAlt
-										className="client-request__list__detail__item__delete-FaTrashAlt"
-										onClick={(event) => {
-											document.getElementById(`delete-request-${request.id}`)?.click(),
-												event.stopPropagation();
-										}}
-										aria-label={`Supprimer la demande ${request.title}`}
-									/>
-								</motion.li>
+							{clientRequestsStore.map((requestByDate) => (
+								<RequestItem
+								setHasManyImages={setHasManyImages}
+								key={requestByDate.id}
+								setClientRequest={setClientRequest}
+								notViewedStore={notViewedRequestStore}
+								setRequest={setRequest}
+								requestByDate={requestByDate}
+								isClientRequest={true}
+								resetRequest={setRequest}
+								onDetailsClick={onDetailsClick}
+								hiddenLoading={hiddenLoading}
+								modalArgs={modalArgs}
+								setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+								isMessageExpanded={isMessageExpanded}
+								setIsMessageExpanded={setIsMessageExpanded}
+								setModalArgs={setModalArgs}
+								openModal={openModal}
+							/>
+								
 							))}
 						</AnimatePresence>
 					</ul>
