@@ -8,7 +8,11 @@ import { motion } from 'framer-motion';
 import { formatMessageDate } from './Component';
 import '../../styles/requestHook.scss';
 import Spinner from './Spinner';
-import { Badge } from './Badge';
+//import { Badge } from './Badge';
+import Stack from '@mui/material/Stack';
+import Badge, { BadgeProps } from '@mui/material/Badge';
+import { styled } from '@mui/material/styles';
+import { Grow } from '@mui/material';
 
 type ExpandedState = {
 	[key: number]: boolean;
@@ -70,7 +74,18 @@ const RequestItem = ({
 	setHasManyImages: Function
 }) => {
 	const idRef = useRef<number>(0);
-console.log('notViewedStore', notViewedStore);
+	console.log('notViewedStore', notViewedStore);
+
+	const StyledBadge = styled(Badge)<BadgeProps>(() => ({
+		'& .MuiBadge-badge': {
+			fontSize: '0.9rem',
+			borderRadius: '50%',
+			width: '24px',
+			height: '24px',
+			minWidth: '24px',
+		},
+	}));
+
 
 	return (
 		<motion.li
@@ -90,11 +105,11 @@ console.log('notViewedStore', notViewedStore);
 
 				if (isClientRequest && isClientRequest) {
 					setRequest && setRequest(requestByDate),
-					setClientRequest && setClientRequest(requestByDate),
-					onDetailsClick && onDetailsClick(),
-					event.stopPropagation();
+						setClientRequest && setClientRequest(requestByDate),
+						onDetailsClick && onDetailsClick(),
+						event.stopPropagation();
 				}
-				
+
 				if (isMyrequest && isMyrequest) {
 					handleConversation && handleConversation(requestByDate, event);
 					setSelectedRequest && setSelectedRequest(requestByDate);
@@ -117,7 +132,7 @@ console.log('notViewedStore', notViewedStore);
 
 				if (isMyConversation && isMyConversation) {
 					if (requestByDate && setSelectedRequest) {
-						setSelectedRequest && setSelectedRequest;
+						setSelectedRequest && setSelectedRequest(requestByDate);
 					}
 					if (window.innerWidth < 780) {
 						//itemList();
@@ -137,7 +152,14 @@ console.log('notViewedStore', notViewedStore);
 			role="listitem"
 			aria-labelledby={`item-title-${requestByDate?.id}`}
 		>
-			{isMyrequest && (requestByDate.conversation?.length > 0 && <Badge count={requestByDate?.conversation?.length} />)}
+			{isMyrequest && (
+				<Grow in={true} timeout={200}>
+					<Stack >
+						<StyledBadge className="notification-badge" badgeContent={requestByDate?.conversation?.length} color="info" >
+						</StyledBadge>
+					</Stack>
+				</Grow>
+			)}
 			{isClientRequest && ((hiddenLoading && modalArgs?.requestId === requestByDate.id) && <Spinner />)}
 			{isMyConversation && (requestByDate?.deleted_at && <p className="item__deleted">SUPPRIMÉ PAR L&apos;UTILISATEUR</p>)}
 			{requestByDate?.urgent && <p className="item urgent">URGENT</p>}

@@ -105,19 +105,12 @@
                 transition: 0.2s ease color;
 
                 .badge-container {
-                    position: absolute;
-                   // top: 0.2rem;
-                    right: -1.3rem;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    min-width: 2rem;
-                    height: 1.5rem;
-                    visibility: hidden;
+                position:absolute;
+                right: -0.2rem;
+                top: 0.9rem;
+                background-color: #f5c6cb;
 
-                    &.visible {
-                        visibility: visible;
-                    }
+                   
                 }
 
                 .tab-content {
@@ -194,7 +187,7 @@
             .dashboard__nav__menu {
                 .dashboard__nav__menu__content__tab {
                     font-size: 0.9rem;
-
+             
                 }
             }
         }
@@ -377,6 +370,11 @@
                         list-style-type: none;
                         transition: transform 0.1s ease;
 
+                        .badge-container {
+                            right: 0.2rem;
+               
+                        }
+        
 
                         &:hover {
                             .indicator {

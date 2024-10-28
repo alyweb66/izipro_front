@@ -10,7 +10,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import Logout from '../Header/Logout/Logout';
 import Footer from '../Footer/Footer';
 import Spinner from '../Hook/Spinner';
-import { Badge } from '../Hook/Badge';
+//import { Badge } from '../Hook/Badge';
 
 // Hook personal
 import {
@@ -48,7 +48,10 @@ import { messageDataStore, myMessageDataStore } from '../../store/message';
 // Style
 import './Dashboard.scss';
 import { DeleteItemModal } from '../Hook/DeleteItemModal';
-
+import Stack from '@mui/material/Stack';
+import Badge, { BadgeProps } from '@mui/material/Badge';
+import { styled } from '@mui/material/styles';
+import { Grow } from '@mui/material';
 
 const Request = lazy(() => import('./Request/Request'));
 const MyRequest = lazy(() => import('./MyRequest/MyRequest'));
@@ -162,7 +165,7 @@ function Dashboard() {
 	const [isMultipleLogout, setIsMultipleLogout] = useState<boolean>(false);
 	const [isOffLine, setIsOffLine] = useState<boolean>(false);
 
-console.log('id', id);
+	console.log('id', id);
 
 	//*state for myRequest
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
@@ -248,6 +251,14 @@ console.log('id', id);
 	const { clientRequestSubscription } = useClientRequestSubscriptions((role !== 'pro'));
 	const { clientMessageSubscription } = useMyConversationSubscriptions((role !== 'pro'));
 
+	// style for the badge
+	const StyledBadge = styled(Badge)<BadgeProps>(() => ({
+		'& .MuiBadge-badge': {
+			color: 'white',
+			backgroundColor: '#ff0000',
+		},
+	}));
+	
 	// For indacating the tab under the burger menu
 	const tabLabels: { [key: string]: string } = {
 		'Request': 'DEMANDE',
@@ -929,6 +940,8 @@ console.log('id', id);
 		);
 	};
 
+	
+
 	return (
 		<>
 			<div className='dashboard'>
@@ -975,7 +988,14 @@ console.log('id', id);
 
 								<span>MES DEMANDES</span>
 								{(viewedMessageState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMessageState.length > 0 ? 'visible' : ''}`}>
-									{viewedMessageState.length > 0 && <Badge count={viewedMessageState.length} />}
+									{viewedMessageState.length > 0 && (
+										<Grow in={true} timeout={200}>
+										<Stack aria-label={`Vous avez${viewedMessageState.length} notifications`} >
+											<StyledBadge className="notification-badge" badgeContent={viewedMessageState.length} >
+											</StyledBadge>
+										</Stack>
+										</Grow>
+									)}
 								</div>)}
 							</div>
 							<div className="indicator"></div>
@@ -986,7 +1006,15 @@ console.log('id', id);
 								<div className="tab-content">
 									<span>CLIENT</span>
 									{(notViewedRequestStore.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>
-										{notViewedRequestStore.length > 0 && <Badge count={notViewedRequestStore.length} />}
+										{notViewedRequestStore.length > 0 && (
+											<Grow in={true} timeout={200}>
+											<Stack aria-label={`Vous avez${notViewedRequestStore.length} notifications`} >
+												<StyledBadge className="notification-badge" badgeContent={notViewedRequestStore.length} >
+												</StyledBadge>
+											</Stack>
+											</Grow>
+											)}
+
 									</div>)}
 								</div>
 								{/* {notViewedRequestStore.length > 0 && <ClientRequestBadge count={notViewedRequestStore.length} />} */}
@@ -999,7 +1027,14 @@ console.log('id', id);
 								<div className="tab-content">
 									<span>MES CONVERSATIONS</span>
 									{(viewedMyConversationState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
-										{viewedMyConversationState.length > 0 && <Badge count={viewedMyConversationState.length} />}
+										{viewedMyConversationState.length > 0 && (
+											<Grow in={true} timeout={200}>
+											<Stack aria-label={`Vous avez${viewedMyConversationState.length} notifications`} >
+												<StyledBadge className="notification-badge" badgeContent={viewedMyConversationState.length} >
+												</StyledBadge>
+											</Stack>
+											</Grow>
+										)}
 									</div>)}
 								</div>
 								<div className="indicator"></div>
@@ -1089,7 +1124,7 @@ console.log('id', id);
 					deleteItemModalIsOpen={isMultipleLogout || isExpiredSession}
 					handleDeleteItem={RedirectExpiredSession}
 				/>
-			</div>
+			</div >
 		</>
 
 	);
