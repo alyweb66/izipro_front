@@ -32,25 +32,20 @@ import { SubscriptionProps } from '../../../Type/Subscription';
 
 // Components and utilities
 import './MyRequest.scss';
-import pdfLogo from '/logo-pdf.webp';
 import logoProfile from '/logo-profile.webp';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
-import { FaCamera } from 'react-icons/fa';
-import { MdSend, MdAttachFile, MdKeyboardArrowLeft, MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
+import { MdKeyboardArrowLeft } from 'react-icons/md';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
-import TextareaAutosize from 'react-textarea-autosize';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import { motion, AnimatePresence } from 'framer-motion';
-import Alert from '@mui/material/Alert';
-import Stack from '@mui/material/Stack';
-import Fade from '@mui/material/Fade';
 import noPicture from '/no-picture.webp';
 //import { formatMessageDate } from '../../Hook/Component';
 import { MessageList } from '../../Hook/MessageList';
 import RequestItem from '../../Hook/RequestHook';
 import { HeaderMessage } from '../../Hook/HeaderMessage';
+import { MessageForm } from '../../Hook/MessageForm';
 //import { Id } from '@turf/turf';
 
 // Configuration for React Modal
@@ -460,7 +455,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	// useEffect to sort the requests by date and update the subscription
 	useEffect(() => {
 		if (myRequestsStore) {
-			
+
 			// Sort the requests by date
 			const sortedRequests = [...myRequestsStore].sort((requestA, requestB) => {
 				const dateA = requestA.conversation?.length
@@ -882,16 +877,16 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
 						{(messageLoading || messageMutationLoading) && <Spinner />}
-						<HeaderMessage 
-						selectedItem={selectedUser}
-						setIsAnswerOpen={setIsAnswerOpen}
-						setIsEndViewed={setIsEndViewed}
-						setIsListOpen={setIsListOpen}
-						isMyRequest={true}
-						setIsMessageOpen={setIsMessageOpen}
-						setSelectedItem={setSelectedUser}
-						setUserDescription={setUserDescription}
-						userDescription={userDescription}
+						<HeaderMessage
+							selectedItem={selectedUser}
+							setIsAnswerOpen={setIsAnswerOpen}
+							setIsEndViewed={setIsEndViewed}
+							setIsListOpen={setIsListOpen}
+							isMyRequest={true}
+							setIsMessageOpen={setIsMessageOpen}
+							setSelectedItem={setSelectedUser}
+							setUserDescription={setUserDescription}
+							userDescription={userDescription}
 						/>
 						<MessageList
 							conversationIdState={conversationIdState}
@@ -902,119 +897,20 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							setHasManyImages={setHasManyImages}
 						/>
 
-
-						<form className="my-request__message-list__form" onSubmit={(event) => {
-							event.preventDefault();
-							if (selectedUser?.id && !selectedUser?.deleted_at) {
-								handleMessageSubmit(event);
-							}
-
-						}}>
-							<div className="message">
-								<Stack sx={{ width: '100%' }} spacing={2}>
-									{fileError && (
-										<Fade in={!!fileError} timeout={300}>
-											<Alert variant="filled" severity="error">{fileError}</Alert>
-										</Fade>
-									)}
-								</Stack>
-								<Stack sx={{ width: '100%' }} spacing={2}>
-									{uploadFileError && (
-										<Fade in={!!uploadFileError} timeout={300}>
-											<Alert variant="filled" severity="error">{uploadFileError}</Alert>
-										</Fade>
-									)}
-								</Stack>
-							</div>
-							{urlFile.length > 0 && <div className="my-request__message-list__form__preview">
-								{urlFile.map((file, index) => (
-									<div className="my-request__message-list__form__preview__container" key={index}>
-
-										<img
-											className="my-request__message-list__form__preview__container__image"
-											src={file.type === 'application/pdf' ? pdfLogo : file.name}
-											alt={`Preview ${index}`}
-										/>
-										<div
-											className="my-request__message-list__form__preview__container__remove"
-											onClick={() => handleRemove(index)}
-											aria-label='Supprimer le fichier'
-										>
-											X
-										</div>
-									</div>
-								))}
-							</div>}
-							<label className="my-request__message-list__form__label">
-								<MdAttachFile
-									className="my-request__message-list__form__label__attach"
-									onClick={(event) => {
-										event.preventDefault(),
-											event.stopPropagation(),
-											document.getElementById('send-file')?.click()
-									}}
-									aria-label='Joindre un fichier'
-								/>
-								<FaCamera
-									className="my-request__message-list__form__label__camera"
-									onClick={(event) => {
-										event.preventDefault(),
-											event.stopPropagation(),
-											document.getElementById('file-camera')?.click()
-									}}
-									aria-label='Prendre une photo'
-
-								/>
-								<TextareaAutosize
-									id="messageInput"
-									name="message"
-									className="my-request__message-list__form__label__input"
-									value={messageValue}
-									onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}
-									placeholder="Tapez votre message ici..."
-									aria-label='Tapez votre message'
-									maxLength={1000}
-									readOnly={selectedUser && selectedUser?.id > 0 ? false : true}
-									onClick={(event: React.MouseEvent) => { event.stopPropagation(); event?.preventDefault(); }}
-								/>
-								<MdSend
-									className="my-request__message-list__form__label__send"
-									onClick={(event) => { document.getElementById('send-message')?.click(), event.stopPropagation(); event?.preventDefault(); }}
-									aria-label='Envoyer le message'
-
-								/>
-							</label>
-							<input
-								id="send-file"
-								className="my-request__message-list__form__input"
-								type="file"
-								accept="image/*,.pdf"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
-								multiple={true}
-								disabled={selectedUser && selectedUser?.id > 0 ? false : true}
-								aria-label="Envoyer un fichier"
-							/>
-							<input
-								id="file-camera"
-								className="my-request__message-list__form__input medi"
-								type="file"
-								accept="image/*"
-								capture="environment"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
-								disabled={selectedUser && selectedUser?.id > 0 ? false : true}
-								aria-label="Prendre une photo"
-							/>
-							<button
-								id="send-message"
-								className="my-request__message-list__form__button"
-								type="submit"
-								disabled={!selectedUser || selectedUser?.id <= 0 || messageMutationLoading}
-								aria-label="Envoyer le message"
-							>
-								Send
-							</button>
-						</form>
-
+						<MessageForm
+							fileError={fileError}
+							isMyRequest={true}
+							handleFileUpload={handleFileUpload}
+							handleMessageSubmit={handleMessageSubmit}
+							messageValue={messageValue}
+							setMessageValue={setMessageValue}
+							handleRemove={handleRemove}
+							urlFile={urlFile}
+							uploadFileError={uploadFileError}
+							messageMutationLoading={messageMutationLoading}
+							selectedItem={selectedUser}
+						/>
+						
 					</motion.div>
 				)}
 			</AnimatePresence>

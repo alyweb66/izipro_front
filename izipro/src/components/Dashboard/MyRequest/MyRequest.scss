@@ -240,8 +240,6 @@
         }
     }
 
-
-
     .my-request__message-list {
         display: flex;
         flex-direction: column;
@@ -256,171 +254,6 @@
             position: relative;
         }
       
-        .my-request__message-list__form {
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-            bottom: 0;
-            width: 100%;
-            z-index: 8;
-
-            .my-request__message-list__form__preview {
-                max-width: 100%;
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                background-color: transparent;
-                margin: 0;
-                padding: 0.5rem;
-                gap: 1rem;
-                background-color: transparent;
-
-                .my-request__message-list__form__preview__container {
-                    display: flex;
-                    flex-wrap: wrap;
-
-
-                    .my-request__message-list__form__preview__container__image {
-                        box-shadow: -5px 0 10px #6666661e,
-                            -5px 0 10px #ffffff62,
-                            5px 0 10px #66666680;
-                        border-radius: 0.5rem;
-                        width: 100px;
-                        height: 100px;
-                        object-fit: cover;
-
-                    }
-
-                    .my-request__message-list__form__preview__container__remove {
-                        margin: 0 0.3rem;
-                        width: 0.8rem;
-                        height: 1.5rem;
-                        border: none;
-                        background-color: transparent;
-                        color: red;
-                        font-size: 1rem;
-                        font-weight: 600;
-                        transition: transform 0.1s ease;
-
-                        /* For mouse */
-                        @media (hover: hover) and (pointer: fine) {
-                            cursor: pointer;
-                        }
-
-                        /* For touch */
-                        @media (hover: none) and (pointer: coarse) {
-                            cursor: default;
-                        }
-
-
-                        &:hover {
-                            transform: scale(1.5);
-                        }
-                    }
-
-
-                }
-            }
-
-        }
-
-        .my-request__message-list__form__label {
-            display: flex;
-            align-items: center;
-            margin: 0;
-            padding: 0.5rem;
-            background: white;
-            box-shadow: 0 -1px 6px 1px rgba(0, 0, 0, 0.2);
-            font-size: 1rem;
-            font-weight: 500;
-            color: v.$color-primary-orange;
-            border-radius: 0 0 0.3rem 0.3rem;
-            z-index: 8;
-
-            .my-request__message-list__form__label__attach {
-                font-size: 2rem;
-                margin: 0.2rem 0.3rem;
-                z-index: 10;
-
-                /* For mouse */
-                @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer;
-                }
-
-                /* For touch */
-                @media (hover: none) and (pointer: coarse) {
-                    cursor: default;
-                }
-            }
-
-            .my-request__message-list__form__label__camera {
-                font-size: 2rem;
-                margin: 0.2rem 0.3rem;
-                z-index: 10;
-
-                /* For mouse */
-                @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer;
-                }
-
-                /* For touch */
-                @media (hover: none) and (pointer: coarse) {
-                    cursor: default;
-                }
-            }
-
-            .my-request__message-list__form__label__input {
-                overflow: hidden;
-                scrollbar-width: none;
-                border-radius: 0.5rem;
-                width: 100%;
-                margin: 0 0.3rem;
-                color: black;
-                font-weight: 400;
-                border: none;
-                background-color: transparent;
-                resize: none;
-                z-index: 10;
-
-                &::-webkit-scrollbar {
-                    display: none;
-                    /* For Chrome, Safari and Opera */
-                }
-
-                &:focus {
-                    outline: none;
-                }
-            }
-
-            .my-request__message-list__form__label__send {
-                margin: auto;
-                font-size: 2.5rem;
-                margin-right: 0.5rem;
-                z-index: 10;
-
-                /* For mouse */
-                @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer;
-                }
-
-                /* For touch */
-                @media (hover: none) and (pointer: coarse) {
-                    cursor: default;
-                }
-                
-
-            }
-        }
-
-        .my-request__message-list__form__input {
-
-            display: none;
-
-        }
-
-        .my-request__message-list__form__button {
-            display: none;
-        }
 
 
     }
@@ -513,40 +346,8 @@
                 width: 80%;
                
 
-                .my-request__message-list__user {
+                
 
-                    .my-request__message-list__user__header {
-
-                        &.description {
-                            margin-top: 0;
-
-                        }
-
-                        .my-request__message-list__user__header__detail {
-
-                            &.return {
-                                display: block;
-                                font-size: 4rem;
-                                color: v.$color-primary-orange;
-
-                               
-                                @media (hover: hover) and (pointer: fine) {
-                                    cursor: pointer;
-                                }
-
-                             
-                                @media (hover: none) and (pointer: coarse) {
-                                    cursor: default;
-                                }
-                            }
-                        }
-                    }
-                }
-
-               /*  .my-request__message-list__message {
-                    overflow-y: auto;
-                    height: auto
-                } */
             }
 
         }
@@ -598,45 +399,9 @@
                 margin-top: 0;
                 margin-bottom: 0;
 
-                .my-request__message-list__user {
-                    .my-request__message-list__user__header {
-
-
-                        .my-request__message-list__user__header__detail {
-                            border-radius: 0;
-
-                            &.description {
-                                padding: 0 0.5rem;
-                                display: b lock;
-                                overflow: hidden;
-                                text-overflow: none;
-                                white-space: normal;
-                            }
-
-                            &.return {
-                                font-size: 4rem;
-                                width: 15%;
-                            }
-
-                            &.img {
-                                margin: 0.5rem 0.5rem 0.5rem 0.2rem;
-                                border-radius: 0.5rem;
-                            }
-
-                            &.denomination {
-                                width: 40%;
-
-                                &.deployed {
-                                    width: 100%;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                .my-request__message-list__form__label {
+                /* .my-request__message-list__form__label {
                     border-radius: 0;
-                }
+                } */
             }
         }
 

@@ -105,3 +105,73 @@
     }
 
 }
+
+@media (max-width: 1000px) {
+    .header-message__user {
+
+        .header-message__user__header {
+
+            &.description {
+                margin-top: 0;
+
+            }
+
+            .header-message__user__header__detail {
+
+                &.return {
+                    display: block;
+                    font-size: 4rem;
+                    color: v.$color-primary-orange;
+
+                   
+                    @media (hover: hover) and (pointer: fine) {
+                        cursor: pointer;
+                    }
+
+                 
+                    @media (hover: none) and (pointer: coarse) {
+                        cursor: default;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .header-message__user {
+        .header-message__user__header {
+
+
+            .header-message__user__header__detail {
+                border-radius: 0;
+
+                &.description {
+                    padding: 0 0.5rem;
+                    display: b lock;
+                    overflow: hidden;
+                    text-overflow: none;
+                    white-space: normal;
+                }
+
+                &.return {
+                    font-size: 4rem;
+                    width: 15%;
+                }
+
+                &.img {
+                    margin: 0.5rem 0.5rem 0.5rem 0.2rem;
+                    border-radius: 0.5rem;
+                }
+
+                &.denomination {
+                    width: 40%;
+
+                    &.deployed {
+                        width: 100%;
+                    }
+                }
+            }
+        }
+    }
+}

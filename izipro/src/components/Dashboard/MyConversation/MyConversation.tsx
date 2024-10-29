@@ -1,7 +1,6 @@
 
 // React hooks and components
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import TextareaAutosize from 'react-textarea-autosize';
 
 // Apollo Client mutations
 import { useMutation } from '@apollo/client';
@@ -42,23 +41,14 @@ import { RequestProps } from '../../../Type/Request';
 import { MessageProps, MessageStoreProps } from '../../../Type/message';
 
 import { SubscriptionProps } from '../../../Type/Subscription';
-import pdfLogo from '/logo-pdf.webp';
-import logoProfile from '/logo-profile.webp';
+
 
 // Components and utilities
 import './MyConversation.scss';
-
-import { FaCamera } from 'react-icons/fa';
-import { MdAttachFile, MdKeyboardArrowLeft, MdSend, MdKeyboardArrowRight, MdKeyboardArrowDown } from 'react-icons/md';
-
 import { AnimatePresence, motion } from 'framer-motion';
-import Alert from '@mui/material/Alert';
-import Stack from '@mui/material/Stack';
-import Fade from '@mui/material/Fade';
-import noPicture from '/no-picture.webp';
-
 import { UpdateMyConvMessage } from '../../Hook/UpdateMyConvMessage';
 import { HeaderMessage } from '../../Hook/HeaderMessage';
+import { MessageForm } from '../../Hook/MessageForm';
 
 
 type useQueryUserConversationsProps = {
@@ -141,7 +131,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const { setIsEndViewed } = ScrollList({});
 
 	// Function to send message
-	function sendMessage(event: React.FormEvent<HTMLFormElement>, requestId: number) {
+	function sendMessage(event: React.FormEvent<HTMLFormElement>, requestId?: number) {
 		event.preventDefault();
 
 		if (fileError) {
@@ -568,14 +558,14 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 						{(messageLoading || messageMutLoading) && <Spinner />}
 						<div className="my-conversation__message-list__user">
 							{selectedRequest && (
-								<HeaderMessage 
-								requestTitle={requestTitle}
-								selectedItem={selectedRequest}
-								setRequestTitle={setRequestTitle}
-								isMyConversation={true}
-								setIsListOpen={setIsListOpen}
-								setIsMessageOpen={setIsMessageOpen}
-								setIsEndViewed={setIsEndViewed}
+								<HeaderMessage
+									requestTitle={requestTitle}
+									selectedItem={selectedRequest}
+									setRequestTitle={setRequestTitle}
+									isMyConversation={true}
+									setIsListOpen={setIsListOpen}
+									setIsMessageOpen={setIsMessageOpen}
+									setIsEndViewed={setIsEndViewed}
 								/>
 							)}
 
@@ -588,118 +578,19 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							openModal={openModal}
 							setHasManyImages={setHasManyImages}
 						/>
-
-						<form className="my-conversation__message-list__form" onSubmit={(event) => {
-							event.preventDefault();
-							if (selectedRequest?.id && !selectedRequest.deleted_at) {
-								sendMessage(event, selectedRequest.id);
-							}
-						}}>
-
-							<div className="message">
-								<Stack sx={{ width: '100%' }} spacing={2}>
-									{fileError && (
-										<Fade in={!!fileError} timeout={300}>
-											<Alert variant="filled" severity="error">{fileError}</Alert>
-										</Fade>
-									)}
-								</Stack>
-								<Stack sx={{ width: '100%' }} spacing={2}>
-									{uploadFileError && (
-										<Fade in={!!uploadFileError} timeout={300}>
-											<Alert variant="filled" severity="error">{uploadFileError}</Alert>
-										</Fade>
-									)}
-								</Stack>
-							</div>
-							{urlFile.length > 0 && <div className="my-conversation__message-list__form__preview">
-								{urlFile.map((file, index) => (
-									<div className="my-conversation__message-list__form__preview__container" key={index}>
-
-										<img
-											className="my-conversation__message-list__form__preview__container__image"
-											src={file.type === 'application/pdf' ? pdfLogo : file.name}
-											alt={`Preview ${index}`}
-										/>
-										<div
-											className="my-conversation__message-list__form__preview__container__remove"
-											onClick={() => handleRemove(index)}
-											aria-label="Supprimer le fichier"
-										>
-											X
-										</div>
-									</div>
-								))}
-							</div>}
-							<label className="my-conversation__message-list__form__label">
-								<MdAttachFile
-									className="my-conversation__message-list__form__label__attach"
-									onClick={(event) => {
-										event.stopPropagation(),
-											event.preventDefault(),
-											document.getElementById('send-file')?.click()
-									}}
-									aria-label="Joindre un fichier"
-								/>
-								<FaCamera
-									className="my-conversation__message-list__form__label__camera"
-									onClick={(event) => {
-										event.preventDefault(),
-											event.stopPropagation(),
-											document.getElementById('file-camera')?.click()
-									}}
-									aria-label="Prendre une photo"
-								/>
-								<TextareaAutosize
-									id="message-input"
-									name="message"
-									className="my-conversation__message-list__form__label__input"
-									value={messageValue}
-									onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(event.target.value)}
-									placeholder="Tapez votre message ici..."
-									maxLength={1000}
-									minRows={1}
-									readOnly={selectedRequest && selectedRequest?.id > 0 ? false : true}
-									aria-label="Tapez votre message ici"
-								/>
-								<MdSend
-									className="my-conversation__message-list__form__label__send"
-									onClick={(event) => { document.getElementById('send-message')?.click(), event.stopPropagation(); event?.preventDefault(); }}
-									aria-label="Envoyer le message"
-								/>
-							</label>
-							<input
-								id="send-file"
-								name="send-file"
-								className="my-conversation__message-list__form__input"
-								type="file"
-								accept="image/*,.pdf"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
-								multiple={true}
-								disabled={selectedRequest && selectedRequest?.id > 0 ? false : true}
-								aria-label="Joindre un fichier"
-							/>
-							<input
-								id="file-camera"
-								name="file-camera"
-								className="my-conversation__message-list__form__input medi"
-								type="file"
-								accept="image/*"
-								capture="environment"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
-								disabled={selectedRequest && selectedRequest?.id > 0 ? false : true}
-								aria-label="Prendre une photo"
-							/>
-							<button
-								id="send-message"
-								className="my-conversation__message-list__form__button"
-								type="submit"
-								disabled={!selectedRequest || selectedRequest?.id <= 0 || messageMutLoading}
-								aria-label="Envoyer le message"
-							>
-								Send
-							</button>
-						</form>
+						<MessageForm
+							fileError={fileError}
+							isMyRequest={true}
+							handleFileUpload={handleFileUpload}
+							handleMessageSubmit={sendMessage}
+							messageValue={messageValue}
+							setMessageValue={setMessageValue}
+							handleRemove={handleRemove}
+							urlFile={urlFile}
+							uploadFileError={uploadFileError}
+							messageMutationLoading={messageMutLoading}
+							selectedItem={selectedRequest}
+						/>
 
 					</motion.div>
 				)}
