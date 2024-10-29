@@ -258,7 +258,7 @@ function Dashboard() {
 			backgroundColor: '#ff0000',
 		},
 	}));
-	
+
 	// For indacating the tab under the burger menu
 	const tabLabels: { [key: string]: string } = {
 		'Request': 'DEMANDE',
@@ -736,8 +736,6 @@ function Dashboard() {
 						} else {
 							// if the request hasn't a conversation
 							if (request.id === messageAdded[0].request_id && !request.conversation) {
-
-
 								const conversation = [
 									{
 										id: messageAdded[0].conversation_id,
@@ -765,7 +763,7 @@ function Dashboard() {
 			}
 
 			// check if the selectedRequest is the same as the messageAdded and update the conversation
-			if (selectedRequest?.id === messageAdded[0].request_id && conversationIdState !== messageAdded[0].conversation_id) {
+			if (selectedRequest?.id === messageAdded[0].request_id ) {
 				setSelectedRequest((prevState: RequestProps | null) => {
 					// if a conversation is already in selectedRequest
 					if (prevState && prevState.conversation && prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
@@ -829,7 +827,7 @@ function Dashboard() {
 				});
 			}
 
-			// remove the conversation from the notViewedConversationStore and database
+			// remove the conversation from the notViewedConversationStore and database if the conversation is selected
 			if (selectedRequest?.id === messageAdded[0].request_id && conversationIdState === messageAdded[0].conversation_id) {
 				if (selectedRequest && selectedRequest.conversation && messageAdded[0].user_id !== id) {
 

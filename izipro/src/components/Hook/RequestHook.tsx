@@ -34,6 +34,7 @@ const RequestItem = ({
 	setClientRequest,
 	onDetailsClick,
 	hiddenLoading,
+	deleteRequestLoading,
 	modalArgs,
 	resetRequest,
 	selectedRequest,
@@ -53,6 +54,7 @@ const RequestItem = ({
 	isMyConversation?: boolean,
 	handleConversation?: Function,
 	setIsAnswerOpen?: Function,
+	deleteRequestLoading?: boolean,
 	selectedRequestRef?: React.MutableRefObject<RequestProps | null>,
 	notViewedStore?: number[],
 	setIsMessageOpen?: Function,
@@ -161,6 +163,7 @@ const RequestItem = ({
 				</Grow>
 			)}
 			{isClientRequest && ((hiddenLoading && modalArgs?.requestId === requestByDate.id) && <Spinner />)}
+			{(isMyrequest && deleteRequestLoading ) && <Spinner />}
 			{isMyConversation && (requestByDate?.deleted_at && <p className="item__deleted">SUPPRIMÉ PAR L&apos;UTILISATEUR</p>)}
 			{requestByDate?.urgent && <p className="item urgent">URGENT</p>}
 			<div className="item__header">

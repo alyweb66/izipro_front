@@ -1,0 +1,107 @@
+@use './variables' as v;
+@use './mixins' as m;
+
+.header-message__user {
+
+    .header-message__user__header {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 1px 6px -2px rgba(0, 0, 0, 0.2);
+        position: relative;
+        background-color: white;
+        border-radius: 0.3rem 0.3rem 0 0;
+
+        /* For mouse */
+        @media (hover: hover) and (pointer: fine) {
+            cursor: pointer;
+        }
+
+        /* For touch */
+        @media (hover: none) and (pointer: coarse) {
+            cursor: default;
+        }
+
+
+
+        .header-message__user__header__detail {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border-radius: 8px 8px 0 0;
+
+            &.return {
+                display: none;
+            }
+
+            &.img {
+                @include m.border;
+                margin: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                width: 50px;
+                height: 50px;
+                box-shadow: 5px 5px 10px #ebebeb,
+                    -5px -5px 10px #ffffff;
+                object-fit: cover;
+            }
+
+            &.name {
+                box-shadow: none;
+                margin: 0 0.3rem;
+                font-size: 1rem;
+                font-weight: 500;
+            }
+
+            &.denomination {
+                display: block;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                width: inherit;
+                box-shadow: none;
+                margin: auto 0.3rem auto 0;
+                background-color: transparent;
+                font-size: 1rem;
+                font-weight: 500;
+
+            }
+
+            &.deploy-arrow {
+                color: v.$color-primary-blue;
+                font-size: 2.5rem;
+                font-weight: 600;
+                margin-left: 0.5rem;
+                margin-right: 0.5rem;
+
+            }
+
+            &.deleted {
+                color: v.$color-error;
+                margin: auto 0.3rem auto 0;
+                font-size: 1rem;
+                font-weight: 500;
+            }
+
+            &.deployed {
+                font-size: 0.8rem;
+                padding: 0 1rem;
+                display: block;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: normal;
+            }
+        }
+
+        &.description {
+            width: 98%;
+            padding: 0.5rem;
+            box-shadow: none;
+            margin: 0 0.5rem;
+            background-color: white;
+            color: v.$color-primary-blue;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+    }
+
+}

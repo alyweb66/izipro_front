@@ -35,7 +35,7 @@ import './MyRequest.scss';
 import pdfLogo from '/logo-pdf.webp';
 import logoProfile from '/logo-profile.webp';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
-import { FaTrashAlt, FaCamera } from 'react-icons/fa';
+import { FaCamera } from 'react-icons/fa';
 import { MdSend, MdAttachFile, MdKeyboardArrowLeft, MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
@@ -49,17 +49,12 @@ import Fade from '@mui/material/Fade';
 import noPicture from '/no-picture.webp';
 //import { formatMessageDate } from '../../Hook/Component';
 import { MessageList } from '../../Hook/MessageList';
-import { formatMessageDate } from '../../Hook/Component';
-import { Badge } from '../../Hook/Badge';
 import RequestItem from '../../Hook/RequestHook';
+import { HeaderMessage } from '../../Hook/HeaderMessage';
 //import { Id } from '@turf/turf';
 
 // Configuration for React Modal
 ReactModal.setAppElement('#root');
-
-type ExpandedState = {
-	[key: number]: boolean;
-};
 
 
 type MyRequestProps = {
@@ -117,7 +112,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	//useRef
 	//const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
-	const idRef = useRef<number>(0);
+	//const idRef = useRef<number>(0);
 	const selectedRequestRef = useRef<RequestProps | null>(null);
 
 	const limit = 5;
@@ -413,7 +408,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const { setIsEndViewed } = ScrollList({});
 
 	// useEffect to check the size of the window and update the page visibility 
-
 	useLayoutEffect(() => {
 		const handleResize = () => {
 
@@ -466,6 +460,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	// useEffect to sort the requests by date and update the subscription
 	useEffect(() => {
 		if (myRequestsStore) {
+			
 			// Sort the requests by date
 			const sortedRequests = [...myRequestsStore].sort((requestA, requestB) => {
 				const dateA = requestA.conversation?.length
@@ -601,7 +596,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		}
 	}, [myRequestsStore]);
-	console.log('subscriptionStore', subscriptionStore);
 
 	// useEffect to update user conversation by date
 	useEffect(() => {
@@ -628,8 +622,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			// Convert filteredSortedUsers to a Set to remove duplicates, then convert it back to an array
 			const uniqueUsers = Array.from(new Set(filteredSortedUsers.map(user => JSON.stringify(user)))).map(user => JSON.parse(user));
 			setUserConvState(uniqueUsers);
-
-
 		}
 
 		// if selected
@@ -721,7 +713,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 		}
 	}, [selectedUser]);
-	console.log('subscriptionStore myRequest', subscriptionStore);
 
 	return (
 		<div className="my-request">
@@ -742,6 +733,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 									requestByDate={requestByDate}
 									setIsMessageOpen={setIsMessageOpen}
 									isMyrequest={true}
+									deleteRequestLoading={deleteRequestLoading}
 									handleConversation={handleConversation}
 									setIsAnswerOpen={setIsAnswerOpen}
 									selectedRequestRef={selectedRequestRef}
@@ -890,64 +882,17 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
 						{(messageLoading || messageMutationLoading) && <Spinner />}
-						<div className="my-request__message-list__user" aria-label="Détails de l'utilisateur" >
-							<div
-								className="my-request__message-list__user__header"
-								onClick={(event) => {
-									setUserDescription(!userDescription);
-									event.stopPropagation();
-								}}
-							>
-								<div
-									className="my-request__message-list__user__header__detail"
-								>
-									<MdKeyboardArrowLeft
-										className="my-request__message-list__user__header__detail return"
-										onClick={(event) => {
-											if (window.innerWidth < 1000) {
-												setIsEndViewed(false);
-												setIsMessageOpen(false);
-												setTimeout(() => {
-													setIsListOpen(false);
-													setIsAnswerOpen(true);
-												}, 200);
-											}
-
-											setSelectedUser(null);
-											event.stopPropagation();
-										}}
-										aria-label="Retour à la liste des utilisateurs"
-									/>
-									<img
-										className="my-request__message-list__user__header__detail img"
-										src={selectedUser?.image ? selectedUser.image : logoProfile}
-										onError={(event) => {
-											event.currentTarget.src = noPicture;
-										}}
-										alt={selectedUser?.denomination ? selectedUser.denomination : `${selectedUser?.first_name} ${selectedUser?.last_name}`} />
-									{selectedUser?.denomination ? (
-										<p className="my-request__message-list__user__header__detail denomination">{selectedUser?.denomination}</p>
-									) : (
-										<p className="my-request__message-list__user__header__detail name">{selectedUser?.first_name} {selectedUser?.last_name}</p>
-									)}
-									{selectedUser?.deleted_at && <p className="my-request__message-list__user__header__detail deleted" aria-label="Utilisateur supprimé">Utilisateur supprimé</p>}
-									{selectedUser && selectedUser?.id > 0 && <span className="my-request__message-list__user__header__detail deploy-arrow">{userDescription ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}</span>}
-								</div>
-
-								{userDescription && <div>
-									{selectedUser?.denomination ? (
-										<p className="my-request__message-list__user__header__detail denomination deployed">{selectedUser?.denomination}</p>
-									) : (
-										<p className="my-request__message-list__user__header__detail name description">{selectedUser?.first_name} {selectedUser?.last_name}</p>
-									)}
-									<p className="my-request__message-list__user__header description" aria-label="Description de l'utilisateur">
-										{selectedUser?.description ? selectedUser.description : 'Pas de description'}
-									</p>
-								</div>
-								}
-							</div>
-
-						</div>
+						<HeaderMessage 
+						selectedItem={selectedUser}
+						setIsAnswerOpen={setIsAnswerOpen}
+						setIsEndViewed={setIsEndViewed}
+						setIsListOpen={setIsListOpen}
+						isMyRequest={true}
+						setIsMessageOpen={setIsMessageOpen}
+						setSelectedItem={setSelectedUser}
+						setUserDescription={setUserDescription}
+						userDescription={userDescription}
+						/>
 						<MessageList
 							conversationIdState={conversationIdState}
 							id={id}

@@ -58,6 +58,7 @@ import Fade from '@mui/material/Fade';
 import noPicture from '/no-picture.webp';
 
 import { UpdateMyConvMessage } from '../../Hook/UpdateMyConvMessage';
+import { HeaderMessage } from '../../Hook/HeaderMessage';
 
 
 type useQueryUserConversationsProps = {
@@ -446,8 +447,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		}
 
 	}, [selectedRequest]);
-console.log('requestsConversationStore', requestsConversationStore);
-console.log('request', request);
 
 	// useEffect to sort the requests by date
 	useEffect(() => {
@@ -506,7 +505,6 @@ console.log('request', request);
 		};
 	}, []);
 
-console.log('subscriptions my conv', subscriptionStore);
 
 	return (
 		<div className="my-conversation">
@@ -570,66 +568,15 @@ console.log('subscriptions my conv', subscriptionStore);
 						{(messageLoading || messageMutLoading) && <Spinner />}
 						<div className="my-conversation__message-list__user">
 							{selectedRequest && (
-								<div
-									className="my-conversation__message-list__user__header"
-									onClick={(event) => {
-										setRequestTitle(!requestTitle);
-										event.stopPropagation();
-									}}
-								>
-									<div
-										className="my-conversation__message-list__user__header__detail"
-									>
-										<MdKeyboardArrowLeft
-											className="my-conversation__message-list__user__header__detail return"
-											onClick={(event) => {
-												event.stopPropagation();
-												if (window.innerWidth < 780) {
-													setIsEndViewed(false);
-													setIsMessageOpen(false);
-													setTimeout(() => {
-														setIsListOpen(true);
-													}, 200);
-												}
-											}}
-											aria-label="Retour à la liste des conversations"
-										/>
-										<img
-											className="my-conversation__message-list__user__header__detail img"
-											src={selectedRequest.image ? selectedRequest.image : logoProfile}
-											onError={(event) => {
-												event.currentTarget.src = noPicture;
-											}}
-											alt="" />
-										{selectedRequest.denomination ? (
-											<p className="my-conversation__message-list__user__header__detail name" >
-												<span className="my-conversation__message-list__user__header__detail name-span">
-												</span>&nbsp;{selectedRequest.denomination}
-											</p>
-										) : (
-											<p className="my-conversation__message-list__user__header__detail name" >
-												<span className="my-conversation__message-list__user__header__detail name-span">
-												</span>&nbsp;{selectedRequest.first_name} {selectedRequest.last_name}
-											</p>
-										)}
-
-										{selectedRequest.id > 0 && <span className="my-conversation__message-list__user__header__detail deploy-arrow">{requestTitle ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}</span>}
-									</div>
-									{requestTitle && <div className="my-conversation__message-list__user__header__request">
-										{selectedRequest.denomination ? (
-											<p className="my-conversation__message-list__user__header__detail name deployed" >
-												<span className="my-conversation__message-list__user__header__detail name-span">
-												</span>&nbsp;{selectedRequest.denomination}
-											</p>
-										) : (
-											<p className="my-conversation__message-list__user__header__detail name" >
-												<span className="my-conversation__message-list__user__header__detail name-span">
-												</span>&nbsp;{selectedRequest.first_name} {selectedRequest.last_name}
-											</p>
-										)}
-										<p className="my-conversation__message-list__user__header__request title">{selectedRequest.title}</p>
-									</div>}
-								</div>
+								<HeaderMessage 
+								requestTitle={requestTitle}
+								selectedItem={selectedRequest}
+								setRequestTitle={setRequestTitle}
+								isMyConversation={true}
+								setIsListOpen={setIsListOpen}
+								setIsMessageOpen={setIsMessageOpen}
+								setIsEndViewed={setIsEndViewed}
+								/>
 							)}
 
 						</div>

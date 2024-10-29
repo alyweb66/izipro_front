@@ -212,7 +212,7 @@ function Request() {
 			throw new Error('Error while creating request');
 		}
 	};
-console.log('subscriptionStore', subscriptionStore);
+
 
 	// Handle file upload
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement> & React.DragEvent<HTMLLabelElement>) => {
