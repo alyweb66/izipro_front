@@ -40,6 +40,8 @@ export const MessageForm = ({
     messageMutationLoading
 
 }: MessageFormProps) => {
+    console.log('selectedItem', selectedItem);
+    
     return (
         <form className="message-form" onSubmit={(event) => {
             event.preventDefault();

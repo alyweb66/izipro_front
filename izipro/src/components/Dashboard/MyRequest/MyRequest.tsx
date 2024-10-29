@@ -28,7 +28,6 @@ import { messageConvIdMyreqStore, myMessageDataStore } from '../../../store/mess
 import { RequestProps } from '../../../Type/Request';
 import { UserDataProps } from '../../../Type/User';
 import { MessageProps } from '../../../Type/message';
-import { SubscriptionProps } from '../../../Type/Subscription';
 
 // Components and utilities
 import './MyRequest.scss';
@@ -101,7 +100,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [myRequestsStore, setMyRequestsStore] = myRequestStore((state) => [state.requests, state.setMyRequestStore]);
 	const [userConvStore, setUserConvStore] = userConversation((state) => [state.users, state.setUsers]);
 	const [messageStore] = myMessageDataStore((state) => [state.messages, state.setMessageStore]);
-	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
+	const [subscriptionStore] = subscriptionDataStore((state) => [state.subscription]);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 	const [isMessageConvIdFetched, setIsMessageConvIdFetched] = messageConvIdMyreqStore((state) => [state.convId, state.setConvId]);
 
@@ -118,7 +117,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	//mutation
 	const [deleteRequest, { loading: deleteRequestLoading, error: deleteRequestError }] = useMutation(DELETE_REQUEST_MUTATION);
 	const [message, { loading: messageMutationLoading, error: createMessageError }] = useMutation(MESSAGE_MUTATION);
-	const [subscriptionMutation, { error: subscriptionError }] = useMutation(SUBSCRIPTION_MUTATION);
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
 
 	// Query to get the user requests
@@ -471,123 +469,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			});
 
 			setRequestByDate(sortedRequests);
-
-			// update the subscription by request and conversation
-			// get conversation id in subscriptionStore
-			const conversationIds = subscriptionStore
-				.filter(subscription => subscription.subscriber === 'conversation')
-				.flatMap(subscription => subscription.subscriber_id);
-
-			// get request with conversation id
-			const requestwithId = myRequestsStore.filter(request => request.conversation && request.conversation.some(conversation => conversation.id));
-			// get conversation id of all request which are not in the subscription
-			const idsNotInSubscriptionStore = requestwithId.flatMap((request: RequestProps) =>
-				request.conversation
-					.filter(conversation => conversation.id !== null && !conversationIds.includes(conversation.id))
-					.map(conversation => conversation.id)
-			);
-
-			// check if the conversation is already in the subscription
-			if (idsNotInSubscriptionStore.length ?? 0 > 0) {
-				const updatedConversationIds = [...conversationIds, ...idsNotInSubscriptionStore];
-
-				//add new conversation to subscription
-				if (updatedConversationIds && updatedConversationIds.length > 0) {
-					subscriptionMutation({
-						variables: {
-							input: {
-								user_id: id,
-								subscriber: 'conversation',
-								subscriber_id: updatedConversationIds
-							}
-						}
-
-					}).then((response) => {
-
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-						// replace the old subscription with the new one
-
-						// Check if the subscriber already exists in subscriptionStore
-						const existingSubscription = subscriptionStore.find((subscription: SubscriptionProps) =>
-							subscription.subscriber === 'conversation'
-						);
-						// If the subscriber doesn't exist, add it to subscriptionStore
-						if (!existingSubscription) {
-							setSubscriptionStore([...subscriptionStore, subscriptionWithoutTimestamps]);
-						} else {
-							// Replace the old subscription with the new one
-							const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
-								subscription.subscriber === 'conversation' ? subscriptionWithoutTimestamps : subscription
-							);
-
-							if (addSubscriptionStore) {
-								setSubscriptionStore(addSubscriptionStore);
-							}
-						}
-					});
-
-					if (subscriptionError) {
-						throw new Error('Error while creating subscription');
-					}
-				}
-			}
-
-			// get request id in the request store
-			const conversationRequestIds = subscriptionStore
-				.filter(subscription => subscription.subscriber === 'request')
-				.flatMap(subscription => subscription.subscriber_id);
-
-			// get request id of all request which are not in the subscription
-			const idsNotInRequestSubscriptionStore = myRequestsStore
-				.filter(request => !conversationRequestIds.includes(request.id))
-				.map(request => request.id); // map to an array of viewedIds
-
-			// check if the request is already in the subscription
-			if (idsNotInRequestSubscriptionStore.length ?? 0 > 0) {
-				const updatedRequestIds = [...conversationRequestIds, ...idsNotInRequestSubscriptionStore];
-
-				//add new request to subscription
-				if (updatedRequestIds && updatedRequestIds.length > 0) {
-
-
-					subscriptionMutation({
-						variables: {
-							input: {
-								user_id: id,
-								subscriber: 'request',
-								subscriber_id: updatedRequestIds
-							}
-						}
-
-					}).then((response) => {
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const { created_at, updated_at, ...subscriptionWithoutTimestamps } = response.data.createSubscription;
-						// Check if the subscriber already exists in subscriptionStore
-						const existingSubscription = subscriptionStore.find((subscription: SubscriptionProps) =>
-							subscription.subscriber === 'request'
-						);
-						// If the subscriber doesn't exist, add it to subscriptionStore
-						if (!existingSubscription) {
-							setSubscriptionStore([...subscriptionStore, subscriptionWithoutTimestamps]);
-						} else {
-							// Replace the old subscription with the new one
-							const addSubscriptionStore = subscriptionStore.map((subscription: SubscriptionProps) =>
-								subscription.subscriber === 'request' ? subscriptionWithoutTimestamps : subscription
-							);
-
-							if (addSubscriptionStore) {
-								setSubscriptionStore(addSubscriptionStore);
-							}
-						}
-					});
-
-					if (subscriptionError) {
-						throw new Error('Error while creating subscription');
-					}
-				}
-			}
-
 
 		}
 	}, [myRequestsStore]);

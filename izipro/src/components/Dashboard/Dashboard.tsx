@@ -10,7 +10,6 @@ import { ErrorBoundary } from "react-error-boundary";
 import Logout from '../Header/Logout/Logout';
 import Footer from '../Footer/Footer';
 import Spinner from '../Hook/Spinner';
-//import { Badge } from '../Hook/Badge';
 
 // Hook personal
 import {
@@ -184,7 +183,7 @@ function Dashboard() {
 
 	//store
 	const isLoggedOut = isLoggedOutStore((state) => state.isLoggedOut);
-	const setSubscription = subscriptionDataStore((state) => state.setSubscription);
+	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const [notViewedConversationStore, setNotViewedConversationStore] = notViewedConversation((state) => [state.notViewed, state.setNotViewedStore]);
 	const [requestConversationIdStore, setRequestConversationsIdStore] = requestConversationIds((state) => [state.notViewed, state.setNotViewedStore]);
 
@@ -387,13 +386,6 @@ function Dashboard() {
 						return { ...prevRequests, requests: [request, ...prevRequests.requests] };
 					});
 
-					/* //add conversation id to the requestConversationsIdStore
-					const conversationIds = request.conversation?.map((conversation: RequestProps) => conversation.id);
-					// check if conversation are not already in the store
-					if (conversationIds.some((id: number) => !requestConversationIdStore?.includes(id))) {
-						setRequestConversationsIdStore([...conversationIds, ...(requestConversationIdStore || [])]);
-					} */
-
 					setRequestByIdState(0);
 					setIsForMyConversation(false);
 				}
@@ -453,7 +445,7 @@ function Dashboard() {
 	useEffect(() => {
 		if (getUserSubscription) {
 
-			setSubscription(getUserSubscription?.user.subscription);
+			setSubscriptionStore(getUserSubscription?.user.subscription);
 			isSkipSubscriptionRef.current = true;
 		}
 	}, [getUserSubscription]);
@@ -757,13 +749,35 @@ function Dashboard() {
 				});
 			}
 
+			// check if the conversation subscriber is already in the subscriptionStore
+			const isExistingSubscription = subscriptionStore.some(subscription => subscription.subscriber === 'conversation');
+
+			// Get all the conversation ids
+			const conversationIds = subscriptionStore
+				.filter(subscription => subscription.subscriber === 'conversation')
+				.flatMap(subscription => subscription.subscriber_id) || [];
+
+
+			// add the conversation_id to the subscriptionStore
+			if (!conversationIds.includes(messageAdded[0].conversation_id) && !isExistingSubscription) {
+				setSubscriptionStore([...subscriptionStore, { user_id: id, subscriber: 'conversation', subscriber_id: [messageAdded[0].conversation_id], created_at: new Date().toISOString() }]);
+
+			} else if (!conversationIds.includes(messageAdded[0].conversation_id) && isExistingSubscription) {
+				setSubscriptionStore(subscriptionStore.map(subscription => {
+					if (subscription.subscriber === 'conversation') {
+						return { ...subscription, subscriber_id: [...subscription.subscriber_id, messageAdded[0].conversation_id] };
+					}
+					return subscription;
+				}));
+			}
+
 			// add the conversation if not exist in requestConversationsIdStore
 			if (!requestConversationIdStore.includes(messageAdded[0].conversation_id)) {
 				setRequestConversationsIdStore([messageAdded[0].conversation_id, ...(requestConversationIdStore || [])]);
 			}
 
 			// check if the selectedRequest is the same as the messageAdded and update the conversation
-			if (selectedRequest?.id === messageAdded[0].request_id ) {
+			if (selectedRequest?.id === messageAdded[0].request_id) {
 				setSelectedRequest((prevState: RequestProps | null) => {
 					// if a conversation is already in selectedRequest
 					if (prevState && prevState.conversation && prevState.conversation.some(conversation => conversation.id === messageAdded[0].conversation_id)) {
@@ -938,7 +952,7 @@ function Dashboard() {
 		);
 	};
 
-	
+
 
 	return (
 		<>
@@ -988,10 +1002,10 @@ function Dashboard() {
 								{(viewedMessageState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMessageState.length > 0 ? 'visible' : ''}`}>
 									{viewedMessageState.length > 0 && (
 										<Grow in={true} timeout={200}>
-										<Stack aria-label={`Vous avez${viewedMessageState.length} notifications`} >
-											<StyledBadge className="notification-badge" badgeContent={viewedMessageState.length} >
-											</StyledBadge>
-										</Stack>
+											<Stack aria-label={`Vous avez${viewedMessageState.length} notifications`} >
+												<StyledBadge className="notification-badge" badgeContent={viewedMessageState.length} >
+												</StyledBadge>
+											</Stack>
 										</Grow>
 									)}
 								</div>)}
@@ -1006,12 +1020,12 @@ function Dashboard() {
 									{(notViewedRequestStore.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>
 										{notViewedRequestStore.length > 0 && (
 											<Grow in={true} timeout={200}>
-											<Stack aria-label={`Vous avez${notViewedRequestStore.length} notifications`} >
-												<StyledBadge className="notification-badge" badgeContent={notViewedRequestStore.length} >
-												</StyledBadge>
-											</Stack>
+												<Stack aria-label={`Vous avez${notViewedRequestStore.length} notifications`} >
+													<StyledBadge className="notification-badge" badgeContent={notViewedRequestStore.length} >
+													</StyledBadge>
+												</Stack>
 											</Grow>
-											)}
+										)}
 
 									</div>)}
 								</div>
@@ -1027,10 +1041,10 @@ function Dashboard() {
 									{(viewedMyConversationState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
 										{viewedMyConversationState.length > 0 && (
 											<Grow in={true} timeout={200}>
-											<Stack aria-label={`Vous avez${viewedMyConversationState.length} notifications`} >
-												<StyledBadge className="notification-badge" badgeContent={viewedMyConversationState.length} >
-												</StyledBadge>
-											</Stack>
+												<Stack aria-label={`Vous avez${viewedMyConversationState.length} notifications`} >
+													<StyledBadge className="notification-badge" badgeContent={viewedMyConversationState.length} >
+													</StyledBadge>
+												</Stack>
 											</Grow>
 										)}
 									</div>)}

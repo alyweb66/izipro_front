@@ -133,6 +133,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	// Function to send message
 	function sendMessage(event: React.FormEvent<HTMLFormElement>, requestId?: number) {
 		event.preventDefault();
+console.log('sendMessage', requestId);
 
 		if (fileError) {
 			setFile([]);
@@ -580,7 +581,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 						/>
 						<MessageForm
 							fileError={fileError}
-							isMyRequest={true}
+							isMyConversation={true}
 							handleFileUpload={handleFileUpload}
 							handleMessageSubmit={sendMessage}
 							messageValue={messageValue}
