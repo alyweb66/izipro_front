@@ -5,78 +5,106 @@
     width: 100%;
     display: flex;
     height: 100%;
+    overflow: hidden;
     scrollbar-width: none;
     padding-top: 0.5rem;
+
+
 
     &::-webkit-scrollbar {
         display: none;
         /* For Chrome, Safari and Opera */
     }
 
-    .my-request__list {
-        overflow-y: auto;
-        scrollbar-width: none;
-        width: 100%;
-        max-width: 30%;
+    .my-request__container {
+        display: flex;
+        flex-direction: column;
         height: 100%;
-        margin: 0 0.1rem;
-        -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
-        touch-action: pan-y;
+        max-width: 30%;
+        width: 100%;
 
-        &::-webkit-scrollbar {
-            display: none;
-            /* For Chrome, Safari and Opera */
-        }
-
-        &.no-req {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            margin: 0.5rem auto;
-            border-radius: 0.5rem;
-            box-shadow: none;
-            max-width: 90%;
+        .my-request__container__deploy {
+            font-size: 1rem;
             color: v.$color-primary-orange;
-            text-align: center;
+            text-decoration: underline;
+            border: none;
+            background-color: transparent;
+            margin-bottom: 0.2rem;
 
-        }
+            /* For mouse */
+            @media (hover: hover) and (pointer: fine) {
+                cursor: pointer;
+            }
 
-        &.loading {
-
-            position: relative;
-        }
-
-        .my-request__list__fetch-button {
-            @include m.fetch-button;
-
-            & {
-                display: flex;
-                justify-content: center;
+            /* For touch */
+            @media (hover: none) and (pointer: coarse) {
+                cursor: default;
             }
         }
 
-
-        .my-request__list__detail {
-            position: relative;
-            overflow: hidden;
+        .my-request__container__list {
+            overflow-y: auto;
             scrollbar-width: none;
-            padding-left: 0;
+            margin: 0 0.1rem;
+            -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+            touch-action: pan-y;
+
             &::-webkit-scrollbar {
                 display: none;
-             
+                /* For Chrome, Safari and Opera */
             }
 
-            .notification-badge {
-                position:absolute;
-                top: 1.2rem;
-                right: 1.2rem;
-               /*  font-family: v.$font;
+            .my-request__container__deploy {
+                font-size: 1rem;
+                color: v.$color-primary-orange;
+                text-decoration: underline;
+                border: none;
+
+                background-color: transparent;
+
+            }
+
+            &.no-req {
+                display: flex;
+                justify-content: center;
+                width: 100%;
+                margin: 0.5rem auto;
+                border-radius: 0.5rem;
+                box-shadow: none;
+                max-width: 90%;
+                color: v.$color-primary-orange;
+                text-align: center;
+
+            }
+
+            &.loading {
+
+                position: relative;
+            }
+
+            .my-request__container__list__detail {
+                position: relative;
+                overflow: hidden;
+                scrollbar-width: none;
+                padding-left: 0;
+
+                &::-webkit-scrollbar {
+                    display: none;
+
+                }
+
+                .notification-badge {
+                    position: absolute;
+                    top: 1.2rem;
+                    right: 1.2rem;
+                    /*  font-family: v.$font;
                 color: v.$color-validation; */
+                }
+
+
             }
 
-           
         }
-
     }
 
     .my-request__answer-list {
@@ -253,7 +281,7 @@
         &.loading {
             position: relative;
         }
-      
+
 
 
     }
@@ -264,22 +292,28 @@
         width: 100%;
         height: 100%;
 
+
+        .my-request__container {
+
+            max-width: 100%;
+
+            .my-request__container__list {
+                display: none;
+
+                &.open {
+                    display: block;
+                    margin: 0 auto;
+                    width: 100%;
+                    max-width: 80%;
+                }
+
+            }
+        }
+
         .my-request__message-list {
             width: 100%;
             max-width: 90%;
             margin: auto;
-        }
-
-        .my-request__list {
-            display: none;
-
-            &.open {
-                display: block;
-                margin: 0 auto;
-                max-width: 90%;
-
-            }
-
         }
 
         .my-request__answer-list {
@@ -344,9 +378,9 @@
                 margin: 0 auto;
                 max-width: 80%;
                 width: 80%;
-               
 
-                
+
+
 
             }
 
@@ -356,11 +390,13 @@
 
 @media (max-width: 800px) {
     .my-request {
-        .my-request__list {
-            &.open {
-                max-width: 95%;
-            }
+        .my-request__container {
+            .my-request__container__list {
+                &.open {
+                    max-width: 95%;
+                }
 
+            }
         }
     }
 }
@@ -369,16 +405,28 @@
     .my-request {
         padding-top: 0;
 
+        .my-request__container {
+            .my-request__container__deploy {
+                margin-top: 0.5rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .my-request__container__list.open {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+
         .my-request__message-list {
             margin: 0;
         }
 
         .my-request__answer-list.open,
-        .my-request__message-list.open,
-        .my-request__list.open {
+        .my-request__message-list.open {
             max-width: 100%;
             width: 100%;
         }
+
 
         .my-request__answer-list {
             &.open {
@@ -394,7 +442,7 @@
             }
         }
 
-         .my-request__message-list {
+        .my-request__message-list {
             &.open {
                 margin-top: 0;
                 margin-bottom: 0;

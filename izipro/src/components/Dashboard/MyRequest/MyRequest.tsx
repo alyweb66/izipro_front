@@ -5,7 +5,6 @@ import { useMutation } from '@apollo/client';
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../../GraphQL/ConversationMutation';
 import { DELETE_REQUEST_MUTATION } from '../../GraphQL/RequestMutation';
 import { MESSAGE_MUTATION } from '../../GraphQL/MessageMutation';
-import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 // Custom hooks and queries
 import {
 	useQueryMyMessagesByConversation,
@@ -45,6 +44,7 @@ import { MessageList } from '../../Hook/MessageList';
 import RequestItem from '../../Hook/RequestHook';
 import { HeaderMessage } from '../../Hook/HeaderMessage';
 import { MessageForm } from '../../Hook/MessageForm';
+import { FetchButton } from '../../Hook/FetchButton';
 //import { Id } from '@turf/turf';
 
 // Configuration for React Modal
@@ -79,7 +79,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [isListOpen, setIsListOpen] = useState<boolean>(true);
 	const [isAnswerOpen, setIsAnswerOpen] = useState<boolean>(window.innerWidth > 1000 ? true : false);
 	const [isMessageOpen, setIsMessageOpen] = useState<boolean>(window.innerWidth > 1000 ? true : false);
-	const [isMessageExpanded, setIsMessageExpanded] = useState({});
+	//const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ requestId: number, requestTitle: string } | null>(null);
 	const [isUserMessageOpen, setIsUserMessageOpen] = useState(false);
@@ -90,6 +90,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [uploadFileError, setUploadFileError] = useState('');
 	const [isFetchingMore, setIsFetchingMore] = useState(false);
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+	const [showAllContent, setShowAllContent] = useState(true);
 	//const [isHandleClick, setIsHandleClick] = useState<boolean>(false);
 
 	// Create a state for the scroll position
@@ -592,62 +593,56 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 	return (
 		<div className="my-request">
-			<div
-				id="scrollableRequest"
-				className={`my-request__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}
-				aria-label="Liste des demandes"
-			>
-				{requestLoading && <Spinner />}
-				{!requestByDate ? <p className="my-request__list no-req">Vous n&apos;avez pas de demande</p> : (
-					<ul className="my-request__list__detail" >
-						<AnimatePresence>
-							{isListOpen && requestByDate.map((requestByDate) => (
-								<RequestItem
-									setHasManyImages={setHasManyImages}
-									key={requestByDate.id}
-									notViewedStore={notViewedConversationStore}
-									requestByDate={requestByDate}
-									setIsMessageOpen={setIsMessageOpen}
-									isMyrequest={true}
-									deleteRequestLoading={deleteRequestLoading}
-									handleConversation={handleConversation}
-									setIsAnswerOpen={setIsAnswerOpen}
-									selectedRequestRef={selectedRequestRef}
-									selectedRequest={selectedRequest!}
-									setSelectedRequest={setSelectedRequest}
-									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
-									isMessageExpanded={isMessageExpanded}
-									setIsMessageExpanded={setIsMessageExpanded}
-									setIsListOpen={setIsListOpen}
-									setModalArgs={setModalArgs}
-									openModal={openModal}
-								/>
-							))}
-
-						</AnimatePresence>
-					</ul>
-				)}
-
-				<div className="my-request__list__fetch-button">
-					{(isHasMore && requestByDate && requestByDate?.length > 0) ? (<button
-						className="Btn"
-						onClick={(event) => {
-							event.preventDefault();
-							event.stopPropagation();
-							if (!isFetchingMore) {
-								addRequest();
-							}
-						}
-						}>
-						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
-						<span className="icon2"></span>
-						<span className="tooltip">Charger plus</span>
-					</button>
+			{isListOpen && <div className="my-request__container">
+					{requestByDate && isListOpen && requestByDate?.length > 0 && <button className="my-request__container__deploy"
+					onClick={() => setShowAllContent(!showAllContent)}
+				>
+					{requestByDate && requestByDate?.length > 0 && (showAllContent ? 'Réduire les demandes' : 'Déployer les demandes')}</button>}
+				<div
+					id="scrollableRequest"
+					className={`my-request__container__list ${isListOpen ? 'open' : ''} ${requestLoading ? 'loading' : ''}`}
+					aria-label="Liste des demandes"
+				>
+					{!requestByDate ? <p className="my-request__container__list no-req">Vous n&apos;avez pas de demande</p> : (
+						<ul className="my-request__container__list__detail" >
+							<AnimatePresence>
+								{isListOpen && requestByDate.map((requestByDate) => (
+									<RequestItem
+										setHasManyImages={setHasManyImages}
+										key={requestByDate.id}
+										notViewedStore={notViewedConversationStore}
+										requestByDate={requestByDate}
+										setIsMessageOpen={setIsMessageOpen}
+										showAllContent={showAllContent}
+										isMyrequest={true}
+										deleteRequestLoading={deleteRequestLoading}
+										handleConversation={handleConversation}
+										setIsAnswerOpen={setIsAnswerOpen}
+										selectedRequestRef={selectedRequestRef}
+										selectedRequest={selectedRequest!}
+										setSelectedRequest={setSelectedRequest}
+										setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+										//	isMessageExpanded={isMessageExpanded}
+										//setIsMessageExpanded={setIsMessageExpanded}
+										setIsListOpen={setIsListOpen}
+										setModalArgs={setModalArgs}
+										openModal={openModal}
+									/>
+								))}
+							</AnimatePresence>
+						</ul>
+					)}
+					{(isHasMore && requestByDate && requestByDate?.length > 0) ? (
+						<FetchButton
+							addRequest={addRequest}
+							isMyRequest={true}
+							isFetchingMore={isFetchingMore}
+						/>
 					) : (
-						<p className="my-request__list no-req">Fin des résultats</p>
+						<p className="my-request__container__list no-req">Fin des résultats</p>
 					)}
 				</div>
-			</div>
+			</div>}
 
 			<AnimatePresence>
 				{isAnswerOpen && (
@@ -791,7 +786,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							messageMutationLoading={messageMutationLoading}
 							selectedItem={selectedUser}
 						/>
-						
+
 					</motion.div>
 				)}
 			</AnimatePresence>

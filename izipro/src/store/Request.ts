@@ -26,6 +26,7 @@ export type ClientRequestStore = {
 	resetClientRequest: () => void;
 }
 
+
 export const requestDataStore = create<RequestStore>((set: (state: Partial<RequestStore>) => void) => ({
 	request: {
 		id: 0,
@@ -110,3 +111,4 @@ export const clientRequestStore = create<ClientRequestStore>((set) => ({
 	setClientRequestStore: (data) => set({ requests: data }),
 	resetClientRequest: () => set({ requests: [] })
 }));
+

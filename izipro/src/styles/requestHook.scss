@@ -151,8 +151,8 @@
     &.message {
         display: block;
         overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    /*     text-overflow: ellipsis;
+        white-space: nowrap; */
         width: inherit;
         border: none;
         padding-left: 0.3rem;
@@ -178,10 +178,10 @@
 
     }
 
-    &.expanded {
+ /*    &.expanded {
         white-space: normal;
         max-width: none;
-    }
+    } */
 
     &.false.selected {
         @include m.selected;
@@ -224,27 +224,49 @@
         }
     }
 
-    .item__delete {
-        display: none;
+    .item__action {
+        display: flex;
+        justify-content: space-between;
+        height: 3rem;
 
-    }
+        .item__delete {
+            display: none;
 
-    .item__delete-FaTrashAlt {
-        font-size: 1.5rem;
-        margin: 1rem 1rem 1rem auto;
-        color: v.$color-error;
-        z-index: 2;
-
-        /* For mouse */
-        @media (hover: hover) and (pointer: fine) {
-            cursor: pointer;
         }
 
-        /* For touch */
-        @media (hover: none) and (pointer: coarse) {
-            cursor: default;
-        }
+        .item__delete-FaTrashAlt {
+            font-size: 1.5rem;
+            margin: auto 0 auto 1rem;
+            color: v.$color-error;
+            z-index: 2;
 
+            /* For mouse */
+            @media (hover: hover) and (pointer: fine) {
+                cursor: pointer;
+            }
+
+            /* For touch */
+            @media (hover: none) and (pointer: coarse) {
+                cursor: default;
+            }
+
+        }
+        .item__message {
+            font-size: 1.8rem;
+            color: v.$color-primary-blue;
+            margin: auto 1rem auto 0;
+            z-index: 2;
+            
+            /* For mouse */
+            @media (hover: hover) and (pointer: fine) {
+                cursor: pointer;
+            }
+
+            /* For touch */
+            @media (hover: none) and (pointer: coarse) {
+                cursor: default;
+            }
+        }
     }
 
     .item.false.selected {

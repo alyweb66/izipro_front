@@ -45,11 +45,11 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
 
 	// State
-	const [isMessageExpanded, setIsMessageExpanded] = useState({});
+	//const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [hasManyImages, setHasManyImages] = useState(false);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ requestId: number, requestTitle: string } | null>(null);
-
+	const [showAllContent, setShowAllContent] = useState(true);
 
 	const limit = 5;
 
@@ -74,7 +74,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 			state.denomination,
 			state.postal_code]);
 	const [setRequest] = requestDataStore((state) => [state.setRequest]);
-//	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
+	//	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 	const [notViewedRequestStore] = notViewedRequest((state) => [state.notViewed]);
 	const [requestsConversationStore, setRequestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
@@ -221,54 +221,61 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 
 	return (
 		<div className="client-request">
-			<div id="scrollableClientRequest" className="client-request__list">
-				{(requestJobLoading || loading) && <Spinner />}
-				{(!address || !city || !postal_code || (role === 'pro' ? !denomination : (!first_name || !last_name))) ? (
-					<p className="client-request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>
-				) : (
-					<ul className="client-request__list__detail">
-						<AnimatePresence>
-							{clientRequestsStore.map((requestByDate) => (
-								<RequestItem
-								setHasManyImages={setHasManyImages}
-								key={requestByDate.id}
-								setClientRequest={setClientRequest}
-								notViewedStore={notViewedRequestStore}
-								setRequest={setRequest}
-								requestByDate={requestByDate}
-								isClientRequest={true}
-								resetRequest={setRequest}
-								onDetailsClick={onDetailsClick}
-								hiddenLoading={hiddenLoading}
-								modalArgs={modalArgs}
-								setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
-								isMessageExpanded={isMessageExpanded}
-								setIsMessageExpanded={setIsMessageExpanded}
-								setModalArgs={setModalArgs}
-								openModal={openModal}
-							/>
-								
-							))}
-						</AnimatePresence>
-					</ul>
-				)}
-				<div className="client-request__list__fetch-button">
-					{(isHasMore && clientRequestsStore.length > 0) ? (<button
-						className="Btn"
-						onClick={(event) => {
-							event.preventDefault();
-							event.stopPropagation();
-							addRequest();
-						}}
-						aria-label="Charger plus de demandes"
-					>
-						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
-						<span className="icon2"></span>
-						<span className="tooltip">Charger plus</span>
-					</button>
+			<div className="client-request__container">
+			{clientRequestsStore && clientRequestsStore?.length > 0 && <button className="client-request__container__deploy"
+					onClick={() => setShowAllContent(!showAllContent)}
+				>
+					{clientRequestsStore && clientRequestsStore?.length > 0 && (showAllContent ? 'Réduire les demandes' : 'Déployer les demandes')}</button>}
+				<div id="scrollableClientRequest" className="client-request__container__list">
+					{(requestJobLoading || loading) && <Spinner />}
+					{(!address || !city || !postal_code || (role === 'pro' ? !denomination : (!first_name || !last_name))) ? (
+						<p className="client-request no-req">Veuillez renseigner les champs &quot;Mes informations&quot; et &quot;Vos métiers&quot; pour consulter les demandes</p>
 					) : (
-						(address || city || postal_code || (role === 'pro' ? denomination : (first_name || last_name))) && (<p className="client-request__list no-req">Fin des résultats</p>)
+						<ul className="client-request__container__list__detail">
+							<AnimatePresence>
+								{clientRequestsStore.map((requestByDate) => (
+									<RequestItem
+										setHasManyImages={setHasManyImages}
+										key={requestByDate.id}
+										setClientRequest={setClientRequest}
+										notViewedStore={notViewedRequestStore}
+										setRequest={setRequest}
+										requestByDate={requestByDate}
+										showAllContent={showAllContent}
+										isClientRequest={true}
+										resetRequest={setRequest}
+										onDetailsClick={onDetailsClick}
+										hiddenLoading={hiddenLoading}
+										modalArgs={modalArgs}
+										setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+										//isMessageExpanded={isMessageExpanded}
+										//setIsMessageExpanded={setIsMessageExpanded}
+										setModalArgs={setModalArgs}
+										openModal={openModal}
+									/>
+
+								))}
+							</AnimatePresence>
+						</ul>
 					)}
+					<div className="client-request__container__list__fetch-button">
+						{(isHasMore && clientRequestsStore.length > 0) ? (<button
+							className="Btn"
+							onClick={(event) => {
+								event.preventDefault();
+								event.stopPropagation();
+								addRequest();
+							}}
+							aria-label="Charger plus de demandes"
+						>
+							<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
+							<span className="icon2"></span>
+							<span className="tooltip">Charger plus</span>
+						</button>
+						) : (
+							(address || city || postal_code || (role === 'pro' ? denomination : (first_name || last_name))) && (<p className="client-request__container__list no-req">Fin des résultats</p>)
+						)}
+					</div>
 				</div>
 			</div>
 

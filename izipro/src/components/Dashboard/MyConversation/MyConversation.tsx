@@ -49,6 +49,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { UpdateMyConvMessage } from '../../Hook/UpdateMyConvMessage';
 import { HeaderMessage } from '../../Hook/HeaderMessage';
 import { MessageForm } from '../../Hook/MessageForm';
+import { FetchButton } from '../../Hook/FetchButton';
 
 
 type useQueryUserConversationsProps = {
@@ -81,7 +82,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
 	const [isListOpen, setIsListOpen] = useState(true);
-	const [isMessageExpanded, setIsMessageExpanded] = useState({});
+	//const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [isMessageOpen, setIsMessageOpen] = useState(window.innerWidth > 780 ? true : false);
 	const [requestTitle, setRequestTitle] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ requestId: number, requestTitle: string } | null>(null);
@@ -91,6 +92,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const [hasManyImages, setHasManyImages] = useState(false);
 	const [uploadFileError, setUploadFileError] = useState('');
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+	const [showAllContent, setShowAllContent] = useState(true);
 
 	// limit of requests to fetch
 	const limit = 4;
@@ -133,7 +135,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	// Function to send message
 	function sendMessage(event: React.FormEvent<HTMLFormElement>, requestId?: number) {
 		event.preventDefault();
-console.log('sendMessage', requestId);
 
 		if (fileError) {
 			setFile([]);
@@ -499,54 +500,47 @@ console.log('sendMessage', requestId);
 
 	return (
 		<div className="my-conversation">
-			{(hideRequestLoading || convLoading) && <Spinner />}
-			<div id="scrollableList" className={`my-conversation__list ${isListOpen ? 'open' : ''}`}>
-
-				{(requestByDate || request.id > 0) && (
-					<ul className="my-conversation__list__detail" >
-						<AnimatePresence>
-							{isListOpen && requestByDate?.map((requestByDate) => (
-								<RequestItem
-									setHasManyImages={setHasManyImages}
-									key={requestByDate.id}
-									notViewedStore={notViewedConversationStore}
-									requestByDate={requestByDate}
-									setIsMessageOpen={setIsMessageOpen}
-									isMyConversation={true}
-									selectedRequest={selectedRequest!}
-									setSelectedRequest={setSelectedRequest}
-									setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
-									isMessageExpanded={isMessageExpanded}
-									setIsMessageExpanded={setIsMessageExpanded}
-									setIsListOpen={setIsListOpen}
-									setModalArgs={setModalArgs}
-									openModal={openModal}
-								/>
-							))}
-						</AnimatePresence>
-
-					</ul>
-				)}
-				<div className="my-conversation__list__fetch-button">
-					{(isHasMore && requestByDate && requestByDate?.length > 0) ? (<button
-						className="Btn"
-						onClick={(event) => {
-							event.preventDefault();
-							event.stopPropagation();
-							addRequest();
-						}}
-						aria-label="Charger plus de conversations">
-
-						<svg className="svgIcon" viewBox="0 0 384 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"></path></svg>
-						<span className="icon2"></span>
-						<span className="tooltip">Charger plus</span>
-					</button>
+				{(hideRequestLoading || convLoading) && <Spinner />}
+			{isListOpen && <div className="my-conversation__container">
+				{requestByDate && isListOpen && requestByDate?.length > 0 && <button className="my-conversation__container__deploy"
+					onClick={() => setShowAllContent(!showAllContent)}
+				>
+					{requestByDate && requestByDate?.length > 0 && (showAllContent ? 'Réduire les demandes' : 'Déployer les demandes')}</button>}
+				<div id="scrollableList" className={`my-conversation__container__list ${isListOpen ? 'open' : ''}`}>
+					{(requestByDate || request.id > 0) && (
+						<ul className="my-conversation__container__list__detail" >
+							<AnimatePresence>
+								{isListOpen && requestByDate?.map((requestByDate) => (
+									<RequestItem
+										setHasManyImages={setHasManyImages}
+										key={requestByDate.id}
+										notViewedStore={notViewedConversationStore}
+										requestByDate={requestByDate}
+										showAllContent={showAllContent}
+										setIsMessageOpen={setIsMessageOpen}
+										isMyConversation={true}
+										selectedRequest={selectedRequest!}
+										setSelectedRequest={setSelectedRequest}
+										setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
+										//isMessageExpanded={isMessageExpanded}
+										//setIsMessageExpanded={setIsMessageExpanded}
+										setIsListOpen={setIsListOpen}
+										setModalArgs={setModalArgs}
+										openModal={openModal}
+									/>
+								))}
+							</AnimatePresence>
+						</ul>
+					)}
+					{(isHasMore && requestByDate && requestByDate?.length > 0) ? (
+						<FetchButton
+							addRequest={addRequest}
+						/>
 					) : (
-						<p className="my-conversation__list no-req">Fin des résultats</p>
+						<p className="my-conversation__container__list no-req">Fin des résultats</p>
 					)}
 				</div>
-
-			</div>
+			</div>}
 			<AnimatePresence>
 				{isMessageOpen && (
 					<motion.div

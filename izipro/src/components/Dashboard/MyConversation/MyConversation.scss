@@ -6,57 +6,74 @@
     // position for spinner
     position: relative;
     display: flex;
+    overflow: hidden;
     justify-content: space-evenly;
     align-items: stretch;
     height: 100%;
     background-color: transparent;
     padding-top: 0.5rem;
 
-
-
-    .my-conversation__list {
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
-        touch-action: pan-y;
-        scrollbar-width: none;
+    .my-conversation__container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
         width: 100%;
         max-width: 40%;
-        margin: 0 0.1rem;
-        height: 100%;
 
-        &::-webkit-scrollbar {
-            display: none;
-            /* For Chrome, Safari and Opera */
-        }
-
-        &.no-req {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            margin: 0.5rem auto;
-            border-radius: 0.5rem;
-            box-shadow: none;
-            max-width: 90%;
+        .my-conversation__container__deploy {
+            font-size: 1rem;
             color: v.$color-primary-orange;
-            text-align: center;
+            text-decoration: underline;
+            border: none;
+            background-color: transparent;
+            margin-bottom: 0.2rem;
 
-        }
+            /* For mouse */
+            @media (hover: hover) and (pointer: fine) {
+                cursor: pointer;
+            }
 
-        .my-conversation__list__fetch-button {
-            @include m.fetch-button;
-
-            & {
-                display: flex;
-                justify-content: center;
+            /* For touch */
+            @media (hover: none) and (pointer: coarse) {
+                cursor: default;
             }
         }
 
-        .my-conversation__list__detail {
-            padding-left: 0;
-           
+        .my-conversation__container__list {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+            touch-action: pan-y;
+            scrollbar-width: none;
+            margin: 0 0.1rem;
+            // height: 100%;
+
+            &::-webkit-scrollbar {
+                display: none;
+                /* For Chrome, Safari and Opera */
+            }
+
+
+
+            &.no-req {
+                display: flex;
+                justify-content: center;
+                width: 100%;
+                margin: 0.5rem auto;
+                border-radius: 0.5rem;
+                box-shadow: none;
+                max-width: 90%;
+                color: v.$color-primary-orange;
+                text-align: center;
+
+            }
+
+            .my-conversation__container__list__detail {
+                padding-left: 0;
+
+            }
+
+
         }
-
-
     }
 
     .my-conversation__message-list {
@@ -78,6 +95,22 @@
 @media (max-width: 900px) {
     .my-conversation {
         justify-content: center;
+        .my-conversation__container {
+            max-width: 50%;
+
+            .my-conversation__list {
+                display: none;
+
+                &.open {
+                    display: block;
+                    margin: 0 auto;
+                    // height: 97%;
+                }
+
+
+
+            }
+        }
 
     }
 }
@@ -85,20 +118,23 @@
 @media (max-width: 780px) {
     .my-conversation {
         width: 100%;
+
         // height: 100%;
+        .my-conversation__container {
+            max-width: 100%;
 
-        .my-conversation__list {
-            display: none;
+            .my-conversation__list {
+                display: none;
 
-            &.open {
-                display: block;
-                margin: 0 auto;
-                max-width: 98%;
-                // height: 97%;
+                &.open {
+                    display: block;
+                    margin: 0 auto;
+                    // height: 97%;
+                }
+
+
+
             }
-
-
-
         }
 
         .my-conversation__message-list {
@@ -122,13 +158,24 @@
     .my-conversation {
         padding-top: 0;
 
+
+        .my-conversation__container {
+            max-width: 100%;
+            width: 100%;
+
+            .my-conversation__container__deploy {
+                margin-top: 0.5rem;
+                margin-bottom: 0.2rem;
+            }
+
+        }
+
         .my-conversation__message-list {
             &.open {
                 margin-top: 0;
+                border-radius: 0;
                 width: 100%;
                 max-width: 100%;
-                border-radius: 0;
-
             }
         }
 
