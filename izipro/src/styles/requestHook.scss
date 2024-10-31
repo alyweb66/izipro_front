@@ -44,7 +44,8 @@
     }
 
     &.not-viewed {
-        @include m.not-viewed
+        @include m.not-viewed;
+
     }
 
     &.deleted {
@@ -54,25 +55,25 @@
             z-index: 1;
         }
 
-        .item__deleted {
-            position: absolute;
-            top: 50%;
-            left: 55%;
-            transform: translate(-50%, -50%);
-            color: v.$color-error;
-            font-size: 1.5rem;
-            font-weight: 500;
-            z-index: 0;
-        }
-
+        
         .item__header,
         .item {
             opacity: 0.4;
         }
-
-
+        
+        
     }
-
+    
+    .item__deleted {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: v.$color-error;
+        font-size: 1.5rem;
+        font-weight: 500;
+        z-index: 0;
+    }
 
 
     .item__header {
@@ -151,7 +152,7 @@
     &.message {
         display: block;
         overflow: hidden;
-    /*     text-overflow: ellipsis;
+        /*     text-overflow: ellipsis;
         white-space: nowrap; */
         width: inherit;
         border: none;
@@ -178,7 +179,7 @@
 
     }
 
- /*    &.expanded {
+    /*    &.expanded {
         white-space: normal;
         max-width: none;
     } */
@@ -251,12 +252,13 @@
             }
 
         }
+
         .item__message {
             font-size: 1.8rem;
             color: v.$color-primary-blue;
             margin: auto 1rem auto 0;
             z-index: 2;
-            
+
             /* For mouse */
             @media (hover: hover) and (pointer: fine) {
                 cursor: pointer;

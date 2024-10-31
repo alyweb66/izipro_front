@@ -33,10 +33,6 @@ export const HeaderMessage = ({
     setIsMessageOpen,
     setSelectedItem
 }: HeaderMessageProps) => {
-console.log('requestTitle', requestTitle);
-console.log('isMyRequest', isMyRequest);
-console.log('isMyConversation', isMyConversation);
-
 
     return (
         <div className="header-message__user" aria-label="Détails de l'utilisateur" >
@@ -94,7 +90,7 @@ console.log('isMyConversation', isMyConversation);
                     ) : (
                         <p className="header-message__user__header__detail name">{selectedItem?.first_name} {selectedItem?.last_name}</p>
                     )}
-                    {selectedItem?.deleted_at && <p className="header-message__user__header__detail deleted" aria-label="Utilisateur supprimé">Utilisateur supprimé</p>}
+                    {selectedItem && 'email' in selectedItem && selectedItem?.deleted_at && <p className="header-message__user__header__detail deleted" aria-label="Utilisateur supprimé">Utilisateur supprimé</p>}
 
                     {selectedItem && selectedItem?.id > 0 && <span className="header-message__user__header__detail deploy-arrow">{(isMyRequest ? userDescription : requestTitle) ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}</span>}
 

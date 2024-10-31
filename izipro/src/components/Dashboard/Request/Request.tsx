@@ -69,7 +69,7 @@ function Request() {
 	const [uploadFileError, setUploadFileError] = useState('');
 	const [categoriesState, setCategoriesState] = useState<CategoryPros[]>([]);
 	const [jobsState, setJobsState] = useState<JobProps[]>([]);
-	//const [isMobile, setIsMobile] = useState(window.matchMedia('(max-width: 450px)').matches);
+	const [isCreateRequestLoading, setIsCreateRequestLoading] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [map, setMap] = useState<Map | null>(null);
 	// Map
@@ -134,7 +134,7 @@ function Request() {
 			const sendFile = file.map(file => ({
 				file,
 			}));
-
+			setIsCreateRequestLoading(true);
 			createRequest({
 				variables: {
 					input: {
@@ -166,7 +166,7 @@ function Request() {
 
 					// update subscriptionStore with the new request id
 					if (subscriptionStore.some(subscription => subscription.subscriber === 'request')) {
-						
+
 						const newSubscription = subscriptionStore.map(subscription => {
 							if (subscription.subscriber === 'request' && Array.isArray(subscription.subscriber_id) && !subscription.subscriber_id.includes(newRequest.id)) {
 
@@ -203,6 +203,7 @@ function Request() {
 					setUrgent(false);
 
 				}
+				setIsCreateRequestLoading(false);
 			});
 			clearTimeout(timer);
 
@@ -600,7 +601,7 @@ function Request() {
 										<Alert variant="filled" severity="error">{fileError}</Alert>
 									</Fade>
 								)}
-								{createLoading && <Spinner className="small-spinner" />}
+								{createLoading || isCreateRequestLoading && <Spinner className="small-spinner" />}
 							</Stack>
 						</div>
 						<button

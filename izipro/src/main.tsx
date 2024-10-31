@@ -127,7 +127,6 @@ const captureSessionIdLink =  new ApolloLink((operation, forward) => {
 		if (httpResponse && httpResponse.headers) {
 			// Get le X-Session-ID from the headers
 			const sessionId = httpResponse.headers.get('X-Session-ID');
-			console.log('sessionId:', sessionId);
 
 			if (sessionId) {
 				const sessionCookie = document.cookie.split(';').find(cookie => cookie.includes('session-id'));

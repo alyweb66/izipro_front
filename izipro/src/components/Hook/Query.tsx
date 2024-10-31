@@ -119,7 +119,7 @@ export const  useQueryUserRequests = (id: number, offset: number, limit: number,
 
 // fetch requests by job
 export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, limit: number, skip: boolean) => {
-	
+
 	const jobIdArray = jobId.map((job) => job.job_id);
 
 	const { loading, subscribeToMore, error: requestError, data: getRequestsByJob, fetchMore } = useQuery(GET_REQUEST_BY_JOB, {
@@ -254,8 +254,10 @@ export const useQueryNotViewedRequests = (skip: boolean) => {
 	return {loading, viewedData};
 };
 
-export const useQueryNotViewedConversations = () => {
-	const { loading, error: viewedError, data: notViewedConversationQuery } = useQuery(NOT_VIEWED_CONVERSATIONS);
+export const useQueryNotViewedConversations = (skip: boolean) => {
+	const { loading, error: viewedError, data: notViewedConversationQuery } = useQuery(NOT_VIEWED_CONVERSATIONS, {
+		skip
+	});
 
 	if (viewedError) {
 		throw new Error('Error while fetching viewed requests');

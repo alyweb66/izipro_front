@@ -25,13 +25,15 @@
 
         .rules-modal-header {
             flex-shrink: 0;
-            height: 10%;
+            height: fit-content;
+            padding-bottom: 0.5rem;
 
             .modal__title {
                 color: v.$color-primary-orange;
                 font-weight: 500;
                 font-size: 2rem;
                 text-align: center;
+              
                 //  height: 10%;
             }
         }

@@ -40,8 +40,7 @@ export const MessageForm = ({
     messageMutationLoading
 
 }: MessageFormProps) => {
-    console.log('selectedItem', selectedItem);
-    
+
     return (
         <form className="message-form" onSubmit={(event) => {
             event.preventDefault();
@@ -119,7 +118,7 @@ export const MessageForm = ({
                     placeholder="Tapez votre message ici..."
                     aria-label='Tapez votre message ici'
                     maxLength={1000}
-                    readOnly={selectedItem && selectedItem?.id > 0 ? false : true}
+                    readOnly={(selectedItem && selectedItem?.id > 0 ? false : true) || selectedItem && 'deleted_at' in selectedItem ? selectedItem?.deleted_at !== null : false}
                     onClick={(event: React.MouseEvent) => { event.stopPropagation(); event?.preventDefault(); }}
                 />
                 <MdSend
@@ -136,7 +135,7 @@ export const MessageForm = ({
                 accept="image/*,.pdf"
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
                 multiple={true}
-                disabled={selectedItem && selectedItem?.id > 0 ? false : true}
+                disabled={(selectedItem && selectedItem?.id > 0 ? false : true) || selectedItem && 'deleted_at' in selectedItem ? selectedItem?.deleted_at !== null : false}
                 aria-label="Envoyer un fichier"
             />
             <input
@@ -146,14 +145,14 @@ export const MessageForm = ({
                 accept="image/*"
                 capture="environment"
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
-                disabled={selectedItem && selectedItem?.id > 0 ? false : true}
+                disabled={(selectedItem && selectedItem?.id > 0 ? false : true) || selectedItem && 'deleted_at' in selectedItem ? selectedItem?.deleted_at !== null : false}
                 aria-label="Prendre une photo"
             />
             <button
                 id="send-message"
                 className="message-form__button"
                 type="submit"
-                disabled={!selectedItem || selectedItem?.id <= 0 || messageMutationLoading}
+                disabled={!selectedItem || selectedItem?.id <= 0 || messageMutationLoading || selectedItem && 'deleted_at' in selectedItem ? selectedItem?.deleted_at !== null : false}
                 aria-label="Envoyer le message"
             >
                 Send

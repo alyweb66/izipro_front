@@ -179,7 +179,7 @@ function Dashboard() {
 
 	//*state for clientRequest
 	const [isCLientRequestHasMore, setIsClientRequestHasMore] = useState<boolean>(true);
-	const [isSkipClientRequest, setIsSkipClientRequest] = useState<boolean>(true);
+	//const [isSkipClientRequest, setIsSkipClientRequest] = useState<boolean>(true);
 
 	//store
 	const isLoggedOut = isLoggedOutStore((state) => state.isLoggedOut);
@@ -212,7 +212,10 @@ function Dashboard() {
 	const myConversationOffsetRef = useRef<number>(0);
 	const isSkipGetUserDataRef = useRef<boolean>(true);
 	const isSkipSubscriptionRef = useRef<boolean>(false);
-	const isSkipMyRequestRef = useRef<boolean>(true);
+	const isSkipMyRequestRef = useRef<boolean>(false);
+	const isSkipMyConversationRef = useRef<boolean>(false);
+	const isSkipClientRequestRef = useRef<boolean>(false);
+	const isSkipNotViewedConvRef = useRef<boolean>(false);
 	const idRef = useRef<number>(id);
 
 	// to keep id for the sendBeacon when the user leaves the page
@@ -225,21 +228,22 @@ function Dashboard() {
 
 	// Query 
 	const { loading: userDataLoading, getUserData } = useQueryUserData(isSkipGetUserDataRef.current || id !== 0);
-	const getUserSubscription = useQueryUserSubscriptions(isSkipSubscriptionRef.current);
+	const getUserSubscription = useQueryUserSubscriptions(isSkipSubscriptionRef.current || id === 0);
 	const notViewedRequestQuery = useQueryNotViewedRequests((role !== 'pro' || notViewedRequestStore.length > 0));
-	const { loading: notViewedConversationLoading, notViewedConversationQuery } = useQueryNotViewedConversations();
+	const { loading: notViewedConversationLoading, notViewedConversationQuery } = useQueryNotViewedConversations(isSkipNotViewedConvRef.current);
 	// this query is only ids of all conversation used to compare with the notViewedConversationStore to get the number of not viewed conversation
 	const { loading: myConversationIdsLoading, myConversationIds } = useQueryUserConversationIds(requestConversationIdStore.length > 0);
 
 	//* Query for MyRequest
-	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, (isSkipMyRequestRef.current || requestStore.length > 0));
+	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, (isSkipMyRequestRef.current || id === 0 || requestStore.length > 0));
 	const { loading: requestByIdLoading, requestById } = useQueryGetRequestById(requestByIdState);
 
 	//*Query for ClientRequest
-	const { loading: getRequestByJobLoading, getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequest || clientRequestsStore.length > 0));
+	const { loading: getRequestByJobLoading, getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequestRef.current || jobs.length === 0 || clientRequestsStore.length > 0));
 
 	//*Query for MyConversation
-	const { loading: requestMyConversationLoading, data: requestMyConversation } = useQueryUserConversations(0, myconversationLimit, (role === 'pro' ? requestsConversationStore.length > 0 : true)) as unknown as useQueryUserConversationsProps;
+	const { loading: requestMyConversationLoading, data: requestMyConversation } = useQueryUserConversations(
+		0, myconversationLimit, (role === 'pro' ? (isSkipMyConversationRef.current || requestsConversationStore.length > 0 ): true)) as unknown as useQueryUserConversationsProps;
 
 	//mutation
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
@@ -356,7 +360,7 @@ function Dashboard() {
 		return () => window.removeEventListener('resize', handleResize);
 	}, []);
 
-	// set the new request from requestById to myRequestStore 
+	// set the new request from requestById to myConversation 
 	useEffect(() => {
 
 		if (requestById) {
@@ -436,6 +440,7 @@ function Dashboard() {
 
 					setNotViewedConversationStore(newId);
 					setHasQueryConversationRun(true);
+					isSkipNotViewedConvRef.current = true;
 				}
 			}
 		}
@@ -474,16 +479,16 @@ function Dashboard() {
 			const newRequests = requestByJob?.filter((request: RequestProps) => clientRequestsStore?.every(prevRequest => prevRequest.id !== request.id));
 
 			// Filter the requests
-			setIsSkipClientRequest(true);
+			isSkipClientRequestRef.current = true;
 			if (newRequests && newRequests.length > 0) {
-				setIsSkipClientRequest(true);
+				isSkipClientRequestRef.current = true;
 				clientRequestOffset.current = clientRequestOffset.current + requestByJob?.length;
 				RangeFilter(requestByJob);
 			}
 		}
 
 		// If there are no more requests, stop the fetchmore
-		if (getRequestsByJob?.requestsByJob?.length < clientRequestLimit) {
+		if (!getRequestsByJob || getRequestsByJob?.requestsByJob?.length < clientRequestLimit) {
 			setIsClientRequestHasMore(false);
 		}
 	}, [getRequestsByJob, settings]);
@@ -508,8 +513,9 @@ function Dashboard() {
 			}
 		}
 
-		if (getUserRequestsData?.user.requests?.length < myRequestLimit) {
+		if (!getUserRequestsData || getUserRequestsData?.user.requests?.length < myRequestLimit) {
 			setIsMyRequestHasMore(false);
+			isSkipMyRequestRef.current = true;
 		}
 	}, [getUserRequestsData]);
 
@@ -527,13 +533,15 @@ function Dashboard() {
 
 			// add the new request to the requestsConversationStore
 			if (newRequests.length > 0) {
+				
 				requestConversationStore.setState(prevState => ({ ...prevState, requests: [...requestsConversationStore, ...newRequests] }));
 			}
 
 			myConversationOffsetRef.current = requestsConversations?.length;
+			isSkipMyConversationRef.current = true;
 		}
 
-		if (requestMyConversation?.user.requestsConversations.length < myconversationLimit) {
+		if (!requestMyConversation || requestMyConversation?.user.requestsConversations.length < myconversationLimit) {
 			setIsMyConversationHasMore(false);
 		}
 	}, [requestMyConversation]);
@@ -608,6 +616,7 @@ function Dashboard() {
 			} else {
 				// add updated_at to the request.conversation
 				if (myConversationIdState !== messageAdded[0].conversation_id) {
+
 					requestConversationStore.setState(prevState => {
 						const updatedRequest = prevState.requests.map((request: RequestProps) => {
 							const updatedConversation = request.conversation?.map((conversation) => {
@@ -995,7 +1004,7 @@ function Dashboard() {
 							<div className="indicator"></div>
 						</li>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }} aria-label="Ouvrir mes demandes">
+							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen) }} aria-label="Ouvrir mes demandes">
 							<div className="tab-content">
 
 								<span>MES DEMANDES</span>
@@ -1014,7 +1023,7 @@ function Dashboard() {
 						</li>
 						{role === 'pro' &&
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
-								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); setIsSkipClientRequest(false); }} aria-label="Ouvrir les demandes clients">
+								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen) }} aria-label="Ouvrir les demandes clients">
 								<div className="tab-content">
 									<span>CLIENT</span>
 									{(notViewedRequestStore.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>

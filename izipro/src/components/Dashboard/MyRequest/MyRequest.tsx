@@ -45,7 +45,6 @@ import RequestItem from '../../Hook/RequestHook';
 import { HeaderMessage } from '../../Hook/HeaderMessage';
 import { MessageForm } from '../../Hook/MessageForm';
 import { FetchButton } from '../../Hook/FetchButton';
-//import { Id } from '@turf/turf';
 
 // Configuration for React Modal
 ReactModal.setAppElement('#root');
@@ -79,7 +78,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [isListOpen, setIsListOpen] = useState<boolean>(true);
 	const [isAnswerOpen, setIsAnswerOpen] = useState<boolean>(window.innerWidth > 1000 ? true : false);
 	const [isMessageOpen, setIsMessageOpen] = useState<boolean>(window.innerWidth > 1000 ? true : false);
-	//const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ requestId: number, requestTitle: string } | null>(null);
 	const [isUserMessageOpen, setIsUserMessageOpen] = useState(false);
@@ -91,7 +89,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [isFetchingMore, setIsFetchingMore] = useState(false);
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	const [showAllContent, setShowAllContent] = useState(true);
-	//const [isHandleClick, setIsHandleClick] = useState<boolean>(false);
+	const [isSendingMessage, setIsSendingMessage] = useState(false);
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
@@ -145,6 +143,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 				setUserConvState([]);
 				setModalArgs(null);
 				setDeleteItemModalIsOpen(false);
+				setSelectedRequest(null);
 
 				// Remove the request from the store
 				setMyRequestsStore(myRequestsStore.filter(request => request.id !== requestId));
@@ -286,7 +285,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		if (conversationIdState ?? 0 > 0) {
 
 			if (messageValue.trim() !== '' || sendFile.length > 0) {
-
+				setIsSendingMessage(true);
 				message({
 					variables: {
 						id: id,
@@ -294,6 +293,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							content: messageValue,
 							user_id: id,
 							conversation_id: conversationIdState,
+							request_id: selectedRequest?.id,
 							media: sendFile
 						}
 					}
@@ -302,6 +302,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 					setMessageValue('');
 					setFile([]);
 					setUrlFile([]);
+					setIsSendingMessage(false);
 				});
 			}
 		}
@@ -594,7 +595,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	return (
 		<div className="my-request">
 			{isListOpen && <div className="my-request__container">
-					{requestByDate && isListOpen && requestByDate?.length > 0 && <button className="my-request__container__deploy"
+				{requestByDate && isListOpen && requestByDate?.length > 0 && <button className="my-request__container__deploy"
 					onClick={() => setShowAllContent(!showAllContent)}
 				>
 					{requestByDate && requestByDate?.length > 0 && (showAllContent ? 'Réduire les demandes' : 'Déployer les demandes')}</button>}
@@ -752,7 +753,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
-						{(messageLoading || messageMutationLoading) && <Spinner />}
+						{(messageLoading || messageMutationLoading || isSendingMessage) && <Spinner />}
 						<HeaderMessage
 							selectedItem={selectedUser}
 							setIsAnswerOpen={setIsAnswerOpen}

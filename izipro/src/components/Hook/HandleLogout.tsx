@@ -9,7 +9,7 @@ import { notViewedConversation, notViewedRequest, notViewedRequestRef, requestCo
 import { userNotificationStore } from '../../store/Notification';
 
 
-export default function useHandleLogout() {
+ const useHandleLogout = () =>{
 	const navigate = useNavigate();
 	//const resetUserData = userDataStore((state) => state.resetUserData);
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
@@ -69,6 +69,7 @@ export default function useHandleLogout() {
 			if (document.cookie) {
 				document.cookie = 'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 				document.cookie = 'refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+				document.cookie = 'session-id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 			}
 			
 			//redirect to home page
@@ -81,3 +82,4 @@ export default function useHandleLogout() {
 		}
 	};
 }
+export default useHandleLogout;

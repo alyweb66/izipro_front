@@ -15,7 +15,6 @@ import { styled } from '@mui/material/styles';
 import { Grow } from '@mui/material';
 import { BiConversation } from "react-icons/bi";
 
-
 const RequestItem = ({
 	//index,
 	requestByDate,
@@ -35,7 +34,7 @@ const RequestItem = ({
 	hiddenLoading,
 	deleteRequestLoading,
 	modalArgs,
-	resetRequest,
+	removeRequestStore,
 	selectedRequest,
 	setSelectedRequest,
 	setDeleteItemModalIsOpen,
@@ -63,7 +62,7 @@ const RequestItem = ({
 	onDetailsClick?: Function,
 	hiddenLoading?: boolean,
 	modalArgs?: { requestId: number, requestTitle: string } | null,
-	resetRequest?: Function,
+	removeRequestStore?: Function,
 	selectedRequest?: RequestProps,
 	setSelectedRequest?: Function,
 	setDeleteItemModalIsOpen: React.Dispatch<React.SetStateAction<boolean>>,
@@ -73,10 +72,6 @@ const RequestItem = ({
 	openModal?: Function
 	setHasManyImages: Function
 }) => {
-	//	const idRef = useRef<number>(0);
-	//const [deploySelected, setDeploySelected] = useState<number[]>([]);
-	//const [ShowContent, setShowContent] = useState<number[]>([]);
-
 
 	const StyledBadge = styled(Badge)<BadgeProps>(() => ({
 		'& .MuiBadge-badge': {
@@ -89,7 +84,6 @@ const RequestItem = ({
 	}));
 
 	// Etat pour contrôler l'affichage global
-	//const [showAllContent, setShowAllContent] = useState(false);
 	useEffect(() => {
 		setIndividualVisibility({});
 	}, [showAllContent]);
@@ -105,7 +99,6 @@ const RequestItem = ({
 		}));
 	};
 
-
 	return (
 		<motion.li
 
@@ -115,9 +108,9 @@ const RequestItem = ({
 			${''/* request ? 'new' : '' */} 
 			${isMyConversation && (selectedRequest?.id === requestByDate?.id && window.innerWidth > 800 ? 'selected' : '')}
 			${isMyrequest && (selectedRequest?.id === requestByDate?.id ? 'selected' : '')}
-			${isMyConversation && (requestByDate?.deleted_at ? 'deleted' : '')}
 			${(isMyConversation || isMyrequest) && (requestByDate?.conversation?.some(conv => notViewedStore?.some(id => id === conv.id))) ? 'not-viewed' : ''}
 			${isClientRequest && (notViewedStore?.some(id => id === requestByDate.id)) ? 'not-viewed' : ''}
+			${isMyConversation && (requestByDate?.deleted_at && !requestByDate?.conversation?.some(conv => notViewedStore?.some(id => id === conv.id)) ? 'deleted' : '')}
 			` }
 			data-request-id={isClientRequest && requestByDate?.id}
 			key={requestByDate?.id}
@@ -131,7 +124,7 @@ const RequestItem = ({
 			style={{ overflow: 'scroll' }}
 			initial={{ opacity: 0, scale: 0.9 }}
 			animate={{ opacity: 1, scale: 1 }}
-			exit={{ opacity: 0, scale: 0.9 }}
+			exit={{ opacity: 0, scale: 0 }}
 			transition={{ duration: 0.1, type: 'tween' }}
 			role="listitem"
 			aria-labelledby={`item-title-${requestByDate?.id}`}
@@ -147,7 +140,7 @@ const RequestItem = ({
 			)}
 			{isClientRequest && ((hiddenLoading && modalArgs?.requestId === requestByDate.id) && <Spinner />)}
 			{(isMyrequest && deleteRequestLoading) && <Spinner />}
-			{isMyConversation && (requestByDate?.deleted_at && <p className="item__deleted">SUPPRIMÉ PAR L&apos;UTILISATEUR</p>)}
+			{isMyConversation && (requestByDate?.deleted_at && <p className="item__deleted">{(individualVisibility[requestByDate.id] ?? showAllContent) ? "SUPPRIMÉ PAR L'UTILISATEUR" : 'SUPPRIMÉ'}</p>)}
 			{requestByDate?.urgent && <p className="item urgent">URGENT</p>}
 			<AnimatePresence>
 				{(individualVisibility[requestByDate.id] ?? showAllContent) && (
@@ -269,9 +262,9 @@ const RequestItem = ({
 						event.stopPropagation();
 						event.preventDefault();
 						if (request?.id && isMyConversation) {
-							resetRequest && resetRequest();
+							removeRequestStore && removeRequestStore(requestByDate.id);
 						} else {
-							setDeleteItemModalIsOpen(true);
+					setDeleteItemModalIsOpen(true);
 							if (requestByDate) {
 								event.stopPropagation();
 								setModalArgs({ requestId: requestByDate.id, requestTitle: requestByDate.title });

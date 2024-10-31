@@ -28,7 +28,6 @@ import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import { subscriptionDataStore } from '../../../../store/subscription';
 import { SubscriptionProps } from '../../../../Type/Subscription';
-import { set } from 'date-fns';
 
 
 function SettingAccount() {
@@ -69,7 +68,6 @@ function SettingAccount() {
 		// update selectedJob and jobs
 		setSelectedJob(selectedJob.filter((job) => job.id !== jobId));
 		setJobs(jobs.filter((job) => job.job_id !== jobId));
-		console.log('jobId', jobId);
 
 		deleteUserJob({
 			variables: {
@@ -102,7 +100,6 @@ function SettingAccount() {
 
 	};
 
-	console.log('selectedJob', selectedJob);
 	// function to submit job
 	const handleSubmitJob = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -176,8 +173,6 @@ function SettingAccount() {
 		}
 	};
 
-	console.log('subscription', subscriptionStore);
-
 
 	// function to validate the range
 	const handleValidateRange = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -244,8 +239,8 @@ function SettingAccount() {
 					<>
 						<form className={`setting-account__form ${jobLoading ? 'loading' : ''}`} onSubmit={handleSubmitJob} aria-label="Formulaire de sélection de métiers">
 							{/* {jobLoading && <Spinner />} */}
-							<h1 className="setting-account__form__title">Options de recherche:</h1>
-							<h2 className="setting-account__subtitle">Séléctionnez un ou plusieurs métiers:</h2>
+							<h1 className="setting-account__form__title">Options de recherche</h1>
+							<h2 className="setting-account__subtitle">Séléctionnez un ou plusieurs métiers</h2>
 							<SelectBox
 								isSetting={true}
 								data={categoriesState}
@@ -267,7 +262,7 @@ function SettingAccount() {
 							/>
 
 							<ul className="setting-account__form__list" >
-								<h2 className="setting-account__subtitle">Métiers à ajouter (max 5):</h2>
+								<h2 className="setting-account__subtitle">Métiers à ajouter (max 5)</h2>
 								<AnimatePresence>
 									{wishListJob && [...wishListJob].reverse().map((job: JobProps) => (
 										<motion.li
@@ -291,7 +286,7 @@ function SettingAccount() {
 											{job.name}
 											<button
 												className="setting-account__form__list__delete__button"
-												onClick={(event) => handleRemoveListJob(job.id, event)}
+												onClick={(event) => {setJobError(''), handleRemoveListJob(job.id, event)}}
 												aria-label={`Supprimer le métier ${job.name}`}
 											>X</button>
 										</motion.li>
@@ -311,7 +306,7 @@ function SettingAccount() {
 							<ul className={`setting-account__form__list job ${(userJobLoading || deleteJobLoading || categoryLoading) ? 'loading' : ''}`}>
 								{(userJobLoading || categoryLoading) && <Spinner className="small-spinner" />}
 
-								<h2 className="setting-account__subtitle">Métiers séléctionnés:</h2>
+								<h2 className="setting-account__subtitle">Métiers séléctionnés</h2>
 								<AnimatePresence>
 									{/* {jobDataLoading && <Spinner />} */}
 									{selectedJob && selectedJob.length > 0 ? selectedJob.map((job: JobProps) => (
@@ -353,7 +348,7 @@ function SettingAccount() {
 						<div className={`setting-account__radius ${settingLoading ? 'loading' : ''}`}>
 							{settingLoading && <Spinner />}
 							<label className="setting-account__radius__label">
-								<h2 className="setting-account__subtitle">Selectionnez une distance d&apos;action:</h2>
+								<h2 className="setting-account__subtitle">Selectionnez une distance d&apos;action</h2>
 								<span className="setting-account__radius__range">
 									{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
 								</span>

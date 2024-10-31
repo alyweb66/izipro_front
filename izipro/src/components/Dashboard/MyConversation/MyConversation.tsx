@@ -82,7 +82,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(null);
 	const [requestByDate, setRequestByDate] = useState<RequestProps[] | null>(null);
 	const [isListOpen, setIsListOpen] = useState(true);
-	//const [isMessageExpanded, setIsMessageExpanded] = useState({});
+	const [isSendingMessage, setIsSendingMessage] = useState(false);
 	const [isMessageOpen, setIsMessageOpen] = useState(window.innerWidth > 780 ? true : false);
 	const [requestTitle, setRequestTitle] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ requestId: number, requestTitle: string } | null>(null);
@@ -93,6 +93,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const [uploadFileError, setUploadFileError] = useState('');
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	const [showAllContent, setShowAllContent] = useState(true);
+
 
 	// limit of requests to fetch
 	const limit = 4;
@@ -153,7 +154,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		if (isNewConversation || conversationIdState > 0) {
 
 			if (messageValue.trim() !== '' || sendFile.length > 0) {
-
+				setIsSendingMessage(true);
 				message({
 					variables: {
 						id: id,
@@ -161,7 +162,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							content: messageValue,
 							user_id: id,
 							...(isNewConversation && { user_request_id: request.user_id }),
-							...(isNewConversation && { request_id: requestId }),
+							request_id: isNewConversation ? requestId : selectedRequest?.id,
 							...(conversationIdState && { conversation_id: conversationIdState }),
 							media: sendFile
 						}
@@ -170,21 +171,32 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 					setMessageValue('');
 
-					if (!response.data.createMessage?.success) {
+					if (response.data.createMessage?.id > 0) {
 						const newMessage = response.data.createMessage;
 						// if the request is a new client request
 						if (isNewConversation) {
+							// insert value in local storage to know if the request is new to remove request when unmouting
+							localStorage.setItem('newConversationCreated', 'true');
 							manageMessage({ newMessage, setConversationIdState, isNewConversation: true, requestId })
 
 						}
+					} else if (response.data.createMessage?.success === false) {
+						setUploadFileError('Demande supprimée, actualisez la page pour verifier');
+						setTimeout(() => {
+							setUploadFileError('');
+						}, 10000);
 					}
 
 					// remove request from clientRequestStore
-					setClientRequestsStore(clientRequestsStore.filter(clientRequest => clientRequest.id !== request.id));
+					const newRequest = clientRequestsStore.filter(clientRequest => clientRequest.id !== request.id);
+
+					setClientRequestsStore(newRequest);
 					// remove file from the file list and request
 					resetRequest();
 					setFile([]);
 					setUrlFile([]);
+
+					setIsSendingMessage(false);
 				});
 			}
 		}
@@ -212,6 +224,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 				if (!fetchMoreResult.data) return;
 				// add the new request to the requestsConversationStore
 				if (newRequests) {
+
 					const addRequest = [...(requestsConversationStore || []), ...newRequests];
 					setRequestsConversationStore(addRequest);
 				}
@@ -245,10 +258,12 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 			const requestConversation = requestsConversationStore.find(request => request.id === requestId);
 			const conversationId = requestConversation?.conversation.find(conversation => conversation.user_1 === id || conversation.user_2 === id)?.id;
 
-			if (response.data.createHiddenClientRequest) {
-				// remove the request from the clientRequestStore
-				setRequestsConversationStore(requestsConversationStore.filter(request => request.id !== requestId));
 
+			if (response.data.createHiddenClientRequest) {
+
+				// remove the request from the clientRequestStore
+				const updatedStore = requestsConversationStore.filter(request => request.id !== requestId);
+				setRequestsConversationStore(updatedStore);
 
 				// remove subscription for this conversation
 				const subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');
@@ -343,6 +358,13 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		}
 
 	};
+
+	// remove request from the store if not sending message of the selected request
+	const removeRequestStore = (requestId: number) => {
+		resetRequest();
+		const updatedStore = requestsConversationStore.filter(request => request.id !== requestId);
+		setRequestsConversationStore(updatedStore);
+	}
 
 	// useEffect to check the size of the window
 	useLayoutEffect(() => {
@@ -485,22 +507,28 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	// clean the request store if the component is unmounted
 	useEffect(() => {
 		return () => {
+			const isNewConversation = localStorage.getItem('newConversationCreated');
 			//if the request is in the requestsConversationStore and if there is a conversation with the user
-			if (requestsConversationStore.some(requestConv => requestConv.id === request.id && !requestConv.conversation?.some(conversation => conversation.user_1 === id || conversation.user_2 === id))) {
+			if (!isNewConversation || isNewConversation !== 'true' && request.id > 0) {
 				// remove request.id in requestsConversationStore
+
 				const removedRequest = requestConversationStore.getState().requests?.filter((requestConv: RequestProps) => request.id !== requestConv.id);
 				requestConversationStore.setState({ requests: removedRequest });
+
 			}
 			//setRequestsConversationStore(removedRequest);
 			resetRequest();
 			setConversationIdState(0);
+			if (isNewConversation) {
+				localStorage.removeItem('newConversationCreated');
+			}
 		};
 	}, []);
 
 
 	return (
 		<div className="my-conversation">
-				{(hideRequestLoading || convLoading) && <Spinner />}
+			{(hideRequestLoading || convLoading) && <Spinner />}
 			{isListOpen && <div className="my-conversation__container">
 				{requestByDate && isListOpen && requestByDate?.length > 0 && <button className="my-conversation__container__deploy"
 					onClick={() => setShowAllContent(!showAllContent)}
@@ -518,7 +546,9 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 										requestByDate={requestByDate}
 										showAllContent={showAllContent}
 										setIsMessageOpen={setIsMessageOpen}
+										request={request}
 										isMyConversation={true}
+										removeRequestStore={removeRequestStore}
 										selectedRequest={selectedRequest!}
 										setSelectedRequest={setSelectedRequest}
 										setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
@@ -550,7 +580,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 						exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
-						{(messageLoading || messageMutLoading) && <Spinner />}
+						{(messageLoading || messageMutLoading || isSendingMessage) && <Spinner />}
 						<div className="my-conversation__message-list__user">
 							{selectedRequest && (
 								<HeaderMessage

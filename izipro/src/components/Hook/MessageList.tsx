@@ -19,7 +19,6 @@ type MessageListProps = {
 export const MessageList: React.FC<MessageListProps> = ({ id, openModal, setHasManyImages, filteredMessages, conversationIdState, isMessageOpen }) => {
     // Scroll to the last message
     const { endMessageListRef, imageRefs, isEndViewed } = ScrollList({ filteredMessages, conversationIdState, isListOpen: isMessageOpen });
-console.log('conversationIdState', conversationIdState);
 
     return (
 

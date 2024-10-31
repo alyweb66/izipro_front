@@ -133,10 +133,7 @@ export const USER_SETTING_MUTATION = gql`
 
 export const USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION = gql`
     mutation CreateHiddenClientRequest($input: UserHasHiddenClientRequestInput!) {
-        createHiddenClientRequest(input: $input) {
-            user_id
-            request_id
-        }
+        createHiddenClientRequest(input: $input) 
     }
 `;
 
