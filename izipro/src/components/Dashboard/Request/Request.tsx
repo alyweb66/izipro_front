@@ -17,7 +17,7 @@ import { myRequestStore } from '../../../store/Request';
 
 // Types and icons
 import { CategoryPros, JobProps } from '../../../Type/Request';
-import pdfLogo from '/logo-pdf.webp';
+import pdfLogo from '/logos/logo-pdf.webp';
 //import { TbUrgent } from 'react-icons/tb';
 import { FaCamera } from 'react-icons/fa';
 
@@ -152,6 +152,7 @@ function Request() {
 				}
 			}).then((response) => {
 				if (!response.data.createRequest) {
+					setIsCreateRequestLoading(false);
 					setErrorMessage('Erreur lors de la création de la demande');
 					setTimeout(() => {
 						setErrorMessage('');
@@ -185,7 +186,7 @@ function Request() {
 						// Create new subscription
 						setSubscriptionStore([...subscriptionStore, { subscriber: 'request', subscriber_id: [newRequest.id], user_id: id, created_at: new Date().toISOString() }]);
 					}
-
+					setIsCreateRequestLoading(false);
 					setSuccessMessage('Demande envoyée avec succès');
 					setTimeout(() => {
 						setSuccessMessage('');
@@ -203,7 +204,7 @@ function Request() {
 					setUrgent(false);
 
 				}
-				setIsCreateRequestLoading(false);
+				
 			});
 			clearTimeout(timer);
 
@@ -386,7 +387,7 @@ function Request() {
 								classes={{ label: 'urgent-switch' }}
 							/>
 						</FormGroup>
-						<h1 className="request__form__title">Séléctionnez la catégorie et le métier concerné:</h1>
+						<h1 className="request__form__title">Séléctionnez la catégorie et le métier concerné*</h1>
 						<SelectBox
 							data={categoriesState}
 							selected={selectedCategory}
@@ -405,7 +406,7 @@ function Request() {
 
 						{lng && lat && (
 							<>
-								<h1 className="request__form__title radius">Séléctionnez une distance:</h1>
+								<h1 className="request__form__title radius">Séléctionnez une distance*</h1>
 								<label className="request__form__label-radius">
 									{radius === 0 ? 'Toute la france' : `Autour de moi: ${radius / 1000} Km`}
 									<Box className="request__slider-container" sx={{ width: 250 }}>
@@ -433,7 +434,7 @@ function Request() {
 								</div>
 							</>
 						)}
-						<h1 className="request__form__title">Saisissez le titre:</h1>
+						<h1 className="request__form__title">Saisissez le titre*</h1>
 						<label className="request__form__label">
 							<input
 								className="request__form__label__input title"
@@ -447,7 +448,7 @@ function Request() {
 								maxLength={50}
 							/>
 						</label>
-						<h1 className="request__form__title">Décrivez votre demande:</h1>
+						<h1 className="request__form__title">Décrivez votre demande*</h1>
 						<label className="request__form__label">
 							<TextareaAutosize
 								className="request__form__label__input textarea"
@@ -503,7 +504,7 @@ function Request() {
 								)}
 							</Stack>
 						</div>
-						<h1 className="request__form__title media">Ajoutez des photos (3 maximum):</h1>
+						<h1 className="request__form__title media">(Optionel) ajoutez des photos (3 maximum):</h1>
 						<label
 							htmlFor="file"
 							className="request__form__label-file"
@@ -563,7 +564,7 @@ function Request() {
 							type="file"
 							multiple={true}
 							onChange={handleFileUpload}
-							accept=".jpg,.jpeg,.png,.pdf,.heic,.heif"
+							accept=".jpg,.jpeg,.png,.pdf"
 							aria-label="Téléchargez plusieurs fichiers (formats acceptés : .jpg, .jpeg, .png, .heic, .heif, .pdf)"
 							title="Téléchargez des fichiers"
 						/>
@@ -571,7 +572,7 @@ function Request() {
 							id="fileInput"
 							className="request__form__input-media camera"
 							type="file"
-							accept="image/*"
+							accept=".jpg,.jpeg,.png,.pdf"
 							capture="environment"
 							onChange={handleFileUpload}
 							aria-label="Prendre une photo via la caméra"
@@ -601,7 +602,7 @@ function Request() {
 										<Alert variant="filled" severity="error">{fileError}</Alert>
 									</Fade>
 								)}
-								{createLoading || isCreateRequestLoading && <Spinner className="small-spinner" />}
+								{(createLoading || isCreateRequestLoading) && <Spinner className="small-spinner" />}
 							</Stack>
 						</div>
 						<button

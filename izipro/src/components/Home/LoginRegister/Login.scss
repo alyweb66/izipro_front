@@ -231,6 +231,10 @@
       justify-content: center;
       align-items: center;
 
+      .message {
+        margin-top: 0.5rem;
+      }
+      
       &.label {
         color: v.$color-primary-blue;
         font-weight: 500;

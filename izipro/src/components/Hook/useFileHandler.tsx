@@ -1,11 +1,13 @@
 import { useState } from 'react';
 
+
+
 export function useFileHandler() {
 	const [fileError, setFileError] = useState('');
 	const [file, setFile] = useState<File[]>([]);
 	const [urlFile, setUrlFile] = useState<File[]>([]);
 
-	const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLLabelElement>, onDrag = false, media?: File[]) => {
+	const handleFileChange = async (event?: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLLabelElement>, onDrag = false, media?: File[]) => {
 		setFileError('');
 		let files;
 		if (onDrag) {
@@ -15,23 +17,25 @@ export function useFileHandler() {
 		} else {
 			files = (event as React.ChangeEvent<HTMLInputElement>).target.files;
 		}
-		const maxFileSize = 1.5e+7; // 15MB in bytes
-		const maxPdfFileSize = 1024; // 1MB in bytes
+		const maxFileSize = 1.5e+7;
+		const maxPdfFileSize = 1048576; // 1 Mo
 		// filter pdf files that are too large
-		const validFiles = Array.from(files!).filter(file => {
+		const validFiles = (await Promise.all(Array.from(files!).map(async (file) => {
+			console.log('file', file);
 
 
 			// check if file is too large
 			if (file.size > maxFileSize) {
-				setFileError(`Fichier ${file.name} est trop grand, veuillez choisir un fichier de moins de 15MB.`);
+				setFileError(`Fichier ${file.name} est trop grand, veuillez choisir un fichier de moins de 15Mo.`);
 				setTimeout(() => {
 					setFileError('');
 				}, 15000);
 				return false;
 			}
 
+			// check if pdf file is too large
 			if (file.name.endsWith('.pdf') && file.size > maxPdfFileSize) {
-				setFileError(`Fichier ${file.name} est trop grand, veuillez choisir un PDF de moins de 1MB.`);
+				setFileError(`Fichier ${file.name} est trop grand, veuillez choisir un PDF de moins de 1Mo.`);
 				setTimeout(() => {
 					setFileError('');
 				}, 15000);
@@ -48,20 +52,21 @@ export function useFileHandler() {
 				}, 15000);
 				return false;
 			}
+			if (extension === 'heic' || extension === 'heif') {
+				try {
+					
 
-			// check if pdf file is too large
-			if (file.name.endsWith('.pdf')) {
-				if (file.size > maxFileSize) {
-					setFileError(`Fichier ${file.name} est trop grand, veuillez choisir un fichier de moins de 1MB.`);
+				} catch (error) {
+					//console.log('error', error);
+					setFileError(`Erreur lors de la conversion du fichier ${file.name}.`);
 					setTimeout(() => {
 						setFileError('');
 					}, 15000);
-					return false;
+					return null;
 				}
-				return true;
 			}
-			return true;
-		});
+			return file;
+		}))).filter(file => file !== false && file !== null) as File[];
 
 		if (validFiles) {
 			const urls = validFiles.map(file => URL.createObjectURL(file));

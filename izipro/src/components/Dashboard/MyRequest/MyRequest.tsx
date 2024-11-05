@@ -30,7 +30,7 @@ import { MessageProps } from '../../../Type/message';
 
 // Components and utilities
 import './MyRequest.scss';
-import logoProfile from '/logo-profile.webp';
+import logoProfile from '/logos/logo-profile.webp';
 import { useModal, ImageModal } from '../../Hook/ImageModal';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
 //@ts-expect-error react-modal is not compatible with typescript
@@ -38,7 +38,7 @@ import ReactModal from 'react-modal';
 import Spinner from '../../Hook/Spinner';
 import { DeleteItemModal } from '../../Hook/DeleteItemModal';
 import { motion, AnimatePresence } from 'framer-motion';
-import noPicture from '/no-picture.webp';
+import noPicture from '/logos/no-picture.webp';
 //import { formatMessageDate } from '../../Hook/Component';
 import { MessageList } from '../../Hook/MessageList';
 import RequestItem from '../../Hook/RequestHook';

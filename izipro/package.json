@@ -22,6 +22,7 @@
     "graphql": "^16.9.0",
     "graphql-ws": "^5.16.0",
     "immer": "^10.1.1",
+    "libheif-js": "^1.18.2",
     "maplibre-gl": "^4.7.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

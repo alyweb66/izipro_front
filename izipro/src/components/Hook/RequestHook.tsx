@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { FaTrashAlt } from 'react-icons/fa';
-import pdfLogo from '/logo-pdf.webp';
+import pdfLogo from '/logos/logo-pdf.webp';
 import { RequestProps } from '../../Type/Request';
 import React, { useEffect, useState } from 'react';
-import noPicture from '/no-picture.webp';
+import noPicture from '/logos/no-picture.webp';
 import { AnimatePresence, motion } from 'framer-motion';
 import { formatMessageDate } from './Component';
 import '../../styles/requestHook.scss';

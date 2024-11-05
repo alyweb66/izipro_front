@@ -33,7 +33,7 @@ function DisplayError() {
 			<header>
 				<h1 id="error-title" className="error__title">{serverErrorStatus || error.status}</h1>
 			</header>
-			<img className="error__img" src="/Error.webp" alt="Image d'erreur" />
+			<img className="error__img" src="/images/Error.webp" alt="Image d'erreur" />
 			<p id="error-description" className="error__description">Désolé, une erreur inattendue est survenue.</p>
 			<article>
 				<p>

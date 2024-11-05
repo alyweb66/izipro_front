@@ -30,8 +30,8 @@ import serviceWorkerRegistration from '../../Hook/ServiceWorkerRegistration';
 import { UserAccountDataProps, UserDataProps } from '../../../Type/User';
 
 // Asset imports
-import profileLogo from '/logo-profile.webp';
-import noPicture from '/no-picture.webp';
+import profileLogo from '/logos/logo-profile.webp';
+import noPicture from '/logos/no-picture.webp';
 
 //Maplibre
 import maplibregl, { Map } from 'maplibre-gl';
@@ -157,7 +157,7 @@ function Account() {
 	const mapContainerRef = useRef<HTMLDivElement>(null);
 
 	// Store data
-	const [serverErrorStatus, resetServerError, serverErrorStatusText] = serverErrorStore((state) => [state.status, state.resetServerError, state.statusText]);
+	const [serverErrorStatus, resetServerError, serverErrorStatusText, message] = serverErrorStore((state) => [state.status, state.resetServerError, state.statusText, state.message]);
 	const setAccount = userDataStore((state) => state.setAccount);
 	const role = userDataStore((state) => state.role);
 	const resetUserData = userDataStore((state) => state.resetUserData);
@@ -447,12 +447,13 @@ function Account() {
 
 		}
 
-		if (updateUserError || serverErrorStatus === 500) {
+		if (updateUserError) {
 			setErrorPicture('Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png');
 			throw new Error('Error while updating user picture');
 		}
 
 	};
+
 
 	// Handle the profile picture delete
 	const handleDeletePicture = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -536,10 +537,11 @@ function Account() {
 		isGetNotificationRef.current = false;
 	}
 
+
 	// Error profile picture
 	useEffect(() => {
-		if (serverErrorStatus === 500 && serverErrorStatusText === 'INTERNAL_SERVER_FILES_ERROR') {
-			setErrorPicture('Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png');
+		if (serverErrorStatus === 500 && serverErrorStatusText === 'INTERNAL_SERVER_FILES_ERROR' || message === 'Error updating image' || message === 'Error updating image user'  ) {
+			setErrorPicture('Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png, .heic, .heif');
 
 		}
 	}, [serverErrorStatus, serverErrorStatusText]);

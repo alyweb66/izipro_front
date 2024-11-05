@@ -123,6 +123,7 @@ function Dashboard() {
 			navigator.sendBeacon(url, blob);
 		}
 	};
+
 	// useEffect to check if user is logged in and use sendBeacon to logout the user
 	useEffect(() => {
 
@@ -513,7 +514,8 @@ function Dashboard() {
 			}
 		}
 
-		if (!getUserRequestsData || getUserRequestsData?.user.requests?.length < myRequestLimit) {
+		if ((!getUserRequestsData || getUserRequestsData?.user.requests?.length < myRequestLimit) && id !== 0) {
+			
 			setIsMyRequestHasMore(false);
 			isSkipMyRequestRef.current = true;
 		}
@@ -976,7 +978,7 @@ function Dashboard() {
 						<div className="__container">
 							<img
 								className="__logo"
-								src="/izipro-logo.svg"
+								src="/logos/izipro-logo.svg"
 								alt="Izipro logo"
 								role="button"
 								aria-label="Recharger la page"

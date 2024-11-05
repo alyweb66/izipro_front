@@ -248,8 +248,6 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 										hiddenLoading={hiddenLoading}
 										modalArgs={modalArgs}
 										setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
-										//isMessageExpanded={isMessageExpanded}
-										//setIsMessageExpanded={setIsMessageExpanded}
 										setModalArgs={setModalArgs}
 										openModal={openModal}
 									/>
@@ -263,7 +261,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 							addRequest={addRequest}
 						/>
 					) : (
-						<p className="client-request__container__list no-req">Fin des résultats</p>
+						<p className="client-request__container__list no-req">{(address || city || postal_code || (role === 'pro' ? denomination : (first_name || last_name))) ? 'Fin des résultats' : ''}</p>
 					)}
 					
 				</div>

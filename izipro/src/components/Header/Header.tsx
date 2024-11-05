@@ -52,7 +52,7 @@ function Header() {
 			<div className="header__container">
 				<img
 					className='header__container image'
-					src="/izipro-logo.svg"
+					src="/logos/izipro-logo.svg"
 					alt="Izipro logo"
 					role="button"
 					aria-label="Recharger la page"

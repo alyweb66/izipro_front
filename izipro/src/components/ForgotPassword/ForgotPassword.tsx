@@ -43,7 +43,11 @@ function ForgotPassword() {
 
 	// useEffect to check the size of the window
 	useEffect(() => {
+		console.log('couocu');
+		
 		if (!token) {
+			console.log('recouocu');
+			
 			navigate('/', { replace: true });
 		}
 		const handleResize = () => {
@@ -109,7 +113,7 @@ function ForgotPassword() {
 	return (
 		<div className="forgot-password-container">
 			{isLogo && <div className="login-container__logo">
-				<img className='__image' src="/izipro-logo.svg" alt="Izipro logo" />
+				<img className='__image' src="/logos/izipro-logo.svg" alt="Izipro logo" />
 				<h1 className="__title">POP</h1>
 			</div>}
 			<form className="forgot-password-container__form" onSubmit={handleSubmitForm} aria-label="Formulaire de réinitialisation de mot de passe">

@@ -39,7 +39,7 @@ registerSW({
 						if (newWorker.state === 'installed') {
 							// Le nouveau service worker est installé
 							if (navigator.serviceWorker.controller && !updateNotified) {
-								alert('Votre applicaiton a été mise à jour');
+								alert('Votre application a été mise à jour');
 								updateNotified = true;
 							}
 						}
@@ -54,7 +54,7 @@ registerSW({
 });
 
 // store
-const setServerError = (serverError: { status: number; statusText: string }) => {
+const setServerError = (serverError: { status: number; statusText: string, message: string }) => {
 	serverErrorStore.getState().setServerError(serverError);
 };
 
@@ -93,6 +93,7 @@ let isLoggedOut = false;
 // Middleware to check if the user has a 401 error from the server
 const errorLink = onError((error: ErrorResponse) => {
 	const statusCode = (error.networkError as ServerError)?.statusCode;
+console.log('error', error.graphQLErrors[0].message);
 
 	setServerError({
 		status: (statusCode || 500),
@@ -101,7 +102,8 @@ const errorLink = onError((error: ErrorResponse) => {
 			|| (error.networkError && (error.networkError as ServerError).response?.statusText)
 			|| (error.graphQLErrors && error.graphQLErrors[0]?.extensions?.code?.toString())
 			|| ''
-		)
+		),
+		message: error?.graphQLErrors?.[0]?.message ?? '',
 	});
 
 	if (statusCode === 401) {

@@ -20,9 +20,12 @@ function Root() {
 
 		}
 
-		if (localStorage.getItem('login') === null) {
+		if (localStorage.getItem('login') === null 
+		&& window.location.pathname !== '/forgot-password' 
+		&& window.location.pathname !== '/confirm-email') {
 			navigate('/', { replace: true });
 		}
+
 	}, []);
 
 

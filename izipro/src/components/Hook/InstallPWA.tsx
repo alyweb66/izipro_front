@@ -130,7 +130,7 @@ const InstallPWA: React.FC = () => {
             <p className="content-PWA">L'installation de l'application n'est pas supportée sur Firefox, utilisez Chrome ou un autre navigateur pour installer l'application.</p>
           )}
           {browserName === 'Safari' && (
-            <p className="content-PWA">Pour installer l'application depuis Safari, cliquez sur le bouton de partage du navigateur et sélectionnez l'option : <strong className="strong-PWA">“Ajouter à l'écran d'accueil”.</strong></p>
+            <p className="content-PWA">Pour installer l'application depuis Safari, cliquez sur le bouton de partage du navigateur et sélectionnez l'option : <strong className="strong-PWA">“Sur l'écran d'accueil”.</strong></p>
           )}
           {browserName === 'un navigateur non supporté' && (
             <p className="content-PWA">L'installation de l'application n'est pas supportée sur ce navigateur.</p>

@@ -2,7 +2,7 @@ import Stack from "@mui/material/Stack";
 import { UserDataProps } from "../../Type/User";
 import Fade from "@mui/material/Fade";
 import Alert from "@mui/material/Alert";
-import pdfLogo from '/logo-pdf.webp';
+import pdfLogo from '/logos/logo-pdf.webp';
 import { MdAttachFile, MdSend } from "react-icons/md";
 import { FaCamera } from "react-icons/fa";
 import TextareaAutosize from 'react-textarea-autosize';

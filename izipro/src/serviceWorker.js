@@ -5,9 +5,14 @@ import { StaleWhileRevalidate } from 'workbox-strategies';
 
 
 // Version du service worker pour gérer le versioning
-const SW_VERSION = '1.1.0';
+const SW_VERSION = '0.0.5';
 const CACHE_NAME = `my-app-cache-${SW_VERSION}`;
 //console.log(`Service Worker Version: ${SW_VERSION}`);
+const urlsToCache = [
+    '/',
+    '/manifest.json?v=0.0.5',  // Inclure la version ici également
+    // Autres ressources
+];
 
 // Activer le service worker sur tous les clients
 self.addEventListener('activate', (event) => {
@@ -26,6 +31,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('install', (event) => {
 	//console.log(`Service Worker ${SW_VERSION} installé`);
 	self.skipWaiting();
+	event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(urlsToCache);
+        })
+    );
 });
 
 //* PWA

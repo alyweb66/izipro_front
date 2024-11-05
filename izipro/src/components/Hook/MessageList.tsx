@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { ScrollList } from "./ScrollList";
 import Spinner from "./Spinner";
-import pdfLogo from '/logo-pdf.webp'
-import noPicture from '/no-picture.webp'
+import pdfLogo from '/logos/logo-pdf.webp'
+import noPicture from '/logos/no-picture.webp'
 import { formatMessageDate } from "./Component";
 import { MessageProps } from "../../Type/message";
 import '../../styles/MessageList.scss';

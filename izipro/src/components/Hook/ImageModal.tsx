@@ -4,7 +4,7 @@ import ReactModal from 'react-modal';
 import { MdKeyboardArrowRight, MdKeyboardArrowLeft, MdClose } from 'react-icons/md';
 import '../../styles/imageModal.scss';
 import { motion } from 'framer-motion';
-import pdfLogo from '/logo-pdf.webp';
+import pdfLogo from '/logos/logo-pdf.webp';
 
 ReactModal.setAppElement('#root');
 

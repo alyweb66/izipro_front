@@ -1,7 +1,7 @@
 import { MdKeyboardArrowDown, MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { UserDataProps } from "../../Type/User";
-import logoProfile from "/logo-profile.webp";
-import noPicture from "/no-picture.webp";
+import logoProfile from "/logos/logo-profile.webp";
+import noPicture from "/logos/no-picture.webp";
 import '../../styles/HeaderMessage.scss'
 import { RequestProps } from "../../Type/Request";
 

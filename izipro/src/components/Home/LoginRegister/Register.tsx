@@ -41,6 +41,8 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [showProPassword, setShowProPassword] = useState(false);
 	const [showProConfirmPassword, setShowProConfirmPassword] = useState(false);
+	const [proRegisterLoading, setProRegisterLoading] = useState(false);
+	const [userRegisterLoading, setUserRegisterLoading] = useState(false);
 
 	// function to toggle the visibility of the register form
 	const toggleRegisterVisibility = () => {
@@ -97,6 +99,7 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 		}
 
 		try {
+			setProRegisterLoading(true);
 			createProUser({
 				variables: {
 					input: {
@@ -117,6 +120,7 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 					setSiret('');
 					setIsProError('');
 				}
+				setProRegisterLoading(false);
 			});
 			if (proUserError) {
 				setIsProError('Erreur lors de la création de l\'utilisateur');
@@ -171,14 +175,15 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 		}
 
 		try {
-			const response = await createUser({
+			setUserRegisterLoading(true);
+			createUser({
 				variables: {
 					input: {
 						email: DOMPurify.sanitize(email),
 						password: DOMPurify.sanitize(password)
 					}
 				}
-			});
+			}).then((response) => {;
 
 
 			if (response.data.createUser.id) {
@@ -188,6 +193,8 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 			setPassword('');
 			setConfirmPassword('');
 			setError('');
+			setUserRegisterLoading(false);
+			});
 
 			if (userError) {
 				setError('Erreur lors de la création de l\'utilisateur');
@@ -218,7 +225,7 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
 						<form className="register-container__form__form" onSubmit={(event) => handleRegister(event)}>
-							{userLoading && <Spinner />}
+							{(userLoading || userRegisterLoading) && <Spinner />}
 							<p className="register-container__form__form category">Particulier</p>
 							<input
 								type="email"
@@ -289,7 +296,7 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 							<button type="submit" className="register-container__form__form button">Enregistrer</button>
 						</form>
 						<form className="register-container__form__form" onSubmit={(event) => handleProRegister(event)}>
-							{proUserLoading && <Spinner />}
+							{(proUserLoading || proRegisterLoading) && <Spinner />}
 							<p className="register-container__form__form category">Professionnel</p>
 							<input
 								type="email"
