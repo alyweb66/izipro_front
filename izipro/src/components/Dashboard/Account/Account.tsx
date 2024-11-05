@@ -408,8 +408,8 @@ function Account() {
 		if (file && file[0]) {
 			const extension = file[0].name.split('.').pop()?.toLowerCase();
 
-			if (extension && !['jpg', 'jpeg', 'png', 'heic', 'heif'].includes(extension)) {
-				setErrorPicture('Seuls les fichiers .jpg, .jpeg, .heic, .heif et .png sont autorisés');
+			if (extension && !['jpg', 'jpeg', 'png'].includes(extension)) {
+				setErrorPicture('Seuls les fichiers .jpg, .jpeg, et .png sont autorisés');
 				setTimeout(() => {
 					setErrorAccount('');
 				}, 3000);
@@ -541,7 +541,7 @@ function Account() {
 	// Error profile picture
 	useEffect(() => {
 		if (serverErrorStatus === 500 && serverErrorStatusText === 'INTERNAL_SERVER_FILES_ERROR' || message === 'Error updating image' || message === 'Error updating image user'  ) {
-			setErrorPicture('Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png, .heic, .heif');
+			setErrorPicture('Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png');
 
 		}
 	}, [serverErrorStatus, serverErrorStatusText]);
@@ -703,7 +703,7 @@ function Account() {
 							ref={fileInput}
 							onChange={handleProfilePicture}
 							style={{ display: 'none' }}
-							accept=".jpg,.jpeg,.png,heic,heif"
+							accept="image/png, image/jpeg, image/jpg, application/pdf"
 							aria-label="Sélectionner une nouvelle photo de profil"
 						/>
 						<div className="message">

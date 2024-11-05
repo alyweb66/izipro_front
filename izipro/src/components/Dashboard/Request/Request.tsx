@@ -555,7 +555,7 @@ function Request() {
 									</g>
 								</svg>
 							</span>
-							<p>Glissez et déposez votre fichier ici ou cliquez pour sélectionner un fichier! (Format accepté : jpg, jpeg, png, pdf, heic, heif, pdf inférieur à 1Mo)</p>
+							<p>Glissez et déposez votre fichier ici ou cliquez pour sélectionner un fichier! (Format accepté : jpg, jpeg, png, pdf (pdf inférieur à 1Mo))</p>
 						</label>
 						<input
 							id="file"
@@ -564,15 +564,15 @@ function Request() {
 							type="file"
 							multiple={true}
 							onChange={handleFileUpload}
-							accept=".jpg,.jpeg,.png,.pdf"
-							aria-label="Téléchargez plusieurs fichiers (formats acceptés : .jpg, .jpeg, .png, .heic, .heif, .pdf)"
+							accept="image/png, image/jpeg, image/jpg, application/pdf"
+							aria-label="Téléchargez plusieurs fichiers (formats acceptés : jpg, jpeg, png, pdf)"
 							title="Téléchargez des fichiers"
 						/>
 						<input
 							id="fileInput"
 							className="request__form__input-media camera"
 							type="file"
-							accept=".jpg,.jpeg,.png,.pdf"
+							accept="image/png, image/jpeg, image/jpg, application/pdf"
 							capture="environment"
 							onChange={handleFileUpload}
 							aria-label="Prendre une photo via la caméra"

@@ -1,13 +1,11 @@
 import { useState } from 'react';
 
-
-
 export function useFileHandler() {
 	const [fileError, setFileError] = useState('');
 	const [file, setFile] = useState<File[]>([]);
 	const [urlFile, setUrlFile] = useState<File[]>([]);
 
-	const handleFileChange = async (event?: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLLabelElement>, onDrag = false, media?: File[]) => {
+	const handleFileChange = (event?: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLLabelElement>, onDrag = false, media?: File[]) => {
 		setFileError('');
 		let files;
 		if (onDrag) {
@@ -17,11 +15,10 @@ export function useFileHandler() {
 		} else {
 			files = (event as React.ChangeEvent<HTMLInputElement>).target.files;
 		}
-		const maxFileSize = 1.5e+7;
+		const maxFileSize = 1.5e+7; 
 		const maxPdfFileSize = 1048576; // 1 Mo
 		// filter pdf files that are too large
-		const validFiles = (await Promise.all(Array.from(files!).map(async (file) => {
-			console.log('file', file);
+		const validFiles = Array.from(files!).filter(file => {
 
 
 			// check if file is too large
@@ -33,7 +30,6 @@ export function useFileHandler() {
 				return false;
 			}
 
-			// check if pdf file is too large
 			if (file.name.endsWith('.pdf') && file.size > maxPdfFileSize) {
 				setFileError(`Fichier ${file.name} est trop grand, veuillez choisir un PDF de moins de 1Mo.`);
 				setTimeout(() => {
@@ -44,29 +40,17 @@ export function useFileHandler() {
 
 			// check if format is a valid file
 			const extension = file.name.split('.').pop()?.toLowerCase();
-			if (extension && !['jpg', 'jpeg', 'png', 'pdf', 'heic', 'heif'].includes(extension)) {
-				setFileError(`Fichier ${file.name} n'est pas un fichier valide, fichiers acceptés .jpg, .jpeg, .png, heic, heif ou .pdf.`);
+			if (extension && !['jpg', 'jpeg', 'png', 'pdf'].includes(extension)) {
+				setFileError(`Fichier ${file.name} n'est pas un fichier valide, fichiers acceptés .jpg, .jpeg, .png ou .pdf.`);
 
 				setTimeout(() => {
 					setFileError('');
 				}, 15000);
 				return false;
 			}
-			if (extension === 'heic' || extension === 'heif') {
-				try {
-					
 
-				} catch (error) {
-					//console.log('error', error);
-					setFileError(`Erreur lors de la conversion du fichier ${file.name}.`);
-					setTimeout(() => {
-						setFileError('');
-					}, 15000);
-					return null;
-				}
-			}
-			return file;
-		}))).filter(file => file !== false && file !== null) as File[];
+			return true;
+		});
 
 		if (validFiles) {
 			const urls = validFiles.map(file => URL.createObjectURL(file));

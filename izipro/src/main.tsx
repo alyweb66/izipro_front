@@ -93,7 +93,7 @@ let isLoggedOut = false;
 // Middleware to check if the user has a 401 error from the server
 const errorLink = onError((error: ErrorResponse) => {
 	const statusCode = (error.networkError as ServerError)?.statusCode;
-console.log('error', error.graphQLErrors[0].message);
+console.log('error', error?.graphQLErrors?.[0]?.message);
 
 	setServerError({
 		status: (statusCode || 500),
