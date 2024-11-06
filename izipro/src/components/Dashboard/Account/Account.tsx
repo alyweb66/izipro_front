@@ -322,6 +322,9 @@ function Account() {
 				},
 			}).then((response): void => {
 
+				if (response.errors && response.errors.length > 0) {
+					setErrorAccount('Erreur lors de la modification');
+				}
 				const { updateUser } = response.data;
 
 				// Set the new user data to the store
@@ -345,7 +348,7 @@ function Account() {
 
 					}, 15000);
 				}
-				
+
 			});
 
 			if (updateUserError) {
@@ -379,6 +382,9 @@ function Account() {
 				},
 			},
 		}).then((response) => {
+			if (response.errors && response.errors.length > 0) {
+				setErrorPassword('Erreur lors de la modification du mot de passe');
+			}
 			if (response.data?.changePassword) {
 				setMessagePassword('Mot de passe modifié');
 				setOldPassword('');
@@ -437,7 +443,12 @@ function Account() {
 					}
 				},
 			}).then((response): void => {
-
+				if (response.errors && response.errors.length > 0) {
+					setErrorPicture('Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png');
+					setTimeout(() => {
+						setErrorPicture('');
+					}, 3000);
+				}
 				const { updateUser } = response.data;
 				// Set the new user data to the store
 				setAccount(updateUser);
@@ -485,6 +496,7 @@ function Account() {
 				id: id,
 			},
 		}).then((response): void => {
+
 			if (response.data?.deleteUser) {
 
 				// clear user data store
@@ -497,6 +509,7 @@ function Account() {
 				if (document.cookie) {
 					document.cookie = 'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 					document.cookie = 'refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+					document.cookie = 'session-id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 				}
 				//redirect to home page
 				setModalIsOpen(false);
@@ -540,7 +553,7 @@ function Account() {
 
 	// Error profile picture
 	useEffect(() => {
-		if (serverErrorStatus === 500 && serverErrorStatusText === 'INTERNAL_SERVER_FILES_ERROR' || message === 'Error updating image' || message === 'Error updating image user'  ) {
+		if (serverErrorStatus === 500 && serverErrorStatusText === 'INTERNAL_SERVER_FILES_ERROR' || message === 'Error updating image' || message === 'Error updating image user') {
 			setErrorPicture('Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png');
 
 		}

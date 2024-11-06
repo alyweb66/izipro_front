@@ -93,6 +93,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const [uploadFileError, setUploadFileError] = useState('');
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	const [showAllContent, setShowAllContent] = useState(true);
+	const [messageError, setMessageError] = useState('');
 
 
 	// limit of requests to fetch
@@ -168,7 +169,12 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 						}
 					}
 				}).then((response) => {
-
+					if (response.errors && response.errors.length > 0) {
+						setMessageError('Erreur lors de l\'envoi du message');
+						setTimeout(() => {
+							setUploadFileError('');
+						}, 10000);
+					}
 					setMessageValue('');
 
 					if (response.data.createMessage?.id > 0) {
@@ -604,7 +610,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							setHasManyImages={setHasManyImages}
 						/>
 						<MessageForm
-							fileError={fileError}
+							fileError={fileError || messageError}
 							isMyConversation={true}
 							handleFileUpload={handleFileUpload}
 							handleMessageSubmit={sendMessage}

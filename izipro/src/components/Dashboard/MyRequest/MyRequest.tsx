@@ -90,6 +90,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	const [showAllContent, setShowAllContent] = useState(true);
 	const [isSendingMessage, setIsSendingMessage] = useState(false);
+	const [messageError, setMessageError] = useState('');
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
@@ -297,7 +298,14 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							media: sendFile
 						}
 					}
-				}).then(() => {
+				}).then((response) => {
+
+					if (response.errors && response.errors.length > 0) {
+						setMessageError('Erreur lors de l\'envoi du message');
+						setTimeout(() => {
+							setMessageError('');
+						},15000);
+					};
 
 					setMessageValue('');
 					setFile([]);
@@ -623,8 +631,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 										selectedRequest={selectedRequest!}
 										setSelectedRequest={setSelectedRequest}
 										setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
-										//	isMessageExpanded={isMessageExpanded}
-										//setIsMessageExpanded={setIsMessageExpanded}
 										setIsListOpen={setIsListOpen}
 										setModalArgs={setModalArgs}
 										openModal={openModal}
@@ -775,7 +781,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						/>
 
 						<MessageForm
-							fileError={fileError}
+							fileError={fileError || messageError}
 							isMyRequest={true}
 							handleFileUpload={handleFileUpload}
 							handleMessageSubmit={handleMessageSubmit}

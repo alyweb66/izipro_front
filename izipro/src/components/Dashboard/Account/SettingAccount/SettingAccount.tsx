@@ -139,7 +139,10 @@ function SettingAccount() {
 					job_id: newJobIds
 				}
 			}
-		}).then(() => {
+		}).then((response) => {
+			if (response.errors && response.errors.length > 0) {
+				setJobError('Erreur lors de l\'ajout du métier');
+			}
 			setJobError('');
 			setWishListJob([]);
 			setSelectedCategory(0);

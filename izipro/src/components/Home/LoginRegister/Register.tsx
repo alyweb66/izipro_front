@@ -23,7 +23,7 @@ type RegisterProps = {
 }
 
 
-function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
+function Register({ setLoginVisibility, loginVisibility }: RegisterProps) {
 	// State
 	const [email, setEmail] = useState('');
 	const [proEmail, setProEmail] = useState('');
@@ -41,16 +41,22 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [showProPassword, setShowProPassword] = useState(false);
 	const [showProConfirmPassword, setShowProConfirmPassword] = useState(false);
-	const [proRegisterLoading, setProRegisterLoading] = useState(false);
-	const [userRegisterLoading, setUserRegisterLoading] = useState(false);
+
 
 	// function to toggle the visibility of the register form
 	const toggleRegisterVisibility = () => {
 		setIsRegisterVisible(!isRegisterVisible);
 	};
 
+
 	// Mutation to register a user
-	const [createUser, { loading: userLoading, error: userError }] = useMutation(REGISTER_USER_MUTATION);
+	const [createUser, { loading: userLoading, error: userError }] = useMutation(REGISTER_USER_MUTATION, {
+		onError: (error) => {
+			console.error('Error in mutation:', error);
+			setError(error.message || 'Une erreur est survenue');
+			// Si tu souhaites déclencher une autre action après la capture
+		},
+	});
 	const [createProUser, { loading: proUserLoading, error: proUserError }] = useMutation(REGISTER_PRO_USER_MUTATION);
 
 	// function to handle the registration of a pro user
@@ -99,7 +105,6 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 		}
 
 		try {
-			setProRegisterLoading(true);
 			createProUser({
 				variables: {
 					input: {
@@ -109,6 +114,12 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 					}
 				}
 			}).then((response) => {
+				if (response?.errors && response?.errors?.length > 0) {
+					setIsProError('Erreur lors de la création de l\'utilisateur');
+					setTimeout(() => {
+						setIsProError('');
+					}, 15000);
+				}
 				if (response.data.createProUser.__typename === 'ExistingSiret') {
 					setIsProError('Erreur de SIRET');
 				}
@@ -120,7 +131,6 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 					setSiret('');
 					setIsProError('');
 				}
-				setProRegisterLoading(false);
 			});
 			if (proUserError) {
 				setIsProError('Erreur lors de la création de l\'utilisateur');
@@ -175,7 +185,7 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 		}
 
 		try {
-			setUserRegisterLoading(true);
+			//setUserRegisterLoading(true);
 			createUser({
 				variables: {
 					input: {
@@ -183,18 +193,25 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 						password: DOMPurify.sanitize(password)
 					}
 				}
-			}).then((response) => {;
+			}).then((response) => {
+				;
 
+				if (response?.errors && response?.errors?.length > 0) {
+					setError('Erreur lors de la création de l\'utilisateur');
+					setTimeout(() => {
+						setError('');
+					}, 15000);
+				}
 
-			if (response.data.createUser.id) {
-				setUserCreated(true);
-			}
-			setEmail('');
-			setPassword('');
-			setConfirmPassword('');
-			setError('');
-			setUserRegisterLoading(false);
-			});
+				if (response.data.createUser.id) {
+					setUserCreated(true);
+				}
+				setEmail('');
+				setPassword('');
+				setConfirmPassword('');
+				setError('');
+				//setUserRegisterLoading(false);
+			})
 
 			if (userError) {
 				setError('Erreur lors de la création de l\'utilisateur');
@@ -212,6 +229,7 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 		}
 	};
 
+
 	return (
 		<div className="register-container" >
 			<p className="register-container title" ><span onClick={() => { toggleRegisterVisibility(); (window.innerWidth < 480 && setLoginVisibility(!loginVisibility)); }}> Créer un compte </span></p>
@@ -225,7 +243,7 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
 						<form className="register-container__form__form" onSubmit={(event) => handleRegister(event)}>
-							{(userLoading || userRegisterLoading) && <Spinner />}
+							{(userLoading) && <Spinner />}
 							<p className="register-container__form__form category">Particulier</p>
 							<input
 								type="email"
@@ -296,7 +314,7 @@ function Register({setLoginVisibility, loginVisibility}: RegisterProps) {
 							<button type="submit" className="register-container__form__form button">Enregistrer</button>
 						</form>
 						<form className="register-container__form__form" onSubmit={(event) => handleProRegister(event)}>
-							{(proUserLoading || proRegisterLoading) && <Spinner />}
+							{(proUserLoading) && <Spinner />}
 							<p className="register-container__form__form category">Professionnel</p>
 							<input
 								type="email"

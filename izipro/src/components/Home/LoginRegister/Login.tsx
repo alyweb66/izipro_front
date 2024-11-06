@@ -147,6 +147,13 @@ function Login() {
 		}).then((response) => {
 			const userId = response.data?.login;
 			// if login is successful, redirect to dashboard
+			if (response.errors && response.errors.length > 0) {
+				setMessageError('Adresse e-mail ou mot de passe incorrect');
+				setTimeout(() => {
+					setMessageError('');
+				}, 15000);
+			}
+
 			if (userId && userId > 0) {
 				// set id to the store for headers in main.tsx
 				userDataStore.setState({ id: userId });
@@ -188,6 +195,12 @@ function Login() {
 				},
 			},
 		}).then((response) => {
+			if (response.errors && response.errors.length > 0) {
+				setErrorForgotPassword('Adresse e-mail invalide');
+				setTimeout(() => {
+					setErrorForgotPassword('');
+				}, 15000);
+			}
 			if (response.data?.forgotPassword === true) {
 				setMessage('Un e-mail a été envoyé pour réinitialiser votre mot de passe');
 			}

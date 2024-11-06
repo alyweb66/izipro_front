@@ -151,7 +151,8 @@ function Request() {
 					}
 				}
 			}).then((response) => {
-				if (!response.data.createRequest) {
+			
+				if ((response.errors && response.errors.length > 0) || !response.data.createRequest) {
 					setIsCreateRequestLoading(false);
 					setErrorMessage('Erreur lors de la création de la demande');
 					setTimeout(() => {

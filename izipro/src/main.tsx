@@ -87,23 +87,30 @@ const defaultOptions: DefaultOptions = {
 		fetchPolicy: 'network-only',
 		errorPolicy: 'all',
 	},
+	mutate: {
+		errorPolicy: 'all',
+	},
 };
 // Global flag to indicate if the user is logged out
 let isLoggedOut = false;
 // Middleware to check if the user has a 401 error from the server
 const errorLink = onError((error: ErrorResponse) => {
-	const statusCode = (error.networkError as ServerError)?.statusCode;
-console.log('error', error?.graphQLErrors?.[0]?.message);
+	const statusCode = Number(error?.graphQLErrors?.[0]?.extensions?.code) 
+		|| (error.networkError as ServerError)?.statusCode 
+		|| 500;
+	console.log('error', error);
 
 	setServerError({
-		status: (statusCode || 500),
+		status: statusCode,
 		statusText: (
-			(error.networkError as ServerError)?.response?.headers.get('message')
+			(error.graphQLErrors && error.graphQLErrors[0]?.extensions?.code?.toString())
+			|| (error.networkError && (error.networkError as ServerError).response?.headers.get('message'))
 			|| (error.networkError && (error.networkError as ServerError).response?.statusText)
-			|| (error.graphQLErrors && error.graphQLErrors[0]?.extensions?.code?.toString())
 			|| ''
 		),
-		message: error?.graphQLErrors?.[0]?.message ?? '',
+		message: error?.graphQLErrors?.[0]?.message
+			?? (error.networkError && (error.networkError as ServerError).response?.statusText)
+			?? '',
 	});
 
 	if (statusCode === 401) {
@@ -121,7 +128,7 @@ console.log('error', error?.graphQLErrors?.[0]?.message);
 // if they are different, the user is logged out
 // Custom link to intercept responses and get headers
 // Middleware pour capturer le header X-Session-ID
-const captureSessionIdLink =  new ApolloLink((operation, forward) => {
+const captureSessionIdLink = new ApolloLink((operation, forward) => {
 	return forward(operation).map((response) => {
 		const context = operation.getContext();
 		// Verify that the context has a response
