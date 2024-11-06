@@ -54,6 +54,9 @@ import { userNotificationStore } from '../../../store/Notification';
 import TextareaAutosize from 'react-textarea-autosize';
 import { Grow } from '@mui/material';
 import { serverErrorStore } from '../../../store/LoginRegister';
+import { IoMdInformationCircleOutline } from "react-icons/io";
+import Popover from '@mui/material/Popover';
+import Typography from '@mui/material/Typography';
 
 //import '../../../styles/spinner.scss';
 
@@ -123,7 +126,7 @@ function Account() {
 	const [cityState, setCityState] = useState(cityStore || '');
 	const [lngState, setLngState] = useState(lng || 0);
 	const [latState, setLatState] = useState(lat || 0);
-	const [siretState, setSiretState] = useState(siret || '');
+	const [siretState] = useState(siret || '');
 	const [denominationState, setDenominationState] = useState(denomination || '');
 	const [descriptionState, setDescriptionState] = useState(description || '');
 	const [pictureState, setPictureState] = useState(image || '');
@@ -142,6 +145,8 @@ function Account() {
 	const [isImgLoading, setIsImgLoading] = useState(true);
 	const [location, setLocation] = useState({ city: '', postcode: '', name: '' });
 	const [errorLocation, setErrorLocation] = useState('');
+	const [isIOS, setIsIOS] = useState(false);
+	const [anchorEl, setAnchorEl] = useState<SVGElement | null>(null);
 	// state for mapBox
 	const [map, setMap] = useState<Map | null>(null);
 	// Message modification account
@@ -686,7 +691,26 @@ function Account() {
 		checkNotificationStatus();
 	}, [notificationData]);
 
+	//* popover
+	const userAgent = navigator.userAgent.toLowerCase();
+	if (userAgent.indexOf('safari') > -1) {
+		setIsIOS(true);
+	}
 
+	const InfoPush = 'Pour profiter des notifications push sur ios, vous devez installer l\'application sur votre écran d\'accueil.';
+
+	const handleClick = (event: React.MouseEvent<SVGElement>) => {
+		setAnchorEl(event.currentTarget);
+	};
+
+	const handleClose = () => {
+		setAnchorEl(null);
+	};
+
+	const open = Boolean(anchorEl);
+	const popoverId = open ? 'simple-popover' : undefined;
+	//* End popover
+	
 	return (
 		<div className="account">
 			<Grow in={true} timeout={200}>
@@ -740,6 +764,28 @@ function Account() {
 					<div className="notification-container">
 						{(notification === null || notificationLoading) && <Spinner delay={0} />}
 						<div className="notification">
+							{isIOS && <IoMdInformationCircleOutline
+								className="info-push"
+								onClick={handleClick}
+							/>}
+							{isIOS && <Popover
+								id={popoverId}
+								open={open}
+								anchorEl={anchorEl}
+								onClose={handleClose}
+								anchorOrigin={{
+									vertical: 'bottom',
+									horizontal: 'center',
+								}}
+								transformOrigin={{
+									vertical: 'top',
+									horizontal: 'center',
+								}}
+							>
+								<Typography sx={{ p: 2 }} className="typo" style={{ fontFamily: 'Fredoka, sans-serif', fontWeight: 400 }}>
+									{InfoPush}
+								</Typography>
+							</Popover>}
 							<FormGroup>
 								<FormControlLabel
 									control={<Switch
@@ -754,6 +800,7 @@ function Account() {
 									classes={{ label: 'custom-label' }}
 								/>
 							</FormGroup>
+
 						</div>
 						<div className="notification">
 							<FormGroup>
@@ -877,11 +924,13 @@ function Account() {
 											name="siret"
 											value={siretState || ''}
 											placeholder={siretState || ''}
-											onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiretState(event.target.value.replace(/\s+/g, ''))}
+											//onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiretState(event.target.value.replace(/\s+/g, ''))}
 											aria-label="Siret"
 											autoComplete="off"
 											maxLength={14}
 											required
+											readOnly
+											style={{ color: 'gray' }}
 										/>
 									</label>
 									<label className="account__profile__form__label">

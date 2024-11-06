@@ -35,9 +35,17 @@
             width: 100%;
             gap: 2rem;
 
+
             .notification {
                 display: flex;
                 justify-content: center;
+
+                .info-push {
+                    font-size: 1.2rem;
+                    margin-right: -1rem;
+                    color: v.$color-primary-orange;
+                    z-index: 2;
+                }
 
                 .custom-label {
                     color: v.$color-primary-blue;
@@ -197,6 +205,20 @@
                             }
 
                         }
+                    }
+
+                    .account__profile__form__label__input[type="number"] {
+                        appearance: textfield;
+                        /* Standard */
+                        -moz-appearance: textfield;
+                        /* Firefox */
+                    }
+
+                    .account__profile__form__label__input[type="number"]::-webkit-outer-spin-button,
+                    .account__profile__form__label__input[type="number"]::-webkit-inner-spin-button {
+                        -webkit-appearance: none;
+                        /* Chrome, Safari, Edge, Opera */
+                        margin: 0;
                     }
                 }
 

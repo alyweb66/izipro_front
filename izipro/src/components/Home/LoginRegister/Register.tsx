@@ -306,7 +306,7 @@ function Register({ setLoginVisibility, loginVisibility }: RegisterProps) {
 								<Stack sx={{ width: '100%' }} spacing={2}>
 									{userCreated && (
 										<Fade in={!!userCreated} timeout={300}>
-											<Alert variant="filled" severity="success">Utilisateur créé avec succès, un email de validation vous a été envoyé</Alert>
+											<Alert variant="filled" severity="success">Utilisateur créé avec succès, un email de validation vous a été envoyé (pas de mail? vérifiez vos spams)</Alert>
 										</Fade>
 									)}
 								</Stack>
