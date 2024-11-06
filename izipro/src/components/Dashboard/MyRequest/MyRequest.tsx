@@ -408,7 +408,8 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 
 	// get state for scrollList
-	const { setIsEndViewed } = ScrollList({});
+	const scrollList = ScrollList({});
+	const setIsEndViewed = scrollList?.setIsEndViewed;
 
 	// useEffect to check the size of the window and update the page visibility 
 	useLayoutEffect(() => {
@@ -520,7 +521,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			selectedRequestRef.current = selectedRequest;
 		}
 
-		setIsEndViewed(false);
+		setIsEndViewed && setIsEndViewed(false);
 
 	}, [userConvStore, selectedRequest]);
 

@@ -132,7 +132,8 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	}, [messageStore, conversationIdState]);
 
 	// Scroll to the last message
-	const { setIsEndViewed } = ScrollList({});
+	const scrollList = ScrollList({});
+	const { setIsEndViewed } = scrollList || {};
 
 	// Function to send message
 	function sendMessage(event: React.FormEvent<HTMLFormElement>, requestId?: number) {
@@ -421,8 +422,14 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	// useEffect to update the message store from database
 	useEffect(() => {
 		if (messageData) {
+			console.log('messageData', messageData);
 
 			const messages: MessageProps[] = messageData.user.messages;
+
+			if (messages.length === 0) {
+				setIsSkipMessage(true);
+				return;
+			}
 
 			messageDataStore.setState(prevState => {
 				const newMessages = messages.filter(
@@ -462,7 +469,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 					handleViewedMessage(convId);
 				}
 			}
-			setIsEndViewed(false);
+			setIsEndViewed && setIsEndViewed(false);
 
 		}
 

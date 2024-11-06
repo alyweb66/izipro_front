@@ -573,6 +573,8 @@ function Dashboard() {
 
 	// set user data to the store
 	useEffect(() => {
+		console.log('getUserData', getUserData);
+		
 		if (getUserData) {
 
 			setAll(getUserData?.user);

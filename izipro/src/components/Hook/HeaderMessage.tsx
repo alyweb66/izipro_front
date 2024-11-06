@@ -14,7 +14,7 @@ type HeaderMessageProps = {
     setRequestTitle?: (value: boolean) => void;
     requestTitle?: boolean;
     isMyConversation?: boolean;
-    setIsEndViewed: (value: boolean) => void;
+    setIsEndViewed?: (value: boolean) => void;
     setIsListOpen: (value: boolean) => void;
     setIsAnswerOpen?: (value: boolean) => void;
     setIsMessageOpen: (value: boolean) => void;
@@ -58,7 +58,7 @@ export const HeaderMessage = ({
                             event.stopPropagation();
 
                             if (isMyRequest && window.innerWidth < 1000) {
-                                setIsEndViewed(false);
+                                setIsEndViewed && setIsEndViewed(false);
                                 setIsMessageOpen(false);
                                 setTimeout(() => {
                                     setIsListOpen(false);
@@ -69,7 +69,7 @@ export const HeaderMessage = ({
                             isMyRequest && setSelectedItem && setSelectedItem(null);
 
                             if (isMyConversation && window.innerWidth < 780) {
-                                setIsEndViewed(false);
+                                setIsEndViewed && setIsEndViewed(false);
                                 setIsMessageOpen(false);
                                 setTimeout(() => {
                                     setIsListOpen(true);

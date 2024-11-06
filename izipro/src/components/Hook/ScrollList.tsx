@@ -136,7 +136,11 @@ export const ScrollList = ({ filteredMessages, conversationIdState, isListOpen }
 
     // Scroll to last message
     useLayoutEffect(() => {
-
+        
+        if (!lastMessageId || filteredMessages?.length === 0) {
+            setIsEndViewed(true);
+            return;
+        }
 
         const scrollToLastMessage = (delay = 350) => {
             setTimeout(() => {
@@ -157,7 +161,7 @@ export const ScrollList = ({ filteredMessages, conversationIdState, isListOpen }
                     if (!isLastMessageInView) {
                         scrollToLastMessage(100); // Try again after 100ms
                     } else {
-                        setIsEndViewed(true);   
+                        setIsEndViewed(true);
                     }
                 }
             }, delay);
@@ -175,7 +179,6 @@ export const ScrollList = ({ filteredMessages, conversationIdState, isListOpen }
             lastMessageIdRef.current = lastMessageId;
         }
     }, [conversationIdState, isEndViewed, isElementPresent, filteredMessages, lastMessageId, isListOpen]);
-
 
 
     // Reset isElementPresent when isEndViewed is true
