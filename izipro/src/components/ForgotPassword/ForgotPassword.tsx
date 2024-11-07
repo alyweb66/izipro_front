@@ -43,11 +43,9 @@ function ForgotPassword() {
 
 	// useEffect to check the size of the window
 	useEffect(() => {
-		console.log('couocu');
-		
+	
 		if (!token) {
-			console.log('recouocu');
-			
+
 			navigate('/', { replace: true });
 		}
 		const handleResize = () => {

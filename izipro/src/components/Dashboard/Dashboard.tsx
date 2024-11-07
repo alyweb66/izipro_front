@@ -51,6 +51,7 @@ import Stack from '@mui/material/Stack';
 import Badge, { BadgeProps } from '@mui/material/Badge';
 import { styled } from '@mui/material/styles';
 import { Grow } from '@mui/material';
+import Intro from '../Hook/Intro';
 
 const Request = lazy(() => import('./Request/Request'));
 const MyRequest = lazy(() => import('./MyRequest/MyRequest'));
@@ -211,12 +212,13 @@ function Dashboard() {
 	//useRef
 	const clientRequestOffset = useRef<number>(0);
 	const myConversationOffsetRef = useRef<number>(0);
-	const isSkipGetUserDataRef = useRef<boolean>(true);
+	const isSkipGetUserDataRef = useRef<boolean>(false);
 	const isSkipSubscriptionRef = useRef<boolean>(false);
 	const isSkipMyRequestRef = useRef<boolean>(false);
 	const isSkipMyConversationRef = useRef<boolean>(false);
 	const isSkipClientRequestRef = useRef<boolean>(false);
 	const isSkipNotViewedConvRef = useRef<boolean>(false);
+	const isSkipUserConversationIdsRef = useRef<boolean>(false);
 	const idRef = useRef<number>(id);
 
 	// to keep id for the sendBeacon when the user leaves the page
@@ -226,14 +228,13 @@ function Dashboard() {
 		}
 	}, [id]);
 
-
 	// Query 
-	const { loading: userDataLoading, getUserData } = useQueryUserData(isSkipGetUserDataRef.current || id !== 0);
+	const { loading: userDataLoading, getUserData } = useQueryUserData(isSkipGetUserDataRef.current);
 	const getUserSubscription = useQueryUserSubscriptions(isSkipSubscriptionRef.current || id === 0);
 	const notViewedRequestQuery = useQueryNotViewedRequests((role !== 'pro' || notViewedRequestStore.length > 0));
 	const { loading: notViewedConversationLoading, notViewedConversationQuery } = useQueryNotViewedConversations(isSkipNotViewedConvRef.current);
 	// this query is only ids of all conversation used to compare with the notViewedConversationStore to get the number of not viewed conversation
-	const { loading: myConversationIdsLoading, myConversationIds } = useQueryUserConversationIds(requestConversationIdStore.length > 0);
+	const { loading: myConversationIdsLoading, myConversationIds } = useQueryUserConversationIds(isSkipUserConversationIdsRef.current || requestConversationIdStore.length > 0);
 
 	//* Query for MyRequest
 	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, (isSkipMyRequestRef.current || id === 0 || requestStore.length > 0));
@@ -244,7 +245,7 @@ function Dashboard() {
 
 	//*Query for MyConversation
 	const { loading: requestMyConversationLoading, data: requestMyConversation } = useQueryUserConversations(
-		0, myconversationLimit, (role === 'pro' ? (isSkipMyConversationRef.current || requestsConversationStore.length > 0 ): true)) as unknown as useQueryUserConversationsProps;
+		0, myconversationLimit, (role === 'pro' ? (isSkipMyConversationRef.current || requestsConversationStore.length > 0) : true)) as unknown as useQueryUserConversationsProps;
 
 	//mutation
 	const [deleteNotViewedConversation, { error: deleteNotViewedConversationError }] = useMutation(DELETE_NOT_VIEWED_CONVERSATION_MUTATION);
@@ -268,7 +269,7 @@ function Dashboard() {
 		'Request': 'DEMANDE',
 		'My requests': 'MES DEMANDES',
 		'Client request': 'CLIENT',
-		'My conversations': 'MES CONVERSATIONS',
+		'My conversations': 'MES CLIENTS',
 		'My profile': 'MON COMPTE'
 	};
 
@@ -403,6 +404,7 @@ function Dashboard() {
 	useEffect(() => {
 		if (myConversationIds && myConversationIds.user) {
 			setRequestConversationsIdStore(myConversationIds.user?.conversationRequestIds);
+			isSkipUserConversationIdsRef.current = true;
 		}
 	}, [myConversationIds]);
 
@@ -515,7 +517,7 @@ function Dashboard() {
 		}
 
 		if ((!getUserRequestsData || getUserRequestsData?.user.requests?.length < myRequestLimit) && id !== 0) {
-			
+
 			setIsMyRequestHasMore(false);
 			isSkipMyRequestRef.current = true;
 		}
@@ -535,7 +537,7 @@ function Dashboard() {
 
 			// add the new request to the requestsConversationStore
 			if (newRequests.length > 0) {
-				
+
 				requestConversationStore.setState(prevState => ({ ...prevState, requests: [...requestsConversationStore, ...newRequests] }));
 			}
 
@@ -573,12 +575,9 @@ function Dashboard() {
 
 	// set user data to the store
 	useEffect(() => {
-		console.log('getUserData', getUserData);
-		
 		if (getUserData) {
-
 			setAll(getUserData?.user);
-			isSkipGetUserDataRef.current = false;
+			isSkipGetUserDataRef.current = true;
 		}
 	}, [getUserData]);
 
@@ -1029,7 +1028,7 @@ function Dashboard() {
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
 								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen) }} aria-label="Ouvrir les demandes clients">
 								<div className="tab-content">
-									<span>CLIENT</span>
+									<span>CLIENTS</span>
 									{(notViewedRequestStore.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>
 										{notViewedRequestStore.length > 0 && (
 											<Grow in={true} timeout={200}>
@@ -1050,7 +1049,7 @@ function Dashboard() {
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
 								onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }} aria-label="Ouvrir mes conversations">
 								<div className="tab-content">
-									<span>MES CONVERSATIONS</span>
+									<span>MES CLIENTS</span>
 									{(viewedMyConversationState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
 										{viewedMyConversationState.length > 0 && (
 											<Grow in={true} timeout={200}>
@@ -1090,7 +1089,7 @@ function Dashboard() {
 						</ErrorBoundary>
 						<ErrorBoundary FallbackComponent={ErrorFallback}>
 							{selectedTab === 'My requests' &&
-								<MyRequest
+								(role === 'pro' ? (requestStore.length > 0 ? (<MyRequest
 									setIsHasMore={setIsMyRequestHasMore}
 									isHasMore={isMyRequestHasMore}
 									conversationIdState={conversationIdState}
@@ -1099,17 +1098,33 @@ function Dashboard() {
 									setSelectedRequest={setSelectedRequest}
 									newUserId={newUserId}
 									setNewUserId={setNewUserId}
-								/>}
+								/>) : (<p className="no-req"> Pas de demandes </p>)) : (lng && lat ? (
+
+									<MyRequest
+										setIsHasMore={setIsMyRequestHasMore}
+										isHasMore={isMyRequestHasMore}
+										conversationIdState={conversationIdState}
+										setConversationIdState={setConversationIdState}
+										selectedRequest={selectedRequest}
+										setSelectedRequest={setSelectedRequest}
+										newUserId={newUserId}
+										setNewUserId={setNewUserId}
+									/>
+
+								) : (<Intro />)))
+							}
 						</ErrorBoundary>
-						{selectedTab === 'My conversations' && <MyConversation
-							viewedMyConversationState={viewedMyConversationState}
-							isHasMore={isMyConversationHasMore}
-							setIsHasMore={setIsMyConversationHasMore}
-							offsetRef={myConversationOffsetRef}
-							conversationIdState={myConversationIdState}
-							setConversationIdState={setMyConversationIdState}
-							clientMessageSubscription={clientMessageSubscription}
-						/>}
+						{selectedTab === 'My conversations' && (
+							lng && lat ? (<MyConversation
+								viewedMyConversationState={viewedMyConversationState}
+								isHasMore={isMyConversationHasMore}
+								setIsHasMore={setIsMyConversationHasMore}
+								offsetRef={myConversationOffsetRef}
+								conversationIdState={myConversationIdState}
+								setConversationIdState={setMyConversationIdState}
+								clientMessageSubscription={clientMessageSubscription}
+							/>) : (<Intro />)
+						)}
 						<ErrorBoundary FallbackComponent={ErrorFallback}>
 							{selectedTab === 'My profile' && (
 								<>

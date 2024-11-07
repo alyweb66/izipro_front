@@ -8,7 +8,7 @@ import { RequestProps } from "../../Type/Request";
 type HeaderMessageProps = {
     setUserDescription?: (value: boolean) => void;
     userDescription?: boolean;
-    selectedItem?: UserDataProps | RequestProps |  null;
+    selectedItem?: UserDataProps | RequestProps | null;
     setSelectedItem?: (value: UserDataProps | null) => void;
     isMyRequest?: boolean;
     setRequestTitle?: (value: boolean) => void;
@@ -96,21 +96,32 @@ export const HeaderMessage = ({
 
                 </div>
 
-                {(isMyRequest ? userDescription : requestTitle) && <div>
-                    {selectedItem?.denomination ? (
-                        <p className="header-message__user__header__detail denomination deployed">{selectedItem?.denomination}</p>
-                    ) : (
-                        <p className="header-message__user__header__detail name description">{selectedItem?.first_name} {selectedItem?.last_name}</p>
-                    )}
+                {(isMyRequest ? userDescription : requestTitle) &&
+                    <div className="header-message__user__header__info">
+                        {selectedItem?.denomination ? (
 
-                    {isMyRequest ? (
-                        <p className="header-message__user__header description" aria-label="Description de l'utilisateur">
-                            {selectedItem && 'description' in selectedItem && selectedItem.description ? selectedItem.description : 'Pas de description'}
-                        </p>
-                    ) : (
-                        <p className="header-message__user__header description">{selectedItem && 'title' in selectedItem && selectedItem?.title}</p>
-                    )}
-                </div>
+                            <div className="header-message__user__header__info__identity">
+                                <p className="header-message__user__header__info__identity denomination">{selectedItem?.denomination}</p>
+                                <p className="header-message__user__header__info__identity siret">SIRET : {selectedItem && 'siret' in selectedItem && selectedItem?.siret}</p>
+                            </div>
+                        ) : (
+                            <div className="header-message__user__header__info__identity">
+                                <p className="header-message__user__header__info__identity denomination">{selectedItem?.first_name} {selectedItem?.last_name}</p>
+                            </div>
+                        )}
+
+                        {isMyRequest ? (
+                            <div className="header-message__user__header__info__identity">
+                                <p className="header-message__user__header__info__identity description" aria-label="Description de l'utilisateur">
+                                    {selectedItem && 'description' in selectedItem && selectedItem.description ? selectedItem.description : 'Pas de description'}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="header-message__user__header__info__identity">
+                                <p className="header-message__user__header__info__identity description">{selectedItem && 'title' in selectedItem && selectedItem?.title}</p>
+                            </div>
+                        )}
+                    </div>
                 }
             </div>
 

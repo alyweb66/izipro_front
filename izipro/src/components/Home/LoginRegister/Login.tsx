@@ -116,6 +116,7 @@ function Login() {
 	// send login request
 	const handleLogin = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+	
 		// reset all the stores
 		resetIsLoggedOut();
 		resetUserData();
@@ -145,6 +146,7 @@ function Login() {
 				},
 			},
 		}).then((response) => {
+
 			const userId = response.data?.login;
 			// if login is successful, redirect to dashboard
 			if (response.errors && response.errors.length > 0) {

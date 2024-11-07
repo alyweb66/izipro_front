@@ -51,11 +51,11 @@ function Register({ setLoginVisibility, loginVisibility }: RegisterProps) {
 
 	// Mutation to register a user
 	const [createUser, { loading: userLoading, error: userError }] = useMutation(REGISTER_USER_MUTATION, {
-		onError: (error) => {
+	/* 	onError: (error) => {
 			console.error('Error in mutation:', error);
 			setError(error.message || 'Une erreur est survenue');
 			// Si tu souhaites déclencher une autre action après la capture
-		},
+		}, */
 	});
 	const [createProUser, { loading: proUserLoading, error: proUserError }] = useMutation(REGISTER_PRO_USER_MUTATION);
 
@@ -194,8 +194,7 @@ function Register({ setLoginVisibility, loginVisibility }: RegisterProps) {
 					}
 				}
 			}).then((response) => {
-				;
-
+				
 				if (response?.errors && response?.errors?.length > 0) {
 					setError('Erreur lors de la création de l\'utilisateur');
 					setTimeout(() => {

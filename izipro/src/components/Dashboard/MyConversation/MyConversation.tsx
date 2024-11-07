@@ -422,7 +422,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	// useEffect to update the message store from database
 	useEffect(() => {
 		if (messageData) {
-			console.log('messageData', messageData);
 
 			const messages: MessageProps[] = messageData.user.messages;
 

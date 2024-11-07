@@ -10,9 +10,10 @@ import '../../styles/spinner.scss';
 
 
 // fetch user data
-export const useQueryUserData = (getData: boolean) => {
+export const useQueryUserData = (skip: boolean) => {
+
 	const { loading, error: getUserError, data: getUserData } = useQuery(GET_USER_DATA, {
-		skip: !getData
+		skip: skip
 	});
 	
 	if (getUserError) {

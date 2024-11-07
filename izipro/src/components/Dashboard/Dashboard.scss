@@ -39,6 +39,19 @@
             display: none;
             /* For Chrome, Safari and Opera */
         }
+
+        .no-req {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 0.5rem auto;
+            border-radius: 0.5rem;
+            box-shadow: none;
+            max-width: 90%;
+            color: v.$color-primary-orange;
+            text-align: center;
+
+        }
     }
 
     .indicator {

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 //import { MdInstallMobile } from "react-icons/md";
 import { motion } from 'framer-motion';
 import Spinner from './Spinner';
+import UAParser from 'ua-parser-js';
 import '../../styles/installPWA.scss';
 
 // type of event `beforeinstallprompt`
@@ -21,20 +22,22 @@ const InstallPWA: React.FC = () => {
 
 
   useEffect(() => {
+        // Réinitialiser l'état pour éviter des valeurs conservées incorrectement
+        setIsInstalled(false);
     // Verify if the app is installed as a PWA
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     if (isStandalone) {
-     // console.log('L\'application est installée en tant qu\'application autonome');
+      // console.log('L\'application est installée en tant qu\'application autonome');
 
       setIsInstalled(true);
     } else {
-     // console.log('L\'application n\'est pas installée en tant qu\'application autonome');
+      // console.log('L\'application n\'est pas installée en tant qu\'application autonome');
 
       // Check if the app is installed using getInstalledRelatedApps
       if ('getInstalledRelatedApps' in navigator) {
         (navigator as any).getInstalledRelatedApps().then((apps: any[]) => {
           if (apps.length > 0) {
-          //  console.log('L\'application est installée en tant qu\'application liée');
+            //  console.log('L\'application est installée en tant qu\'application liée');
 
             setIsInstalled(true);
           }
@@ -44,20 +47,15 @@ const InstallPWA: React.FC = () => {
 
     // Detect type of browser
     const userAgent = navigator.userAgent.toLowerCase();
-    if (userAgent.indexOf('chrome') > -1) {
-      setBrowserName('Chrome');
-    } else if (userAgent.indexOf('firefox') > -1) {
-      setBrowserName('Firefox');
-    } else if (userAgent.indexOf('safari') > -1) {
-      setBrowserName('Safari');
-    } else if (userAgent.indexOf('edge') > -1) {
-      setBrowserName('Edge');
-    } else {
-      setBrowserName('un navigateur non supporté');
-    }
+    const parser = new UAParser(userAgent);
+    const result = parser.getResult();
+    const nameBrowser: string = result.browser.name || 'un navigateur non supporté';
+    setBrowserName(nameBrowser);
+
+
     // function to handle the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
-     // console.log('handleBeforeInstallPrompt', e);
+      // console.log('handleBeforeInstallPrompt', e);
 
       e.preventDefault();
       const event = e as BeforeInstallPromptEvent;
@@ -70,19 +68,17 @@ const InstallPWA: React.FC = () => {
 
     // Verify if the browser supports the beforeinstallprompt event
     if ('onbeforeinstallprompt' in window) {
-     // console.log('Le navigateur supporte l\'installation d\'applications');
-
-
+      // console.log('Le navigateur supporte l\'installation d\'applications');
       window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       // Verify if the event was triggered
       setIsLoading(true);
       setTimeout(() => {
         if (!eventTriggered) {
-        //  console.log('L\'événement beforeinstallprompt n\'a pas été déclenché. L\'application est peut-être déjà installée.');
+          //  console.log('L\'événement beforeinstallprompt n\'a pas été déclenché. L\'application est peut-être déjà installée.');
           setIsInstalled(true);
         }
         setIsLoading(false);
-      }, 1000); // 5 secondes
+      }, 1000); // 1 secondes
     } else {
       setIsCompatible(false);
     }
@@ -96,12 +92,7 @@ const InstallPWA: React.FC = () => {
 
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((/* choiceResult */) => {
-        /* if (choiceResult.outcome === 'accepted') {
-          console.log("L'utilisateur a accepté d'installer l'application");
-        } else {
-          console.log("L'utilisateur a refusé l'installation");
-        } */
+      deferredPrompt.userChoice.then(() => {
         setDeferredPrompt(null);
         setShowInstallButton(false);
         setIsInstalled(true);
@@ -126,10 +117,10 @@ const InstallPWA: React.FC = () => {
       )}
       {!showInstallButton && !isCompatible && (
         <div className="message-PWA">
-          {browserName === 'Firefox' && (
+          {browserName === 'firefox' && (
             <p className="content-PWA">L'installation de l'application n'est pas supportée sur Firefox, utilisez Chrome ou un autre navigateur pour installer l'application.</p>
           )}
-          {browserName === 'Safari' && (
+          {(browserName === 'Safari' || browserName === 'Mobile Safari') && (
             <p className="content-PWA">Pour installer l'application depuis Safari, cliquez sur le bouton de partage du navigateur et sélectionnez l'option : <strong className="strong-PWA">“Sur l'écran d'accueil”.</strong></p>
           )}
           {browserName === 'un navigateur non supporté' && (

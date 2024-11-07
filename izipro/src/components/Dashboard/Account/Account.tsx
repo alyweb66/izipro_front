@@ -12,6 +12,7 @@ import {
 	DELETE_PROFILE_PICTURE_MUTATION,
 	UPDATE_USER_MUTATION
 } from '../../GraphQL/UserMutations';
+import UAParser from 'ua-parser-js';
 
 // Third-party libraries
 import DOMPurify from 'dompurify';
@@ -692,13 +693,6 @@ function Account() {
 	}, [notificationData]);
 
 	//* popover
-	const userAgent = navigator.userAgent.toLowerCase();
-	if (userAgent.indexOf('safari') > -1) {
-		setIsIOS(true);
-	}
-
-	const InfoPush = 'Pour profiter des notifications push sur ios, vous devez installer l\'application sur votre écran d\'accueil.';
-
 	const handleClick = (event: React.MouseEvent<SVGElement>) => {
 		setAnchorEl(event.currentTarget);
 	};
@@ -708,9 +702,19 @@ function Account() {
 	};
 
 	const open = Boolean(anchorEl);
+	const InfoPush = 'Pour profiter des notifications push sur ios, vous devez installer l\'application sur votre écran d\'accueil.';
 	const popoverId = open ? 'simple-popover' : undefined;
+
+	// detect if the user is on iOS
+	useEffect(() => {
+		const userAgent = navigator.userAgent.toLowerCase();
+		const parser = new UAParser(userAgent);
+		const result = parser.getResult();
+		const isMobileSafari = result.browser.name === 'Mobile Safari'
+		setIsIOS(isMobileSafari);
+
+	}, []);
 	//* End popover
-	
 	return (
 		<div className="account">
 			<Grow in={true} timeout={200}>

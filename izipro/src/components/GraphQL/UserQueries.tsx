@@ -114,6 +114,7 @@ export const GET_USERS_CONVERSATION = gql`
       image
       description
       denomination
+      siret
       deleted_at
     }
   }

@@ -304,7 +304,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 						setMessageError('Erreur lors de l\'envoi du message');
 						setTimeout(() => {
 							setMessageError('');
-						},15000);
+						}, 15000);
 					};
 
 					setMessageValue('');
