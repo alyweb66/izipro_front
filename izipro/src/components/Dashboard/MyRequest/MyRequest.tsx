@@ -91,6 +91,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	const [showAllContent, setShowAllContent] = useState(true);
 	const [isSendingMessage, setIsSendingMessage] = useState(false);
 	const [messageError, setMessageError] = useState('');
+	const [isMessageStoreLoading, setIsMessageStoreLoading] = useState(false);
 
 	// Create a state for the scroll position
 	const offsetRef = useRef(0);
@@ -528,7 +529,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 	// useEffect to update the message store
 	useEffect(() => {
 		if (messageData) {
-
+			setIsMessageStoreLoading(true);
 			const messages: MessageProps[] = messageData.messages;
 
 			// Add the new messages to the store
@@ -553,7 +554,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 			});
 			setIsMessageConvIdFetched([...isMessageConvIdFetched, conversationIdState]);
 			setIsSkipMessage(true);
-
+			setIsMessageStoreLoading(false);
 		}
 	}, [messageData]);
 
@@ -706,7 +707,6 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 												setSelectedUser(user);
 												handleMessageConversation(user.id, event);
 												if (window.innerWidth < 1000) {
-													//setIsHandleClick(true);
 													setIsAnswerOpen(false);
 													setTimeout(() => {
 														setIsMessageOpen(true);
@@ -779,6 +779,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							isMessageOpen={isMessageOpen}
 							openModal={openModal}
 							setHasManyImages={setHasManyImages}
+							loading={messageLoading || messageMutationLoading || isMessageStoreLoading}
 						/>
 
 						<MessageForm

@@ -50,6 +50,7 @@ import { UpdateMyConvMessage } from '../../Hook/UpdateMyConvMessage';
 import { HeaderMessage } from '../../Hook/HeaderMessage';
 import { MessageForm } from '../../Hook/MessageForm';
 import { FetchButton } from '../../Hook/FetchButton';
+import { se } from 'date-fns/locale';
 
 
 type useQueryUserConversationsProps = {
@@ -94,6 +95,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 	const [showAllContent, setShowAllContent] = useState(true);
 	const [messageError, setMessageError] = useState('');
+	const [isMessageLoading, setIsMessageLoading] = useState(false);
 
 
 	// limit of requests to fetch
@@ -422,7 +424,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 	// useEffect to update the message store from database
 	useEffect(() => {
 		if (messageData) {
-
+			setIsMessageLoading(true);
 			const messages: MessageProps[] = messageData.user.messages;
 
 			if (messages.length === 0) {
@@ -442,6 +444,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 			});
 			setIsMessageConvIdFetched([...isMessageConvIdFetched, conversationIdState]);
 			setIsSkipMessage(true);
+			setIsMessageLoading(false);
 		}
 	}, [messageData]);
 
@@ -564,8 +567,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 										selectedRequest={selectedRequest!}
 										setSelectedRequest={setSelectedRequest}
 										setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}
-										//isMessageExpanded={isMessageExpanded}
-										//setIsMessageExpanded={setIsMessageExpanded}
 										setIsListOpen={setIsListOpen}
 										setModalArgs={setModalArgs}
 										openModal={openModal}
@@ -614,6 +615,7 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 							isMessageOpen={isMessageOpen}
 							openModal={openModal}
 							setHasManyImages={setHasManyImages}
+							loading={messageLoading || messageMutLoading || isMessageLoading}
 						/>
 						<MessageForm
 							fileError={fileError || messageError}

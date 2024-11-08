@@ -408,19 +408,23 @@ function Account() {
 		}
 
 	};
+	console.log('image', image);
 
 	// Handle the profile picture change
 	const handleProfilePicture = (event: React.ChangeEvent<HTMLInputElement>) => {
 		event.preventDefault();
+		console.log('starting handleProfilePicture');
+
 		setErrorPicture('');
 		resetServerError();
 		const file = event.target.files;
+		console.log('file', file);
 
 		// Check if the file is .jpg, .jpeg or .png
 		if (file && file[0]) {
 			const extension = file[0].name.split('.').pop()?.toLowerCase();
 
-			if (extension && !['jpg', 'jpeg', 'png'].includes(extension)) {
+			if (extension && !['jpg', 'jpeg', 'png'].includes(extension) && !['image/png', 'image/jpeg', 'image/jpg'].includes(file[0].type)) {
 				setErrorPicture('Seuls les fichiers .jpg, .jpeg, et .png sont autorisés');
 				setTimeout(() => {
 					setErrorAccount('');
@@ -440,7 +444,8 @@ function Account() {
 		}
 
 		if ((file?.length ?? 0) > 0) {
-
+			console.log('go to updateUser');
+			setIsImgLoading(true);
 			updateUser({
 				variables: {
 					updateUserId: id,
@@ -449,15 +454,18 @@ function Account() {
 					}
 				},
 			}).then((response): void => {
+				setIsImgLoading(false);
 				if (response.errors && response.errors.length > 0) {
 					setErrorPicture('Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png');
 					setTimeout(() => {
 						setErrorPicture('');
 					}, 3000);
 				}
+				console.log(response.data);
+
 				const { updateUser } = response.data;
 				// Set the new user data to the store
-				setAccount(updateUser);
+				setImage(updateUser.image);
 				setErrorPicture('');
 				resetServerError();
 			});
@@ -722,9 +730,9 @@ function Account() {
 					className="account__profile"
 					aria-label="Profil utilisateur"
 				>
-					{updateUserLoading && <Spinner />}
 					<div className="account__picture" >
-						{isImgLoading && <Spinner delay={0} />}
+						
+						<div className="spinner-container">
 						<img
 							className="account__profile__picture__img"
 							src={image || profileLogo}
@@ -738,13 +746,16 @@ function Account() {
 							style={{ cursor: 'pointer' }}
 							aria-label="Changer la photo de profil"
 						/>
+						{isImgLoading && <Spinner delay={0} />}
+						</div>
 						<input
 							className="account__profile__picture__input"
 							type="file"
 							ref={fileInput}
-							onChange={handleProfilePicture}
+							onClick={(event) => { event.currentTarget.value = ''; }}
+							onChange={(event) => { handleProfilePicture(event); console.log('fileInput'); }}
 							style={{ display: 'none' }}
-							accept="image/png, image/jpeg, image/jpg, application/pdf"
+							accept="image/png, image/jpeg, image/jpg"
 							aria-label="Sélectionner une nouvelle photo de profil"
 						/>
 						<div className="message">
@@ -760,6 +771,7 @@ function Account() {
 							className="account__profile__picture__delete"
 							type='button'
 							onClick={handleDeletePicture}
+							disabled={isImgLoading}
 							aria-label="Supprimer la photo de profil"
 						>
 							Supprimer

@@ -564,6 +564,7 @@ function Request() {
 							name="text"
 							type="file"
 							multiple={true}
+							onClick={(event) => { event.currentTarget.value = ''; }}
 							onChange={handleFileUpload}
 							accept="image/png, image/jpeg, image/jpg, application/pdf"
 							aria-label="Téléchargez plusieurs fichiers (formats acceptés : jpg, jpeg, png, pdf)"
@@ -575,6 +576,7 @@ function Request() {
 							type="file"
 							accept="image/png, image/jpeg, image/jpg, application/pdf"
 							capture="environment"
+							onClick={(event) => { event.currentTarget.value = ''; }}
 							onChange={handleFileUpload}
 							aria-label="Prendre une photo via la caméra"
 							title="Prendre une photo via la caméra"

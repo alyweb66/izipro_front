@@ -6,10 +6,11 @@ type ScrollListProps = {
     filteredMessages?: MessageProps[] | undefined;
     conversationIdState?: number;
     isListOpen?: boolean;
+    loading?: boolean;
 };
 
 
-export const ScrollList = ({ filteredMessages, conversationIdState, isListOpen }: ScrollListProps) => {
+export const ScrollList = ({ filteredMessages, conversationIdState, isListOpen, loading }: ScrollListProps) => {
 
     const [isEndVisible, setIsEndVisible] = useState(false);
     const [isEndViewed, setIsEndViewed] = useState(false);
@@ -133,52 +134,64 @@ export const ScrollList = ({ filteredMessages, conversationIdState, isListOpen }
             observer.disconnect();
         };
     }, [filteredMessages, isEndVisible]);
-
+    
     // Scroll to last message
     useLayoutEffect(() => {
         
-        if (!lastMessageId || filteredMessages?.length === 0) {
-            setIsEndViewed(true);
-            return;
-        }
+        if (filteredMessages && filteredMessages?.length > 0 && !loading) {
 
-        const scrollToLastMessage = (delay = 350) => {
-            setTimeout(() => {
-                const lastMessageElement = document.querySelector(`[data-key="${lastMessageId}"]`);
+            const lastMessageElement = document.querySelector(`[data-key="${lastMessageId}"]`);
+
+            const scrollToLastMessage = () => {
                 if (lastMessageElement) {
-                    lastMessageElement.scrollIntoView({ behavior: 'instant' });
-
-                    // Verify if the last message is visible
-                    const lastMessageRect = lastMessageElement.getBoundingClientRect();
-                    const isLastMessageInView = (
-                        lastMessageRect.top >= 0 &&
-                        lastMessageRect.left >= 0 &&
-                        lastMessageRect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-                        lastMessageRect.right <= (window.innerWidth || document.documentElement.clientWidth)
-                    );
-
-                    // if not visible, try again
-                    if (!isLastMessageInView) {
-                        scrollToLastMessage(100); // Try again after 100ms
-                    } else {
-                        setIsEndViewed(true);
-                    }
+                    lastMessageElement.scrollIntoView({ behavior: 'smooth' });
                 }
-            }, delay);
-        };
+            };
 
-        // Scroll to last message if conversationIdState is present and end is not viewed
-        if (conversationIdState && conversationIdState > 0 && !isEndViewed) {
+            // Check if last message is present
+            if (lastMessageElement) {
+                scrollToLastMessage();
+                let visibilityTimeout: NodeJS.Timeout;
+                // Define an observer to check if last message is visible
+                const observer = new IntersectionObserver((entries) => {
+                    const [entry] = entries;
+                    if (entry.isIntersecting) {
+                        // if last message is visible for 500ms then set isEndViewed to true
+                        visibilityTimeout = setTimeout(() => {
+                            setIsEndViewed(true);
+                            observer.disconnect();
+                        }, 500);
+                    } else {
+                        // Remove timer if not visible
+                        clearTimeout(visibilityTimeout);
+                        scrollToLastMessage();
+                    }
+                }, {
+                    root: null,  // Observer by viewport
+                    threshold: 1.0  // 100% visible
+                });
 
-            scrollToLastMessage();
+                // Start observing the last message
+                observer.observe(lastMessageElement);
+
+                // Cleanup observer when component unmounts or last message changes
+                return () => observer.disconnect();
+            }
+
+            // Scroll to last message if new message is added and end is in view
+            if (lastMessageId !== null && lastMessageIdRef.current < lastMessageId) {
+                endMessageListRef.current?.scrollIntoView({ behavior: 'smooth' });
+                lastMessageIdRef.current = lastMessageId;
+            }
+        } else if (!loading) {
+            setTimeout(() => {
+                if (filteredMessages && filteredMessages?.length === 0) {
+                setIsEndViewed(true);
+                }
+            }, 5000);
+
         }
-
-        // Scroll to last message if new message is added and end is in view
-        if (lastMessageId !== null && lastMessageIdRef.current < lastMessageId) {
-            scrollToLastMessage();
-            lastMessageIdRef.current = lastMessageId;
-        }
-    }, [conversationIdState, isEndViewed, isElementPresent, filteredMessages, lastMessageId, isListOpen]);
+    }, [conversationIdState, isEndViewed, isElementPresent, filteredMessages, lastMessageId, isListOpen, loading]);
 
 
     // Reset isElementPresent when isEndViewed is true

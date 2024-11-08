@@ -40,7 +40,7 @@ export function useFileHandler() {
 
 			// check if format is a valid file
 			const extension = file.name.split('.').pop()?.toLowerCase();
-			if (extension && !['jpg', 'jpeg', 'png', 'pdf'].includes(extension)) {
+			if (extension && !['jpg', 'jpeg', 'png'].includes(extension) && !['image/png', 'image/jpeg', 'image/jpg'].includes(file.type))  {
 				setFileError(`Fichier ${file.name} n'est pas un fichier valide, fichiers acceptés .jpg, .jpeg, .png ou .pdf.`);
 
 				setTimeout(() => {

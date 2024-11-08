@@ -132,6 +132,7 @@ export const MessageForm = ({
                 id="send-file"
                 className="message-form__input"
                 type="file"
+                onClick={(event) => { event.currentTarget.value = ''; }}
                 accept="image/png, image/jpeg, image/jpg, application/pdf"
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}
                 multiple={true}
@@ -142,6 +143,7 @@ export const MessageForm = ({
                 id="file-camera"
                 className="message-form__input medi"
                 type="file"
+                onClick={(event) => { event.currentTarget.value = ''; }}
                 accept="image/png, image/jpeg, image/jpg, application/pdf"
                 capture="environment"
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleFileUpload(event)}

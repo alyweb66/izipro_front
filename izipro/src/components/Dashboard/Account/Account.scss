@@ -15,6 +15,7 @@
     -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
     touch-action: pan-y;
     height: 100%;
+    padding-top: 1rem;
 
     .account__profile {
         position: relative;
@@ -95,24 +96,28 @@
             margin-top: 1rem;
             text-align: center;
 
+            .spinner-container {
+                position: relative;
 
-            .account__profile__picture__img {
-                margin: auto;
-                width: 8rem;
-                height: 8rem;
-                border-radius: 1rem;
-                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-                object-fit: cover;
+                .account__profile__picture__img {
+                    margin: auto;
+                    width: 8rem;
+                    height: 8rem;
+                    border-radius: 1rem;
+                    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+                    object-fit: cover;
 
-                /* For mouse */
-                @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer;
+                    /* For mouse */
+                    @media (hover: hover) and (pointer: fine) {
+                        cursor: pointer;
+                    }
+
+                    /* For touch */
+                    @media (hover: none) and (pointer: coarse) {
+                        cursor: default;
+                    }
                 }
 
-                /* For touch */
-                @media (hover: none) and (pointer: coarse) {
-                    cursor: default;
-                }
             }
 
             .account__profile__picture__delete {
