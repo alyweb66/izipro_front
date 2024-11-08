@@ -19,7 +19,8 @@
         padding: 0.5rem;
         gap: 1rem;
         background-color: transparent;
-
+        box-shadow: 4px 0 6px -4px rgba(0, 0, 0, 0.1), -4px 0 6px -4px rgba(0, 0, 0, 0.1);
+        
         .message-form__preview__container {
             display: flex;
             flex-wrap: wrap;
