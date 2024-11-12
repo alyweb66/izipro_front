@@ -23,7 +23,7 @@ type RequestProps = {
     conversation: {
         id: number
         user_1: number
-        user_2: number
+        user_2: number 
         request_id: number
         updated_at: string
     }[]

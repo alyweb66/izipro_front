@@ -15,7 +15,6 @@
     -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
     touch-action: pan-y;
     height: 100%;
-    padding-top: 1rem;
 
     .account__profile {
         position: relative;
@@ -93,7 +92,7 @@
         .account__picture {
             position: relative;
             width: 100%;
-            margin-top: 1rem;
+            margin-top: 2rem;
             text-align: center;
 
             .spinner-container {

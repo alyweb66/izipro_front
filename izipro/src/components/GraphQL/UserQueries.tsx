@@ -110,6 +110,7 @@ export const GET_USERS_CONVERSATION = gql`
       id
       first_name
       last_name
+      email
       city
       image
       description

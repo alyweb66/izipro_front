@@ -99,6 +99,7 @@ export const useQueryJobData = (jobId:{job_id: number}[], skip: boolean ) => {
 
 // fetch user requests
 export const  useQueryUserRequests = (id: number, offset: number, limit: number, skip: boolean) => {
+	console.log('skip', skip);
 	
 	const { loading, error: getUserRequestsError, data: getUserRequestsData, fetchMore } = useQuery(GET_USER_REQUESTS, {
 		fetchPolicy: 'no-cache',
@@ -110,6 +111,7 @@ export const  useQueryUserRequests = (id: number, offset: number, limit: number,
 		skip
 	
 	});
+console.log('getUserRequestsData query', getUserRequestsData);
 
 	if (getUserRequestsError) {
 		throw new Error('Error while fetching user requests');

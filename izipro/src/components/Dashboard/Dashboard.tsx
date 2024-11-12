@@ -181,7 +181,6 @@ function Dashboard() {
 
 	//*state for clientRequest
 	const [isCLientRequestHasMore, setIsClientRequestHasMore] = useState<boolean>(true);
-	//const [isSkipClientRequest, setIsSkipClientRequest] = useState<boolean>(true);
 
 	//store
 	const isLoggedOut = isLoggedOutStore((state) => state.isLoggedOut);
@@ -235,13 +234,18 @@ function Dashboard() {
 	const { loading: notViewedConversationLoading, notViewedConversationQuery } = useQueryNotViewedConversations(isSkipNotViewedConvRef.current);
 	// this query is only ids of all conversation used to compare with the notViewedConversationStore to get the number of not viewed conversation
 	const { loading: myConversationIdsLoading, myConversationIds } = useQueryUserConversationIds(isSkipUserConversationIdsRef.current || requestConversationIdStore.length > 0);
+console.log('isSkipMyRequestRef.current', isSkipMyRequestRef.current);
+console.log('requestStore.length > 0', requestStore.length > 0);
+console.log('role', role);
+
 
 	//* Query for MyRequest
 	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, (isSkipMyRequestRef.current || id === 0 || requestStore.length > 0));
 	const { loading: requestByIdLoading, requestById } = useQueryGetRequestById(requestByIdState);
+console.log('getUserRequestsData', getUserRequestsData);
 
 	//*Query for ClientRequest
-	const { loading: getRequestByJobLoading, getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequestRef.current || jobs.length === 0 || clientRequestsStore.length > 0));
+	const { loading: getRequestByJobLoading, getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequestRef.current || jobs.length === 0 || role !== 'pro' || clientRequestsStore.length > 0));
 
 	//*Query for MyConversation
 	const { loading: requestMyConversationLoading, data: requestMyConversation } = useQueryUserConversations(
@@ -1007,7 +1011,7 @@ function Dashboard() {
 							<div className="indicator"></div>
 						</li>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen) }} aria-label="Ouvrir mes demandes">
+							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }} aria-label="Ouvrir mes demandes">
 							<div className="tab-content">
 
 								<span>MES DEMANDES</span>

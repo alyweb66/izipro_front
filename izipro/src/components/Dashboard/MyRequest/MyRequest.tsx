@@ -501,6 +501,10 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 
 			// take the user id from the conversation
 			const sortedUsers = conversationByDate.map(conversation => {
+				// Remove conversation where user is 0
+				if (!conversation.user_1 || !conversation.user_2) {
+					return;
+				}
 				const user = userConvStore.find(user => user.id === (conversation.user_1 !== id ? conversation.user_1 : conversation.user_2));
 				return user;
 			});

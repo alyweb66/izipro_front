@@ -33,6 +33,7 @@ export const HeaderMessage = ({
     setIsMessageOpen,
     setSelectedItem
 }: HeaderMessageProps) => {
+console.log('selectedItem', selectedItem);
 
     return (
         <div className="header-message__user" aria-label="Détails de l'utilisateur" >
