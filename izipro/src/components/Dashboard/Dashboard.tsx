@@ -41,7 +41,7 @@ import { MessageProps } from '../../Type/message';
 import { isLoggedOutStore, userConversation, userDataStore } from '../../store/UserData';
 import { subscriptionDataStore } from '../../store/subscription';
 import { notViewedRequest, notViewedConversation, requestConversationIds } from '../../store/Viewed';
-import { clientRequestStore, myRequestStore, requestConversationStore } from '../../store/Request';
+import { clientRequestStore, myRequestStore, requestConversationStore, requestDataStore } from '../../store/Request';
 import { messageDataStore, myMessageDataStore } from '../../store/message';
 
 // Style
@@ -174,10 +174,11 @@ function Dashboard() {
 	const [isMyRequestHasMore, setIsMyRequestHasMore] = useState<boolean>(true);
 	//const [isSkipMyRequest, setIsSkipMyRequest] = useState<boolean>(true);
 
+
 	//*state for myConversation
-	const [myConversationIdState, setMyConversationIdState] = useState<number>(0);
-	const [isMyConversationHasMore, setIsMyConversationHasMore] = useState<boolean>(true);
 	const [isForMyConversation, setIsForMyConversation] = useState<boolean>(false);
+	const [isMyConversationHasMore, setIsMyConversationHasMore] = useState<boolean>(true);
+	const [myConversationIdState, setMyConversationIdState] = useState<number>(0);
 
 	//*state for clientRequest
 	const [isCLientRequestHasMore, setIsClientRequestHasMore] = useState<boolean>(true);
@@ -207,6 +208,7 @@ function Dashboard() {
 
 	//* ClientRequest store
 	const [notViewedRequestStore, setNotViewedRequestStore] = notViewedRequest((state) => [state.notViewed, state.setNotViewedStore]);
+	const [resetRequest] = requestDataStore((state) => [state.resetRequest]);
 
 	//useRef
 	const clientRequestOffset = useRef<number>(0);
@@ -234,15 +236,10 @@ function Dashboard() {
 	const { loading: notViewedConversationLoading, notViewedConversationQuery } = useQueryNotViewedConversations(isSkipNotViewedConvRef.current);
 	// this query is only ids of all conversation used to compare with the notViewedConversationStore to get the number of not viewed conversation
 	const { loading: myConversationIdsLoading, myConversationIds } = useQueryUserConversationIds(isSkipUserConversationIdsRef.current || requestConversationIdStore.length > 0);
-console.log('isSkipMyRequestRef.current', isSkipMyRequestRef.current);
-console.log('requestStore.length > 0', requestStore.length > 0);
-console.log('role', role);
-
 
 	//* Query for MyRequest
 	const { getUserRequestsData } = useQueryUserRequests(id, 0, myRequestLimit, (isSkipMyRequestRef.current || id === 0 || requestStore.length > 0));
 	const { loading: requestByIdLoading, requestById } = useQueryGetRequestById(requestByIdState);
-console.log('getUserRequestsData', getUserRequestsData);
 
 	//*Query for ClientRequest
 	const { loading: getRequestByJobLoading, getRequestsByJob } = useQueryRequestByJob(jobs, 0, clientRequestLimit, (isSkipClientRequestRef.current || jobs.length === 0 || role !== 'pro' || clientRequestsStore.length > 0));
@@ -278,8 +275,12 @@ console.log('getUserRequestsData', getUserRequestsData);
 	};
 
 	// function to handle navigation to my conversation
-	const handleMyConvesationNavigate = () => {
-		setSelectedTab('My conversations');
+	const handleNavigate = (isClientConv = false) => {
+		if (isClientConv) {
+			setSelectedTab('Client request');
+		} else {
+			setSelectedTab('My conversations');
+		}
 	};
 
 	// function to range request by request location
@@ -492,10 +493,18 @@ console.log('getUserRequestsData', getUserRequestsData);
 				clientRequestOffset.current = clientRequestOffset.current + requestByJob?.length;
 				RangeFilter(requestByJob);
 			}
+
+			if (getRequestsByJob?.requestsByJob?.length === clientRequestLimit) {
+
+				setIsClientRequestHasMore(true);
+			} else {
+				setIsClientRequestHasMore(false);
+			}
 		}
 
 		// If there are no more requests, stop the fetchmore
-		if (!getRequestsByJob || getRequestsByJob?.requestsByJob?.length < clientRequestLimit) {
+		if (!getRequestsByJob && getRequestsByJob?.requestsByJob?.length < clientRequestLimit && (isSkipClientRequestRef.current === false)) {
+			
 			setIsClientRequestHasMore(false);
 		}
 	}, [getRequestsByJob, settings]);
@@ -517,10 +526,17 @@ console.log('getUserRequestsData', getUserRequestsData);
 						return { ...prevRequests, requests: [...prevRequests.requests, ...newRequests] };
 					});
 				}
+
+				if (getUserRequestsData?.user.requests?.length === myRequestLimit) {
+
+					setIsMyRequestHasMore(true);
+				} else {
+					setIsMyRequestHasMore(false);
+				}
 			}
 		}
 
-		if ((!getUserRequestsData || getUserRequestsData?.user.requests?.length < myRequestLimit) && id !== 0) {
+		if ((!getUserRequestsData || getUserRequestsData?.user.requests?.length < myRequestLimit) && id !== 0 && (isSkipMyRequestRef.current === false)) {
 
 			setIsMyRequestHasMore(false);
 			isSkipMyRequestRef.current = true;
@@ -547,9 +563,15 @@ console.log('getUserRequestsData', getUserRequestsData);
 
 			myConversationOffsetRef.current = requestsConversations?.length;
 			isSkipMyConversationRef.current = true;
+
+			if (requestMyConversation.user.requestsConversations.length === myconversationLimit) {
+				setIsMyConversationHasMore(true);
+			} else {
+				setIsMyConversationHasMore(false);
+			}
 		}
 
-		if (!requestMyConversation || requestMyConversation?.user.requestsConversations.length < myconversationLimit) {
+		if (requestMyConversation && requestMyConversation.user && requestMyConversation.user.requestsConversations.length < myconversationLimit && (isSkipMyConversationRef.current === false)) {
 			setIsMyConversationHasMore(false);
 		}
 	}, [requestMyConversation]);
@@ -968,8 +990,6 @@ console.log('getUserRequestsData', getUserRequestsData);
 		);
 	};
 
-
-
 	return (
 		<>
 			<div className='dashboard'>
@@ -1007,11 +1027,11 @@ console.log('getUserRequestsData', getUserRequestsData);
 					</div>
 					<ul className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Request' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('Request'); setIsOpen(!isOpen); }} aria-label="Ouvrir les demandes">DEMANDE
+							onClick={() => { setSelectedTab('Request'); setIsOpen(!isOpen); resetRequest(); }} aria-label="Ouvrir les demandes">DEMANDE
 							<div className="indicator"></div>
 						</li>
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My requests' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; }} aria-label="Ouvrir mes demandes">
+							onClick={() => { setSelectedTab('My requests'); setIsOpen(!isOpen); isSkipMyRequestRef.current = false; resetRequest(); }} aria-label="Ouvrir mes demandes">
 							<div className="tab-content">
 
 								<span>MES DEMANDES</span>
@@ -1030,7 +1050,7 @@ console.log('getUserRequestsData', getUserRequestsData);
 						</li>
 						{role === 'pro' &&
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'Client request' ? 'active' : ''}`}
-								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen) }} aria-label="Ouvrir les demandes clients">
+								onClick={() => { setSelectedTab('Client request'); setIsOpen(!isOpen); resetRequest(); }} aria-label="Ouvrir les demandes clients">
 								<div className="tab-content">
 									<span>CLIENTS</span>
 									{(notViewedRequestStore.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${notViewedRequestStore.length > 0 ? 'visible' : ''}`}>
@@ -1069,7 +1089,7 @@ console.log('getUserRequestsData', getUserRequestsData);
 							</li>
 						}
 						<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My profile' ? 'active' : ''}`}
-							onClick={() => { setSelectedTab('My profile'); setIsOpen(!isOpen); }} aria-label="Ouvrir mon compte">MON COMPTE
+							onClick={() => { setSelectedTab('My profile'); setIsOpen(!isOpen); resetRequest(); }} aria-label="Ouvrir mon compte">MON COMPTE
 							<div className="indicator"></div>
 						</li>
 						{!isFooter && <Footer />}
@@ -1124,6 +1144,7 @@ console.log('getUserRequestsData', getUserRequestsData);
 								isHasMore={isMyConversationHasMore}
 								setIsHasMore={setIsMyConversationHasMore}
 								offsetRef={myConversationOffsetRef}
+								handleNavigate={handleNavigate}
 								conversationIdState={myConversationIdState}
 								setConversationIdState={setMyConversationIdState}
 								clientMessageSubscription={clientMessageSubscription}
@@ -1151,7 +1172,7 @@ console.log('getUserRequestsData', getUserRequestsData);
 											offsetRef={clientRequestOffset}
 											setIsHasMore={setIsClientRequestHasMore}
 											isHasMore={isCLientRequestHasMore}
-											onDetailsClick={handleMyConvesationNavigate}
+											handleNavigate={handleNavigate}
 											RangeFilter={RangeFilter}
 										/>
 									)}

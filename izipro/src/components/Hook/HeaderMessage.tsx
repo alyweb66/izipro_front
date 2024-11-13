@@ -4,12 +4,13 @@ import logoProfile from "/logos/logo-profile.webp";
 import noPicture from "/logos/no-picture.webp";
 import '../../styles/HeaderMessage.scss'
 import { RequestProps } from "../../Type/Request";
+import { requestDataStore } from "../../store/Request";
 
 type HeaderMessageProps = {
     setUserDescription?: (value: boolean) => void;
     userDescription?: boolean;
     selectedItem?: UserDataProps | RequestProps | null;
-    setSelectedItem?: (value: UserDataProps | null) => void;
+    setSelectedItem?: React.Dispatch<React.SetStateAction<UserDataProps | null>> | React.Dispatch<React.SetStateAction<RequestProps | null>>;
     isMyRequest?: boolean;
     setRequestTitle?: (value: boolean) => void;
     requestTitle?: boolean;
@@ -18,6 +19,9 @@ type HeaderMessageProps = {
     setIsListOpen: (value: boolean) => void;
     setIsAnswerOpen?: (value: boolean) => void;
     setIsMessageOpen: (value: boolean) => void;
+    handleNavigate?: (value?: boolean) => void;
+    setConversationIdState?: (value: number) => void;
+
 }
 export const HeaderMessage = ({
     setUserDescription,
@@ -31,9 +35,11 @@ export const HeaderMessage = ({
     setIsEndViewed,
     setIsListOpen,
     setIsMessageOpen,
-    setSelectedItem
+    setSelectedItem,
+    handleNavigate,
+    setConversationIdState
 }: HeaderMessageProps) => {
-console.log('selectedItem', selectedItem);
+    const [request, resetRequest] = requestDataStore((state) => [state.request, state.resetRequest]);
 
     return (
         <div className="header-message__user" aria-label="Détails de l'utilisateur" >
@@ -59,6 +65,7 @@ console.log('selectedItem', selectedItem);
                             event.stopPropagation();
 
                             if (isMyRequest && window.innerWidth < 1000) {
+                                setConversationIdState && setConversationIdState(0);
                                 setIsEndViewed && setIsEndViewed(false);
                                 setIsMessageOpen(false);
                                 setTimeout(() => {
@@ -67,9 +74,14 @@ console.log('selectedItem', selectedItem);
                                 }, 200);
                             }
 
-                            isMyRequest && setSelectedItem && setSelectedItem(null);
+                            setSelectedItem && setSelectedItem(null);
 
                             if (isMyConversation && window.innerWidth < 780) {
+                                if (request?.id > 0) {
+                                    resetRequest();
+                                    handleNavigate && handleNavigate(true);
+                                }
+
                                 setIsEndViewed && setIsEndViewed(false);
                                 setIsMessageOpen(false);
                                 setTimeout(() => {
@@ -103,11 +115,12 @@ console.log('selectedItem', selectedItem);
 
                             <div className="header-message__user__header__info__identity">
                                 <p className="header-message__user__header__info__identity denomination">{selectedItem?.denomination}</p>
-                                <p className="header-message__user__header__info__identity siret">SIRET : {selectedItem && 'siret' in selectedItem && selectedItem?.siret}</p>
+                                {('siret' in selectedItem) && <p className="header-message__user__header__info__identity siret">SIRET : {selectedItem && selectedItem?.siret}</p>}
                             </div>
                         ) : (
                             <div className="header-message__user__header__info__identity">
                                 <p className="header-message__user__header__info__identity denomination">{selectedItem?.first_name} {selectedItem?.last_name}</p>
+
                             </div>
                         )}
 

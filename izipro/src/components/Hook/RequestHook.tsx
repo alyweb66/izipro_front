@@ -30,7 +30,7 @@ const RequestItem = ({
 	setRequest,
 	showAllContent,
 	setClientRequest,
-	onDetailsClick,
+	handleNavigate,
 	hiddenLoading,
 	deleteRequestLoading,
 	modalArgs,
@@ -59,7 +59,7 @@ const RequestItem = ({
 	setRequest?: Function,
 	showAllContent?: boolean,
 	setClientRequest?: Function,
-	onDetailsClick?: Function,
+	handleNavigate?: Function,
 	hiddenLoading?: boolean,
 	modalArgs?: { requestId: number, requestTitle: string } | null,
 	removeRequestStore?: Function,
@@ -287,8 +287,9 @@ const RequestItem = ({
 						event.preventDefault();
 						if (isClientRequest && isClientRequest) {
 							setRequest && setRequest(requestByDate),
+
 								setClientRequest && setClientRequest(requestByDate);
-							onDetailsClick && onDetailsClick();
+								handleNavigate && handleNavigate();
 						}
 
 						if (isMyrequest && isMyrequest) {

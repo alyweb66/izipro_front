@@ -58,7 +58,7 @@ function Header() {
 					aria-label="Recharger la page"
 					onClick={() => window.location.reload()}
 				/>
-				<h1 className="header__container title">POP</h1>
+				<h1 className="header__container title">2pro</h1>
 			</div>
 			{isLogged && <Logout />}
 		</header>

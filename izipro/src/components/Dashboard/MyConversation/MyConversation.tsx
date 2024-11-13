@@ -66,10 +66,11 @@ type ClientMessageProps = {
 	conversationIdState: number;
 	setConversationIdState: (id: number) => void;
 	clientMessageSubscription?: { messageAdded: MessageProps[] };
+	handleNavigate: (value?: boolean) => void;
 };
 
 
-function MyConversation({ viewedMyConversationState, clientMessageSubscription, conversationIdState, setConversationIdState, isHasMore, setIsHasMore, offsetRef }: ClientMessageProps) {
+function MyConversation({ viewedMyConversationState, clientMessageSubscription, conversationIdState, setConversationIdState, isHasMore, setIsHasMore, offsetRef, handleNavigate }: ClientMessageProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -199,7 +200,9 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 
 					setClientRequestsStore(newRequest);
 					// remove file from the file list and request
-					resetRequest();
+					if (window.innerWidth > 780) {
+						resetRequest();
+					}
 					setFile([]);
 					setUrlFile([]);
 
@@ -538,7 +541,6 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 		};
 	}, []);
 
-
 	return (
 		<div className="my-conversation">
 			{(hideRequestLoading || convLoading) && <Spinner />}
@@ -599,9 +601,11 @@ function MyConversation({ viewedMyConversationState, clientMessageSubscription, 
 									selectedItem={selectedRequest}
 									setRequestTitle={setRequestTitle}
 									isMyConversation={true}
+									handleNavigate={handleNavigate}
 									setIsListOpen={setIsListOpen}
 									setIsMessageOpen={setIsMessageOpen}
 									setIsEndViewed={setIsEndViewed}
+									setSelectedItem={setSelectedRequest}
 								/>
 							)}
 

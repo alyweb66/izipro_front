@@ -36,11 +36,11 @@ type clientRequestProps = {
 	offsetRef: React.MutableRefObject<number>;
 	isHasMore: boolean;
 	setIsHasMore: (value: boolean) => void;
-	onDetailsClick: () => void;
+	handleNavigate: () => void;
 	RangeFilter: (requests: RequestProps[], fromSubscribeToMore?: boolean) => void;
 };
 
-function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, offsetRef, loading }: clientRequestProps) {
+function ClientRequest({ handleNavigate, RangeFilter, setIsHasMore, isHasMore, offsetRef, loading }: clientRequestProps) {
 
 	// ImageModal Hook
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
@@ -244,7 +244,7 @@ function ClientRequest({ onDetailsClick, RangeFilter, setIsHasMore, isHasMore, o
 										requestByDate={requestByDate}
 										showAllContent={showAllContent}
 										isClientRequest={true}
-										onDetailsClick={onDetailsClick}
+										handleNavigate={handleNavigate}
 										hiddenLoading={hiddenLoading}
 										modalArgs={modalArgs}
 										setDeleteItemModalIsOpen={setDeleteItemModalIsOpen}

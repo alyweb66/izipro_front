@@ -408,17 +408,14 @@ function Account() {
 		}
 
 	};
-	console.log('image', image);
 
 	// Handle the profile picture change
 	const handleProfilePicture = (event: React.ChangeEvent<HTMLInputElement>) => {
 		event.preventDefault();
-		console.log('starting handleProfilePicture');
 
 		setErrorPicture('');
 		resetServerError();
 		const file = event.target.files;
-		console.log('file', file);
 
 		// Check if the file is .jpg, .jpeg or .png
 		if (file && file[0]) {
@@ -444,7 +441,6 @@ function Account() {
 		}
 
 		if ((file?.length ?? 0) > 0) {
-			console.log('go to updateUser');
 			setIsImgLoading(true);
 			updateUser({
 				variables: {
@@ -461,7 +457,6 @@ function Account() {
 						setErrorPicture('');
 					}, 3000);
 				}
-				console.log(response.data);
 
 				const { updateUser } = response.data;
 				// Set the new user data to the store
@@ -753,7 +748,7 @@ function Account() {
 							type="file"
 							ref={fileInput}
 							onClick={(event) => { event.currentTarget.value = ''; }}
-							onChange={(event) => { handleProfilePicture(event); console.log('fileInput'); }}
+							onChange={(event) => { handleProfilePicture(event); }}
 							style={{ display: 'none' }}
 							accept="image/png, image/jpeg, image/jpg"
 							aria-label="Sélectionner une nouvelle photo de profil"

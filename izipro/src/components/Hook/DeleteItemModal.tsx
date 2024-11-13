@@ -119,8 +119,7 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 								<button
 									className="delete-item-modal__container__container__button__delete"
 									onClick={(event) => {
-										console.log('delete');
-										
+
 										event.stopPropagation();
 										event.preventDefault();
 										if (modalArgs?.requestId) {

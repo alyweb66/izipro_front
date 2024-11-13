@@ -110,7 +110,7 @@
     .my-request__answer-list {
         margin: 0;
         width: 30%;
-        height: 100%;
+       // height: 100%;
         max-width: 30%;
 
         .my-request__answer-list__header {
@@ -155,6 +155,7 @@
             border-radius: 0.5rem;
             box-shadow: none;
             max-width: 90%;
+           // height: 100%;
             color: v.$color-primary-orange;
             text-align: center;
         }

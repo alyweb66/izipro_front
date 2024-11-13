@@ -606,6 +606,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 		}
 	}, [selectedUser]);
 
+
 	return (
 		<div className="my-request">
 			{isListOpen && <div className="my-request__container">
@@ -775,6 +776,7 @@ function MyRequest({ selectedRequest, setSelectedRequest, newUserId, setNewUserI
 							setSelectedItem={setSelectedUser}
 							setUserDescription={setUserDescription}
 							userDescription={userDescription}
+							setConversationIdState={setConversationIdState}
 						/>
 						<MessageList
 							conversationIdState={conversationIdState}
