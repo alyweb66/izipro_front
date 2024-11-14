@@ -270,7 +270,7 @@ function Dashboard() {
 		'Request': 'DEMANDE',
 		'My requests': 'MES DEMANDES',
 		'Client request': 'CLIENT',
-		'My conversations': 'MES CLIENTS',
+		'My conversations': 'MES CONTACTS',
 		'My profile': 'MON COMPTE'
 	};
 
@@ -1073,7 +1073,7 @@ function Dashboard() {
 							<li className={`dashboard__nav__menu__content__tab ${selectedTab === 'My conversations' ? 'active' : ''}`}
 								onClick={() => { setSelectedTab('My conversations'); setIsOpen(!isOpen); }} aria-label="Ouvrir mes conversations">
 								<div className="tab-content">
-									<span>MES CLIENTS</span>
+									<span>MES CONTACTS</span>
 									{(viewedMyConversationState.length > 0 || window.innerWidth > 480) && (<div className={`badge-container ${viewedMyConversationState.length > 0 ? 'visible' : ''}`}>
 										{viewedMyConversationState.length > 0 && (
 											<Grow in={true} timeout={200}>

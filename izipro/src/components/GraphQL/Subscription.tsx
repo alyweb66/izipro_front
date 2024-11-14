@@ -12,6 +12,7 @@ export const REQUEST_SUBSCRIPTION = gql`
             city
             first_name
             last_name
+            image
             denomination
             range
             user_id

@@ -2,12 +2,11 @@
 @use './mixins' as m;
 
 .react-modal {
-
-    display: flex;
+   // display: flex;
     width: 100%;
     height: 100%;
     position: relative;
-    margin: 0;
+  
 
     .react-modal__button {
         display: none;
@@ -17,7 +16,7 @@
         position: fixed;
         top: 0;
         right: 0;
-        z-index: 1;
+        z-index: 11;
         margin: 2rem 2rem 0.5rem auto;
         font-size: 4rem;
         color: v.$color-primary-orange;
@@ -34,15 +33,16 @@
     }
 
     .react-modal__picture {
-
         display: flex;
+        align-items: center;
         justify-content: center;
         object-fit: contain;
         position: relative;
-        margin: auto;
+        height: 100dvh;
         max-width: 100%;
         max-height: 100%;
         overflow: hidden;
+        border: none;
 
 
         &.button {
@@ -57,6 +57,7 @@
 
         &.forward {
             right: 0px;
+
             color: v.$color-primary-blue;
         }
 
@@ -82,8 +83,8 @@
         }
 
         &.img {
-            margin: 1rem 0;
-            width: 100%;
+           // margin: 1rem 0;
+           // width: 100%;
             max-height: 90vh;
             object-fit: contain;
             border: none;
