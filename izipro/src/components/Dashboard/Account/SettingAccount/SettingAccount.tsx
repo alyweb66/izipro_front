@@ -28,8 +28,11 @@ import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import { subscriptionDataStore } from '../../../../store/subscription';
 import { SubscriptionProps } from '../../../../Type/Subscription';
-
-
+import ListItem from '@mui/material/ListItem';
+import Collapse from '@mui/material/Collapse';
+import ListItemText from '@mui/material/ListItemText';
+import List from '@mui/material/List';
+import { TransitionGroup } from 'react-transition-group';
 function SettingAccount() {
 
 	//store
@@ -266,35 +269,39 @@ function SettingAccount() {
 
 							<ul className="setting-account__form__list" >
 								<h2 className="setting-account__subtitle">Métiers à ajouter (max 5)</h2>
-								<AnimatePresence>
-									{wishListJob && [...wishListJob].reverse().map((job: JobProps) => (
-										<motion.li
-											key={job.id}
-											className="setting-account__form__list__tag"
-											initial={{ opacity: 0, scale: 0.5 }}
-											animate={{ opacity: 1, scale: 1 }}
-											exit={{ opacity: 0, scale: 0.2 }}
-											transition={{
-												duration: 0.2,
-												ease: [0, 0, 0.2, 0],
-												scale: {
-													type: 'tween',
-													damping: 5,
-													stiffness: 20,
-													restDelta: 0.001
-												}
-											}}
-											aria-label={`Métier sélectionné: ${job.name}`}
-										>
-											{job.name}
-											<button
-												className="setting-account__form__list__delete__button"
-												onClick={(event) => {setJobError(''), handleRemoveListJob(job.id, event)}}
-												aria-label={`Supprimer le métier ${job.name}`}
-											>X</button>
-										</motion.li>
-									))}
-								</AnimatePresence>
+								<List >
+									<TransitionGroup>
+										{wishListJob && [...wishListJob].reverse().map((job: JobProps) => (
+											<Collapse
+												sx={{ minHeight: 0, margin: 0 }}
+												key={job.id}
+												timeout={200}
+											>
+												<ListItem
+													key={job.id}
+													className="setting-account__form__list__tag"
+													aria-label={`Métier sélectionné: ${job.name}`}
+												>
+													<ListItemText className="__name" primary={job.name} aria-label={`Métier actuel: ${job.name}`} sx={{
+														'& .MuiTypography-root': {
+															fontFamily: 'Fredoka, sans-serif',
+															fontWeight: 400,
+															paddingTop: 0,
+															paddingBottom: 0,
+															margin: 0
+														}
+													}} />
+													<button
+														className="setting-account__form__list__delete__button"
+														onClick={(event) => { setJobError(''), handleRemoveListJob(job.id, event) }}
+														aria-label={`Supprimer le métier ${job.name}`}
+													>X</button>
+												</ListItem>
+											</Collapse>
+										))}
+									</TransitionGroup>
+								</List>
+
 							</ul>
 							<div className="message">
 								<Stack sx={{ width: '100%' }} spacing={2}>
@@ -306,43 +313,54 @@ function SettingAccount() {
 								</Stack>
 							</div>
 							<button className="setting-account__form__button" type="submit" aria-label="Valider les métiers">valider les métiers</button>
-							<ul className={`setting-account__form__list job ${(userJobLoading || deleteJobLoading || categoryLoading) ? 'loading' : ''}`}>
+
+							<ul
+								className={`setting-account__form__list job ${(userJobLoading || deleteJobLoading || categoryLoading) ? 'loading' : ''}`}
+
+							>
 								{(userJobLoading || categoryLoading) && <Spinner className="small-spinner" />}
 
 								<h2 className="setting-account__subtitle">Métiers séléctionnés</h2>
-								<AnimatePresence>
-									{/* {jobDataLoading && <Spinner />} */}
-									{selectedJob && selectedJob.length > 0 ? selectedJob.map((job: JobProps) => (
-										<motion.li
-											key={job.id}
-											className="setting-account__form__list__tag"
-											initial={{ opacity: 0, scale: 0.5 }}
-											animate={{ opacity: 1, scale: 1 }}
-											exit={{ opacity: 0, scale: 0.2 }}
-											transition={{
-												duration: 0.2,
-												ease: [0, 0, 0.2, 0],
-												scale: {
-													type: 'tween',
-													damping: 5,
-													stiffness: 20,
-													restDelta: 0.001
-												}
-											}}
-											aria-label={`Métier actuel: ${job.name}`}
-										>
-											{job.name}
-											<button
-												className="setting-account__form__list__delete__button"
-												onClick={(event) => handleDeleteJob(job.id, event)}
-												aria-label={`Supprimer le métier ${job.name}`}
-											>X</button>
-										</motion.li>
-									))
-										:
+								<List>
+									{selectedJob && selectedJob.length > 0 ? (
+										<TransitionGroup>
+											{/* {jobDataLoading && <Spinner />} */}
+											{selectedJob.map((job: JobProps) => (
+												<Collapse
+													sx={{ minHeight: 0, margin: 0 }}
+													key={job.id}
+													timeout={200}
+
+												>
+													<ListItem
+														className="setting-account__form__list__tag"
+
+													>
+														<ListItemText className="__name" primary={job.name} aria-label={`Métier actuel: ${job.name}`} sx={{
+															'& .MuiTypography-root': {
+																fontFamily: 'Fredoka, sans-serif',
+																fontWeight: 400,
+																paddingTop: 0,
+																paddingBottom: 0,
+																margin: 0
+															}
+														}} />
+														<button
+															className="setting-account__form__list__delete__button"
+															onClick={(event) => handleDeleteJob(job.id, event)}
+															aria-label={`Supprimer le métier ${job.name}`}
+														>X</button>
+
+													</ListItem>
+												</Collapse>
+											))
+											}
+										</TransitionGroup>
+									) : (
 										<p className="setting-account__form__list noJobs">Vous n&apos;avez pas de métier séléctionné</p>
+									)
 									}
-								</AnimatePresence>
+								</List>
 							</ul>
 
 

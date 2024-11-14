@@ -82,14 +82,18 @@
 
             .setting-account__form__list__tag {
                 //height: 2rem;
-                width: 100%;
+                //width: 100%;
                 display: flex;
                 flex-direction: row-reverse;
-                align-items: center;
-                justify-content: flex-end;
-
+               // align-items: center;
+               // justify-content: flex-end;
+               // font-family: v.$font;
+               padding: 0 !important;
+               margin: 0 !important;
+               
             }
-
+       
+         
             &.noJobs {
                 text-align: center;
             }

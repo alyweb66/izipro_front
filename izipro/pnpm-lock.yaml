@@ -23,6 +23,9 @@ importers:
       '@turf/turf':
         specifier: ^7.1.0
         version: 7.1.0
+      '@types/react-transition-group':
+        specifier: ^4.4.11
+        version: 4.4.11
       apollo-upload-client:
         specifier: ^18.0.1
         version: 18.0.1(@apollo/client@3.11.8(@types/react@18.3.11)(graphql-ws@5.16.0(graphql@16.9.0))(graphql@16.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(graphql@16.9.0)
@@ -68,6 +71,9 @@ importers:
       react-textarea-autosize:
         specifier: ^8.5.3
         version: 8.5.3(@types/react@18.3.11)(react@18.3.1)
+      react-transition-group:
+        specifier: ^4.4.5
+        version: 4.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       ua-parser-js:
         specifier: ^1.0.39
         version: 1.0.39
