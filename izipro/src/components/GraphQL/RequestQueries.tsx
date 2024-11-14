@@ -72,6 +72,7 @@ export const GET_REQUEST_BY_JOB = gql`
             lng
             lat
             city
+            image
             range
             user_id
             job_id

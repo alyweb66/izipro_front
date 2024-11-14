@@ -505,7 +505,7 @@ function Request() {
 								)}
 							</Stack>
 						</div>
-						<h1 className="request__form__title media">(Optionel) ajoutez des photos (3 maximum):</h1>
+						<h1 className="request__form__title media">(Optionel) ajoutez des photos pour des réponses plus précises (3 maximum):</h1>
 						<label
 							htmlFor="file"
 							className="request__form__label-file"

@@ -40,6 +40,7 @@ export const HeaderMessage = ({
     setConversationIdState
 }: HeaderMessageProps) => {
     const [request, resetRequest] = requestDataStore((state) => [state.request, state.resetRequest]);
+console.log('selectedItem', selectedItem);
 
     return (
         <div className="header-message__user" aria-label="Détails de l'utilisateur" >

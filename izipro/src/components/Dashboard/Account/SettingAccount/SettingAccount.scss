@@ -131,6 +131,10 @@
 
         .setting-account__form__button {
             @include m.blue-button;
+
+            &{
+                margin-top: 0;
+            }
         }
 
     }

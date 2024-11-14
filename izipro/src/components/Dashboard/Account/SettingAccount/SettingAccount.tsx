@@ -19,7 +19,6 @@ import Spinner from '../../../Hook/Spinner';
 
 // Styling imports
 import './SettingAccount.scss';
-import { motion, AnimatePresence } from 'framer-motion';
 import SelectBox from '../../../Hook/SelectBox';
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
@@ -33,6 +32,7 @@ import Collapse from '@mui/material/Collapse';
 import ListItemText from '@mui/material/ListItemText';
 import List from '@mui/material/List';
 import { TransitionGroup } from 'react-transition-group';
+
 function SettingAccount() {
 
 	//store
@@ -179,7 +179,6 @@ function SettingAccount() {
 		}
 	};
 
-
 	// function to validate the range
 	const handleValidateRange = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		event.preventDefault();
@@ -269,11 +268,10 @@ function SettingAccount() {
 
 							<ul className="setting-account__form__list" >
 								<h2 className="setting-account__subtitle">Métiers à ajouter (max 5)</h2>
-								<List >
+								<List sx={{ p: 0 }} >
 									<TransitionGroup>
 										{wishListJob && [...wishListJob].reverse().map((job: JobProps) => (
 											<Collapse
-												sx={{ minHeight: 0, margin: 0 }}
 												key={job.id}
 												timeout={200}
 											>
@@ -321,13 +319,12 @@ function SettingAccount() {
 								{(userJobLoading || categoryLoading) && <Spinner className="small-spinner" />}
 
 								<h2 className="setting-account__subtitle">Métiers séléctionnés</h2>
-								<List>
+								<List sx={{ p: 0 }}>
 									{selectedJob && selectedJob.length > 0 ? (
 										<TransitionGroup>
 											{/* {jobDataLoading && <Spinner />} */}
 											{selectedJob.map((job: JobProps) => (
 												<Collapse
-													sx={{ minHeight: 0, margin: 0 }}
 													key={job.id}
 													timeout={200}
 
