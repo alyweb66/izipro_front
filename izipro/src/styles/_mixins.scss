@@ -568,3 +568,27 @@
   }
 
 }
+
+@mixin fader-top {
+   // fader top for list
+   mask-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 1) 99%,
+    rgba(0, 0, 0, 0)
+  );
+  -webkit-mask-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 1) 99%,
+    rgba(0, 0, 0, 0)
+  );
+
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+
+  mask-position: top;
+  -webkit-mask-position: top;
+
+}

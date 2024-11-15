@@ -1,188 +1,172 @@
 @use '../../../styles/variables' as v;
 @use '../../../styles/mixins' as m;
 
-
 .my-conversation {
-    // position for spinner
-    position: relative;
+  // position for spinner
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  justify-content: space-evenly;
+  align-items: stretch;
+  height: 100%;
+  background-color: transparent;
+  padding-top: 0.5rem;
+
+  .my-conversation__container {
     display: flex;
-    overflow: hidden;
-    justify-content: space-evenly;
-    align-items: stretch;
+    flex-direction: column;
     height: 100%;
-    background-color: transparent;
-    padding-top: 0.5rem;
+    width: 100%;
+    max-width: 40%;
 
-    .my-conversation__container {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        width: 100%;
-        max-width: 40%;
+    .my-conversation__container__deploy {
+      top: 0;
+      font-size: 1rem;
+      color: v.$color-primary-orange;
+      text-decoration: underline;
+      border: none;
+      width: 100%;
+      background-color: transparent;
+      backdrop-filter: blur(2px);
+      margin-bottom: 0.2rem;
+      //box-shadow: 0px 4px 10px -2px rgba(0, 0, 0, 0.1);
+      z-index: 5;
+      /* For mouse */
+      @media (hover: hover) and (pointer: fine) {
+        cursor: pointer;
+      }
 
-        .my-conversation__container__deploy {
-            font-size: 1rem;
-            color: v.$color-primary-orange;
-            text-decoration: underline;
-            border: none;
-            background-color: transparent;
-            margin-bottom: 0.2rem;
-
-            /* For mouse */
-            @media (hover: hover) and (pointer: fine) {
-                cursor: pointer;
-            }
-
-            /* For touch */
-            @media (hover: none) and (pointer: coarse) {
-                cursor: default;
-            }
-        }
-
-        .my-conversation__container__list {
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
-            touch-action: pan-y;
-            scrollbar-width: none;
-            margin: 0 0.1rem;
-            // height: 100%;
-
-            &::-webkit-scrollbar {
-                display: none;
-                /* For Chrome, Safari and Opera */
-            }
-
-
-
-            &.no-req {
-                display: flex;
-                justify-content: center;
-                width: 100%;
-                margin: 1rem auto;
-                border-radius: 0.5rem;
-                box-shadow: none;
-                max-width: 90%;
-                color: v.$color-primary-orange;
-                text-align: center;
-
-            }
-
-            .my-conversation__container__list__detail {
-                padding-left: 0;
-
-            }
-
-
-        }
+      /* For touch */
+      @media (hover: none) and (pointer: coarse) {
+        cursor: default;
+      }
     }
 
-    .my-conversation__message-list {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
+    .my-conversation__container__list {
+      @include m.fader-top;
+      & {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+        touch-action: pan-y;
+        scrollbar-width: none;
         margin: 0 0.1rem;
-        max-width: 45%;
-        height: 100%;
+        // height: 100%;
+      }
 
+      &::-webkit-scrollbar {
+        display: none;
+        /* For Chrome, Safari and Opera */
+      }
 
-        &.loading {
-            position: relative;
-        }
+      &.no-req {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin: 1rem auto;
+        border-radius: 0.5rem;
+        box-shadow: none;
+        max-width: 90%;
+        color: v.$color-primary-orange;
+        text-align: center;
+      }
 
+      .my-conversation__container__list__detail {
+        padding-left: 0;
+      }
     }
+  }
+
+  .my-conversation__message-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0 0.1rem;
+    max-width: 45%;
+    height: 100%;
+
+    &.loading {
+      position: relative;
+    }
+  }
 }
 
 @media (max-width: 900px) {
-    .my-conversation {
-        justify-content: center;
-        .my-conversation__container {
-            max-width: 50%;
+  .my-conversation {
+    justify-content: center;
+    .my-conversation__container {
+      max-width: 50%;
 
-            .my-conversation__list {
-                display: none;
+      .my-conversation__list {
+        display: none;
 
-                &.open {
-                    display: block;
-                    margin: 0 auto;
-                    // height: 97%;
-                }
-
-
-
-            }
+        &.open {
+          display: block;
+          margin: 0 auto;
+          // height: 97%;
         }
-
+      }
     }
+  }
 }
 
 @media (max-width: 780px) {
-    .my-conversation {
-        width: 100%;
+  .my-conversation {
+    width: 100%;
 
-        // height: 100%;
-        .my-conversation__container {
-            max-width: 100%;
+    // height: 100%;
+    .my-conversation__container {
+      max-width: 100%;
 
-            .my-conversation__list {
-                display: none;
+      .my-conversation__list {
+        display: none;
 
-                &.open {
-                    display: block;
-                    margin: 0 auto;
-                    // height: 97%;
-                }
-
-
-
-            }
+        &.open {
+          display: block;
+          margin: 0 auto;
+          // height: 97%;
         }
-
-        .my-conversation__message-list {
-            display: none;
-
-            &.open {
-                display: flex;
-                margin: 0 auto;
-                width: 80%;
-                max-width: 80%;
-
-            }
-
-        }
-
+      }
     }
+
+    .my-conversation__message-list {
+      display: none;
+
+      &.open {
+        display: flex;
+        margin: 0 auto;
+        width: 80%;
+        max-width: 80%;
+      }
+    }
+  }
 }
 
 @media (max-width: 480px) {
+  .my-conversation {
+    padding-top: 0;
 
-    .my-conversation {
-        padding-top: 0;
+    .my-conversation__container {
+      max-width: 100%;
+      width: 100%;
 
-
-        .my-conversation__container {
-            max-width: 100%;
-            width: 100%;
-
-            .my-conversation__container__deploy {
-                margin-top: 0.5rem;
-                margin-bottom: 0.2rem;
-            }
-
-        }
-
-        .my-conversation__message-list {
-            &.open {
-                margin-top: 0;
-                border-radius: 0;
-                width: 100%;
-                max-width: 100%;
-            }
-        }
-
-        .my-conversation__message-list__form__preview__container__image {
-            width: 50px;
-            height: 50px;
-
-        }
+      .my-conversation__container__deploy {
+        margin-top: 0.5rem;
+        margin-bottom: 0.2rem;
+      }
     }
+
+    .my-conversation__message-list {
+      &.open {
+        margin-top: 0;
+        border-radius: 0;
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+
+    .my-conversation__message-list__form__preview__container__image {
+      width: 50px;
+      height: 50px;
+    }
+  }
 }

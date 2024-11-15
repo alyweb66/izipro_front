@@ -4,7 +4,6 @@ import React, { useLayoutEffect, useState } from 'react';
 // Apollo Client mutations
 import { useMutation } from '@apollo/client';
 import { USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION } from '../../GraphQL/UserMutations';
-//import { SUBSCRIPTION_MUTATION } from '../../GraphQL/SubscriptionMutations';
 import { DELETE_NOT_VIEWED_REQUEST_MUTATION } from '../../GraphQL/NotViewedRequestMutation';
 
 // Custom hooks and queries
@@ -13,12 +12,10 @@ import { useQueryRequestByJob } from '../../Hook/Query';
 // State management
 import { userDataStore } from '../../../store/UserData';
 import { requestDataStore, clientRequestStore, requestConversationStore } from '../../../store/Request';
-//import { subscriptionDataStore } from '../../../store/subscription';
 import { notViewedRequest } from '../../../store/Viewed';
 
 // Types and assets
 import { RequestProps } from '../../../Type/Request';
-//import { SubscriptionProps } from '../../../Type/Subscription';
 
 // Components and utilities
 import './clientRequest.scss';
@@ -46,11 +43,10 @@ function ClientRequest({ handleNavigate, RangeFilter, setIsHasMore, isHasMore, o
 	const { modalIsOpen, openModal, closeModal, selectedImage, nextImage, previousImage } = useModal();
 
 	// State
-	//const [isMessageExpanded, setIsMessageExpanded] = useState({});
 	const [hasManyImages, setHasManyImages] = useState(false);
 	const [deleteItemModalIsOpen, setDeleteItemModalIsOpen] = useState(false);
 	const [modalArgs, setModalArgs] = useState<{ requestId: number, requestTitle: string } | null>(null);
-	const [showAllContent, setShowAllContent] = useState(true);
+	const [showAllContent, setShowAllContent] = useState(false);
 
 	const limit = 5;
 
@@ -79,7 +75,6 @@ function ClientRequest({ handleNavigate, RangeFilter, setIsHasMore, isHasMore, o
 	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
 	const [notViewedRequestStore] = notViewedRequest((state) => [state.notViewed]);
 	const [requestsConversationStore, setRequestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
-
 
 	// mutation
 	const [hideRequest, { loading: hiddenLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);
@@ -147,7 +142,6 @@ function ClientRequest({ handleNavigate, RangeFilter, setIsHasMore, isHasMore, o
 		setRequestsConversationStore([...requestsConversationStore, request]);
 
 	}
-
 
 	// useEffect to see if the request is viewed
 	useLayoutEffect(() => {

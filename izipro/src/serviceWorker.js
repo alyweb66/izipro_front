@@ -5,7 +5,7 @@ import { StaleWhileRevalidate } from 'workbox-strategies';
 
 
 // Version du service worker pour gérer le versioning
-const SW_VERSION = '0.0.5';
+const SW_VERSION = '0.0.6';
 const CACHE_NAME = `my-app-cache-${SW_VERSION}`;
 //console.log(`Service Worker Version: ${SW_VERSION}`);
 const urlsToCache = [
@@ -62,15 +62,31 @@ registerRoute(
 );
 
 //* Notification push
-
+let selectedConversationId = null;
+let selectedTab = null;
 // listen for push event and show notification
 self.addEventListener('push', (event) => {
 	const data = event.data ? event.data.json() : {};
+	console.log('data service worker', data);
+	console.log('selectedConversationId', selectedConversationId);
+	console.log('selectedTab', selectedTab);
+	
+	
+	// Check if the conversation ID matches the selected conversation ID
+    if (data.message && data.tag && data.tag === selectedConversationId) {
+        // Do not show notification if the user is already viewing the conversation
+        return;
+    }
+
+	if (!data.message && selectedTab === 'Client request') {
+		// Do not show notification if the user is already viewing the conversation
+		return;
+	}
+
 	event.waitUntil(
 		self.registration.showNotification(data.title, {
 			body: data.body,
 			icon: data.icon,
-			// badge: data.badge,
 			tag: data.tag,
 			renotify: data.renotify
 		})
@@ -85,6 +101,18 @@ self.addEventListener('notificationclick', (event) => {
 	);
 });
 
+// Listen for messages from the client to update the selected conversation ID
+self.addEventListener('message', (event) => {
+	// listen for message from client
+    if (event.data && event.data.type === 'UPDATE_SELECTED_CONVERSATION') {
+        selectedConversationId = event.data.conversationId;
+    }
+
+	// listen for request from client
+	if (event.data && event.data.type === 'UPDATE_SELECTED_TAB') {
+        selectedTab = event.data.tab;
+    }
+});
 
 
 // listen for push subscription change
