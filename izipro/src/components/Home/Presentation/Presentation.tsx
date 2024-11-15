@@ -11,15 +11,16 @@ function Presentation() {
   const [imagePosition, setImagePosition] = useState(false);
 
   const imageParticular = [
-    '/images/Overwhelmed-mother.webp',
-    '/images/Overwhelmed-men.webp',
-    '/images/Washing-machine.webp'
+    '/images/Familly.webp',
+    '/images/Fix-washing-machine.webp',
+    '/images/Hurry.webp'
+
   ];
 
   const imagePro = [
-    '/images/Welding-gate.webp',
-    '/images/Startup-woman.webp',
-    '/images/Shake-hand.webp'
+    '/images/Welding.webp',
+    '/images/Start-up.webp',
+    '/images/Deal.webp'
   ];
 
   // Image transition

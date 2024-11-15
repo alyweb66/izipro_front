@@ -18,6 +18,16 @@ body {
 
 }
 
+body.menu-open {
+	pointer-events: none; /* Désactive tous les clics */
+}
+
+body.menu-open .dashboard__nav__menu,
+body.menu-open .contact-modal__container,
+body.menu-open .rules-modal__container {
+  pointer-events: auto; /* Autorise les clics sur ces éléments */
+}
+
 #root {
 	height: 100vh;
     height: 100dvh;

@@ -279,6 +279,7 @@ function Dashboard() {
   const isSkipNotViewedConvRef = useRef<boolean>(false);
   const isSkipUserConversationIdsRef = useRef<boolean>(false);
   const idRef = useRef<number>(id);
+  const menuRef = useRef<HTMLUListElement>(null);
 
   // to keep id for the sendBeacon when the user leaves the page
   useEffect(() => {
@@ -367,7 +368,7 @@ function Dashboard() {
   const tabLabels: { [key: string]: string } = {
     Request: 'DEMANDE',
     'My requests': 'MES DEMANDES',
-    'Client request': 'CLIENT',
+    'Client request': 'CLIENTS',
     'My conversations': 'MES CONTACTS',
     'My profile': 'MON COMPTE',
   };
@@ -459,7 +460,34 @@ function Dashboard() {
       </div>
     );
   };
+  // Gestionnaire pour détecter les clics à l'extérieur
+  useEffect(() => {
+    if (window.innerWidth < 480) {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          menuRef.current &&
+          !menuRef.current.contains(event.target as Node)
+        ) {
+          setIsOpen(false);
+        }
+      };
 
+      if (isOpen) {
+        document.addEventListener('mousedown', handleClickOutside);
+        // Ajouter une classe globale
+        document.body.classList.add('menu-open');
+      } else {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.body.classList.remove('menu-open');
+      }
+
+      // Cleanup
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.body.classList.remove('menu-open');
+      };
+    }
+  }, [isOpen]);
   // useEffect to check the size of the window
   useEffect(() => {
     // function to check the size of the window
@@ -1341,7 +1369,10 @@ function Dashboard() {
               {tabLabels[selectedTab] || ''}
             </span>
           </div>
-          <ul className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}>
+          <ul
+            ref={menuRef}
+            className={`dashboard__nav__menu ${isOpen ? 'open' : ''}`}
+          >
             <li
               className={`dashboard__nav__menu__content__tab ${selectedTab === 'Request' ? 'active' : ''}`}
               onClick={() => {

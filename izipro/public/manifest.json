@@ -1,7 +1,7 @@
 {
-    "name": "POP",
-    "short_name": "POP",
-    "description": "Trouvez facilement un professionnel avec POP",
+    "name": "Toupro",
+    "short_name": "Toupro",
+    "description": "Trouvez facilement un professionnel avec Toupro",
     "start_url": "/",
     "display": "standalone",
     "theme_color": "#ffffff",

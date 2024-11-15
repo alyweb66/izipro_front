@@ -220,7 +220,7 @@ function Login() {
 		<div className="login-container">
 			{isLogo && <div className="login-container__logo">
 				<img className='__image' src="/logos/izipro-logo.svg" alt="Izipro logo" />
-				<h1 className="__title">POP</h1>
+				<h1 className="__title">Toupro</h1>
 			</div>}
 			<p className="login-container__title"> Se connecter</p>
 			<div className="message">

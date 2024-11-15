@@ -5,7 +5,7 @@ const Intro: React.FC = () => {
     const role = userDataStore((state) => state.role);
     return (
         <div className="intro-container">
-            <h1 className="intro-title">Bienvenue sur POP</h1>
+            <h1 className="intro-title">Bienvenue sur Toupro</h1>
             <p className="intro-description">Vous êtes actuellement sur l'onglet <strong className="intro-list-item__strong">{role === 'pro' ? 'MES\u00A0CLIENTS' : 'MES\u00A0DEMANDES'}</strong> qui sera votre page d'accueil</p>
             <p className="intro-note">Remplissez vos informations dans l'onglet <strong className="intro-list-item__strong">MON&nbsp;COMPTE</strong>{window.innerWidth < 480 && <> en cliquant sur l'icone <img src="/images/Burger-menu.png" alt="icone" className="intro-icon" /></>} afin de pouvoir profiter des fonctionnalités qui s'offrent à vous :</p>
             <ul className="intro-list">
