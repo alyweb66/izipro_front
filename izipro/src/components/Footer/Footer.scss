@@ -10,6 +10,8 @@
 
   .footer-container {
     width: 100%;
+    height: 5vh;
+    height: 5dvh;
 
     &__nav {
       display: flex;
@@ -58,8 +60,8 @@
     justify-content: space-between;
     background-color: white;
     background-image: none;
-    height: 6vh;
-    height: 6dvh;
+    height: 5vh;
+    height: 5dvh;
 
     .footer-container {
 

@@ -21,7 +21,7 @@ import { registerSW } from 'virtual:pwa-register'
 // Register the service worker PWA
 //registerSW({ immediate: true })
 let updateNotified = false;
-// Enregistre le service worker avec des événements de feedback
+// Record the service worker registration
 registerSW({
 	onNeedRefresh() {
 		//console.log("Nouvelle version disponible ! Mise à jour en cours...");
@@ -57,8 +57,6 @@ registerSW({
 const setServerError = (serverError: { status: number; statusText: string, message: string }) => {
 	serverErrorStore.getState().setServerError(serverError);
 };
-
-
 
 // Middleware to add the userId to the headers
 const userIdMiddleware = setContext((_, { headers }) => {
@@ -180,7 +178,7 @@ let wsLink = navigator.onLine
 	)
 	: null;
 
-// Écoute les changements d'état de connexion
+// Listen for online and offline events
 window.addEventListener('online', () => {
 	wsLink = new GraphQLWsLink(
 		createClient({
@@ -268,6 +266,24 @@ const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
 
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/serviceWorker.js').then(registration => {
+        registration.onupdatefound = () => {
+            const installingWorker = registration.installing;
+            if (installingWorker) {
+                installingWorker.onstatechange = () => {
+                    if (installingWorker.state === 'installed') {
+                        if (navigator.serviceWorker.controller) {
+                            // New update available
+                            installingWorker.postMessage({ type: 'SKIP_WAITING' });
+							installingWorker.postMessage({ type: 'CLEAR_CACHE' });
+                        }
+                    }
+                };
+            }
+        };
+    });
+}
 
 // render element in the DOM
 root.render(

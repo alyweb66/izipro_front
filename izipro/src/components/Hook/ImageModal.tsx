@@ -9,7 +9,7 @@ import {
 } from 'react-icons/md';
 import '../../styles/imageModal.scss';
 import { motion } from 'framer-motion';
-import pdfLogo from '/logos/logo-pdf.webp';
+import pdfLogo from '/logos/logo-pdf-800x800.webp';
 
 // function to use the image modal
 export function useModal() {

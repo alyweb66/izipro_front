@@ -160,7 +160,7 @@ export const ScrollList = ({ filteredMessages, conversationIdState, isListOpen, 
                         visibilityTimeout = setTimeout(() => {
                             setIsEndViewed(true);
                             observer.disconnect();
-                        }, 500);
+                        }, 300);
                     } else {
                         // Remove timer if not visible
                         clearTimeout(visibilityTimeout);

@@ -17,8 +17,6 @@
   height: 100%;
 
   .account__profile {
-    @include m.fader-top;
-    & {
       position: relative;
       width: 100%;
       display: flex;
@@ -30,7 +28,7 @@
       -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
       touch-action: pan-y;
       height: 100%;
-    }
+
 
     .notification-container {
       position: relative;

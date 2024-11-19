@@ -1342,7 +1342,7 @@ function Dashboard() {
             <div className="__container">
               <img
                 className="__logo"
-                src="/logos/izipro-logo.svg"
+                src="/logos/favicon-96x96.png"
                 alt="Izipro logo"
                 role="button"
                 aria-label="Recharger la page"
