@@ -106,12 +106,10 @@ const RequestItem = ({
     if (lastUnderscoreIndex === -1) {
       return mediaName;
     }
-	console.log('rrrrrr', mediaName.substring(0, lastUnderscoreIndex));
-	
+
     return mediaName.substring(0, lastUnderscoreIndex);
   }
-  console.log('requestByDate',requestByDate );
-  
+
   return (
     <motion.li
       //id={index === 0 ? 'first-user' : undefined}

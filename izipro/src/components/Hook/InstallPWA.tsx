@@ -12,7 +12,8 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const InstallPWA: React.FC = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
   const [isCompatible, setIsCompatible] = useState(true);
   const [browserName, setBrowserName] = useState('');
@@ -20,12 +21,13 @@ const InstallPWA: React.FC = () => {
   const [eventTriggered, setEventTriggered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-
   useEffect(() => {
-        // Réinitialiser l'état pour éviter des valeurs conservées incorrectement
-        setIsInstalled(false);
+    // Réinitialiser l'état pour éviter des valeurs conservées incorrectement
+    setIsInstalled(false);
     // Verify if the app is installed as a PWA
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const isStandalone = window.matchMedia(
+      '(display-mode: standalone)'
+    ).matches;
     if (isStandalone) {
       // console.log('L\'application est installée en tant qu\'application autonome');
 
@@ -49,9 +51,9 @@ const InstallPWA: React.FC = () => {
     const userAgent = navigator.userAgent.toLowerCase();
     const parser = new UAParser(userAgent);
     const result = parser.getResult();
-    const nameBrowser: string = result.browser.name || 'un navigateur non supporté';
+    const nameBrowser: string =
+      result.browser.name || 'un navigateur non supporté';
     setBrowserName(nameBrowser);
-
 
     // function to handle the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -83,13 +85,15 @@ const InstallPWA: React.FC = () => {
       setIsCompatible(false);
     }
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt
+      );
     };
   }, []);
 
   // Function to handle the installation of the app
   const handleInstallClick = () => {
-
     if (deferredPrompt) {
       deferredPrompt.prompt();
       deferredPrompt.userChoice.then(() => {
@@ -107,24 +111,38 @@ const InstallPWA: React.FC = () => {
           <div
             className="install-button"
             onClick={() => document.getElementById('install')?.click()}
-            aria-label='Joindre un fichier'
-          >
-          </div>
+            aria-label="Joindre un fichier"
+          ></div>
 
-          <button id="install" onClick={handleInstallClick} style={{ display: 'none' }}>
-          </button>
+          <button
+            id="install"
+            onClick={handleInstallClick}
+            style={{ display: 'none' }}
+          ></button>
         </>
       )}
-      {!showInstallButton && !isCompatible && (
+      {!showInstallButton && !isCompatible && !isInstalled && (
         <div className="message-PWA">
           {browserName === 'firefox' && (
-            <p className="content-PWA">L'installation de l'application n'est pas supportée sur Firefox, utilisez Chrome ou un autre navigateur pour installer l'application.</p>
+            <p className="content-PWA">
+              L'installation de l'application n'est pas supportée sur Firefox,
+              utilisez Chrome ou un autre navigateur pour installer
+              l'application.
+            </p>
           )}
           {(browserName === 'Safari' || browserName === 'Mobile Safari') && (
-            <p className="content-PWA">Pour installer l'application depuis Safari, cliquez sur le bouton de partage du navigateur et sélectionnez l'option : <strong className="strong-PWA">“Sur l'écran d'accueil”.</strong></p>
+            <p className="content-PWA">
+              (Utilisez Chrome pour une meilleure expérience) Pour installer
+              l'application depuis Safari, cliquez sur le bouton de partage du
+              navigateur et sélectionnez l'option :{' '}
+              <strong className="strong-PWA">“Sur l'écran d'accueil”.</strong>
+            </p>
           )}
           {browserName === 'un navigateur non supporté' && (
-            <p className="content-PWA">L'installation de l'application n'est pas supportée sur ce navigateur.</p>
+            <p className="content-PWA">
+              L'installation de l'application n'est pas supportée sur ce
+              navigateur.
+            </p>
           )}
         </div>
       )}
@@ -132,18 +150,30 @@ const InstallPWA: React.FC = () => {
         <div className="message-PWA">
           {isLoading ? (
             <Spinner className="small-spinner" />
-          ) :
-            (
-              <motion.p
-                className="content-PWA"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.1, type: 'tween' } }}
-                transition={{ duration: 0.1, type: 'tween' }}
-              >
-                L'application est déjà installé, pour la réinstaller manuellement sélectionner <strong className="strong-PWA">“Ajouter à l'écran d'accueil”</strong> dans le menu de votre navigateur </motion.p>
-            )
-          }
+          ) : (
+            <motion.p
+              className="content-PWA"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{
+                opacity: 0,
+                scale: 0.9,
+                transition: { duration: 0.1, type: 'tween' },
+              }}
+              transition={{ duration: 0.1, type: 'tween' }}
+            >
+              L'application est déjà installé, pour la réinstaller manuellement
+              sélectionner{' '}
+              {browserName === 'Safari' || browserName === 'Mobile Safari' ? (
+                <strong className="strong-PWA">“Sur l'écran d'accueil”</strong>
+              ) : (
+                <strong className="strong-PWA">
+                  “Ajouter à l'écran d'accueil”
+                </strong>
+              )}{' '}
+              dans le menu de votre navigateur{' '}
+            </motion.p>
+          )}
         </div>
       )}
     </>

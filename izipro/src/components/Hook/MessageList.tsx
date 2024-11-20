@@ -6,6 +6,7 @@ import noPicture from '/logos/no-picture.webp';
 import { formatMessageDate } from './Component';
 import { MessageProps } from '../../Type/message';
 import '../../styles/MessageList.scss';
+import { useEffect } from 'react';
 
 type MessageListProps = {
   id: number;
@@ -36,6 +37,13 @@ export const MessageList: React.FC<MessageListProps> = ({
   const endMessageListRef = scrollList?.endMessageListRef;
   const imageRefs = scrollList?.imageRefs || { current: [] };
   const isEndViewed = scrollList?.isEndViewed || false;
+
+  // Reset badge count when the user views the end of the conversation
+  useEffect(() => {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'RESET_BADGE' });
+    }
+  }, [isEndViewed]);
 
   // Extract file name from media name for pdf
   function extractFileName(mediaName: string): string {

@@ -1,9 +1,11 @@
 {
     "name": "Toupro",
     "short_name": "Toupro",
+    "lang": "fr",
     "description": "Trouvez facilement un professionnel avec Toupro",
     "start_url": "/",
     "display": "standalone",
+    "categories": ["business", "productivity", "utilities"],
     "theme_color": "#ffffff",
     "background_color": "#ffffff",
     "icons": [

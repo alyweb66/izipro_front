@@ -184,6 +184,11 @@ function ClientRequest({ handleNavigate, RangeFilter, setIsHasMore, isHasMore, o
 							throw new Error('Error while deleting viewed Clientrequests');
 						}
 					}
+
+					// reset badge
+					if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+						navigator.serviceWorker.controller.postMessage({ type: 'RESET_BADGE' });
+					  }
 				}, 3000);
 
 			}

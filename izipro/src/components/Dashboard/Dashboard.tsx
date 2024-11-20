@@ -5,6 +5,7 @@ import { useMutation } from '@apollo/client';
 // Modules without types
 import * as turf from '@turf/turf';
 import { ErrorBoundary } from 'react-error-boundary';
+import UAParser from 'ua-parser-js';
 
 // components
 import Logout from '../Header/Logout/Logout';
@@ -1330,6 +1331,32 @@ function Dashboard() {
   }, [conversationIdState, myConversationIdState]);
   //* End notification push
 
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      navigator.serviceWorker.ready.then((registration) => {
+        if (registration.active) {
+          registration.active.postMessage({ action: 'page-hidden' });
+        }
+      });
+    } else {
+      navigator.serviceWorker.ready.then((registration) => {
+        if (registration.active) {
+          registration.active.postMessage({ action: 'page-visible' });
+        }
+        // Detect type of browser
+        const userAgent = navigator.userAgent.toLowerCase();
+        const parser = new UAParser(userAgent);
+        const result = parser.getResult();
+        const nameBrowser: string =
+          result.browser.name || 'un navigateur non supporté';
+          //if the browser is safari, reload the page
+          if (nameBrowser === 'Safari' || nameBrowser === 'Mobile Safari') {
+            window.location.reload();
+          }
+      });
+    }
+  });
+
   return (
     <>
       <div className="dashboard">
@@ -1342,7 +1369,7 @@ function Dashboard() {
             <div className="__container">
               <img
                 className="__logo"
-                src="/logos/favicon-96x96.png"
+                src="/logos/logo-toupro-250x250.png"
                 alt="Izipro logo"
                 role="button"
                 aria-label="Recharger la page"

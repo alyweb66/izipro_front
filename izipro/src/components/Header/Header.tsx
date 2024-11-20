@@ -52,7 +52,7 @@ function Header() {
 			<div className="header__container">
 				<img
 					className='header__container image'
-					src="/logos/favicon-96x96.png"
+					src="/logos/logo-toupro-250x250.png"
 					alt="Izipro logo"
 					role="button"
 					aria-label="Recharger la page"

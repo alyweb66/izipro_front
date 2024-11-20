@@ -3,15 +3,104 @@ import { registerRoute } from 'workbox-routing';
 import { StaleWhileRevalidate } from 'workbox-strategies';
 
 // Version du service worker pour gérer le versioning
-const SW_VERSION = '0.0.6';
+const SW_VERSION = '0.0.10';
 const CACHE_NAME = `my-app-cache-${SW_VERSION}`;
 //console.log(`Service Worker Version: ${SW_VERSION}`);
 const urlsToCache = [
   '/',
-  '/manifest.json?v=0.0.5', // Inclure la version ici également
+  '/manifest.json?v=0.0.7', // Change version in HTML too
   // Autres ressources
 ];
 
+// Open IndexedDB and get unreadCount
+function getUnreadCount() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('notificationsDB', 1);
+
+    // Create the object store if it doesn't exist
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains('counts')) {
+        db.createObjectStore('counts', { keyPath: 'id' });
+      }
+    };
+
+    // Get the unreadCount from the object store
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      const transaction = db.transaction(['counts'], 'readonly');
+      const store = transaction.objectStore('counts');
+      const getRequest = store.get('unreadCount');
+
+      // Resolve the promise with the unreadCount
+      getRequest.onsuccess = () => {
+        resolve(getRequest.result ? getRequest.result.value : 0);
+      };
+
+      // Reject the promise with the error
+      getRequest.onerror = () => {
+        reject(getRequest.error);
+      };
+    };
+
+    // Reject the promise with the error
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+}
+
+// Update unreadCount in IndexedDB
+function updateUnreadCount(count) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('notificationsDB', 1);
+
+    // Create the object store if it doesn't exist
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      const transaction = db.transaction(['counts'], 'readwrite');
+      const store = transaction.objectStore('counts');
+      const putRequest = store.put({ id: 'unreadCount', value: count });
+
+      // Resolve the promise when the transaction is complete
+      putRequest.onsuccess = () => {
+        resolve();
+      };
+
+      // Reject the promise with the error
+      putRequest.onerror = () => {
+        reject(putRequest.error);
+      };
+    };
+
+    // Reject the promise with the error
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+}
+
+// Function to update badge
+function updateBadge(count) {
+  console.log('setAppBadge', navigator);
+
+  if ('setAppBadge' in navigator) {
+    console.log('count', count);
+
+    navigator.setAppBadge(count).catch((error) => {
+      console.error('Erreur lors de la mise à jour du badge:', error);
+    });
+  }
+}
+
+// Function to clear badge
+function clearBadge() {
+  if ('clearAppBadge' in navigator) {
+    navigator.clearAppBadge().catch((error) => {
+      console.error('Erreur lors de la réinitialisation du badge:', error);
+    });
+  }
+}
 // Activer le service worker sur tous les clients
 self.addEventListener('activate', (event) => {
   //console.log(`Service Worker ${SW_VERSION} activé`);
@@ -45,7 +134,7 @@ precacheAndRoute(self.__WB_MANIFEST || []);
 
 //* End PWA
 
-// ======= Cache dynamique pour les appels d'API =======
+// ======= dynamical cache for API call =======
 registerRoute(
   ({ url }) => url.origin === 'https://back.betapoptest.online',
   new StaleWhileRevalidate({
@@ -64,47 +153,28 @@ registerRoute(
 //* Notification push
 let selectedConversationId = null;
 let selectedTab = null;
-// listen for push event and show notification
-self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : {};
-  // Check if the conversation ID matches the selected conversation ID
-  if (data.message && data.tag && data.tag === selectedConversationId) {
-    // Do not show notification if the user is already viewing the conversation
-    return;
-  }
-
-  if (!data.message && selectedTab === 'Client request') {
-    // Do not show notification if the user is already viewing the conversation
-    return;
-  }
-console.log('data', data);
-
-  if (data.silent) {
-	console.log('silent');
-	
-	return;
-  } else {
-	console.log('not silent');
-	
-    event.waitUntil(
-      self.registration.showNotification(data.title, {
-        body: data.body,
-        icon: data.icon,
-        tag: data.tag,
-        renotify: data.renotify,
-      })
-    );
-  }
-});
-
-// open client url when notification is clicked
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  event.waitUntil(openUrl('https://betapoptest.online/dashboard'));
+let isPageVisible = true;
+// Get the unread count from IndexedDB
+let unreadCount = 0;
+getUnreadCount().then((count) => {
+  unreadCount = count;
 });
 
 // Listen for messages from the client to update the selected conversation ID
 self.addEventListener('message', (event) => {
+  // listen for page visibility change
+  if (event.data && event.data.action) {
+    if (event.data.action === 'page-hidden') {
+      console.log('page-hidden');
+
+      isPageVisible = false;
+    } else if (event.data.action === 'page-visible') {
+      console.log('page-visible');
+
+      isPageVisible = true;
+    }
+  }
+
   // listen for message from client
   if (event.data && event.data.type === 'UPDATE_SELECTED_CONVERSATION') {
     selectedConversationId = event.data.conversationId;
@@ -129,6 +199,92 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
+
+  // listen for request from client to clear badge
+  if (event.data && event.data.type === 'RESET_BADGE') {
+    updateUnreadCount(0)
+      .then(() => {
+        unreadCount = 0;
+        updateBadge(0);
+        console.log('unreadCount', 0);
+        return self.registration.getNotifications();
+      })
+      .then((notifications) => {
+        notifications.forEach((notification) => {
+          notification.close();
+        });
+        clearBadge();
+      })
+      .catch((error) => {
+        console.error(
+          'Erreur lors de la mise à jour du compteur de notifications non lues:',
+          error
+        );
+      });
+  }
+});
+
+// listen for push event and show notification
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : {};
+  console.log('isPageVisible', isPageVisible);
+  console.log('data', data);
+  console.log('selectedConversationId', selectedConversationId);
+
+  // Check if the conversation ID matches the selected conversation ID
+  if (
+    data.message &&
+    data.tag &&
+    data.tag === selectedConversationId &&
+    isPageVisible
+  ) {
+    // Do not show notification if the user is already viewing the conversation
+    return;
+  }
+
+  if (!data.message && selectedTab === 'Client request' && isPageVisible) {
+    // Do not show notification if the user is already viewing the conversation
+    return;
+  }
+  console.log('data', data);
+
+  if (data.silent) {
+    console.log('silent');
+
+    return;
+  } else {
+    console.log('not silent');
+    // add count to notification badge
+    unreadCount++;
+    console.log('unreadCount', unreadCount);
+    updateUnreadCount(unreadCount)
+      .then(() => {
+        console.log('unreadCount', unreadCount);
+      })
+      .catch((error) => {
+        console.error(
+          'Erreur lors de la mise à jour du compteur de notifications non lues:',
+          error
+        );
+      });
+    updateBadge(unreadCount);
+    // get the event data and show notification
+    event.waitUntil(
+      self.registration.showNotification(data.title, {
+        body: data.body,
+        icon: 'https://betapoptest.online/logos/logo-toupro-250x250.png',
+        badge: 'https://betapoptest.online/android/badge.png',
+        tag: data.tag,
+        renotify: data.renotify,
+      })
+    );
+  }
+});
+
+// open client url when notification is clicked
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(openUrl('https://betapoptest.online/dashboard'));
 });
 
 // listen for push subscription change
@@ -191,6 +347,3 @@ self.addEventListener('fetch', (event) => {
 });
 
 //* End cache map tiles
-
-// ======= Gestion des messages pour le cache et le skip waiting =======
-self.addEventListener('message', (event) => {});
