@@ -301,7 +301,7 @@ function SettingAccount() {
 								</List>
 
 							</ul>
-							<div className="message">
+							<div className="message-setting">
 								<Stack sx={{ width: '100%' }} spacing={2}>
 									{jobError && (
 										<Fade in={!!jobError} timeout={300}>

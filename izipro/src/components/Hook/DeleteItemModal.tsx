@@ -34,7 +34,9 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
 
   const closeModal = () => {
     setDeleteItemModalIsOpen(false);
+    setTimeout(() => {
     setModalArgs && setModalArgs(null);
+    }, 200);
   };
 
   return (
@@ -125,8 +127,7 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
                   onClick={(event) => {
                     event.stopPropagation();
                     event.preventDefault();
-                    //setDeleteItemModalIsOpen(!deleteItemModalIsOpen);
-                    setModalArgs && setModalArgs(null);
+
                     closeModal();
                   }}
                   aria-label="Annuler la suppression"

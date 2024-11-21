@@ -250,7 +250,7 @@ function Register({ setLoginVisibility, loginVisibility }: RegisterProps) {
 								value={email}
 								className="register-container__form__form input"
 								placeholder="Adresse e-mail"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value.toLowerCase())}
 								aria-label="Adresse e-mail"
 								maxLength={50}
 								required
@@ -321,7 +321,7 @@ function Register({ setLoginVisibility, loginVisibility }: RegisterProps) {
 								value={proEmail}
 								className="register-container__form__form input"
 								placeholder="Adresse e-mail"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProEmail(event.target.value)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProEmail(event.target.value.toLowerCase())}
 								aria-label="Adresse e-mail"
 								maxLength={50}
 								required

@@ -204,7 +204,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
                 value={email || ''}
                 placeholder={'Email'}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  setEmail(DOMPurify.sanitize(event.target.value))
+                  setEmail(DOMPurify.sanitize(event.target.value.toLowerCase()))
                 }
                 aria-label="Email"
                 maxLength={50}

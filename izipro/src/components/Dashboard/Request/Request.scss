@@ -220,6 +220,12 @@
       .request__form__input-media__container {
         display: flex;
         flex-wrap: wrap;
+        overflow: hidden;
+        scrollbar-width: none;
+        &::-webkit-scrollbar {
+          display: none;
+          /* For Chrome, Safari and Opera */
+        }
         .request__form__input-media-content__container {
           overflow: hidden;
           scrollbar-width: none;

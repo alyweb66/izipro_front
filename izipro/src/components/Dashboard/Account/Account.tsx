@@ -873,7 +873,7 @@ function Account() {
 									name="email"
 									value={emailState || ''}
 									placeholder={emailState || ''}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmailState(DOMPurify.sanitize(event.target.value))}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmailState(DOMPurify.sanitize(event.target.value.toLowerCase()))}
 									aria-label="Email"
 									maxLength={50}
 									autoComplete="email"
