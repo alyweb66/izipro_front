@@ -66,7 +66,7 @@ type RequestSoreProps = {
 };
 
 
-type CategoryPros = {
+type CategoryProps = {
 	id: number;
 	name: string;
 }
@@ -74,7 +74,7 @@ type CategoryPros = {
 type JobProps = {
 	id: number;
 	name: string;
-	description: string;
+    category_id: number;
 }
 
-export type { CategoryPros, JobProps, RequestProps,RequestSoreProps };
+export type { CategoryProps, JobProps, RequestProps,RequestSoreProps };

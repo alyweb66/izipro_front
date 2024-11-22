@@ -1,5 +1,5 @@
 import { useLazyQuery, useQuery } from '@apollo/client';
-import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY, GET_REQUEST_BY_ID, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
+import { GET_ALL_JOBS, GET_JOB_CATEGORY, GET_REQUEST_BY_ID, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
 import { GET_JOB_DATA } from '../GraphQL/Job';
 import { GET_COOKIE_CONSENTS, GET_USERS_CONVERSATION, GET_USER_DATA, GET_USER_NOTIFICATION, GET_USER_NOT_VIEWED_REQUESTS, GET_USER_REQUEST_BY_CONVERSATIONS, GET_USER_SUBSCRIPTION, RULES, VAPID_PUBLIC_KEY } from '../GraphQL/UserQueries';
 import { GET_CONVERSATION, GET_CONVERSATION_ID, NOT_VIEWED_CONVERSATIONS } from '../GraphQL/ConversationQueries';
@@ -49,8 +49,10 @@ export const useQueryCookieConsents = (skip: boolean) => {
 };
 
 // fetch categories 
-export const useQueryCategory = () => {
-	const { loading, error: categoryError, data: categoriesData } = useQuery(GET_JOB_CATEGORY);
+export const useQueryCategory = (skip: boolean) => {
+	const { loading, error: categoryError, data: categoriesData } = useQuery(GET_JOB_CATEGORY, {
+		skip
+	});
 	if (categoryError) {
 		throw new Error('Error while fetching categories data');
 	}
@@ -59,14 +61,12 @@ export const useQueryCategory = () => {
 };
 
 // fetch jobs
-export const useQueryJobs = (selectedCategory: number) => {
+export const useQueryJobs = (skip: boolean) => {
+	console.log('skip', skip);
 	
-	const { loading, error: jobError, data: jobData } = useQuery(GET_JOBS_BY_CATEGORY,
+	const { loading, error: jobError, data: jobData } = useQuery(GET_ALL_JOBS,
 		{
-			variables: {
-				categoryId: Number(selectedCategory)
-			},
-			skip: !selectedCategory
+			skip
 		});
 
 	if (jobError) {

@@ -16,7 +16,7 @@ import { userDataStore } from '../../../store/UserData';
 import { myRequestStore } from '../../../store/Request';
 
 // Types and icons
-import { CategoryPros, JobProps } from '../../../Type/Request';
+
 import pdfLogo from '/logos/logo-pdf-name.webp';
 //import { TbUrgent } from 'react-icons/tb';
 import { FaCamera } from 'react-icons/fa';
@@ -36,7 +36,18 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import * as turf from '@turf/turf';
-import { FormControlLabel, FormGroup, Grow, Switch } from '@mui/material';
+import {
+  FormControlLabel,
+  FormGroup,
+  Grow,
+  Popper,
+  Switch,
+} from '@mui/material';
+import { categoriesJobStore, jobsStore } from '../../../store/Job';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import { CategoryProps, JobProps } from '../../../Type/Request';
+import { popperSx, autocompleteSx } from '../../Hook/SearchStyle';
 
 function Request() {
   // Store
@@ -71,23 +82,28 @@ function Request() {
     (state) => [state.subscription, state.setSubscription]
   );
 
+  const [categoriesJobsStore, setCategoriesJobsStore] = categoriesJobStore(
+    (state) => [state.categories, state.setcategories]
+  );
+  const [jobStore, setJobsStore] = jobsStore((state) => [
+    state.jobs,
+    state.setJobs,
+  ]);
+
   // State
   const [urgent, setUrgent] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(0);
-  const [selectedJob, setSelectedJob] = useState(0);
+  const [selectedJob, setSelectedJob] = useState<JobProps | null>(null);
   const [titleRequest, setTitleRequest] = useState('');
   const [descriptionRequest, setDescriptionRequest] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [uploadFileError, setUploadFileError] = useState('');
-  const [categoriesState, setCategoriesState] = useState<CategoryPros[]>([]);
-  const [jobsState, setJobsState] = useState<JobProps[]>([]);
   const [isCreateRequestLoading, setIsCreateRequestLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [map, setMap] = useState<Map | null>(null);
   // Map
   const [radius, setRadius] = useState(0); // Radius in meters
-  //const [zoom, setZoom] = useState(10);
 
   // File upload
   const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } =
@@ -110,8 +126,13 @@ function Request() {
     });
 
   // Query
-  const { loading: categoryLoading, categoriesData } = useQueryCategory();
-  const { loading: JobDataLoading, jobData } = useQueryJobs(selectedCategory);
+  const { loading: categoryLoading, categoriesData } = useQueryCategory(
+    categoriesJobsStore.length > 0
+  );
+  const { loading: JobDataLoading, jobData } = useQueryJobs(
+    jobStore.length > 0
+  );
+  console.log('jobData', jobData);
 
   // remove file
   const handleRemove = (index: number) => {
@@ -231,7 +252,7 @@ function Request() {
           setRadius(0);
           setSelectedCategory(0);
           setErrorMessage('');
-          setSelectedJob(0);
+          setSelectedJob(null);
           setUrgent(false);
         }
       });
@@ -365,24 +386,33 @@ function Request() {
   // Update jobs when category changes
   useEffect(() => {
     if (jobData) {
-      setJobsState(jobData.category.jobs);
+      setJobsStore(jobData.allJobs);
     }
   }, [jobData]);
 
   // Update categories when data is fetched
   useEffect(() => {
     if (categoriesData) {
-      setCategoriesState(categoriesData.categories);
+      setCategoriesJobsStore(categoriesData.categories);
     }
   }, [categoriesData]);
 
   // reset selected job when category changes
   useEffect(() => {
     if (selectedCategory) {
-      setSelectedJob(0);
+      setSelectedJob(null);
     }
   }, [selectedCategory]);
 
+  console.log('selectedJob', selectedJob);
+  const handleInputChange = (event: React.ChangeEvent<{}>, value: string) => {
+    if (event) {
+      event.preventDefault();
+    }
+    if (value === '') {
+      setSelectedJob(null);
+    }
+  };
   return (
     <Grow in={true} timeout={200}>
       <div className="request">
@@ -433,20 +463,68 @@ function Request() {
             <h1 className="request__form__title">
               Séléctionnez la catégorie et le métier concerné*
             </h1>
+            <Stack spacing={2} sx={{ width: 300 }}>
+              <Autocomplete
+                id="jobs"
+                freeSolo
+                options={jobStore}
+                getOptionLabel={(option: string | JobProps) =>
+                  typeof option === 'string' ? option : option.name
+                }
+                renderOption={(props, option) => {
+                  return (
+                    <li {...props} key={option.id}>
+                      {option.name}
+                    </li>
+                  );
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} label="Rechercher" />
+                )}
+                className="custom-autocomplete"
+                sx={ autocompleteSx }
+                PopperComponent={(props) => (
+                  <Popper
+                    {...props}
+                    modifiers={[
+                      {
+                        name: 'offset',
+                        options: {
+                          offset: [0, 9], // Décale le Popper de 16px sous le parent (axe vertical)
+                        },
+                      },
+                    ]}
+                    sx={ popperSx }
+                  />
+                )}
+                value={selectedJob}
+                onInputChange={(event, value) => handleInputChange(event, value)}
+                onChange={(event, value) => { if (value && typeof value !== 'string') setSelectedJob(value); event.preventDefault(); }}
+              />
+            </Stack>
             <SelectBox
-              data={categoriesState}
+              data={categoriesJobsStore}
               selected={selectedCategory}
               isCategory={true}
               loading={categoryLoading}
-              setSelected={setSelectedCategory}
+              setSelected={(value: CategoryProps | JobProps) => {
+                if ('id' in value) {
+                  setSelectedCategory(value.id);
+                }
+              }}
             />
 
             <SelectBox
-              data={jobsState}
+              data={jobStore}
               isCategory={false}
-              selected={selectedJob}
+              selected={selectedJob ? selectedJob.id : 0}
               loading={JobDataLoading}
-              setSelected={setSelectedJob}
+              setSelected={(value: JobProps | CategoryProps) => {
+                if ('category_id' in value) {
+                  setSelectedJob(value as JobProps);
+                }
+              }}
+              selectedCategory={selectedCategory}
             />
 
             {lng && lat && (
@@ -549,28 +627,32 @@ function Request() {
                     transition={{ duration: 0.2, type: 'Spring' }}
                   >
                     <div className="request__form__input-media-content__container">
-						<img
-						  className={`request__form__input-media-content__container preview ${file.file.type === 'application/pdf' ? 'pdf' : ''}`}
-						  style={{
-							width: '100px',
-							height: '100px',
-							objectFit: 'cover',
-						  }}
-						  src={
-							file.file.type === 'application/pdf'
-							  ? pdfLogo
-							  : file.url
-						  }
-						  alt={`Preview ${index}`}
-						  title={`Prévisualisation du fichier ${index + 1}`}
-						/>
-						{file.file.type === 'application/pdf' && (
-						  <p className="pdf-name">{file.file.name}</p>
-						)}
-					</div>
+                      <img
+                        className={`request__form__input-media-content__container preview ${file.file.type === 'application/pdf' ? 'pdf' : ''}`}
+                        style={{
+                          width: '100px',
+                          height: '100px',
+                          objectFit: 'cover',
+                        }}
+                        src={
+                          file.file.type === 'application/pdf'
+                            ? pdfLogo
+                            : file.url
+                        }
+                        alt={`Preview ${index}`}
+                        title={`Prévisualisation du fichier ${index + 1}`}
+                      />
+                      {file.file.type === 'application/pdf' && (
+                        <p className="pdf-name">{file.file.name}</p>
+                      )}
+                    </div>
                     <button
                       className="request__form__input-media__container remove"
-                      onClick={(event) => {handleRemove(index), event.stopPropagation(), event.preventDefault()}}
+                      onClick={(event) => {
+                        handleRemove(index),
+                          event.stopPropagation(),
+                          event.preventDefault();
+                      }}
                     >
                       X
                     </button>
