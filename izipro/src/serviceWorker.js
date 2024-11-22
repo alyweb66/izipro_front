@@ -8,7 +8,7 @@ const CACHE_NAME = `my-app-cache-${SW_VERSION}`;
 //console.log(`Service Worker Version: ${SW_VERSION}`);
 const urlsToCache = [
   '/',
-  '/manifest.json?v=0.0.7', // Change version in HTML too
+  '/manifest.json?v=0.0.8', // Change version in HTML too
   // Autres ressources
 ];
 

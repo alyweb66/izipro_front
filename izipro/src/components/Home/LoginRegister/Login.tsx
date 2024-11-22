@@ -272,6 +272,7 @@ function Login() {
             className="__image"
             src="/logos/logo-toupro-250x250.png"
             alt="Izipro logo"
+            onClick={() => window.location.reload()}
           />
           <h1 className="__title">Toupro</h1>
         </div>
