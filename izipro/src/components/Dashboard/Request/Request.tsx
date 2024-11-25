@@ -1,5 +1,4 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-//import Map, { Layer, Marker, Source } from 'react-map-gl';
 import maplibregl, { Map } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -18,7 +17,6 @@ import { myRequestStore } from '../../../store/Request';
 // Types and icons
 
 import pdfLogo from '/logos/logo-pdf-name.webp';
-//import { TbUrgent } from 'react-icons/tb';
 import { FaCamera } from 'react-icons/fa';
 
 // Utilities and styles
@@ -29,7 +27,6 @@ import Spinner from '../../Hook/Spinner';
 import SelectBox from '../../Hook/SelectBox';
 import { subscriptionDataStore } from '../../../store/subscription';
 import { motion, AnimatePresence } from 'framer-motion';
-//import { IoLocationSharp } from "react-icons/io5";
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import Alert from '@mui/material/Alert';
@@ -48,7 +45,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { CategoryProps, JobProps } from '../../../Type/Request';
 import { popperSx, autocompleteSx } from '../../Hook/SearchStyle';
-import { se } from 'date-fns/locale';
 
 function Request() {
   // Store
@@ -116,7 +112,8 @@ function Request() {
 
   // Ref
   const mapContainerRef = useRef<HTMLDivElement>(null);
-
+  const inputRef = useRef<HTMLInputElement | null>(null); // Ref to close the keyboard on mobile
+  
   // Mutation
   const [createRequest, { loading: createLoading, error: requestError }] =
     useMutation(REQUEST_MUTATION, {
@@ -502,7 +499,17 @@ function Request() {
                   );
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} label="Rechercher" />
+                  <TextField 
+                  {...params} 
+                  label="Rechercher" 
+                  inputRef={(node) => {
+                    // Assign the input element to the inputRef to close the keyboard on mobile
+                    inputRef.current = node; // input element to reference
+                    if (typeof params.inputProps.ref === 'function') {
+                      params.inputProps.ref(node); // Connect the input element to the Autocomplete
+                    }
+                  }}
+                  />
                 )}
                 className="custom-autocomplete"
                 sx={autocompleteSx}
@@ -531,7 +538,10 @@ function Request() {
                 inputValue={searchedJob?.name ?? inputValue}
                 onChange={(event, value) => {
                   if (value && typeof value !== 'string') setSearchedJob(value);
-
+                  // use blur to close the keyboard on mobile
+                  if (inputRef.current) {
+                    inputRef.current.blur();
+                  }
                   event.preventDefault();
                 }}
               />

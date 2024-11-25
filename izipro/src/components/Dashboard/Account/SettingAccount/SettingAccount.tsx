@@ -1,5 +1,5 @@
 // React and React hooks
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // Apollo Client and GraphQL mutations
 import { useMutation } from '@apollo/client';
@@ -41,6 +41,10 @@ import ListItemText from '@mui/material/ListItemText';
 import List from '@mui/material/List';
 import { TransitionGroup } from 'react-transition-group';
 import { categoriesJobStore, jobsStore } from '../../../../store/Job';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import Popper from '@mui/material/Popper';
+import { autocompleteSx, popperSx } from '../../../Hook/SearchStyle';
 
 function SettingAccount() {
   //store
@@ -64,10 +68,11 @@ function SettingAccount() {
     state.jobs,
     state.setJobs,
   ]);
-  
+
   // State
   const [selectedCategory, setSelectedCategory] = useState(0);
   const [wishListJob, setWishListJob] = useState<JobProps[]>([]);
+  const [inputValue, setInputValue] = useState('');
   const [selectedJob, setSelectedJob] = useState<JobProps[]>([]);
   const [radius, setRadius] = useState(settings[0]?.range || 0);
   const [message, setMessage] = useState('');
@@ -75,7 +80,9 @@ function SettingAccount() {
   const [jobError, setJobError] = useState('');
 
   // query
-  const { loading: categoryLoading, categoriesData } = useQueryCategory(categoriesJobsStore.length > 0);
+  const { loading: categoryLoading, categoriesData } = useQueryCategory(
+    categoriesJobsStore.length > 0
+  );
   const { loading: jobLoading, jobData } = useQueryJobs(jobStore.length > 0);
   const { loading: jobDataLoading, jobs: jobDataName } = useQueryJobData(
     jobs ? jobs : [],
@@ -93,6 +100,9 @@ function SettingAccount() {
   ] = useMutation(DELETE_USER_HAS_JOB_MUTATION);
   const [userSetting, { loading: settingLoading, error: errorUserSetting }] =
     useMutation(USER_SETTING_MUTATION);
+
+  // useRef
+  const inputRef = useRef<HTMLInputElement | null>(null); // Create a reference to the input element to close keyboard on mobile
 
   // function to delete job in the database
   const handleDeleteJob = (
@@ -302,16 +312,20 @@ function SettingAccount() {
   // Update jobs when category changes
   useEffect(() => {
     if (jobData) {
-		setJobsStore(jobData.allJobs);
+      setJobsStore(jobData.allJobs);
     }
   }, [jobData]);
 
   // Update categories when data is fetched
   useEffect(() => {
     if (categoriesData) {
-		setCategoriesJobsStore(categoriesData.categories);
+      setCategoriesJobsStore(categoriesData.categories);
     }
   }, [categoriesData]);
+
+  useEffect(() => {
+    setInputValue('');
+  }, [wishListJob]);
 
   return (
     <>
@@ -330,13 +344,86 @@ function SettingAccount() {
               <h2 className="setting-account__subtitle">
                 Séléctionnez un ou plusieurs métiers
               </h2>
+              <Stack
+                spacing={2}
+                sx={{
+                  width: '100%',
+                }}
+              >
+                <Autocomplete
+                  id="jobs"
+                  freeSolo
+                  options={jobStore}
+                  getOptionLabel={(option: string | JobProps) =>
+                    typeof option === 'string' ? option : option.name
+                  }
+                  renderOption={(props, option) => {
+                    return (
+                      <li {...props} key={option.id}>
+                        {option.name}
+                      </li>
+                    );
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Rechercher"
+                      inputRef={(node) => {
+                        // Assign the input element to the inputRef to close the keyboard on mobile
+                        inputRef.current = node; // input element to reference
+                        if (typeof params.inputProps.ref === 'function') {
+                          params.inputProps.ref(node); // Connect the input element to the Autocomplete
+                        }
+                      }}
+                    />
+                  )}
+                  className="custom-autocomplete"
+                  sx={autocompleteSx}
+                  PopperComponent={(props) => (
+                    <Popper
+                      {...props}
+                      modifiers={[
+                        {
+                          name: 'offset',
+                          options: {
+                            offset: [0, 9], // Move popper down by 9px
+                          },
+                        },
+                      ]}
+                      sx={popperSx}
+                      onClick={(event) => {
+                        event.stopPropagation(), setInputValue('');
+                      }}
+                    />
+                  )}
+                  inputValue={inputValue}
+                  onInputChange={(_, newInputValue) => {
+                    setInputValue(newInputValue);
+                  }}
+                  onChange={(event, newValue) => {
+                    event.preventDefault();
+                    if (newValue) {
+                      if (typeof newValue !== 'string') {
+                        setWishListJob([...wishListJob, newValue]);
+                        // use blur to close the keyboard on mobile
+                        if (inputRef.current) {
+                          inputRef.current.blur();
+                        }
+                      }
+                    }
+                  }}
+                />
+              </Stack>
+              <p className="request__form__or">ou</p>
               <SelectBox
                 isSetting={true}
                 data={categoriesJobsStore}
                 selected={selectedCategory}
                 isCategory={true}
                 loading={categoryLoading}
-                setSelected={(value: JobProps | CategoryProps) => setSelectedCategory(value.id)}
+                setSelected={(value: JobProps | CategoryProps) =>
+                  setSelectedCategory(value.id)
+                }
               />
 
               <SelectBox
@@ -347,7 +434,7 @@ function SettingAccount() {
                 isCategory={false}
                 setWishListJob={setWishListJob}
                 loading={jobLoading}
-				selectedCategory={selectedCategory}
+                selectedCategory={selectedCategory}
               />
 
               <ul className="setting-account__form__list">

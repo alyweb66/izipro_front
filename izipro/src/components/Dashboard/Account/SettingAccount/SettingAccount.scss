@@ -25,6 +25,14 @@
     display: flex;
     flex-direction: column;
 
+    .request__form__or {
+      text-align: center;
+      margin: auto;
+      font-size: 1rem;
+      font-weight: 500;
+      color: v.$color-primary-blue;
+    }
+
     &.loading {
       //position for spinner
       position: relative;
