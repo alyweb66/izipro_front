@@ -48,6 +48,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { CategoryProps, JobProps } from '../../../Type/Request';
 import { popperSx, autocompleteSx } from '../../Hook/SearchStyle';
+import { se } from 'date-fns/locale';
 
 function Request() {
   // Store
@@ -94,6 +95,10 @@ function Request() {
   const [urgent, setUrgent] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(0);
   const [selectedJob, setSelectedJob] = useState<JobProps | null>(null);
+  const [searchedJob, setSearchedJob] = useState<JobProps | null>(null);
+  const [inputValue, setInputValue] = useState('');
+  const [selectedJobByCategory, setSelectedJobByCategory] =
+    useState<JobProps | null>(null);
   const [titleRequest, setTitleRequest] = useState('');
   const [descriptionRequest, setDescriptionRequest] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -179,7 +184,7 @@ function Request() {
             lng: lng,
             lat: lat,
             range: radius,
-            job_id: Number(selectedJob),
+            job_id: Number(selectedJob.id),
             user_id: id,
             media: sendFile,
           },
@@ -404,15 +409,24 @@ function Request() {
     }
   }, [selectedCategory]);
 
-  console.log('selectedJob', selectedJob);
-  const handleInputChange = (event: React.ChangeEvent<{}>, value: string) => {
-    if (event) {
-      event.preventDefault();
+  // clear and set state when selectedJobByCategory is set
+  useEffect(() => {
+    if (selectedJobByCategory) {
+      setSelectedJob(selectedJobByCategory);
+      setSearchedJob(null);
+      setInputValue('');
     }
-    if (value === '') {
-      setSelectedJob(null);
+  }, [selectedJobByCategory]);
+
+  // clear and set state when searchedJob is set
+  useEffect(() => {
+    if (searchedJob) {
+      setSelectedJob(searchedJob);
+      setSelectedCategory(0);
+      setSelectedJobByCategory(null);
     }
-  };
+  }, [searchedJob]);
+
   return (
     <Grow in={true} timeout={200}>
       <div className="request">
@@ -463,7 +477,16 @@ function Request() {
             <h1 className="request__form__title">
               Séléctionnez la catégorie et le métier concerné*
             </h1>
-            <Stack spacing={2} sx={{ width: 300 }}>
+            <Stack
+              spacing={2}
+              sx={{
+                width: {
+                  xs: '100%', // 80% width for screen sizes below 900px
+                  sm: '80%', // 80% width for screen sizes 600px and above
+                  md: '50%', // 50% width for screen sizes 900px and above
+                },
+              }}
+            >
               <Autocomplete
                 id="jobs"
                 freeSolo
@@ -482,7 +505,7 @@ function Request() {
                   <TextField {...params} label="Rechercher" />
                 )}
                 className="custom-autocomplete"
-                sx={ autocompleteSx }
+                sx={autocompleteSx}
                 PopperComponent={(props) => (
                   <Popper
                     {...props}
@@ -490,18 +513,30 @@ function Request() {
                       {
                         name: 'offset',
                         options: {
-                          offset: [0, 9], // Décale le Popper de 16px sous le parent (axe vertical)
+                          offset: [0, 9], // Move popper down by 9px
                         },
                       },
                     ]}
-                    sx={ popperSx }
+                    sx={popperSx}
                   />
                 )}
-                value={selectedJob}
-                onInputChange={(event, value) => handleInputChange(event, value)}
-                onChange={(event, value) => { if (value && typeof value !== 'string') setSelectedJob(value); event.preventDefault(); }}
+                onInputChange={(event, newInputValue) => {
+                  event.preventDefault();
+                  setInputValue(newInputValue);
+                  if (newInputValue === '') {
+                    setSearchedJob(null); // Clear when click on cross clear button
+                    setInputValue('');
+                  }
+                }}
+                inputValue={searchedJob?.name ?? inputValue}
+                onChange={(event, value) => {
+                  if (value && typeof value !== 'string') setSearchedJob(value);
+
+                  event.preventDefault();
+                }}
               />
             </Stack>
+            <p className="request__form__or">ou</p>
             <SelectBox
               data={categoriesJobsStore}
               selected={selectedCategory}
@@ -517,11 +552,11 @@ function Request() {
             <SelectBox
               data={jobStore}
               isCategory={false}
-              selected={selectedJob ? selectedJob.id : 0}
+              selected={selectedJobByCategory ? selectedJobByCategory.id : 0}
               loading={JobDataLoading}
               setSelected={(value: JobProps | CategoryProps) => {
                 if ('category_id' in value) {
-                  setSelectedJob(value as JobProps);
+                  setSelectedJobByCategory(value as JobProps);
                 }
               }}
               selectedCategory={selectedCategory}

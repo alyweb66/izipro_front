@@ -11,7 +11,7 @@ export const autocompleteSx = {
   },
   '& .MuiAutocomplete-inputRoot': {
     marginTop: '0.8rem',
-    marginBottom: '0.8rem',
+    marginBottom: '0.4rem',
     borderRadius: '0.5rem',
     height: '2.5rem',
     fontFamily: 'Fredoka, sans-serif',
