@@ -12,6 +12,16 @@
         -5px 0 10px #ffffff17,
         5px 0 10px #6666661c; */
 
+  .setting-account__container {
+    display: flex;
+    .setting-account__container__subtitle {
+      margin: 0.5rem 0.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      color: v.$color-primary-orange;
+    }
+  }
+
   .setting-account__subtitle {
     margin: 0.5rem 0.5rem;
     font-size: 1rem;

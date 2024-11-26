@@ -88,6 +88,32 @@
       color: v.$color-primary-blue;
     }
 
+    .request__form__container {
+      display: flex;
+      .request__form__container__title {
+        text-align: center;
+        margin: auto;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: v.$color-primary-orange;
+
+        &.urgent {
+          margin-top: 2rem;
+        }
+
+        &.radius {
+          margin-bottom: 0.5rem;
+          margin-top: 1.2rem;
+        }
+
+        &.media {
+          margin-bottom: 0.5rem;
+          margin-top: 0;
+        }
+      }
+    }
     .request__form__title {
       text-align: center;
       margin: auto;
@@ -111,7 +137,6 @@
         margin-top: 0;
       }
     }
-
     .request__form__select {
       width: 50%;
       padding: 0.5rem;
@@ -244,7 +269,6 @@
           }
 
           &.preview {
-    
             box-shadow:
               -5px 0 10px #6666661e,
               -5px 0 10px #ffffff62,

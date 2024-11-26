@@ -45,6 +45,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { CategoryProps, JobProps } from '../../../Type/Request';
 import { popperSx, autocompleteSx } from '../../Hook/SearchStyle';
+import InfoPop from '../../Hook/InfoPop';
 
 function Request() {
   // Store
@@ -471,9 +472,12 @@ function Request() {
                 classes={{ label: 'urgent-switch' }}
               />
             </FormGroup>
-            <h1 className="request__form__title">
-              Séléctionnez la catégorie et le métier concerné*
-            </h1>
+            <div className="request__form__container">
+              <h1 className="request__form__container__title">
+                Séléctionnez le métier concerné*
+              </h1>
+              <InfoPop isRequestJob={true}/>
+            </div>
             <Stack
               spacing={2}
               sx={{

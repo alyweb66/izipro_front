@@ -45,6 +45,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Popper from '@mui/material/Popper';
 import { autocompleteSx, popperSx } from '../../../Hook/SearchStyle';
+import InfoPop from '../../../Hook/InfoPop';
 
 function SettingAccount() {
   //store
@@ -341,9 +342,12 @@ function SettingAccount() {
               <h1 className="setting-account__form__title">
                 Options de recherche
               </h1>
-              <h2 className="setting-account__subtitle">
-                Séléctionnez un ou plusieurs métiers
-              </h2>
+              <div className="setting-account__container">
+                <h2 className="setting-account__container__subtitle">
+                  Séléctionnez un ou plusieurs métiers
+                </h2>
+                <InfoPop/>
+              </div>
               <Stack
                 spacing={2}
                 sx={{
