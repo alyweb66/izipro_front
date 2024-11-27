@@ -339,6 +339,7 @@ function Account() {
       {}
     );
 
+    // Check if the siret is valid
     if (changedFields.siret && changedFields.siret.length !== 14) {
       setErrorAccount('Siret invalide');
       setTimeout(() => {
@@ -347,6 +348,7 @@ function Account() {
       return;
     }
 
+    // Check if the email is valid
     if (changedFields.email) {
       if (!validator.isEmail(changedFields.email)) {
         setErrorAccount('Email invalide');
@@ -765,19 +767,6 @@ function Account() {
     checkNotificationStatus();
   }, [notificationData]);
 
-  //* popover
-  /* 	const handleClick = (event: React.MouseEvent<SVGElement>) => {
-		setAnchorEl(event.currentTarget);
-	};
-
-	const handleClose = () => {
-		setAnchorEl(null);
-	}; */
-
-  /* const open = Boolean(anchorEl);
-	const InfoPush = 'Pour profiter des notifications push sur ios, vous devez installer l\'application sur votre écran d\'accueil.';
-	const infoJob = 'Si vous ne trouvez pas votre métier, faite une demande depuis la page contact';
-	const popoverId = open ? 'simple-popover' : undefined; */
 
   // detect if the user is on iOS
   useEffect(() => {
@@ -787,7 +776,7 @@ function Account() {
     const isMobileSafari = result.browser.name === 'Mobile Safari';
     setIsIOS(isMobileSafari);
   }, []);
-  //* End popover
+
   return (
     <div className="account">
       <Grow in={true} timeout={200}>

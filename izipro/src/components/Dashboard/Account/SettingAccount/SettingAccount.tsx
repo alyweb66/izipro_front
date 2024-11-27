@@ -325,6 +325,16 @@ function SettingAccount() {
   }, [categoriesData]);
 
   useEffect(() => {
+    // if more than 5 jobs are selected, remove the last added job and set error
+    if (wishListJob.length > 0 && ((wishListJob.length + selectedJob.length) > 5)) {
+      //setWishListJob(wishListJob.slice(1));
+      setJobError('Vous ne pouvez pas séléctionner plus de 5 métiers');
+      // remove the last added job
+      setTimeout(() => {
+        setJobError('');
+      }, 6000);
+    
+    }
     setInputValue('');
   }, [wishListJob]);
 
@@ -382,7 +392,7 @@ function SettingAccount() {
                     />
                   )}
                   className="custom-autocomplete"
-                  sx={autocompleteSx}
+                  sx={autocompleteSx({})}
                   PopperComponent={(props) => (
                     <Popper
                       {...props}
@@ -435,7 +445,9 @@ function SettingAccount() {
                 isWishList={true}
                 wishListJob={wishListJob}
                 data={jobStore}
+                selectedJob={selectedJob}
                 isCategory={false}
+                setJobError={setJobError}
                 setWishListJob={setWishListJob}
                 loading={jobLoading}
                 selectedCategory={selectedCategory}
@@ -501,7 +513,7 @@ function SettingAccount() {
                 type="submit"
                 aria-label="Valider les métiers"
               >
-                valider les métiers
+                Ajouter les métiers
               </button>
 
               <ul

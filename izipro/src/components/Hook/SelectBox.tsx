@@ -6,22 +6,26 @@ type SelectBoxProps = {
   isSetting?: boolean;
   isWishList?: boolean;
   wishListJob?: JobProps[];
+  selectedJob?: JobProps[];
   selectedCategory?: number;
   setWishListJob?: Dispatch<SetStateAction<JobProps[]>>;
   data: CategoryProps[] | JobProps[];
   isCategory: boolean;
+  setJobError?: Dispatch<SetStateAction<string>>;
   loading: boolean;
   selected?: number;
-  setSelected?: (value: JobProps | CategoryProps ) => void;
+  setSelected?: (value: JobProps | CategoryProps) => void;
 };
 
 const SelectBox = ({
   setSelected,
   loading,
   isCategory,
+  setJobError,
   selected,
   data,
   wishListJob,
+  selectedJob,
   setWishListJob,
   isWishList,
   isSetting,
@@ -47,10 +51,15 @@ const SelectBox = ({
     };
   }, []);
 
-
   let dataJobs;
-  if (!isCategory && data.length > 0 &&  (data as JobProps[])[0].category_id !== undefined) {
-    dataJobs = (data as JobProps[]).filter((value) => value.category_id === selectedCategory);
+  if (
+    !isCategory &&
+    data.length > 0 &&
+    (data as JobProps[])[0].category_id !== undefined
+  ) {
+    dataJobs = (data as JobProps[]).filter(
+      (value) => value.category_id === selectedCategory
+    );
   }
 
   return (
@@ -98,11 +107,34 @@ const SelectBox = ({
                             (option) => option.id === selectedOption.id
                           )
                         ) {
-                          setWishListJob &&
-                            setWishListJob([
-                              selectedOption,
-                              ...(wishListJob ?? []),
-                            ]);
+                          if (isSetting) {
+                            // check if the user has selected more than 5 jobs
+                            if (
+                              wishListJob &&
+                              selectedJob &&
+                              wishListJob.length + selectedJob.length < 5
+                            ) {
+                              setWishListJob &&
+                                setWishListJob([
+                                  selectedOption,
+                                  ...(wishListJob ?? []),
+                                ]);
+                            } else {
+                              setJobError && setJobError(
+                                'Vous ne pouvez pas séléctionner plus de 5 métiers'
+                              );
+                              // remove the last added job
+                              setTimeout(() => {
+                                setJobError && setJobError('');
+                              }, 6000);
+                            }
+                          } else {
+                            setWishListJob &&
+                              setWishListJob([
+                                selectedOption,
+                                ...(wishListJob ?? []),
+                              ]);
+                          }
                         }
                       }
                     : () => {

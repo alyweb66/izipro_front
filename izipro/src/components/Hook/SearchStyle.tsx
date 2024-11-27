@@ -1,5 +1,10 @@
+
+type SearchStyleProps = {
+  isValidate?: boolean;
+};
+
 // style for the autocomplete component
-export const autocompleteSx = {
+export const autocompleteSx = ({isValidate= false}: SearchStyleProps) => ({
   // Modify the input when focused
   '& .MuiOutlinedInput-root': {
     '&:hover .MuiOutlinedInput-notchedOutline': {
@@ -12,6 +17,7 @@ export const autocompleteSx = {
   '& .MuiAutocomplete-inputRoot': {
     marginTop: '0.8rem',
     marginBottom: '0.4rem',
+    color: 'grey',
     borderRadius: '0.5rem',
     height: '2.5rem',
     fontFamily: 'Fredoka, sans-serif',
@@ -21,6 +27,7 @@ export const autocompleteSx = {
       border: 'none',
     },
   },
+
   // Border modifications
   '& .MuiOutlinedInput-notchedOutline': {
     borderColor: 'white', 
@@ -35,9 +42,10 @@ export const autocompleteSx = {
     transform: 'none', 
     borderColor: 'transparent',
     left: '0.5rem',
-    top: '-0.3rem',
+    top: '-0.4rem',
     fontWeight: '400',
-    fontSize: '0.9rem',
+    color: isValidate ? 'green' : '#028eef',
+    fontSize: '1rem',
   },
   // Options list modifications
   '& .MuiAutocomplete-listbox': {
@@ -58,7 +66,7 @@ export const autocompleteSx = {
     },
   },
   
-};
+});
 
 export const popperSx = {
   '& .MuiAutocomplete-paper': {

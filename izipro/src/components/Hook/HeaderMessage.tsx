@@ -49,6 +49,45 @@ export const HeaderMessage = ({
     state.resetRequest,
   ]);
 
+  // Function to convert URL to clickable link
+  function linkify(text: string) {
+    const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
+    const result: (string | JSX.Element)[] = [];
+    let lastIndex = 0;
+  
+    // Use 'matchAll' to get all matches
+    const matches = text.matchAll(urlPattern);
+  
+    for (const match of matches) {
+      const url = match[0];
+      const offset = match.index ?? 0;
+  
+      // Add text before the URL
+      if (offset > lastIndex) {
+        result.push(text.slice(lastIndex, offset));
+      }
+  
+      // Add element for each URL
+      result.push(
+        <a key={offset} href={url} target="_blank" rel="noopener noreferrer">
+          {url}
+        </a>
+      );
+  
+      // Update 'lastIndex' to the end of the URL
+      lastIndex = offset + url.length;
+    }
+  
+    // Add text after the last URL
+    if (lastIndex < text.length) {
+      result.push(text.slice(lastIndex));
+    }
+  
+    return <>{result}</>;
+  }
+  
+
+  
   return (
     <div className="header-message__user" aria-label="Détails de l'utilisateur">
       <div
@@ -170,7 +209,7 @@ export const HeaderMessage = ({
                   {selectedItem &&
                   'description' in selectedItem &&
                   selectedItem.description
-                    ? selectedItem.description
+                    ? linkify(selectedItem.description)
                     : 'Pas de description'}
                 </p>
               </div>

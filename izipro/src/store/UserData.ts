@@ -86,6 +86,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 				lat: data.lat,
 				siret: data.siret,
 				denomination: data.denomination,
+				description: data.description,
 			}));
 		}
 	},

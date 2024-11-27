@@ -409,19 +409,20 @@ function Request() {
 
   // clear and set state when selectedJobByCategory is set
   useEffect(() => {
-    if (selectedJobByCategory) {
+  /*   if (selectedJobByCategory) {
       setSelectedJob(selectedJobByCategory);
       setSearchedJob(null);
       setInputValue('');
-    }
+    } */
   }, [selectedJobByCategory]);
 
   // clear and set state when searchedJob is set
   useEffect(() => {
     if (searchedJob) {
       setSelectedJob(searchedJob);
-      setSelectedCategory(0);
-      setSelectedJobByCategory(null);
+      const categoryId = categoriesJobsStore.find(category => category.id === searchedJob.category_id)?.id;
+      setSelectedCategory(categoryId ?? 0);
+      setSelectedJobByCategory(searchedJob);
     }
   }, [searchedJob]);
 
@@ -505,7 +506,7 @@ function Request() {
                 renderInput={(params) => (
                   <TextField 
                   {...params} 
-                  label="Rechercher" 
+                  label={searchedJob ? '' : 'Rechercher' }
                   inputRef={(node) => {
                     // Assign the input element to the inputRef to close the keyboard on mobile
                     inputRef.current = node; // input element to reference
@@ -516,7 +517,7 @@ function Request() {
                   />
                 )}
                 className="custom-autocomplete"
-                sx={autocompleteSx}
+                sx={autocompleteSx({isValidate:!!searchedJob})}
                 PopperComponent={(props) => (
                   <Popper
                     {...props}
@@ -571,6 +572,8 @@ function Request() {
               setSelected={(value: JobProps | CategoryProps) => {
                 if ('category_id' in value) {
                   setSelectedJobByCategory(value as JobProps);
+                  setSearchedJob(null);
+                  setInputValue('');
                 }
               }}
               selectedCategory={selectedCategory}
@@ -579,7 +582,7 @@ function Request() {
             {lng && lat && (
               <>
                 <h1 className="request__form__title radius">
-                  Séléctionnez une distance*
+                  Dans un rayon autour de*
                 </h1>
                 <label className="request__form__label-radius">
                   {radius === 0
@@ -650,7 +653,7 @@ function Request() {
                 className="request__form__label__input textarea"
                 name="description"
                 id="description"
-                placeholder="Description de la demande (500 caractères maximum)"
+                placeholder="Description de la demande, donnez le plus d'informations possible ainsi que la date souhaitée"
                 value={descriptionRequest}
                 maxLength={500}
                 aria-label="Description de la demande 500 caractères maximum"

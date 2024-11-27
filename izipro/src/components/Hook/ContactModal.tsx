@@ -108,7 +108,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
   const closeModal = () => {
     setConfirmationMessage('');
     setErrorMessage('');
-   // setIsVisible(false);
+    // setIsVisible(false);
     setIsOpenModal(false);
   };
 
@@ -116,18 +116,18 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
     <Modal
       className="contact-modal"
       open={isOpenModal}
-	  onClose={closeModal}
+      onClose={closeModal}
       aria-labelledby="contact-modal-title"
       aria-describedby="contact-modal-description"
       closeAfterTransition
-        slots={{ backdrop: Backdrop }}
-        slotProps={{
-          backdrop: {
-            timeout: 300,
-          },
-        }}
+      slots={{ backdrop: Backdrop }}
+      slotProps={{
+        backdrop: {
+          timeout: 300,
+        },
+      }}
     >
-      <Fade in={isOpenModal} >
+      <Fade in={isOpenModal}>
         <form
           className="contact-modal__container"
           onSubmit={(event) => handleAccept(event)}

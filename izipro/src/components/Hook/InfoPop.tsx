@@ -14,20 +14,20 @@ export default function InfoPop({
   isPush = false,
   isRequestJob = false,
 }: InfoPopProps) {
-  const [anchorEl, setAnchorEl] = useState<SVGElement | null>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const open = Boolean(anchorEl);
   const popoverId = open ? 'simple-popover' : undefined;
 
   const infoPush =
-    "Pour profiter des notifications push sur ios, vous devez installer l'application sur votre écran d'accueil.";
+    "Pour profiter des notifications push sur IOS, vous devez installer l'application sur votre écran d'accueil.";
   const infoJob =
-    "Si votre métier n'est pas dans la liste, contactez nous depuis la page 'Contact' pour faire une demande d'ajout";
+    "Si votre métier n'est pas dans la liste, contactez-nous depuis la page 'Contact' pour faire une demande d'ajout";
   const infoRequestJob =
-    "Si le métier recherché n'est pas dans la liste, contactez nous depuis la page 'Contact' pour faire une demande d'ajout";
+    "Si le métier recherché n'est pas dans la liste, contactez-nous depuis la page 'Contact' pour faire une demande d'ajout";
 
   // open popover
-  const handleClick = (event: React.MouseEvent<SVGElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -48,10 +48,19 @@ export default function InfoPop({
 
   return (
     <div className="info">
-      <IoMdInformationCircleOutline
+      <button
+        aria-describedby="information"
         className={`info-push ${isPush ? '' : 'no-push'}`}
         onClick={handleClick}
-      />
+        style={{
+          background: 'none',
+          border: 'none',
+          padding: 0,
+          cursor: 'pointer',
+        }}
+      >
+        <IoMdInformationCircleOutline />
+      </button>
       <Popover
         id={popoverId}
         open={open}
