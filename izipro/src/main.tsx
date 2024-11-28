@@ -70,8 +70,6 @@ const userIdMiddleware = setContext((_, { headers }) => {
 			headers: {
 				...headers,
 				userid: id > 0 ? id : '',
-				// for openlitespeed
-				'X-Frontend-Auth': import.meta.env.VITE_AUTH_KEY,
 			},
 		};
 	}
