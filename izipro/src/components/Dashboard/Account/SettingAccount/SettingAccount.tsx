@@ -418,7 +418,18 @@ function SettingAccount() {
                     event.preventDefault();
                     if (newValue) {
                       if (typeof newValue !== 'string') {
-                        setWishListJob([...wishListJob, newValue]);
+                        if (
+                          wishListJob &&
+                          selectedJob &&
+                          wishListJob.length + selectedJob.length < 5
+                        ) {
+                          setWishListJob &&
+                          setWishListJob([...wishListJob, newValue]);
+                        } else {
+                          setJobError && setJobError(
+                            'Vous ne pouvez pas séléctionner plus de 5 métiers'
+                          );
+                        }
                         // use blur to close the keyboard on mobile
                         if (inputRef.current) {
                           inputRef.current.blur();
@@ -575,7 +586,7 @@ function SettingAccount() {
               {settingLoading && <Spinner />}
               <label className="setting-account__radius__label">
                 <h2 className="setting-account__subtitle">
-                  Selectionnez une distance d&apos;action
+                  Dans un rayon autour de :
                 </h2>
                 <span className="setting-account__radius__range">
                   {radius === 0

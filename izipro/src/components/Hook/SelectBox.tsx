@@ -35,6 +35,7 @@ const SelectBox = ({
   const selectRef = useRef<HTMLDivElement>(null);
   const toggleOptions = () => setIsOpen(!isOpen);
 
+  // Close the dropdown when the user clicks outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
