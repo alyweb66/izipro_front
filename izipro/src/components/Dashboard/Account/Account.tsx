@@ -12,7 +12,7 @@ import {
   DELETE_PROFILE_PICTURE_MUTATION,
   UPDATE_USER_MUTATION,
 } from '../../GraphQL/UserMutations';
-import UAParser from 'ua-parser-js';
+import { UAParser } from 'ua-parser-js';
 
 // Third-party libraries
 import DOMPurify from 'dompurify';
@@ -212,15 +212,15 @@ function Account() {
   useEffect(() => {
     //sanitize the input
     const newUserData = {
-      first_name: DOMPurify.sanitize(first_nameState),
-      last_name: DOMPurify.sanitize(last_nameState),
-      email: DOMPurify.sanitize(emailState),
-      address: DOMPurify.sanitize(addressState),
-      postal_code: DOMPurify.sanitize(postal_codeState),
-      city: DOMPurify.sanitize(cityState),
+      first_name: DOMPurify.sanitize(first_nameState.trim()),
+      last_name: DOMPurify.sanitize(last_nameState.trim()),
+      email: DOMPurify.sanitize(emailState.trim()),
+      address: DOMPurify.sanitize(addressState.trim()),
+      postal_code: DOMPurify.sanitize(postal_codeState.trim()),
+      city: DOMPurify.sanitize(cityState.trim()),
       siret: DOMPurify.sanitize(siretState),
-      denomination: DOMPurify.sanitize(denominationState),
-      description: DOMPurify.sanitize(descriptionState),
+      denomination: DOMPurify.sanitize(denominationState.trim()),
+      description: DOMPurify.sanitize(descriptionState.trim()),
       image: DOMPurify.sanitize(pictureState),
     };
 
@@ -767,11 +767,9 @@ function Account() {
     checkNotificationStatus();
   }, [notificationData]);
 
-
   // detect if the user is on iOS
   useEffect(() => {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const parser = new UAParser(userAgent);
+    const parser = new UAParser();
     const result = parser.getResult();
     const isMobileSafari = result.browser.name === 'Mobile Safari';
     setIsIOS(isMobileSafari);
