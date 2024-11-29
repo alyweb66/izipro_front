@@ -25,6 +25,7 @@ import {
   messageConvIdMyreqStore,
   myMessageDataStore,
 } from '../../../store/message';
+import { useShallow } from 'zustand/shallow';
 
 // Types
 import { RequestProps } from '../../../Type/Request';
@@ -121,29 +122,27 @@ function MyRequest({
   const offsetRef = useRef(0);
 
   // store
-  const id = userDataStore((state) => state.id);
-  const [myRequestsStore, setMyRequestsStore] = myRequestStore((state) => [
-    state.requests,
-    state.setMyRequestStore,
-  ]);
-  const [userConvStore, setUserConvStore] = userConversation((state) => [
-    state.users,
-    state.setUsers,
-  ]);
-  const [messageStore] = myMessageDataStore((state) => [
-    state.messages,
-    state.setMessageStore,
-  ]);
-  const [subscriptionStore] = subscriptionDataStore((state) => [
-    state.subscription,
-  ]);
+  const id = userDataStore(useShallow((state) => state.id));
+  const [myRequestsStore, setMyRequestsStore] = myRequestStore(
+    useShallow((state) => [state.requests, state.setMyRequestStore])
+  );
+  const [userConvStore, setUserConvStore] = userConversation(
+    useShallow((state) => [state.users, state.setUsers])
+  );
+  const [messageStore] = myMessageDataStore(
+    useShallow((state) => [state.messages, state.setMessageStore])
+  );
+  const [subscriptionStore] = subscriptionDataStore(
+    useShallow((state) => [state.subscription])
+  );
   const [notViewedConversationStore, setNotViewedConversationStore] =
-    notViewedConversation((state) => [
-      state.notViewed,
-      state.setNotViewedStore,
-    ]);
+    notViewedConversation(
+      useShallow((state) => [state.notViewed, state.setNotViewedStore])
+    );
   const [isMessageConvIdFetched, setIsMessageConvIdFetched] =
-    messageConvIdMyreqStore((state) => [state.convId, state.setConvId]);
+    messageConvIdMyreqStore(
+      useShallow((state) => [state.convId, state.setConvId])
+    );
 
   //useRef
   //const endOfMessagesRef = useRef<HTMLDivElement | null>(null);

@@ -9,6 +9,7 @@ import noPicture from '/logos/no-picture.webp';
 import '../../styles/HeaderMessage.scss';
 import { RequestProps } from '../../Type/Request';
 import { requestDataStore } from '../../store/Request';
+import { useShallow } from 'zustand/shallow';
 
 type HeaderMessageProps = {
   setUserDescription?: (value: boolean) => void;
@@ -44,10 +45,10 @@ export const HeaderMessage = ({
   handleNavigate,
   setConversationIdState,
 }: HeaderMessageProps) => {
-  const [request, resetRequest] = requestDataStore((state) => [
+  const [request, resetRequest] = requestDataStore(useShallow((state) => [
     state.request,
     state.resetRequest,
-  ]);
+  ]));
 
   // Function to convert URL to clickable link
   function linkify(text: string) {

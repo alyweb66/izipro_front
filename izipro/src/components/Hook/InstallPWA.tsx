@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 //import { MdInstallMobile } from "react-icons/md";
 import { motion } from 'framer-motion';
 import Spinner from './Spinner';
-import UAParser from 'ua-parser-js';
+import { UAParser } from 'ua-parser-js';
 import '../../styles/installPWA.scss';
 
 // type of event `beforeinstallprompt`
@@ -12,6 +12,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const InstallPWA: React.FC = () => {
+  // state
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
@@ -21,6 +22,7 @@ const InstallPWA: React.FC = () => {
   const [eventTriggered, setEventTriggered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // to check if the app is installed
   useEffect(() => {
     // Réinitialiser l'état pour éviter des valeurs conservées incorrectement
     setIsInstalled(false);
@@ -48,8 +50,7 @@ const InstallPWA: React.FC = () => {
     }
 
     // Detect type of browser
-    const userAgent = navigator.userAgent.toLowerCase();
-    const parser = new UAParser(userAgent);
+    const parser = new UAParser();
     const result = parser.getResult();
     const nameBrowser: string =
       result.browser.name || 'un navigateur non supporté';

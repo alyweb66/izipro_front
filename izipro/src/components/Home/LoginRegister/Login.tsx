@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
-
+import { useShallow } from 'zustand/shallow';
 // React Router
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 // Apollo Client
 import { useMutation } from '@apollo/client';
@@ -51,7 +51,7 @@ import './Login.scss';
 import { userNotificationStore } from '../../../store/Notification';
 
 function Login() {
-  const navigate = useNavigate();
+  let navigate = useNavigate();
 
   // State
   const [email, setEmail] = useState('');
@@ -66,12 +66,11 @@ function Login() {
   const [errorForgotPassword, setErrorForgotPassword] = useState('');
 
   // Store
-  const [isEmailConfirmed, setIsEmailConfirmed] = confirmEmailStore((state) => [
-    state.isEmailConfirmed,
-    state.setIsEmailConfirmed,
-  ]);
+  const [isEmailConfirmed, setIsEmailConfirmed] = confirmEmailStore(
+    useShallow((state) => [state.isEmailConfirmed, state.setIsEmailConfirmed])
+  );
   const [isChangePassword, setIsChangePassword] = changeForgotPasswordStore(
-    (state) => [state.isChangePassword, state.setIsChangePassword]
+    useShallow((state) => [state.isChangePassword, state.setIsChangePassword])
   );
   const resetUserData = userDataStore((state) => state.resetUserData);
   const resetRequest = requestDataStore((state) => state.resetRequest);
@@ -88,30 +87,20 @@ function Login() {
     (state) => state.resetClientRequest
   );
   const resetUsers = userConversation((state) => state.resetUsers);
-  const resetCookieConsents = cookieConsents(
-    (state) => state.resetCookieConsents
-  );
+  const resetCookieConsents = cookieConsents((state) => state.resetCookieConsents);
   const resetrequestConversationIds = requestConversationIds(
     (state) => state.resetBotViewed
   );
-  const resetNotViewedConv = notViewedConversation(
-    (state) => state.resetBotViewed
-  );
-  const resetNotViewedRequestRef = notViewedRequestRef(
-    (state) => state.resetBotViewed
-  );
-  const resetNotViewedRequest = notViewedRequest(
-    (state) => state.resetBotViewed
-  );
+  const resetNotViewedConv = notViewedConversation((state) => state.resetBotViewed);
+  const resetNotViewedRequestRef = notViewedRequestRef((state) => state.resetBotViewed);
+  const resetNotViewedRequest = notViewedRequest((state) => state.resetBotViewed);
   const resetMessageMyConvId = messageConvIdMyConvStore(
     (state) => state.resetMessageMyConvId
   );
   const resetMessageMyReqConvId = messageConvIdMyreqStore(
     (state) => state.resetMessageMyReqConvId
   );
-  const resetNotification = userNotificationStore(
-    (state) => state.resetNotification
-  );
+  const resetNotification = userNotificationStore((state) => state.resetNotification);
   const resetIsLoggedOut = isLoggedOutStore((state) => state.resetIsLoggedOut);
 
   // Mutation
@@ -134,6 +123,7 @@ function Login() {
     };
   }, [error]);
 
+  // To reset the message when the email is confirmed
   useEffect(() => {
     if (isEmailConfirmed) {
       setMessage('');

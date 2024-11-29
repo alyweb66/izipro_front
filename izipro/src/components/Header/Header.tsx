@@ -1,6 +1,6 @@
 import Logout from './Logout/Logout';
 import './Header.scss';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import { useEffect, useState } from 'react';
 
 

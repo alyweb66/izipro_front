@@ -1,13 +1,14 @@
-import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
+import { isRouteErrorResponse, useRouteError } from 'react-router';
 import './DisplayError.scss';
 import { serverErrorStore } from '../../store/LoginRegister';
+import { useShallow } from 'zustand/shallow';
 
 function DisplayError() {
 	// use the `useRouteError` hook to get the error
 	const error = useRouteError() as { status: number; statusText: string; };
 
 	// Store
-	const [serverErrorStatus, serverErrorText] = serverErrorStore((state) => [state.status, state.statusText]);
+	const [serverErrorStatus, serverErrorText] = serverErrorStore(useShallow((state) => [state.status, state.statusText]));
 
 	// Function to get the error message
 	function getErrorMessage(error: { status: number, statusText: string }): string {

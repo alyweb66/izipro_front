@@ -13,6 +13,7 @@ import pdfLogo from '/logos/logo-pdf-800x800.webp';
 
 // function to use the image modal
 export function useModal() {
+  //state
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [images, setImages] = useState<string[]>([]);

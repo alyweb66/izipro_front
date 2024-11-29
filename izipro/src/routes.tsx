@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router';
 import  Root  from './routes/Root/Root';
 import  Home  from './components/Home/Home';
 //import PrivateRoute  from './components/Hook/PrivateRoute';

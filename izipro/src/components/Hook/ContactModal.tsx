@@ -3,7 +3,7 @@
 import Modal from '@mui/material/Modal';
 import Fade from '@mui/material/Fade';
 import Spinner from './Spinner';
-
+import { useShallow } from 'zustand/shallow';
 // Hooks React
 import React, { useEffect, useState } from 'react';
 
@@ -38,12 +38,12 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
     { loading: contactEmailLoading, error: contactEmailError },
   ] = useMutation(CONTACT_MUTATION);
   const [firstName, lastName, denomination, emailStore] = userDataStore(
-    (state) => [
+    useShallow((state) => [
       state.first_name,
       state.last_name,
       state.denomination,
       state.email,
-    ]
+    ])
   );
   //state
   const [description, setDescription] = useState<string>('');

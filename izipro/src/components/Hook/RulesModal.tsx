@@ -4,6 +4,7 @@ import Spinner from './Spinner';
 import { userDataStore } from '../../store/UserData';
 import '../../styles/rulesModal.scss';
 import Backdrop from '@mui/material/Backdrop';
+import { useShallow } from 'zustand/shallow';
 
 type DeleteItemModalProps = {
   loading?: boolean;
@@ -24,7 +25,7 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
   handleAccept,
   handleLogout,
 }) => {
-  const [id, CGU] = userDataStore((state) => [state.id, state.CGU]);
+  const [id, CGU] = userDataStore(useShallow((state) => [state.id, state.CGU]));
 
   const closeModal = () => {
     setIsOpenModal(false);

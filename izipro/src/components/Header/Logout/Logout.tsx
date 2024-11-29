@@ -1,11 +1,12 @@
 import { userDataStore } from '../../../store/UserData';
 import useHandleLogout from '../../Hook/HandleLogout';
 import { MdLogout } from 'react-icons/md';
+import { useShallow } from 'zustand/shallow';
 import './Logout.scss';
 
 function Logout() {
 
-	const  id = userDataStore((state) => state.id);
+	const  id = userDataStore(useShallow((state) => state.id));
 	const handleLogout = useHandleLogout();
 
 	const confirmLogout = (id: number) => {

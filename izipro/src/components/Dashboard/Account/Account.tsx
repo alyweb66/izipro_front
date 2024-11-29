@@ -1,6 +1,6 @@
 // React and React Router imports
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 // State management and GraphQL imports
 import { userDataStore } from '../../../store/UserData';
@@ -19,7 +19,7 @@ import DOMPurify from 'dompurify';
 import validator from 'validator';
 // @ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
-
+import { useShallow } from 'zustand/shallow';
 // Local component imports
 import SettingAccount from './SettingAccount/SettingAccount';
 import { Localization } from '../../Hook/Localization';
@@ -62,7 +62,7 @@ ReactModal.setAppElement('#root');
 
 function Account() {
   // Navigate
-  const navigate = useNavigate();
+  let navigate = useNavigate();
 
   const { askPermission, disableNotifications } = serviceWorkerRegistration();
   // useRef for profile picture
@@ -84,7 +84,7 @@ function Account() {
     lat,
     setImage,
     postal_code,
-  ] = userDataStore((state) => [
+  ] = userDataStore(useShallow((state) => [
     state.id,
     state.email,
     state.address,
@@ -99,18 +99,18 @@ function Account() {
     state.lat,
     state.setImage,
     state.postal_code,
-  ]);
+  ]));
   const [
     emailNotification,
     endpointStore,
     setEnpointStore,
     setEmailNotification,
-  ] = userNotificationStore((state) => [
+  ] = userNotificationStore(useShallow((state) => [
     state.email_notification,
     state.endpoint,
     state.setEndpoint,
     state.setEmailNotification,
-  ]);
+  ]));
 
   //state
   const [first_nameState, setFirstNameState] = useState(first_name || '');
@@ -168,15 +168,15 @@ function Account() {
 
   // Store data
   const [serverErrorStatus, resetServerError, serverErrorStatusText, message] =
-    serverErrorStore((state) => [
+    serverErrorStore(useShallow((state) => [
       state.status,
       state.resetServerError,
       state.statusText,
       state.message,
-    ]);
-  const setAccount = userDataStore((state) => state.setAccount);
-  const role = userDataStore((state) => state.role);
-  const resetUserData = userDataStore((state) => state.resetUserData);
+    ]));
+  const setAccount = userDataStore(useShallow((state) => state.setAccount));
+  const role = userDataStore(useShallow((state) => state.role));
+  const resetUserData = userDataStore(useShallow((state) => state.resetUserData));
 
   // Mutation to update the user data
   const [updateUser, { loading: updateUserLoading, error: updateUserError }] =

@@ -12,10 +12,12 @@ type ScrollListProps = {
 
 export const ScrollList = ({ filteredMessages, conversationIdState, isListOpen, loading }: ScrollListProps) => {
 
+    // state
     const [isEndVisible, setIsEndVisible] = useState(false);
     const [isEndViewed, setIsEndViewed] = useState(false);
     const [isElementPresent, setIsElementPresent] = useState(false);
 
+    // Refs
     const endMessageListRef = useRef<HTMLDivElement | null>(null);
     const imageRefs = useRef<(HTMLImageElement | null)[]>([]);
     const lastMessageIdRef = useRef(0);

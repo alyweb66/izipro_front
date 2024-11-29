@@ -1,8 +1,9 @@
 import { userDataStore } from '../../store/UserData';
+import { useShallow } from 'zustand/shallow';
 import '../../styles/Intro.scss';
 
 const Intro: React.FC = () => {
-  const role = userDataStore((state) => state.role);
+  const role = userDataStore(useShallow((state) => state.role));
   return (
     <div className="intro-container">
       <h1 className="intro-title">Bienvenue sur Toupro</h1>

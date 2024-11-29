@@ -50,13 +50,7 @@ function Register({ setLoginVisibility, loginVisibility }: RegisterProps) {
 
 
 	// Mutation to register a user
-	const [createUser, { loading: userLoading, error: userError }] = useMutation(REGISTER_USER_MUTATION, {
-	/* 	onError: (error) => {
-			console.error('Error in mutation:', error);
-			setError(error.message || 'Une erreur est survenue');
-			// Si tu souhaites déclencher une autre action après la capture
-		}, */
-	});
+	const [createUser, { loading: userLoading, error: userError }] = useMutation(REGISTER_USER_MUTATION);
 	const [createProUser, { loading: proUserLoading, error: proUserError }] = useMutation(REGISTER_PRO_USER_MUTATION);
 
 	// function to handle the registration of a pro user

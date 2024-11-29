@@ -1,5 +1,5 @@
 
-import { RouterProvider } from 'react-router-dom';
+import { RouterProvider } from 'react-router/dom';
 import { ApolloClient, InMemoryCache, ApolloProvider, DefaultOptions, ApolloLink, ServerError } from '@apollo/client';
 // @ts-expect-error - no types available
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';

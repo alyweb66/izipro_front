@@ -13,6 +13,7 @@ import { useFileHandler } from '../../Hook/useFileHandler';
 // State management and stores
 import { userDataStore } from '../../../store/UserData';
 import { myRequestStore } from '../../../store/Request';
+import { useShallow } from 'zustand/shallow';
 
 // Types and icons
 
@@ -60,7 +61,7 @@ function Request() {
     first_name,
     last_name,
     postal_code,
-  } = userDataStore((state) => ({
+  } = userDataStore(useShallow((state) => ({
     id: state.id,
     role: state.role,
     address: state.address,
@@ -71,22 +72,20 @@ function Request() {
     first_name: state.first_name,
     last_name: state.last_name,
     postal_code: state.postal_code,
-  }));
-  const [myRequestsStore, setMyRequestsStore] = myRequestStore((state) => [
-    state.requests,
-    state.setMyRequestStore,
-  ]);
+  })));
+  const [myRequestsStore, setMyRequestsStore] = myRequestStore(
+    useShallow((state) => [state.requests, state.setMyRequestStore])
+  );
   const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore(
-    (state) => [state.subscription, state.setSubscription]
+    useShallow((state) => [state.subscription, state.setSubscription])
   );
 
   const [categoriesJobsStore, setCategoriesJobsStore] = categoriesJobStore(
-    (state) => [state.categories, state.setcategories]
+    useShallow((state) => [state.categories, state.setcategories])
   );
-  const [jobStore, setJobsStore] = jobsStore((state) => [
-    state.jobs,
-    state.setJobs,
-  ]);
+  const [jobStore, setJobsStore] = jobsStore(
+    useShallow((state) => [state.jobs, state.setJobs])
+  );
 
   // State
   const [urgent, setUrgent] = useState(false);
@@ -407,14 +406,6 @@ function Request() {
     }
   }, [selectedCategory]);
 
-  // clear and set state when selectedJobByCategory is set
-  useEffect(() => {
-  /*   if (selectedJobByCategory) {
-      setSelectedJob(selectedJobByCategory);
-      setSearchedJob(null);
-      setInputValue('');
-    } */
-  }, [selectedJobByCategory]);
 
   // clear and set state when searchedJob is set
   useEffect(() => {

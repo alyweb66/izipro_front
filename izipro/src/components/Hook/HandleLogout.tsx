@@ -1,6 +1,6 @@
 import { useMutation } from '@apollo/client';
 import { LOGOUT_USER_MUTATION } from '../GraphQL/UserMutations';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { cookieConsents, isLoggedOutStore, userConversation, userDataStore } from '../../store/UserData';
 import { clientRequestStore, myRequestStore, requestConversationStore, requestDataStore } from '../../store/Request';
 import { messageConvIdMyConvStore, messageConvIdMyreqStore, messageDataStore, myMessageDataStore } from '../../store/message';
@@ -10,7 +10,7 @@ import { userNotificationStore } from '../../store/Notification';
 
 
  const useHandleLogout = () =>{
-	const navigate = useNavigate();
+	let navigate = useNavigate();
 	//const resetUserData = userDataStore((state) => state.resetUserData);
 	const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
 

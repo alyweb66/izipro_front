@@ -14,6 +14,7 @@ export default function InfoPop({
   isPush = false,
   isRequestJob = false,
 }: InfoPopProps) {
+  //state
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const open = Boolean(anchorEl);

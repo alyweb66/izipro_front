@@ -36,6 +36,7 @@ import {
   subscriptionDataStore,
 } from '../../../store/subscription';
 import { notViewedConversation } from '../../../store/Viewed';
+import { useShallow } from 'zustand/shallow';
 
 // Types and assets
 import { RequestProps } from '../../../Type/Request';
@@ -90,10 +91,11 @@ function MyConversation({
   } = useModal();
   const { manageMessage } = UpdateMyConvMessage();
 
-  const [request] = requestDataStore((state) => [
+  const [request] = requestDataStore(useShallow((state) => [
     state.request,
     state.setRequest,
-  ]);
+  ]));
+
   //state
   const [messageValue, setMessageValue] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(
@@ -126,31 +128,31 @@ function MyConversation({
   const limit = 4;
 
   //store
-  const id = userDataStore((state) => state.id);
+  const id = userDataStore(useShallow((state) => state.id));
   const resetRequest = requestDataStore((state) => state.resetRequest);
   const [requestsConversationStore, setRequestsConversationStore] =
-    requestConversationStore((state) => [
+    requestConversationStore(useShallow((state) => [
       state.requests,
       state.setRequestConversation,
-    ]);
-  const [messageStore] = messageDataStore((state) => [
+    ]));
+  const [messageStore] = messageDataStore(useShallow((state) => [
     state.messages,
     state.setMessageStore,
-  ]);
-  const [subscriptionStore] = subscriptionDataStore((state) => [
+  ]));
+  const [subscriptionStore] = subscriptionDataStore(useShallow((state) => [
     state.subscription,
     state.setSubscription,
-  ]);
+  ]));
   const [clientRequestsStore, setClientRequestsStore] = clientRequestStore(
-    (state) => [state.requests, state.setClientRequestStore]
+    useShallow((state) => [state.requests, state.setClientRequestStore])
   );
   const [notViewedConversationStore, setNotViewedConversationStore] =
-    notViewedConversation((state) => [
+    notViewedConversation(useShallow((state) => [
       state.notViewed,
       state.setNotViewedStore,
-    ]);
+    ]));
   const [isMessageConvIdFetched, setIsMessageConvIdFetched] =
-    messageConvIdMyConvStore((state) => [state.convId, state.setConvId]);
+    messageConvIdMyConvStore(useShallow((state) => [state.convId, state.setConvId]));
 
   //mutation
   const [message, { loading: messageMutLoading, error: createMessageError }] =

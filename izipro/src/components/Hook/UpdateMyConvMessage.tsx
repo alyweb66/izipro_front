@@ -4,6 +4,7 @@ import { subscriptionDataStore } from "../../store/subscription";
 import { userDataStore } from "../../store/UserData";
 import { MessageProps } from "../../Type/message";
 import { RequestProps } from "../../Type/Request";
+import { useShallow } from 'zustand/shallow';
 
 type manageMessageProps = {
     newMessage: MessageProps;
@@ -14,9 +15,9 @@ type manageMessageProps = {
 // hook to manage the message
 export const UpdateMyConvMessage = () => {
 
-    const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
-    const id = userDataStore((state) => state.id);
-    const request = requestDataStore((state) => state.request);
+    const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore(useShallow((state) => [state.subscription, state.setSubscription]));
+    const id = userDataStore(useShallow((state) => state.id));
+    const request = requestDataStore(useShallow((state) => state.request));
 
     const manageMessage = ({ newMessage, setConversationIdState, isNewConversation, requestId }: manageMessageProps) => {
         const date = new Date(Number(newMessage.created_at));

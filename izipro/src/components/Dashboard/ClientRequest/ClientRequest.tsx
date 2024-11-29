@@ -13,6 +13,7 @@ import { useQueryRequestByJob } from '../../Hook/Query';
 import { userDataStore } from '../../../store/UserData';
 import { requestDataStore, clientRequestStore, requestConversationStore } from '../../../store/Request';
 import { notViewedRequest } from '../../../store/Viewed';
+import { useShallow } from 'zustand/shallow';
 
 // Types and assets
 import { RequestProps } from '../../../Type/Request';
@@ -60,7 +61,7 @@ function ClientRequest({ handleNavigate, RangeFilter, setIsHasMore, isHasMore, o
 		last_name,
 		role,
 		denomination,
-		postal_code] = userDataStore((state) => [
+		postal_code] = userDataStore(useShallow((state) => [
 			state.id,
 			state.jobs,
 			state.address,
@@ -69,12 +70,12 @@ function ClientRequest({ handleNavigate, RangeFilter, setIsHasMore, isHasMore, o
 			state.last_name,
 			state.role,
 			state.denomination,
-			state.postal_code]);
-	const [setRequest] = requestDataStore((state) => [state.setRequest]);
-	//	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
-	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore((state) => [state.requests, state.setClientRequestStore]);
-	const [notViewedRequestStore] = notViewedRequest((state) => [state.notViewed]);
-	const [requestsConversationStore, setRequestsConversationStore] = requestConversationStore((state) => [state.requests, state.setRequestConversation]);
+			state.postal_code]));
+	const [setRequest] = requestDataStore(useShallow((state) => [state.setRequest]));
+	//	const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore(useShallow((state) => [state.subscription, state.setSubscription]));
+	const [clientRequestsStore, setClientRequestsStore] = clientRequestStore(useShallow((state) => [state.requests, state.setClientRequestStore]));
+	const [notViewedRequestStore] = notViewedRequest(useShallow((state) => [state.notViewed]));
+	const [requestsConversationStore, setRequestsConversationStore] = requestConversationStore(useShallow((state) => [state.requests, state.setRequestConversation]));
 
 	// mutation
 	const [hideRequest, { loading: hiddenLoading, error: hideRequestError }] = useMutation(USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION);

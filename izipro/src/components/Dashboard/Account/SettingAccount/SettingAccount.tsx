@@ -46,29 +46,30 @@ import TextField from '@mui/material/TextField';
 import Popper from '@mui/material/Popper';
 import { autocompleteSx, popperSx } from '../../../Hook/SearchStyle';
 import InfoPop from '../../../Hook/InfoPop';
+import { useShallow } from 'zustand/shallow';
 
 function SettingAccount() {
   //store
-  const id = userDataStore((state) => state.id);
-  const [jobs, setJobs] = userDataStore((state) => [
+  const id = userDataStore(useShallow((state) => state.id));
+  const [jobs, setJobs] = userDataStore(useShallow((state) => [
     state.jobs || [],
     state.setJobs,
-  ]);
-  const [settings, setSettings] = userDataStore((state) => [
+  ]));
+  const [settings, setSettings] = userDataStore(useShallow((state) => [
     state.settings || [],
     state.setSettings,
-  ]);
-  const role = userDataStore((state) => state.role);
+  ]));
+  const role = userDataStore(useShallow((state) => state.role));
   const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore(
-    (state) => [state.subscription, state.setSubscription]
+    useShallow((state) => [state.subscription, state.setSubscription])
   );
   const [categoriesJobsStore, setCategoriesJobsStore] = categoriesJobStore(
-    (state) => [state.categories, state.setcategories]
+    useShallow((state) => [state.categories, state.setcategories])
   );
-  const [jobStore, setJobsStore] = jobsStore((state) => [
+  const [jobStore, setJobsStore] = jobsStore(useShallow((state) => [
     state.jobs,
     state.setJobs,
-  ]);
+  ]));
 
   // State
   const [selectedCategory, setSelectedCategory] = useState(0);

@@ -42,7 +42,6 @@ export const MessageForm = ({
   urlFile,
   messageMutationLoading,
 }: MessageFormProps) => {
-  console.log('urlFile', urlFile[0]);
 
   return (
     <form

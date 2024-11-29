@@ -31,8 +31,11 @@ const SelectBox = ({
   isSetting,
   selectedCategory,
 }: SelectBoxProps) => {
+  // State
   const [isOpen, setIsOpen] = useState(false);
+  // Ref
   const selectRef = useRef<HTMLDivElement>(null);
+  
   const toggleOptions = () => setIsOpen(!isOpen);
 
   // Close the dropdown when the user clicks outside

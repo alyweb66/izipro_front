@@ -1,11 +1,11 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useMutation } from '@apollo/client';
 
 // Modules without types
 import * as turf from '@turf/turf';
 import { ErrorBoundary } from 'react-error-boundary';
-import UAParser from 'ua-parser-js';
+import { UAParser } from 'ua-parser-js';
 
 // components
 import Logout from '../Header/Logout/Logout';
@@ -56,6 +56,7 @@ import {
   requestDataStore,
 } from '../../store/Request';
 import { messageDataStore, myMessageDataStore } from '../../store/message';
+import { useShallow } from 'zustand/shallow';
 
 // Style
 import './Dashboard.scss';
@@ -80,11 +81,11 @@ type useQueryUserConversationsProps = {
 };
 
 function Dashboard() {
-  const navigate = useNavigate();
+  let navigate = useNavigate();
 
   // Store at the top for id to use in the sendBeacon
   const [id, role, lng, lat, settings, jobs, setAll] = userDataStore(
-    (state) => [
+    useShallow((state) => [
       state.id,
       state.role,
       state.lng,
@@ -92,7 +93,7 @@ function Dashboard() {
       state.settings,
       state.jobs,
       state.setAll,
-    ]
+    ])
   );
 
   // condition if user not logged in
@@ -221,20 +222,20 @@ function Dashboard() {
     useState<boolean>(true);
 
   //store
-  const isLoggedOut = isLoggedOutStore((state) => state.isLoggedOut);
+  const isLoggedOut = isLoggedOutStore(useShallow((state) => state.isLoggedOut));
   const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore(
-    (state) => [state.subscription, state.setSubscription]
+    useShallow((state) => [state.subscription, state.setSubscription])
   );
   const [notViewedConversationStore, setNotViewedConversationStore] =
-    notViewedConversation((state) => [
+    notViewedConversation(useShallow((state) => [
       state.notViewed,
       state.setNotViewedStore,
-    ]);
+    ]));
   const [requestConversationIdStore, setRequestConversationsIdStore] =
-    requestConversationIds((state) => [
+    requestConversationIds(useShallow((state) => [
       state.notViewed,
       state.setNotViewedStore,
-    ]);
+    ]));
 
   // Limit
   const myRequestLimit = 5;
@@ -242,32 +243,32 @@ function Dashboard() {
   const myconversationLimit = 5;
 
   //* MyRequest store
-  const [userConvStore] = userConversation((state) => [
+  const [userConvStore] = userConversation(useShallow((state) => [
     state.users,
     state.setUsers,
-  ]);
-  myMessageDataStore((state) => [state.messages, state.setMessageStore]);
-  const [requestStore] = myRequestStore((state) => [
+  ]));
+  myMessageDataStore(useShallow((state) => [state.messages, state.setMessageStore]));
+  const [requestStore] = myRequestStore(useShallow((state) => [
     state.requests,
     state.setMyRequestStore,
-  ]);
-  myMessageDataStore((state) => [state.messages, state.setMessageStore]);
+  ]));
+  myMessageDataStore(useShallow((state) => [state.messages, state.setMessageStore]));
 
   //* MyConversation store
   const [clientRequestsStore, setClientRequestsStore] = clientRequestStore(
-    (state) => [state.requests, state.setClientRequestStore]
+    useShallow((state) => [state.requests, state.setClientRequestStore])
   );
-  const [requestsConversationStore] = requestConversationStore((state) => [
+  const [requestsConversationStore] = requestConversationStore(useShallow((state) => [
     state.requests,
     state.setRequestConversation,
-  ]);
-  messageDataStore((state) => [state.messages, state.setMessageStore]);
+  ]));
+  messageDataStore(useShallow((state) => [state.messages, state.setMessageStore]));
 
   //* ClientRequest store
   const [notViewedRequestStore, setNotViewedRequestStore] = notViewedRequest(
-    (state) => [state.notViewed, state.setNotViewedStore]
+    useShallow((state) => [state.notViewed, state.setNotViewedStore])
   );
-  const [resetRequest] = requestDataStore((state) => [state.resetRequest]);
+  const [resetRequest] = requestDataStore(useShallow((state) => [state.resetRequest]));
 
   //useRef
   const clientRequestOffset = useRef<number>(0);
@@ -1331,6 +1332,7 @@ function Dashboard() {
   }, [conversationIdState, myConversationIdState]);
   //* End notification push
 
+  // get the visibility of the page and send it to the service worker
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
       navigator.serviceWorker.ready.then((registration) => {
@@ -1344,8 +1346,8 @@ function Dashboard() {
           registration.active.postMessage({ action: 'page-visible' });
         }
         // Detect type of browser
-        const userAgent = navigator.userAgent.toLowerCase();
-        const parser = new UAParser(userAgent);
+
+        const parser = new UAParser();
         const result = parser.getResult();
         const nameBrowser: string =
           result.browser.name || 'un navigateur non supporté';

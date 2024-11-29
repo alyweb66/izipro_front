@@ -1,13 +1,13 @@
-//import { Outlet } from "react-router-dom";
+//import { Outlet } from "react-router";
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
-import { Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router';
 import './Root.scss';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 function Root() {
-	const navigate = useNavigate();
+	let navigate = useNavigate();
 	// state
 	const [isFooter, setIsFooter] = useState(true);
 
