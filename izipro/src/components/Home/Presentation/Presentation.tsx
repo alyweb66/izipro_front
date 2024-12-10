@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import InstallPWA from '../../Hook/InstallPWA';
+import InstallPWA from '../../Hook/Components/InstallPWA/InstallPWA';
 import './Presentation.scss';
 import { AnimatePresence, motion } from 'framer-motion';
 

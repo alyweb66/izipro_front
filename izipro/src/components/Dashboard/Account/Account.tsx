@@ -23,7 +23,7 @@ import { useShallow } from 'zustand/shallow';
 // Local component imports
 import SettingAccount from './SettingAccount/SettingAccount';
 import { Localization } from '../../Hook/Localization';
-import Spinner from '../../Hook/Spinner';
+import Spinner from '../../Hook/Components/Spinner/Spinner';
 import serviceWorkerRegistration from '../../Hook/ServiceWorkerRegistration';
 
 // Type definitions
@@ -40,7 +40,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 // Styling imports
 import './Account.scss';
-import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+import { DeleteItemModal } from '../../Hook/Modal/DeleteItem/DeleteItemModal';
 import Switch from '@mui/material/Switch';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -54,7 +54,7 @@ import { userNotificationStore } from '../../../store/Notification';
 import TextareaAutosize from 'react-textarea-autosize';
 import { Grow } from '@mui/material';
 import { serverErrorStore } from '../../../store/LoginRegister';
-import InfoPop from '../../Hook/InfoPop';
+import InfoPop from '../../Hook/Components/InfoPop/InfoPop';
 
 //import '../../../styles/spinner.scss';
 
@@ -1021,7 +1021,7 @@ function Account() {
                       }
                       aria-label="Dénomination"
                       autoComplete="organization"
-                      maxLength={50}
+                      maxLength={100}
                       required
                     />
                   </label>

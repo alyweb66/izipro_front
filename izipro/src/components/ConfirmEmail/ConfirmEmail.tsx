@@ -4,7 +4,7 @@ import { useMutation } from '@apollo/client';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { confirmEmailStore } from '../../store/LoginRegister';
-import Spinner from '../Hook/Spinner';
+import Spinner from '../Hook/Components/Spinner/Spinner';
 import { useShallow } from 'zustand/shallow';
 
 function ConfirmEmail() {

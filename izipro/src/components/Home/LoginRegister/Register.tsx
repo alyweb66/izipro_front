@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // Styles
 import './Register.scss';
-import Spinner from '../../Hook/Spinner';
+import Spinner from '../../Hook/Components/Spinner/Spinner';
 
 type RegisterProps = {
 	loginVisibility: boolean;
@@ -51,7 +51,7 @@ function Register({ setLoginVisibility, loginVisibility }: RegisterProps) {
 
 	// Mutation to register a user
 	const [createUser, { loading: userLoading, error: userError }] = useMutation(REGISTER_USER_MUTATION);
-	const [createProUser, { loading: proUserLoading, error: proUserError }] = useMutation(REGISTER_PRO_USER_MUTATION);
+	const [createProUser, { loading: proUserLoading/* , error: proUserError */ }] = useMutation(REGISTER_PRO_USER_MUTATION);
 
 	// function to handle the registration of a pro user
 	const handleProRegister = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -126,12 +126,12 @@ function Register({ setLoginVisibility, loginVisibility }: RegisterProps) {
 					setIsProError('');
 				}
 			});
-			if (proUserError) {
+			/* if (proUserError) {
 				setIsProError('Erreur lors de la création de l\'utilisateur');
 				setTimeout(() => {
 					setIsProError('');
 				}, 15000);
-			}
+			} */
 
 
 		} catch (error) {
@@ -224,9 +224,9 @@ function Register({ setLoginVisibility, loginVisibility }: RegisterProps) {
 
 
 	return (
-		<div className="register-container" >
-			<p className="register-container title" ><span onClick={() => { toggleRegisterVisibility(); (window.innerWidth < 480 && setLoginVisibility(!loginVisibility)); }}> Créer un compte </span></p>
-			<AnimatePresence>
+        (<div className="register-container" >
+            <p className="register-container title" ><span onClick={() => { toggleRegisterVisibility(); (window.innerWidth < 480 && setLoginVisibility(!loginVisibility)); }}> Créer un compte </span></p>
+            <AnimatePresence>
 				{isRegisterVisible && (
 					<motion.div
 						className="register-container__form"
@@ -381,7 +381,7 @@ function Register({ setLoginVisibility, loginVisibility }: RegisterProps) {
 								<Stack sx={{ width: '100%' }} spacing={2}>
 									{proCreated && (
 										<Fade in={!!proCreated} timeout={300}>
-											<Alert variant="filled" severity="success">Utilisateur créé avec succès, un email de validation vous a été envoyé</Alert>
+											<Alert variant="filled" severity="success">Utilisateur créé avec succès, un email de validation vous a été envoyé (pas de mail? vérifiez vos spams)</Alert>
 										</Fade>
 									)}
 								</Stack>
@@ -391,8 +391,8 @@ function Register({ setLoginVisibility, loginVisibility }: RegisterProps) {
 					</motion.div>
 				)}
 			</AnimatePresence>
-		</div>
-	);
+        </div>)
+    );
 }
 
 export default Register;

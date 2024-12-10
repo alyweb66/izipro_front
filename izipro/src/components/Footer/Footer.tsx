@@ -8,8 +8,8 @@ import {
 } from '../../store/UserData';
 
 // Custom hooks and components
-import { RulesModal } from '../Hook/RulesModal';
-import { ContactModal } from '../Hook/ContactModal';
+import { RulesModal } from '../Hook/Modal/RulesModal/RulesModal';
+import { ContactModal } from '../Hook/Modal/ContactModal/ContactModal';
 
 // Apollo Client
 import { useMutation, FetchResult } from '@apollo/client';
@@ -27,9 +27,10 @@ import { CookieConsentsProps } from '../../Type/CookieConsents';
 
 // Utility hook
 import useHandleLogout from '../Hook/HandleLogout';
-
+import CookieConsentModal from '../Hook/Cookie/CMPModal';
 // Styles
 import './Footer.scss';
+
 
 type ResponseCookieConsents = {
   data: {
@@ -44,20 +45,25 @@ function Footer() {
   const [clickCookie, setClickCookie] = useState<boolean>(false);
   const [CGUModal, setCGUModal] = useState<boolean>(false);
   const [contactModal, setContactModal] = useState<boolean>(false);
-  const [renderForce, setRenderForce] = useState<boolean>(true);
+  const [isGetCookie, setIsGetCookie] = useState<boolean>(true);
 
   //useRef
   const isGetRulesRef = useRef<boolean>(false);
-  const isGetCookieConsentsRef = useRef<boolean>(true);
+  // const isGetCookieConsentsRef = useRef<boolean>(true);
 
   //store
   const [id, CGU] = userDataStore(useShallow((state) => [state.id, state.CGU]));
-  const [CGUStore, cookieStore] = rulesStore(
+  const [CGUStore/* , cookieStore */] = rulesStore(
     useShallow((state) => [state.CGU, state.cookies])
   );
-  const [cookieConsentsId, cookiesNecessaryStore] = cookieConsents(
-    useShallow((state) => [state.id, state.cookies_necessary])
-  );
+  const [cookieConsentsIdStore, cookiesAnalytics, cookiesMarketing] =
+    cookieConsents(
+      useShallow((state) => [
+        state.id,
+        state.cookies_analytics,
+        state.cookies_marketing,
+      ])
+    );
 
   //custom hooks Logout
   const handleLogout = useHandleLogout();
@@ -66,17 +72,17 @@ function Footer() {
   const { loading: rulesLoading, rulesData } = useQueryRules(
     isGetRulesRef.current
   );
-  const { loading: getCookieConsentsLoading, cookieData } =
-    useQueryCookieConsents(renderForce);
+  const { /* loading: getCookieConsentsLoading, */ cookieData } =
+    useQueryCookieConsents(isGetCookie);
 
   //Mutation
   const [
     createCookieConsents,
-    { loading: createCookieConsentsLoading, error: createCookieConsentsError },
+    { /* loading: createCookieConsentsLoading, */ error: createCookieConsentsError },
   ] = useMutation(COOKIE_CONSENTS_MUTATION);
   const [
     updateCookieConsents,
-    { loading: updateCookieConsentsLoading, error: updateCookieConsentsError },
+    { /* loading: updateCookieConsentsLoading, */ error: updateCookieConsentsError },
   ] = useMutation(UPDATE_COOKIE_CONSENTS_MUTATION);
   const [updateUser, { loading: updateUserLoading, error: updateUserError }] =
     useMutation(UPDATE_USER_MUTATION);
@@ -92,45 +98,49 @@ function Footer() {
     };
   }
 
-  // handle accept cookies to set the cookie consents to the store and database
-  function handleAcceptCookies(
-    localConsents?: string,
-    acceptAll?: boolean | null
-  ) {
-    if (acceptAll) {
-      localStorage.setItem('cookieConsents', 'all');
-    } else {
-      localStorage.setItem('cookieConsents', 'necessary');
-    }
 
-    if (id !== 0) {
-      if (cookieConsentsId === 0 && !clickCookie) {
+  // handle accept cookies to set the cookie consents to the store and database
+  function handleAcceptCookies(isCreate = false) {
+    const localConsents = localStorage.getItem('cookieConsent');
+
+    if (id !== 0 && localConsents) {
+      // if id > 0 and localConsents exist, create or update the cookie consents to the database
+      if (
+        cookieConsentsIdStore === 0 &&
+        !clickCookie &&
+        isCreate
+      ) {
+        console.log('createCookieConsents', isGetCookie, cookieConsentsIdStore);
+
         createCookieConsents({
           variables: {
             createCookieConsentsId: id,
             input: {
-              cookies_analytics: localConsents === 'all' || acceptAll || false,
-              cookies_marketing: localConsents === 'all' || acceptAll || false,
-              cookies_necessary: true,
+              cookies_analytics: JSON.parse(localConsents).analytics,
+              cookies_marketing: JSON.parse(localConsents).adsense,
             },
           },
-        }).then((result) =>
-          handleResponse(transformResultToResponseCookieConsents(result))
-        );
-      } else {
+        }).then((result) => {
+          // transform the result to match ResponseCookieConsents structure
+          handleResponse(transformResultToResponseCookieConsents(result));
+          setClickCookie(false);
+        });
+      } else if (cookieConsentsIdStore > 0) {
+        console.log('updateCookieConsents');
+
         updateCookieConsents({
           variables: {
             createCookieConsentsId: id,
             input: {
-              id: cookieConsentsId,
-              cookies_analytics: localConsents === 'all' || acceptAll || false,
-              cookies_marketing: localConsents === 'all' || acceptAll || false,
-              cookies_necessary: true,
+              id: cookieConsentsIdStore,
+              cookies_analytics: JSON.parse(localConsents).analytics,
+              cookies_marketing: JSON.parse(localConsents).adsense,
             },
           },
-        }).then((result) =>
-          handleResponse(transformResultToResponseCookieConsents(result))
-        );
+        }).then((result) => {
+          handleResponse(transformResultToResponseCookieConsents(result));
+          setClickCookie(false);
+      });
 
         if (createCookieConsentsError || updateCookieConsentsError) {
           throw new Error('Error while creating cookie consents');
@@ -153,7 +163,6 @@ function Footer() {
       user_id: id,
       cookies_analytics: cookieConsent?.cookies_analytics,
       cookies_marketing: cookieConsent?.cookies_marketing,
-      cookies_necessary: cookieConsent?.cookies_necessary,
     });
   }
 
@@ -180,38 +189,32 @@ function Footer() {
   // set the cookie consents to the store and database
   useEffect(() => {
     if (cookieData) {
+      console.log('cookieData', cookieData);
+
       if (
         cookieData.user.cookieConsents &&
         cookieData.user.cookieConsents.user_id === id
       ) {
         // set cookie consents to the store
-        const { id, cookies_analytics, cookies_marketing, cookies_necessary } =
+        const { id, cookies_analytics, cookies_marketing } =
           cookieData.user.cookieConsents;
         cookieConsents.setState({
           id,
           user_id: id,
           cookies_analytics,
           cookies_marketing,
-          cookies_necessary,
         });
 
-        setRenderForce(true);
+        setIsGetCookie(true);
       } else {
         // set cookie consents to the database and store
-        const localConsents = localStorage.getItem('cookieConsents');
-
-        if (
-          id !== 0 &&
-          (localConsents === 'all' || localConsents === 'necessary') &&
-          !cookiesNecessaryStore &&
-          !isGetCookieConsentsRef.current
-        ) {
-          handleAcceptCookies(localConsents);
-          setRenderForce(true);
+        if (id !== 0 && cookieData.user.cookieConsents === null) {
+          setIsGetCookie(true);
+          handleAcceptCookies(true);
         }
       }
     }
-  }, [cookieData, renderForce]);
+  }, [cookieData]);
 
   // get rules data and set it to the store
   useEffect(() => {
@@ -227,23 +230,58 @@ function Footer() {
 
   // check if cookie consents are already accepted in the database
   useEffect(() => {
-    if (
-      window.location.pathname === '/dashboard' &&
-      cookiesNecessaryStore === null &&
-      id > 0
-    ) {
-      setRenderForce(false);
+    if (window.location.pathname === '/dashboard' && id > 0) {
+      setIsGetCookie(false);
     }
-  }, [id]);
 
-  // check if cookie consents are accepted to open the modal
-  useEffect(() => {
-    if (!localStorage.getItem('cookieConsents')) {
+    if (window.location.pathname === '/') {
+      setIsGetCookie(true);
+    }
+    // check if cookie consents are accepted to open the modal
+    if (!localStorage.getItem('cookieConsent') && id > 0) {
       if (!CGUStore) {
         isGetRulesRef.current = true;
       }
       setCookiesModal(true);
     }
+  }, [id]);
+
+  // update cookie consents if the user change the cookie consents
+  useEffect(() => {
+    // update
+    const localConsents = localStorage.getItem('cookieConsent');
+    console.log('after fetch cookie', localConsents);
+
+    if (localConsents && id > 0 && cookieConsentsIdStore > 0) {
+      const parsedConsents = JSON.parse(localConsents);
+      
+      if (
+        parsedConsents.adsense !== cookiesMarketing ||
+        parsedConsents.analytics !== cookiesAnalytics
+      ) {
+        console.log('call handleAcceptCookies');
+
+        handleAcceptCookies();
+      }
+    }
+  }, [cookieConsentsIdStore]);
+
+  // check if cookie consents are accepted to open the modal
+  useEffect(() => {
+    if (!localStorage.getItem('cookieConsent')) {
+      if (!CGUStore) {
+        isGetRulesRef.current = true;
+      }
+      setCookiesModal(true);
+    }
+
+/*     const interval = setInterval(() => {
+      if ((window as any)['Cookiebot']) {
+        console.log('Cookiebot chargé.');
+        clearInterval(interval);
+      }
+    }, 500);
+    return () => clearInterval(interval); */
   }, []);
 
   // check if user accept CGU if not show the modal
@@ -259,6 +297,14 @@ function Footer() {
       }
     }
   }, [CGU, CGUStore, id]);
+
+ /*  const openCookieModal = () => {
+    if (window && (window as any)['Cookiebot']) {
+      (window as any)['Cookiebot'].renew(); // Ouvre la modale de gestion des cookies
+    } else {
+      console.error('Cookiebot n\'est pas encore chargé.');
+    }
+  }; */
 
   return (
     <div className="footer">
@@ -296,8 +342,10 @@ function Footer() {
             onClick={(event) => {
               event.preventDefault();
               setCookiesModal(true);
-              !cookieStore && (isGetRulesRef.current = true);
+              document.body.classList.remove('menu-open');
+              /* !cookieStore && (isGetRulesRef.current = true); */
               setClickCookie(true);
+ 
             }}
             aria-label="Politique de Cookies"
           >
@@ -310,19 +358,6 @@ function Footer() {
       </footer>
 
       <RulesModal
-        isCookie={true}
-        content={cookieStore}
-        setIsOpenModal={setCookiesModal}
-        isOpenModal={cookiesModal}
-        handleAccept={handleAcceptCookies}
-        loading={
-          createCookieConsentsLoading ||
-          updateCookieConsentsLoading ||
-          rulesLoading ||
-          getCookieConsentsLoading
-        }
-      />
-      <RulesModal
         content={CGUStore}
         setIsOpenModal={setCGUModal}
         isOpenModal={CGUModal}
@@ -333,6 +368,12 @@ function Footer() {
       <ContactModal
         setIsOpenModal={setContactModal}
         isOpenModal={contactModal}
+      />
+
+      <CookieConsentModal
+        isOpen={cookiesModal}
+        setIsOpen={setCookiesModal}
+        handleAcceptCookies={handleAcceptCookies}
       />
     </div>
   );

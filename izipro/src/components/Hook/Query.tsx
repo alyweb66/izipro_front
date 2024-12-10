@@ -6,9 +6,6 @@ import { GET_CONVERSATION, GET_CONVERSATION_ID, NOT_VIEWED_CONVERSATIONS } from 
 import { GET_MESSAGES_BY_CONVERSATION, GET_MY_MESSAGES_BY_CONVERSATION } from '../GraphQL/MessageQueries';
 
 
-import '../../styles/spinner.scss';
-
-
 // fetch user data
 export const useQueryUserData = (skip: boolean) => {
 
@@ -37,6 +34,8 @@ export const useQueryRules = (getData: boolean) => {
 };
 
 export const useQueryCookieConsents = (skip: boolean) => {
+	console.log('skip in request', skip);
+	
 	const { loading, error: cookieError, data: cookieData } = useQuery(GET_COOKIE_CONSENTS, {
 		skip
 	

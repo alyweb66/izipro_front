@@ -260,6 +260,7 @@
           /* For Chrome, Safari and Opera */
         }
         .request__form__input-media-content__container {
+          position: relative;
           overflow: hidden;
           scrollbar-width: none;
           border-radius: 0.5rem;

@@ -174,14 +174,12 @@ export const cookieConsents = create<CookieConsentStore>((set) => ({
 	user_id: 0,
 	cookies_analytics: null,
 	cookies_marketing: null,
-	cookies_necessary: null,
 
 	resetCookieConsents: () => set({
 		id: 0,
 		user_id: 0,
 		cookies_analytics: null,
 		cookies_marketing: null,
-		cookies_necessary: null
 	})
 }));
 

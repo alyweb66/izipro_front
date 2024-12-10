@@ -20,13 +20,13 @@ import { RequestProps } from '../../../Type/Request';
 
 // Components and utilities
 import './clientRequest.scss';
-import Spinner from '../../Hook/Spinner';
-import { useModal, ImageModal } from '../../Hook/ImageModal';
-import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+import Spinner from '../../Hook/Components/Spinner/Spinner';
+import { useModal, ImageModal } from '../../Hook/Modal/ImageModal/ImageModal';
+import { DeleteItemModal } from '../../Hook/Modal/DeleteItem/DeleteItemModal';
 import { AnimatePresence } from 'framer-motion';
 
-import RequestItem from '../../Hook/RequestHook';
-import { FetchButton } from '../../Hook/FetchButton';
+import RequestItem from '../../Hook/Components/RequestHook/RequestHook';
+import { FetchButton } from '../../Hook/Components/FetchButton/FetchButton';
 
 
 type clientRequestProps = {

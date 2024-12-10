@@ -37,7 +37,6 @@ export const GET_COOKIE_CONSENTS = gql`
         user_id
         cookies_analytics
         cookies_marketing
-        cookies_necessary
       }
     }
   }

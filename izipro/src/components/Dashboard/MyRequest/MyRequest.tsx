@@ -35,20 +35,20 @@ import { MessageProps } from '../../../Type/message';
 // Components and utilities
 import './MyRequest.scss';
 import logoProfile from '/logos/logo-profile.webp';
-import { useModal, ImageModal } from '../../Hook/ImageModal';
+import { useModal, ImageModal } from '../../Hook/Modal/ImageModal/ImageModal';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
 //@ts-expect-error react-modal is not compatible with typescript
 import ReactModal from 'react-modal';
-import Spinner from '../../Hook/Spinner';
-import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+import Spinner from '../../Hook/Components/Spinner/Spinner';
+import { DeleteItemModal } from '../../Hook/Modal/DeleteItem/DeleteItemModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import noPicture from '/logos/no-picture.webp';
 //import { formatMessageDate } from '../../Hook/Component';
-import { MessageList } from '../../Hook/MessageList';
-import RequestItem from '../../Hook/RequestHook';
-import { HeaderMessage } from '../../Hook/HeaderMessage';
-import { MessageForm } from '../../Hook/MessageForm';
-import { FetchButton } from '../../Hook/FetchButton';
+import { MessageList } from '../../Hook/Components/MessageList/MessageList';
+import RequestItem from '../../Hook/Components/RequestHook/RequestHook';
+import { HeaderMessage } from '../../Hook/Components/HeaderMessage/HeaderMessage';
+import { MessageForm } from '../../Hook/Components/MessageForm/MessageForm';
+import { FetchButton } from '../../Hook/Components/FetchButton/FetchButton';
 
 // Configuration for React Modal
 ReactModal.setAppElement('#root');
@@ -222,14 +222,15 @@ function MyRequest({
 
         subscriptionDataStore.setState(
           (prevState) =>
-            ({
+            (({
               ...prevState,
+
               subscription: prevState.subscription?.map((subscription) =>
                 subscription?.subscriber === 'request'
                   ? newSubscription
                   : subscription
-              ),
-            }) as Partial<SubscriptionStore>
+              )
+            }) as Partial<SubscriptionStore>)
         );
 
         // remove subscription for this conversation
@@ -257,14 +258,15 @@ function MyRequest({
 
         subscriptionDataStore.setState(
           (prevState) =>
-            ({
+            (({
               ...prevState,
+
               subscription: prevState.subscription?.map((subscription) =>
                 subscription?.subscriber === 'conversation'
                   ? newConversationSubscription
                   : subscription
-              ),
-            }) as Partial<SubscriptionStore>
+              )
+            }) as Partial<SubscriptionStore>)
         );
 
         // delete from message store all message with this conversation viewedIds

@@ -24,8 +24,8 @@ import { FaCamera } from 'react-icons/fa';
 import DOMPurify from 'dompurify';
 import TextareaAutosize from 'react-textarea-autosize';
 import './Request.scss';
-import Spinner from '../../Hook/Spinner';
-import SelectBox from '../../Hook/SelectBox';
+import Spinner from '../../Hook/Components/Spinner/Spinner';
+import SelectBox from '../../Hook/Components/SelectBox';
 import { subscriptionDataStore } from '../../../store/subscription';
 import { motion, AnimatePresence } from 'framer-motion';
 import Box from '@mui/material/Box';
@@ -46,7 +46,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { CategoryProps, JobProps } from '../../../Type/Request';
 import { popperSx, autocompleteSx } from '../../Hook/SearchStyle';
-import InfoPop from '../../Hook/InfoPop';
+import InfoPop from '../../Hook/Components/InfoPop/InfoPop';
 
 function Request() {
   // Store
@@ -134,7 +134,8 @@ function Request() {
   const { loading: JobDataLoading, jobData } = useQueryJobs(
     jobStore.length > 0
   );
-  console.log('jobData', jobData);
+  console.log('selectedJob', selectedJob);
+console.log('selectedJobByCategory', selectedJobByCategory);
 
   // remove file
   const handleRemove = (index: number) => {
@@ -158,7 +159,7 @@ function Request() {
 
     // check if all fields are filled
     let timer: number | undefined;
-    if (!titleRequest || !descriptionRequest || !selectedJob) {
+    if (!titleRequest || !descriptionRequest || !selectedJobByCategory) {
       setErrorMessage('Veuillez remplir tous les champs');
       setTimeout(() => {
         setErrorMessage('');
@@ -181,7 +182,7 @@ function Request() {
             lng: lng,
             lat: lat,
             range: radius,
-            job_id: Number(selectedJob.id),
+            job_id: Number(selectedJobByCategory.id),
             user_id: id,
             media: sendFile,
           },
@@ -418,7 +419,7 @@ function Request() {
   }, [searchedJob]);
 
   return (
-    <Grow in={true} timeout={200}>
+    (<Grow in={true} timeout={200}>
       <div className="request">
         {categoryLoading && <Spinner />}
 
@@ -509,20 +510,6 @@ function Request() {
                 )}
                 className="custom-autocomplete"
                 sx={autocompleteSx({isValidate:!!searchedJob})}
-                PopperComponent={(props) => (
-                  <Popper
-                    {...props}
-                    modifiers={[
-                      {
-                        name: 'offset',
-                        options: {
-                          offset: [0, 9], // Move popper down by 9px
-                        },
-                      },
-                    ]}
-                    sx={popperSx}
-                  />
-                )}
                 onInputChange={(event, newInputValue) => {
                   event.preventDefault();
                   setInputValue(newInputValue);
@@ -539,6 +526,22 @@ function Request() {
                     inputRef.current.blur();
                   }
                   event.preventDefault();
+                }}
+                slots={{
+                  popper: (props) => (
+                    <Popper
+                      {...props}
+                      modifiers={[
+                        {
+                          name: 'offset',
+                          options: {
+                            offset: [0, 9], // Move popper down by 9px
+                          },
+                        },
+                      ]}
+                      sx={popperSx}
+                    />
+                  )
                 }}
               />
             </Stack>
@@ -851,7 +854,7 @@ function Request() {
           </form>
         )}
       </div>
-    </Grow>
+    </Grow>)
   );
 }
 

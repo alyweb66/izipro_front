@@ -10,8 +10,9 @@ import { UAParser } from 'ua-parser-js';
 // components
 import Logout from '../Header/Logout/Logout';
 import Footer from '../Footer/Footer';
-import Spinner from '../Hook/Spinner';
-
+import Spinner from '../Hook/Components/Spinner/Spinner';
+import Intro from '../Hook/Components/Intro/Intro';
+import { DeleteItemModal } from '../Hook/Modal/DeleteItem/DeleteItemModal';
 // Hook personal
 import {
   useQueryGetRequestById,
@@ -28,7 +29,7 @@ import { useMyRequestMessageSubscriptions } from '../GraphQL/MyRequestSubscripti
 import { useClientRequestSubscriptions } from '../GraphQL/ClientRequestSubscription';
 import { useMyConversationSubscriptions } from '../GraphQL/MyConversationSubscription';
 import { useLogoutSubscription } from '../GraphQL/LogoutSubscription';
-import OffLine from '../Hook/OffLine';
+import OffLine from '../Hook/Components/Offline/OffLine';
 
 // Mutation
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
@@ -60,12 +61,11 @@ import { useShallow } from 'zustand/shallow';
 
 // Style
 import './Dashboard.scss';
-import { DeleteItemModal } from '../Hook/DeleteItemModal';
 import Stack from '@mui/material/Stack';
 import Badge, { BadgeProps } from '@mui/material/Badge';
 import { styled } from '@mui/material/styles';
 import { Grow } from '@mui/material';
-import Intro from '../Hook/Intro';
+
 
 const Request = lazy(() => import('./Request/Request'));
 const MyRequest = lazy(() => import('./MyRequest/MyRequest'));
@@ -462,7 +462,7 @@ function Dashboard() {
       </div>
     );
   };
-  // Gestionnaire pour détecter les clics à l'extérieur
+  // Detect click outside the menu to close it
   useEffect(() => {
     if (window.innerWidth < 480) {
       const handleClickOutside = (event: MouseEvent) => {
@@ -1307,6 +1307,15 @@ function Dashboard() {
   useEffect(() => {
     if (selectedTab) {
       updateSelectedTab(selectedTab);
+
+      // Send an event to Google Analytics
+      if (window.gtag) {
+        window.gtag('event', 'tab_click', {
+          event_category: 'Dashboard',
+          event_label: selectedTab,
+        });
+      }
+      console.log(`User clicked on tab: ${selectedTab}`);
     }
   }, [selectedTab]);
 

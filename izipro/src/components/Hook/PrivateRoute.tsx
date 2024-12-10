@@ -1,12 +1,14 @@
 import { Navigate } from 'react-router';
-import Dashboard  from '../Dashboard/Dashboard';
-import { useEffect, useState } from 'react';
+//import Dashboard  from '../Dashboard/Dashboard';
+//import { useState } from 'react';
 
-const PrivateRoute = () => {
-    const [loading, setLoading] = useState(true); // Indique si l'authentification est en cours
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+import { ReactNode } from 'react';
+
+const PrivateRoute = ({children}: {children: ReactNode}) => {
+   // const [loading, setLoading] = useState(true); // Indique si l'authentification est en cours
+  //  const [isAuthenticated, setIsAuthenticated] = useState(false);
   
-    useEffect(() => {
+ /*    useEffect(() => {
       const getItem = localStorage.getItem('login');
       let decodeData;
       if (getItem) {
@@ -23,16 +25,47 @@ const PrivateRoute = () => {
         localStorage.removeItem('login');
       }
       setLoading(false);
-    }, []);
+    }, []); */
   
-    if (loading) {
-      return <div>Loading...</div>; // 
+      // check if user is logged in and if cookie consents are accepted
+   //
+   console.log('PrivateRoute');
+   
+    // condition if user not logged in
+    const getItem = localStorage.getItem('login');
+    if (!getItem) {
+      return children;
+    }
+    const decodeData = atob(getItem || '');
+    let isLogged;
+
+    if (decodeData === 'session' || decodeData === 'true') {
+      isLogged = { value: true };
+    } else {
+      isLogged = JSON.parse(decodeData || '{}');
+    }
+    if (isLogged) {
+      console.log('User logged in');
+      
+     // navigate('/dashboard', { replace: true });
+     return <Navigate to="/dashboard" replace />;
+     //setIsAuthenticated(true);
+    }else {
+      console.log('User not logged in');
+      
+      localStorage.removeItem('login');
+      
     }
 
+  //};
+   /*  if (loading) {
+      return <div>Loading...</div>; // 
+    }
+ */
 
 
   // Redirect to home page if the user is not authenticated
-  return isAuthenticated ? <Dashboard /> : <Navigate to="/" />;
+  //return isAuthenticated ? <Dashboard /> : <Home />;
 };
 
 export default PrivateRoute;

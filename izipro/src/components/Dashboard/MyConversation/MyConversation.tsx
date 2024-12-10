@@ -14,11 +14,11 @@ import {
 } from '../../Hook/Query';
 import { useFileHandler } from '../../Hook/useFileHandler';
 import { ScrollList } from '../../Hook/ScrollList';
-import { MessageList } from '../../Hook/MessageList';
-import Spinner from '../../Hook/Spinner';
-import RequestItem from '../../Hook/RequestHook';
-import { useModal, ImageModal } from '../../Hook/ImageModal';
-import { DeleteItemModal } from '../../Hook/DeleteItemModal';
+import { MessageList } from '../../Hook/Components/MessageList/MessageList';
+import Spinner from '../../Hook/Components/Spinner/Spinner';
+import RequestItem from '../../Hook/Components/RequestHook/RequestHook';
+import { useModal, ImageModal } from '../../Hook/Modal/ImageModal/ImageModal';
+import { DeleteItemModal } from '../../Hook/Modal/DeleteItem/DeleteItemModal';
 
 // State management and stores
 import {
@@ -48,9 +48,9 @@ import { SubscriptionProps } from '../../../Type/Subscription';
 import './MyConversation.scss';
 import { AnimatePresence, motion } from 'framer-motion';
 import { UpdateMyConvMessage } from '../../Hook/UpdateMyConvMessage';
-import { HeaderMessage } from '../../Hook/HeaderMessage';
-import { MessageForm } from '../../Hook/MessageForm';
-import { FetchButton } from '../../Hook/FetchButton';
+import { HeaderMessage } from '../../Hook/Components/HeaderMessage/HeaderMessage';
+import { MessageForm } from '../../Hook/Components/MessageForm/MessageForm';
+import { FetchButton } from '../../Hook/Components/FetchButton/FetchButton';
 
 type useQueryUserConversationsProps = {
   loading: boolean;

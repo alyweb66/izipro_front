@@ -70,7 +70,6 @@ export const COOKIE_CONSENTS_MUTATION = gql`
         user_id
         cookies_analytics
         cookies_marketing
-        cookies_necessary
     }
     }
 `;
@@ -82,7 +81,6 @@ export const UPDATE_COOKIE_CONSENTS_MUTATION = gql`
         user_id
         cookies_analytics
         cookies_marketing
-        cookies_necessary
     }
     }
 `;

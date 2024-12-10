@@ -23,11 +23,11 @@ import { userDataStore } from '../../../../store/UserData';
 import { CategoryProps, JobProps } from '../../../../Type/Request';
 
 // Local components and assets
-import Spinner from '../../../Hook/Spinner';
+import Spinner from '../../../Hook/Components/Spinner/Spinner';
 
 // Styling imports
 import './SettingAccount.scss';
-import SelectBox from '../../../Hook/SelectBox';
+import SelectBox from '../../../Hook/Components/SelectBox';
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import Alert from '@mui/material/Alert';
@@ -45,7 +45,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import Popper from '@mui/material/Popper';
 import { autocompleteSx, popperSx } from '../../../Hook/SearchStyle';
-import InfoPop from '../../../Hook/InfoPop';
+import InfoPop from '../../../Hook/Components/InfoPop/InfoPop';
 import { useShallow } from 'zustand/shallow';
 
 function SettingAccount() {
@@ -339,62 +339,89 @@ function SettingAccount() {
     setInputValue('');
   }, [wishListJob]);
 
-  return (
-    <>
-      {role === 'pro' && (
-        <div className="setting-account">
-          <>
-            <form
-              className={`setting-account__form ${jobLoading ? 'loading' : ''}`}
-              onSubmit={handleSubmitJob}
-              aria-label="Formulaire de sélection de métiers"
+  return (<>
+    {role === 'pro' && (
+      <div className="setting-account">
+        <>
+          <form
+            className={`setting-account__form ${jobLoading ? 'loading' : ''}`}
+            onSubmit={handleSubmitJob}
+            aria-label="Formulaire de sélection de métiers"
+          >
+            {/* {jobLoading && <Spinner />} */}
+            <h1 className="setting-account__form__title">
+              Options de recherche
+            </h1>
+            <div className="setting-account__container">
+              <h2 className="setting-account__container__subtitle">
+                Séléctionnez un ou plusieurs métiers
+              </h2>
+              <InfoPop/>
+            </div>
+            <Stack
+              spacing={2}
+              sx={{
+                width: '100%',
+              }}
             >
-              {/* {jobLoading && <Spinner />} */}
-              <h1 className="setting-account__form__title">
-                Options de recherche
-              </h1>
-              <div className="setting-account__container">
-                <h2 className="setting-account__container__subtitle">
-                  Séléctionnez un ou plusieurs métiers
-                </h2>
-                <InfoPop/>
-              </div>
-              <Stack
-                spacing={2}
-                sx={{
-                  width: '100%',
+              <Autocomplete
+                id="jobs"
+                freeSolo
+                options={jobStore}
+                getOptionLabel={(option: string | JobProps) =>
+                  typeof option === 'string' ? option : option.name
+                }
+                renderOption={(props, option) => {
+                  return (
+                    <li {...props} key={option.id}>
+                      {option.name}
+                    </li>
+                  );
                 }}
-              >
-                <Autocomplete
-                  id="jobs"
-                  freeSolo
-                  options={jobStore}
-                  getOptionLabel={(option: string | JobProps) =>
-                    typeof option === 'string' ? option : option.name
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Rechercher"
+                    inputRef={(node) => {
+                      // Assign the input element to the inputRef to close the keyboard on mobile
+                      inputRef.current = node; // input element to reference
+                      if (typeof params.inputProps.ref === 'function') {
+                        params.inputProps.ref(node); // Connect the input element to the Autocomplete
+                      }
+                    }}
+                  />
+                )}
+                className="custom-autocomplete"
+                sx={autocompleteSx({})}
+                inputValue={inputValue}
+                onInputChange={(_, newInputValue) => {
+                  setInputValue(newInputValue);
+                }}
+                onChange={(event, newValue) => {
+                  event.preventDefault();
+                  if (newValue) {
+                    if (typeof newValue !== 'string') {
+                      if (
+                        wishListJob &&
+                        selectedJob &&
+                        wishListJob.length + selectedJob.length < 5
+                      ) {
+                        setWishListJob &&
+                        setWishListJob([...wishListJob, newValue]);
+                      } else {
+                        setJobError && setJobError(
+                          'Vous ne pouvez pas séléctionner plus de 5 métiers'
+                        );
+                      }
+                      // use blur to close the keyboard on mobile
+                      if (inputRef.current) {
+                        inputRef.current.blur();
+                      }
+                    }
                   }
-                  renderOption={(props, option) => {
-                    return (
-                      <li {...props} key={option.id}>
-                        {option.name}
-                      </li>
-                    );
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Rechercher"
-                      inputRef={(node) => {
-                        // Assign the input element to the inputRef to close the keyboard on mobile
-                        inputRef.current = node; // input element to reference
-                        if (typeof params.inputProps.ref === 'function') {
-                          params.inputProps.ref(node); // Connect the input element to the Autocomplete
-                        }
-                      }}
-                    />
-                  )}
-                  className="custom-autocomplete"
-                  sx={autocompleteSx({})}
-                  PopperComponent={(props) => (
+                }}
+                slots={{
+                  popper: (props) => (
                     <Popper
                       {...props}
                       modifiers={[
@@ -410,238 +437,211 @@ function SettingAccount() {
                         event.stopPropagation(), setInputValue('');
                       }}
                     />
-                  )}
-                  inputValue={inputValue}
-                  onInputChange={(_, newInputValue) => {
-                    setInputValue(newInputValue);
-                  }}
-                  onChange={(event, newValue) => {
-                    event.preventDefault();
-                    if (newValue) {
-                      if (typeof newValue !== 'string') {
-                        if (
-                          wishListJob &&
-                          selectedJob &&
-                          wishListJob.length + selectedJob.length < 5
-                        ) {
-                          setWishListJob &&
-                          setWishListJob([...wishListJob, newValue]);
-                        } else {
-                          setJobError && setJobError(
-                            'Vous ne pouvez pas séléctionner plus de 5 métiers'
-                          );
-                        }
-                        // use blur to close the keyboard on mobile
-                        if (inputRef.current) {
-                          inputRef.current.blur();
-                        }
-                      }
-                    }
-                  }}
-                />
-              </Stack>
-              <p className="request__form__or">ou</p>
-              <SelectBox
-                isSetting={true}
-                data={categoriesJobsStore}
-                selected={selectedCategory}
-                isCategory={true}
-                loading={categoryLoading}
-                setSelected={(value: JobProps | CategoryProps) =>
-                  setSelectedCategory(value.id)
-                }
+                  )
+                }}
               />
+            </Stack>
+            <p className="request__form__or">ou</p>
+            <SelectBox
+              isSetting={true}
+              data={categoriesJobsStore}
+              selected={selectedCategory}
+              isCategory={true}
+              loading={categoryLoading}
+              setSelected={(value: JobProps | CategoryProps) =>
+                setSelectedCategory(value.id)
+              }
+            />
 
-              <SelectBox
-                isSetting={true}
-                isWishList={true}
-                wishListJob={wishListJob}
-                data={jobStore}
-                selectedJob={selectedJob}
-                isCategory={false}
-                setJobError={setJobError}
-                setWishListJob={setWishListJob}
-                loading={jobLoading}
-                selectedCategory={selectedCategory}
-              />
+            <SelectBox
+              isSetting={true}
+              isWishList={true}
+              wishListJob={wishListJob}
+              data={jobStore}
+              selectedJob={selectedJob}
+              isCategory={false}
+              setJobError={setJobError}
+              setWishListJob={setWishListJob}
+              loading={jobLoading}
+              selectedCategory={selectedCategory}
+            />
 
-              <ul className="setting-account__form__list">
-                <h2 className="setting-account__subtitle">
-                  Métiers à ajouter (max 5)
-                </h2>
-                <List sx={{ p: 0 }}>
-                  <TransitionGroup>
-                    {wishListJob &&
-                      [...wishListJob].reverse().map((job: JobProps) => (
-                        <Collapse key={job.id} timeout={200}>
-                          <ListItem
-                            key={job.id}
-                            className="setting-account__form__list__tag"
-                            aria-label={`Métier sélectionné: ${job.name}`}
+            <ul className="setting-account__form__list">
+              <h2 className="setting-account__subtitle">
+                Métiers à ajouter (max 5)
+              </h2>
+              <List sx={{ p: 0 }}>
+                <TransitionGroup>
+                  {wishListJob &&
+                    [...wishListJob].reverse().map((job: JobProps) => (
+                      <Collapse key={job.id} timeout={200}>
+                        <ListItem
+                          key={job.id}
+                          className="setting-account__form__list__tag"
+                          aria-label={`Métier sélectionné: ${job.name}`}
+                        >
+                          <ListItemText
+                            className="__name"
+                            primary={job.name}
+                            aria-label={`Métier actuel: ${job.name}`}
+                            sx={{
+                              '& .MuiTypography-root': {
+                                fontFamily: 'Fredoka, sans-serif',
+                                fontWeight: 400,
+                                paddingTop: 0,
+                                paddingBottom: 0,
+                                margin: 0,
+                              },
+                            }}
+                          />
+                          <button
+                            className="setting-account__form__list__delete__button"
+                            onClick={(event) => {
+                              setJobError(''),
+                                handleRemoveListJob(job.id, event);
+                            }}
+                            aria-label={`Supprimer le métier ${job.name}`}
                           >
-                            <ListItemText
-                              className="__name"
-                              primary={job.name}
-                              aria-label={`Métier actuel: ${job.name}`}
-                              sx={{
-                                '& .MuiTypography-root': {
-                                  fontFamily: 'Fredoka, sans-serif',
-                                  fontWeight: 400,
-                                  paddingTop: 0,
-                                  paddingBottom: 0,
-                                  margin: 0,
-                                },
-                              }}
-                            />
-                            <button
-                              className="setting-account__form__list__delete__button"
-                              onClick={(event) => {
-                                setJobError(''),
-                                  handleRemoveListJob(job.id, event);
-                              }}
-                              aria-label={`Supprimer le métier ${job.name}`}
-                            >
-                              X
-                            </button>
-                          </ListItem>
-                        </Collapse>
-                      ))}
+                            X
+                          </button>
+                        </ListItem>
+                      </Collapse>
+                    ))}
+                </TransitionGroup>
+              </List>
+            </ul>
+            <div className="message-setting">
+              <Stack sx={{ width: '100%' }} spacing={2}>
+                {jobError && (
+                  <Fade in={!!jobError} timeout={300}>
+                    <Alert variant="filled" severity="error">
+                      {jobError}
+                    </Alert>
+                  </Fade>
+                )}
+              </Stack>
+            </div>
+            <button
+              className="setting-account__form__button"
+              type="submit"
+              aria-label="Valider les métiers"
+            >
+              Ajouter les métiers
+            </button>
+
+            <ul
+              className={`setting-account__form__list job ${userJobLoading || deleteJobLoading || categoryLoading ? 'loading' : ''}`}
+            >
+              {(userJobLoading || categoryLoading) && (
+                <Spinner className="small-spinner" />
+              )}
+
+              <h2 className="setting-account__subtitle">
+                Métiers séléctionnés
+              </h2>
+              <List sx={{ p: 0 }}>
+                {selectedJob && selectedJob.length > 0 ? (
+                  <TransitionGroup>
+                    {/* {jobDataLoading && <Spinner />} */}
+                    {selectedJob.map((job: JobProps) => (
+                      <Collapse key={job.id} timeout={200}>
+                        <ListItem className="setting-account__form__list__tag">
+                          <ListItemText
+                            className="__name"
+                            primary={job.name}
+                            aria-label={`Métier actuel: ${job.name}`}
+                            sx={{
+                              '& .MuiTypography-root': {
+                                fontFamily: 'Fredoka, sans-serif',
+                                fontWeight: 400,
+                                paddingTop: 0,
+                                paddingBottom: 0,
+                                margin: 0,
+                              },
+                            }}
+                          />
+                          <button
+                            className="setting-account__form__list__delete__button"
+                            onClick={(event) =>
+                              handleDeleteJob(job.id, event)
+                            }
+                            aria-label={`Supprimer le métier ${job.name}`}
+                          >
+                            X
+                          </button>
+                        </ListItem>
+                      </Collapse>
+                    ))}
                   </TransitionGroup>
-                </List>
-              </ul>
-              <div className="message-setting">
+                ) : (
+                  <p className="setting-account__form__list noJobs">
+                    Vous n&apos;avez pas de métier séléctionné
+                  </p>
+                )}
+              </List>
+            </ul>
+          </form>
+
+          <div
+            className={`setting-account__radius ${settingLoading ? 'loading' : ''}`}
+          >
+            {settingLoading && <Spinner />}
+            <label className="setting-account__radius__label">
+              <h2 className="setting-account__subtitle">
+                Dans un rayon autour de :
+              </h2>
+              <span className="setting-account__radius__range">
+                {radius === 0
+                  ? 'Toute la france'
+                  : `Autour de moi: ${radius / 1000} Km`}
+              </span>
+
+              <Box className="slider-container" sx={{ width: 300 }}>
+                <Slider
+                  aria-labelledby="radius-slider-label"
+                  defaultValue={105}
+                  aria-label="Distance d'action"
+                  valueLabelDisplay="auto"
+                  value={radius === 0 ? 105 : radius / 1000}
+                  step={5}
+                  marks
+                  min={5}
+                  max={105}
+                  // transform 105 to 0 for condition in the function and database
+                  onChange={(_, value) =>
+                    setRadius(
+                      (value as number) === 105 ? 0 : (value as number) * 1000
+                    )
+                  }
+                  valueLabelFormat={(value) =>
+                    value === 105 ? 'France' : `${value} Km`
+                  }
+                />
+              </Box>
+              <div className="message">
                 <Stack sx={{ width: '100%' }} spacing={2}>
-                  {jobError && (
-                    <Fade in={!!jobError} timeout={300}>
-                      <Alert variant="filled" severity="error">
-                        {jobError}
+                  {message && (
+                    <Fade in={!!message} timeout={300}>
+                      <Alert variant="filled" severity="success">
+                        {message}
                       </Alert>
                     </Fade>
                   )}
                 </Stack>
               </div>
               <button
-                className="setting-account__form__button"
-                type="submit"
-                aria-label="Valider les métiers"
+                className="setting-account__radius__button"
+                onClick={handleValidateRange}
+                aria-label="Valider la distance"
               >
-                Ajouter les métiers
+                Valider la distance
               </button>
-
-              <ul
-                className={`setting-account__form__list job ${userJobLoading || deleteJobLoading || categoryLoading ? 'loading' : ''}`}
-              >
-                {(userJobLoading || categoryLoading) && (
-                  <Spinner className="small-spinner" />
-                )}
-
-                <h2 className="setting-account__subtitle">
-                  Métiers séléctionnés
-                </h2>
-                <List sx={{ p: 0 }}>
-                  {selectedJob && selectedJob.length > 0 ? (
-                    <TransitionGroup>
-                      {/* {jobDataLoading && <Spinner />} */}
-                      {selectedJob.map((job: JobProps) => (
-                        <Collapse key={job.id} timeout={200}>
-                          <ListItem className="setting-account__form__list__tag">
-                            <ListItemText
-                              className="__name"
-                              primary={job.name}
-                              aria-label={`Métier actuel: ${job.name}`}
-                              sx={{
-                                '& .MuiTypography-root': {
-                                  fontFamily: 'Fredoka, sans-serif',
-                                  fontWeight: 400,
-                                  paddingTop: 0,
-                                  paddingBottom: 0,
-                                  margin: 0,
-                                },
-                              }}
-                            />
-                            <button
-                              className="setting-account__form__list__delete__button"
-                              onClick={(event) =>
-                                handleDeleteJob(job.id, event)
-                              }
-                              aria-label={`Supprimer le métier ${job.name}`}
-                            >
-                              X
-                            </button>
-                          </ListItem>
-                        </Collapse>
-                      ))}
-                    </TransitionGroup>
-                  ) : (
-                    <p className="setting-account__form__list noJobs">
-                      Vous n&apos;avez pas de métier séléctionné
-                    </p>
-                  )}
-                </List>
-              </ul>
-            </form>
-
-            <div
-              className={`setting-account__radius ${settingLoading ? 'loading' : ''}`}
-            >
-              {settingLoading && <Spinner />}
-              <label className="setting-account__radius__label">
-                <h2 className="setting-account__subtitle">
-                  Dans un rayon autour de :
-                </h2>
-                <span className="setting-account__radius__range">
-                  {radius === 0
-                    ? 'Toute la france'
-                    : `Autour de moi: ${radius / 1000} Km`}
-                </span>
-
-                <Box className="slider-container" sx={{ width: 300 }}>
-                  <Slider
-                    aria-labelledby="radius-slider-label"
-                    defaultValue={105}
-                    aria-label="Distance d'action"
-                    valueLabelDisplay="auto"
-                    value={radius === 0 ? 105 : radius / 1000}
-                    step={5}
-                    marks
-                    min={5}
-                    max={105}
-                    // transform 105 to 0 for condition in the function and database
-                    onChange={(_, value) =>
-                      setRadius(
-                        (value as number) === 105 ? 0 : (value as number) * 1000
-                      )
-                    }
-                    valueLabelFormat={(value) =>
-                      value === 105 ? 'France' : `${value} Km`
-                    }
-                  />
-                </Box>
-                <div className="message">
-                  <Stack sx={{ width: '100%' }} spacing={2}>
-                    {message && (
-                      <Fade in={!!message} timeout={300}>
-                        <Alert variant="filled" severity="success">
-                          {message}
-                        </Alert>
-                      </Fade>
-                    )}
-                  </Stack>
-                </div>
-                <button
-                  className="setting-account__radius__button"
-                  onClick={handleValidateRange}
-                  aria-label="Valider la distance"
-                >
-                  Valider la distance
-                </button>
-              </label>
-            </div>
-          </>
-        </div>
-      )}
-    </>
-  );
+            </label>
+          </div>
+        </>
+      </div>
+    )}
+  </>);
 }
 
 export default SettingAccount;

@@ -3,13 +3,14 @@ import { registerRoute } from 'workbox-routing';
 import { StaleWhileRevalidate } from 'workbox-strategies';
 
 // Version du service worker pour gérer le versioning
-const SW_VERSION = '0.0.10';
+const SW_VERSION = '0.0.110';
 const CACHE_NAME = `my-app-cache-${SW_VERSION}`;
 //console.log(`Service Worker Version: ${SW_VERSION}`);
 const urlsToCache = [
   '/',
-  '/manifest.json?v=0.0.8', // Change version in HTML too
-  // Autres ressources
+  '/manifest.json?v=0.0.9', //! Change version in HTML too
+  /* '/assets/FetchButton-CmI3IYuX.css' */
+  // add other static assets to force cache
 ];
 
 // Open IndexedDB and get unreadCount
@@ -107,9 +108,13 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames
+        /* cacheNames
           .filter((cacheName) => cacheName !== CACHE_NAME)
-          .map((cacheName) => caches.delete(cacheName))
+          .map((cacheName) => caches.delete(cacheName)) */
+          cacheNames.map((cacheName) => {
+            console.log(`Suppression du cache : ${cacheName}`);
+            return caches.delete(cacheName); // Supprime tous les caches
+          })
       );
     })
   );
@@ -123,6 +128,12 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(urlsToCache);
+      // or that, to update a specific file
+      /* return cache.addAll([
+        '/', 
+        '/manifest.json', 
+        '/assets/FetchButton-CmI3IYuX.css' // Met à jour le fichier CSS
+      ]); */
     })
   );
 });
@@ -130,7 +141,7 @@ self.addEventListener('install', (event) => {
 //* PWA
 // ======= Intégration du cache de vite-plugin-pwa =======
 cleanupOutdatedCaches();
-precacheAndRoute(self.__WB_MANIFEST || []);
+precacheAndRoute(self.__WB_MANIFEST || [{ url: '/assets/FetchButton-CmI3IYuX.css', revision: null }]);
 
 //* End PWA
 

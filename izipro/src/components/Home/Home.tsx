@@ -5,7 +5,7 @@ import Presentation from './Presentation/Presentation';
 import Footer from '../Footer/Footer';
 
 // React Router
-import { useNavigate } from 'react-router';
+/* import { useNavigate } from 'react-router'; */
 
 // Styles
 import './Home.scss';
@@ -14,11 +14,11 @@ import './Home.scss';
 import { useEffect, useState } from 'react';
 
 function Home() {
-  let navigate = useNavigate();
+  /* let navigate = useNavigate(); */
   const [isFooter, setIsFooter] = useState(false);
   const [loginVisibility, setLoginVisibility] = useState(true);
 
-  // check if user is logged in and if cookie consents are accepted
+/*   // check if user is logged in and if cookie consents are accepted
   useEffect(() => {
     // condition if user not logged in
     const getItem = localStorage.getItem('login');
@@ -36,7 +36,7 @@ function Home() {
     if (isLogged) {
       navigate('/dashboard', { replace: true });
     }
-  }, []);
+  }, []); */
 
   // useEffect to check the size of the window
   useEffect(() => {
