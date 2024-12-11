@@ -32,6 +32,7 @@ import CookieConsentModal from '../Hook/Cookie/CMPModal';
 import './Footer.scss';
 
 
+
 type ResponseCookieConsents = {
   data: {
     createCookieConsents: CookieConsentsProps;
@@ -43,9 +44,10 @@ function Footer() {
   //state
   const [cookiesModal, setCookiesModal] = useState<boolean>(false);
   const [clickCookie, setClickCookie] = useState<boolean>(false);
-  const [CGUModal, setCGUModal] = useState<boolean>(false);
+  const [rulesModal, setRulesModal] = useState<boolean>(false);
   const [contactModal, setContactModal] = useState<boolean>(false);
   const [isGetCookie, setIsGetCookie] = useState<boolean>(true);
+  const [isLegalNotices, setIsLegalNotices] = useState<boolean>(false);
 
   //useRef
   const isGetRulesRef = useRef<boolean>(false);
@@ -176,8 +178,6 @@ function Footer() {
         },
       },
     }).then(() => {
-      //setTimeout(() => setCGUModal(false), 300);
-      //setCGUModal(false);
       userDataStore.setState({ CGU: true });
     });
 
@@ -275,13 +275,6 @@ function Footer() {
       setCookiesModal(true);
     }
 
-/*     const interval = setInterval(() => {
-      if ((window as any)['Cookiebot']) {
-        console.log('Cookiebot chargé.');
-        clearInterval(interval);
-      }
-    }, 500);
-    return () => clearInterval(interval); */
   }, []);
 
   // check if user accept CGU if not show the modal
@@ -291,20 +284,13 @@ function Footer() {
         if (!CGUStore) {
           isGetRulesRef.current = true;
         }
-        if (CGUModal === false) {
-          setCGUModal(true);
+        if (rulesModal === false) {
+          setRulesModal(true);
         }
       }
     }
   }, [CGU, CGUStore, id]);
 
- /*  const openCookieModal = () => {
-    if (window && (window as any)['Cookiebot']) {
-      (window as any)['Cookiebot'].renew(); // Ouvre la modale de gestion des cookies
-    } else {
-      console.error('Cookiebot n\'est pas encore chargé.');
-    }
-  }; */
 
   return (
     <div className="footer">
@@ -318,7 +304,20 @@ function Footer() {
             href="#"
             onClick={(event) => {
               event.preventDefault();
-              setCGUModal(true);
+              setIsLegalNotices(true);
+              setRulesModal(true);
+              !CGUStore && (isGetRulesRef.current = true);
+            }}
+            aria-label="Mentions légales"
+          >
+            Mentions légales
+          </a>
+          <a
+            className="footer-container__link"
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              setRulesModal(true);
               !CGUStore && (isGetRulesRef.current = true);
             }}
             aria-label="Conditions Générales d'Utilisation"
@@ -343,9 +342,7 @@ function Footer() {
               event.preventDefault();
               setCookiesModal(true);
               document.body.classList.remove('menu-open');
-              /* !cookieStore && (isGetRulesRef.current = true); */
               setClickCookie(true);
- 
             }}
             aria-label="Politique de Cookies"
           >
@@ -359,8 +356,10 @@ function Footer() {
 
       <RulesModal
         content={CGUStore}
-        setIsOpenModal={setCGUModal}
-        isOpenModal={CGUModal}
+        setIsOpenModal={setRulesModal}
+        isLegalNotices={isLegalNotices}
+        setIsLegalNotices={setIsLegalNotices}
+        isOpenModal={rulesModal}
         handleAccept={handleAcceptCGU}
         handleLogout={handleLogout}
         loading={rulesLoading || updateUserLoading}

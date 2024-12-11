@@ -45,11 +45,17 @@
             overflow: auto;
 
             .rules-modal__container__content {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
                 overflow: auto;
                 overflow-x: hidden;
                 height: 100%;
 
                 .rules-modal__container__content__description {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
                     padding-bottom: 1rem;
                     text-align: left;
                     height: auto;
