@@ -3,12 +3,12 @@ import { registerRoute } from 'workbox-routing';
 import { StaleWhileRevalidate } from 'workbox-strategies';
 
 // Version du service worker pour gérer le versioning
-const SW_VERSION = '0.0.110';
+const SW_VERSION = '0.0.111';
 const CACHE_NAME = `my-app-cache-${SW_VERSION}`;
 //console.log(`Service Worker Version: ${SW_VERSION}`);
 const urlsToCache = [
   '/',
-  '/manifest.json?v=0.0.9', //! Change version in HTML too
+  '/manifest.json?v=0.0.12', //! Change version in HTML too
   /* '/assets/FetchButton-CmI3IYuX.css' */
   // add other static assets to force cache
 ];

@@ -5,6 +5,13 @@ import { userDataStore } from '../../../../store/UserData';
 import './rulesModal.scss';
 import Backdrop from '@mui/material/Backdrop';
 import { useShallow } from 'zustand/shallow';
+import { useEffect } from 'react';
+
+declare global {
+  interface Window {
+    handleButtonClick: () => void;
+  }
+}
 
 type DeleteItemModalProps = {
   loading?: boolean;
@@ -12,6 +19,7 @@ type DeleteItemModalProps = {
   setIsLegalNotices?: (value: boolean) => void;
   content: string;
   isOpenModal: boolean;
+  setContactModal?: (value: boolean) => void;
   setIsOpenModal: (value: boolean) => void;
   handleAccept: (localConsents?: string, acceptAll?: boolean | null) => void;
   handleLogout?: (userId: number) => void;
@@ -22,6 +30,7 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
   isLegalNotices,
   setIsLegalNotices,
   content,
+  setContactModal,
   isOpenModal,
   setIsOpenModal,
   handleAccept,
@@ -35,6 +44,31 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
       setIsLegalNotices && setIsLegalNotices(false);
     }, 200);
   };
+  
+  window.handleButtonClick = () => {
+    setIsOpenModal(false);
+    setContactModal && setContactModal(true);
+  };
+  // useEffect to control the click event on the modal
+  useEffect(() => {
+    const elements = document.querySelectorAll('.rules-modal__container__content__description [data-onclick]');
+    elements.forEach(element => {
+      const functionName = element.getAttribute('data-onclick');
+      if (functionName && typeof (window as any)[functionName] === 'function') {
+        element.addEventListener('click', (window as any)[functionName]);
+      }
+    });
+
+    return () => {
+      elements.forEach(element => {
+        const functionName = element.getAttribute('data-onclick');
+        if (functionName && typeof (window as any)[functionName] === 'function') {
+          element.removeEventListener('click', (window as any)[functionName]);
+        }
+      });
+    };
+  }, [content]);
+  
   return (
     <Modal
       className="rules-modal"
@@ -72,10 +106,10 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
             {loading ? (
               <Spinner />
             ) : isLegalNotices ? (
-              <div className="rules-modal__container__content">
-                <div className="rules-modal__container__content__description">
-                  <h2 className="rules-subtitle">Éditeur du Site</h2>
-                  <p className="rules-description">
+              <div className="rules-modal__container__content legal-notice">
+                <div className="rules-modal__container__content__description legal-notice">
+                  <h2 className="rules-subtitle legal-notice">Éditeur du Site</h2>
+                  <p className="rules-description legal-notice">
                     {' '}
                     NOM : [Votre Nom ou Nom de l'Entreprise]
                     <br />
@@ -84,8 +118,8 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
                     EMAIL : <a href="mailto:[Votre Email]">[Votre Email]</a>
                     <br /> TEL : [Votre Numéro de Téléphone]{' '}
                   </p>
-                  <h2 className="rules-subtitle">Hébergeur du Site</h2>
-                  <p className="rules-description">
+                  <h2 className="rules-subtitle legal-notice">Hébergeur du Site</h2>
+                  <p className="rules-description legal-notice">
                     {' '}
                     NOM : Hostinger International Ltd.
                     <br />

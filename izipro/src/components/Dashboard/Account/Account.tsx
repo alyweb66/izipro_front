@@ -1,11 +1,11 @@
 // React and React Router imports
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
+//import { useNavigate } from 'react-router';
 
 // State management and GraphQL imports
 import { userDataStore } from '../../../store/UserData';
 import { useMutation } from '@apollo/client';
-//import { GET_USER_DATA } from '../../GraphQL/UserQueries';
+
 import {
   CHANGE_PASSWORD_MUTATION,
   DELETE_ACCOUNT_MUTATION,
@@ -17,14 +17,15 @@ import { UAParser } from 'ua-parser-js';
 // Third-party libraries
 import DOMPurify from 'dompurify';
 import validator from 'validator';
-// @ts-expect-error react-modal is not compatible with typescript
-import ReactModal from 'react-modal';
+
+//import ReactModal from 'react-modal';
 import { useShallow } from 'zustand/shallow';
 // Local component imports
 import SettingAccount from './SettingAccount/SettingAccount';
 import { Localization } from '../../Hook/Localization';
 import Spinner from '../../Hook/Components/Spinner/Spinner';
 import serviceWorkerRegistration from '../../Hook/ServiceWorkerRegistration';
+import useHandleLogout from '../../Hook/HandleLogout';
 
 // Type definitions
 import { UserAccountDataProps, UserDataProps } from '../../../Type/User';
@@ -36,7 +37,6 @@ import noPicture from '/logos/no-picture.webp';
 //Maplibre
 import maplibregl, { Map } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-//import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Styling imports
 import './Account.scss';
@@ -58,11 +58,12 @@ import InfoPop from '../../Hook/Components/InfoPop/InfoPop';
 
 //import '../../../styles/spinner.scss';
 
-ReactModal.setAppElement('#root');
+//ReactModal.setAppElement('#root');
 
 function Account() {
   // Navigate
-  let navigate = useNavigate();
+  // let navigate = useNavigate();
+  const handleLogout = useHandleLogout();
 
   const { askPermission, disableNotifications } = serviceWorkerRegistration();
   // useRef for profile picture
@@ -84,33 +85,37 @@ function Account() {
     lat,
     setImage,
     postal_code,
-  ] = userDataStore(useShallow((state) => [
-    state.id,
-    state.email,
-    state.address,
-    state.city,
-    state.first_name,
-    state.last_name,
-    state.lng,
-    state.siret,
-    state.denomination,
-    state.image,
-    state.description,
-    state.lat,
-    state.setImage,
-    state.postal_code,
-  ]));
+  ] = userDataStore(
+    useShallow((state) => [
+      state.id,
+      state.email,
+      state.address,
+      state.city,
+      state.first_name,
+      state.last_name,
+      state.lng,
+      state.siret,
+      state.denomination,
+      state.image,
+      state.description,
+      state.lat,
+      state.setImage,
+      state.postal_code,
+    ])
+  );
   const [
     emailNotification,
     endpointStore,
     setEnpointStore,
     setEmailNotification,
-  ] = userNotificationStore(useShallow((state) => [
-    state.email_notification,
-    state.endpoint,
-    state.setEndpoint,
-    state.setEmailNotification,
-  ]));
+  ] = userNotificationStore(
+    useShallow((state) => [
+      state.email_notification,
+      state.endpoint,
+      state.setEndpoint,
+      state.setEmailNotification,
+    ])
+  );
 
   //state
   const [first_nameState, setFirstNameState] = useState(first_name || '');
@@ -168,15 +173,19 @@ function Account() {
 
   // Store data
   const [serverErrorStatus, resetServerError, serverErrorStatusText, message] =
-    serverErrorStore(useShallow((state) => [
-      state.status,
-      state.resetServerError,
-      state.statusText,
-      state.message,
-    ]));
+    serverErrorStore(
+      useShallow((state) => [
+        state.status,
+        state.resetServerError,
+        state.statusText,
+        state.message,
+      ])
+    );
   const setAccount = userDataStore(useShallow((state) => state.setAccount));
   const role = userDataStore(useShallow((state) => state.role));
-  const resetUserData = userDataStore(useShallow((state) => state.resetUserData));
+  const resetUserData = userDataStore(
+    useShallow((state) => state.resetUserData)
+  );
 
   // Mutation to update the user data
   const [updateUser, { loading: updateUserLoading, error: updateUserError }] =
@@ -571,23 +580,9 @@ function Account() {
       if (response.data?.deleteUser) {
         // clear user data store
         resetUserData();
-        // clear local storage and session storage
-        localStorage.clear();
-        sessionStorage.clear();
-
-        // clear the cookie
-        if (document.cookie) {
-          document.cookie =
-            'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-          document.cookie =
-            'refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-          document.cookie =
-            'session-id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        }
-        //redirect to home page
+        handleLogout(id);
         setModalIsOpen(false);
-        navigate('/', { replace: true });
-        //});
+
       }
     });
 

@@ -102,23 +102,6 @@ const useHandleLogout = () => {
       resetMessageMyReqConvId && resetMessageMyReqConvId();
       resetMessageMyConvId && resetMessageMyConvId();
 
-      const getItem = localStorage.getItem('login');
-	  let decodeData;
-      try {
-        decodeData = JSON.parse(atob(getItem || ''));
-      } catch (error) {
-        decodeData = atob(getItem || '');
-      }
-
-	  // if session, remove the cookie consent
-      if (
-        decodeData &&
-        typeof decodeData === 'object' &&
-        'value' in decodeData &&
-        (decodeData.value === 'session')
-      ) {
-        localStorage.removeItem('cookieConsent');
-      } 
 
       localStorage.removeItem('login');
 
@@ -142,3 +125,6 @@ const useHandleLogout = () => {
   };
 };
 export default useHandleLogout;
+
+
+

@@ -22,7 +22,7 @@ const InstallPWA: React.FC = () => {
   const [eventTriggered, setEventTriggered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // to check if the app is installed
+  // to check if the app is installed and check the browser
   useEffect(() => {
     // Réinitialiser l'état pour éviter des valeurs conservées incorrectement
     setIsInstalled(false);
@@ -124,7 +124,7 @@ const InstallPWA: React.FC = () => {
       )}
       {!showInstallButton && !isCompatible && !isInstalled && (
         <div className="message-PWA">
-          {browserName === 'firefox' && (
+          {browserName === 'Firefox' && (
             <p className="content-PWA">
               L'installation de l'application n'est pas supportée sur Firefox,
               utilisez Chrome ou un autre navigateur pour installer

@@ -20,10 +20,13 @@ function ConfirmEmail() {
 	
 	// send token to confirm email
 	useEffect(() =>{
+		// Remove login from local storage
+		localStorage.removeItem('login');
 		//if no token redirect to home
 		if (!token){
 			navigate('/', { replace: true });
 		}
+
 		confirmRegisterEmail({
 			variables:{
 				input:{
@@ -46,7 +49,6 @@ function ConfirmEmail() {
 	return (
 		<div>
 			{confirmEmailLoading && <Spinner />}
-			{/* <h1>Confirm Email</h1> */}
 		</div>
 	);
 }

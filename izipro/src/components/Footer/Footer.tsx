@@ -351,6 +351,9 @@ function Footer() {
           <span className="footer-container__version">
             {import.meta.env.VITE_VERSION}
           </span>
+          <span className="footer-container__copyright">
+            © {new Date().getFullYear()} Toupro. Tous droits réservés.
+          </span>
         </nav>
       </footer>
 
@@ -358,6 +361,7 @@ function Footer() {
         content={CGUStore}
         setIsOpenModal={setRulesModal}
         isLegalNotices={isLegalNotices}
+        setContactModal={setContactModal}
         setIsLegalNotices={setIsLegalNotices}
         isOpenModal={rulesModal}
         handleAccept={handleAcceptCGU}

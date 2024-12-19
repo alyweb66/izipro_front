@@ -67,7 +67,7 @@
     color: v.$color-error;
     font-size: 1.5rem;
     font-weight: 500;
-    z-index: 0;
+    z-index: 20;
   }
 
   .item__header {
@@ -168,7 +168,11 @@
     @media (hover: none) and (pointer: coarse) {
       cursor: default;
     }
+
   }
+
+    
+ 
 
   /*    &.expanded {
         white-space: normal;
@@ -196,7 +200,9 @@
 
     .item__picture__a-pdf {
       position: relative;
-
+      &.deleted {
+        opacity: 0.3;
+      }
       &.img {
         margin: 1rem 0.5rem 0 0.5rem;
         border-radius: 0.5rem;

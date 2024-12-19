@@ -1,16 +1,18 @@
 //import { Outlet } from "react-router";
 import Header from '../../components/Header/Header';
 import Footer from '../../components/Footer/Footer';
-import { Outlet } from 'react-router';
+import { Outlet, useLocation } from 'react-router';
 import './Root.scss';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 function Root() {
   let navigate = useNavigate();
+  const location = useLocation();
   // state
   const [isFooter, setIsFooter] = useState(true);
-
+  
+  const isConfirmEmailRoute = location.pathname === '/confirm-email';
   // disable background image on home page
   useEffect(() => {
     // check whitch page is active
@@ -48,12 +50,11 @@ function Root() {
     // remove the event listener when the component unmount
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
   return (
     <div className="root">
-      <Header />
+      {!isConfirmEmailRoute && <Header />}
       <Outlet />
-      {isFooter && <Footer />}
+      {isFooter && !isConfirmEmailRoute && <Footer />}
     </div>
   );
 }

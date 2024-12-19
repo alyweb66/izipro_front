@@ -206,7 +206,7 @@ const RequestItem = ({
             layout
             style={{ overflow: 'hidden' }}
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
+            animate={{ opacity: isMyConversation && requestByDate?.deleted_at ? 0.3 : 0, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.1, type: 'tween' }}
           >
@@ -244,7 +244,7 @@ const RequestItem = ({
                       aria-label={`Télécharger ${media.name}`}
                     >
                       <img
-                        className="item__picture__a-pdf img"
+                        className={`item__picture__a-pdf img ${isMyConversation && (requestByDate?.deleted_at ? 'deleted' : '')}`}
                         src={pdfLogo}
                         alt={media.name}
                       />
@@ -252,7 +252,7 @@ const RequestItem = ({
                     </a>
                   ) : (
                     <img
-                      className="item__picture img"
+                      className={`item__picture img ${isMyConversation && (requestByDate?.deleted_at ? 'deleted' : '')}`}
                       key={media.id}
                       src={media.url}
                       loading="lazy"

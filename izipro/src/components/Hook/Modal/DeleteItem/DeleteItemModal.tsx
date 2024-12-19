@@ -36,7 +36,7 @@ export const DeleteItemModal: React.FC<DeleteItemModalProps> = ({
     setDeleteItemModalIsOpen(false);
     setTimeout(() => {
     setModalArgs && setModalArgs(null);
-    }, 200);
+    }, 300);
   };
 
   return (

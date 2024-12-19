@@ -21,18 +21,18 @@
             "purpose": "maskable"
           },
         {
-            "src": "/logos/favicon.ico",
-            "sizes": "64x64",
-            "type": "image/x-icon"
-        },
-        {
-            "src": "/ios/apple-touch-icon-180x180.png",
-            "sizes": "180x180",
+            "src": "/logos/favicon-96x96.png",
+            "sizes": "96x96",
             "type": "image/png"
         },
         {
             "src": "/ios/apple-touch-icon-512x512.png",
             "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "/ios/apple-touch-icon-180x180.png",
+            "sizes": "180x180",
             "type": "image/png"
         }
        
@@ -40,13 +40,13 @@
     "screenshots": [
         {
             "src": "/images/mobile.png",
-            "sizes": "540x720",
+            "sizes": "362x783",
             "type": "image/png",
             "label": "Wonder widgets"
         },
         {
             "src": "/images/desktop.png",
-            "sizes": "1200x800",
+            "sizes": "1751x949",
             "type": "image/png",
             "form_factor": "wide",
             "label": "Wonder widgets"

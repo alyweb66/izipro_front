@@ -37,21 +37,18 @@ import './MyRequest.scss';
 import logoProfile from '/logos/logo-profile.webp';
 import { useModal, ImageModal } from '../../Hook/Modal/ImageModal/ImageModal';
 import { MdKeyboardArrowLeft } from 'react-icons/md';
-//@ts-expect-error react-modal is not compatible with typescript
-import ReactModal from 'react-modal';
+
+//import ReactModal from 'react-modal';
 import Spinner from '../../Hook/Components/Spinner/Spinner';
 import { DeleteItemModal } from '../../Hook/Modal/DeleteItem/DeleteItemModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import noPicture from '/logos/no-picture.webp';
-//import { formatMessageDate } from '../../Hook/Component';
 import { MessageList } from '../../Hook/Components/MessageList/MessageList';
 import RequestItem from '../../Hook/Components/RequestHook/RequestHook';
 import { HeaderMessage } from '../../Hook/Components/HeaderMessage/HeaderMessage';
 import { MessageForm } from '../../Hook/Components/MessageForm/MessageForm';
 import { FetchButton } from '../../Hook/Components/FetchButton/FetchButton';
 
-// Configuration for React Modal
-ReactModal.setAppElement('#root');
 
 type MyRequestProps = {
   setIsHasMore: (hasMore: boolean) => void;
