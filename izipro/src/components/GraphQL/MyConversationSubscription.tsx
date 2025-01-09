@@ -3,11 +3,11 @@ import { MESSAGE_SUBSCRIPTION } from './Subscription';
 import { SubscriptionProps } from '../../Type/Subscription';
 import { subscriptionDataStore } from '../../store/subscription';
 import { MessageProps } from '../../Type/message';
-
+import { useShallow } from 'zustand/shallow';
 
 export const useMyConversationSubscriptions = (skip: boolean) => {
 //store
-	const [subscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
+	const [subscriptionStore] = subscriptionDataStore(useShallow((state) => [state.subscription, state.setSubscription]));
 
 	// Message subscription
 	const Subscription = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'clientConversation');

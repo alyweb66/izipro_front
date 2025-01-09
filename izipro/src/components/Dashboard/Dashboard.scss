@@ -39,6 +39,19 @@
             display: none;
             /* For Chrome, Safari and Opera */
         }
+
+        .no-req {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 1rem auto;
+            border-radius: 0.5rem;
+            box-shadow: none;
+            max-width: 90%;
+            color: v.$color-primary-orange;
+            text-align: center;
+
+        }
     }
 
     .indicator {
@@ -83,11 +96,13 @@
 
         .dashboard__nav__menu {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
+            gap:1rem;
             padding: 0;
             position: relative;
             //background-color: rgba(255, 255, 255, 0.596);
-
+           // box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1), 0px 0px 0px 0px rgba(0, 0, 0, 0.1);
+            z-index: 10;
 
             .dashboard__nav__menu__content__tab {
                 position: relative;
@@ -103,16 +118,12 @@
                 transition: 0.2s ease color;
 
                 .badge-container {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    min-width: 2rem;
-                    height: 1.5rem;
-                    visibility: hidden;
+                position:absolute;
+                right: -0.2rem;
+                top: 0.9rem;
+                background-color: #f5c6cb;
 
-                    &.visible {
-                        visibility: visible;
-                    }
+                   
                 }
 
                 .tab-content {
@@ -189,7 +200,7 @@
             .dashboard__nav__menu {
                 .dashboard__nav__menu__content__tab {
                     font-size: 0.9rem;
-
+             
                 }
             }
         }
@@ -345,9 +356,10 @@
                     z-index: 1;
                     top: 3.9rem;
                     left: 0;
+                    gap:0;
                     border-radius: 0 0 0.5rem 0.5rem;
-                    box-shadow: 0 0 0.5rem 0.1rem rgba(0, 0, 0, 0.1);
-                    padding: 1rem 0.5rem;
+                    box-shadow: 0  6px 5px rgba(0, 0, 0, 0.288);
+                    padding: 1rem 0.5rem 0.1rem 0.5rem;
                     font-weight: 500;
 
                     /* For mouse */
@@ -371,6 +383,11 @@
                         list-style-type: none;
                         transition: transform 0.1s ease;
 
+                        .badge-container {
+                            right: 0.2rem;
+               
+                        }
+        
 
                         &:hover {
                             .indicator {

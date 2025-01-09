@@ -86,6 +86,7 @@ export const userDataStore = create<UserDataStore>((set) => ({
 				lat: data.lat,
 				siret: data.siret,
 				denomination: data.denomination,
+				description: data.description,
 			}));
 		}
 	},
@@ -173,15 +174,25 @@ export const cookieConsents = create<CookieConsentStore>((set) => ({
 	user_id: 0,
 	cookies_analytics: null,
 	cookies_marketing: null,
-	cookies_necessary: null,
 
 	resetCookieConsents: () => set({
 		id: 0,
 		user_id: 0,
 		cookies_analytics: null,
 		cookies_marketing: null,
-		cookies_necessary: null
 	})
+}));
+
+type IsLoggedOutStore = {
+	isLoggedOut: boolean;
+	setIsLoggedOut: (isLoggedOut: boolean) => void;
+	resetIsLoggedOut: () => void;
+}
+
+export const isLoggedOutStore = create<IsLoggedOutStore>((set) => ({
+	isLoggedOut: false,
+	setIsLoggedOut: (isLoggedOut) => set({ isLoggedOut }),
+	resetIsLoggedOut: () => set({ isLoggedOut: false })
 }));
 
 

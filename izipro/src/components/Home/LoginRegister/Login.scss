@@ -19,11 +19,12 @@
   .login-container__logo {
     display: flex;
     justify-content: center;
+    align-items: center;
     margin: 0;
 
     .__image {
-      width: 50px;
-      height: 50px;
+      width: 40px;
+      height: 40px;
       
     }
 
@@ -231,6 +232,10 @@
       justify-content: center;
       align-items: center;
 
+      .message {
+        margin-top: 0.5rem;
+      }
+      
       &.label {
         color: v.$color-primary-blue;
         font-weight: 500;
@@ -303,6 +308,7 @@
 
 @media (max-width: 480px) {
   .login-container {
+    border-radius: 0px 0px 10px 10px;
     margin-top: 0;
     padding-top: 0.5rem;
 

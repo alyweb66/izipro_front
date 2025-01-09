@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { MessageProps } from '../Type/message';
 
-type MessageStore = {
+export type MessageStore = {
     messages: MessageProps[];
     setMessageStore: (data: MessageProps[]) => void;
     resetMessage: () => void;

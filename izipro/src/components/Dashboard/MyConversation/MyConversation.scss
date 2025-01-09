@@ -1,978 +1,172 @@
 @use '../../../styles/variables' as v;
 @use '../../../styles/mixins' as m;
 
-
 .my-conversation {
-    // position for spinner
-    position: relative;
+  // position for spinner
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  justify-content: space-evenly;
+  align-items: stretch;
+  height: 100%;
+  background-color: transparent;
+  padding-top: 0.5rem;
+
+  .my-conversation__container {
     display: flex;
-    justify-content: space-evenly;
-    align-items: stretch;
+    flex-direction: column;
     height: 100%;
-    background-color: transparent;
-    padding-top: 0.5rem;
+    width: 100%;
+    max-width: 40%;
 
+    .my-conversation__container__deploy {
+      top: 0;
+      font-size: 1rem;
+      color: v.$color-primary-orange;
+      text-decoration: underline;
+      border: none;
+      width: 100%;
+      background-color: transparent;
+      backdrop-filter: blur(2px);
+      margin-bottom: 0.2rem;
+      //box-shadow: 0px 4px 10px -2px rgba(0, 0, 0, 0.1);
+      z-index: 5;
+      /* For mouse */
+      @media (hover: hover) and (pointer: fine) {
+        cursor: pointer;
+      }
 
+      /* For touch */
+      @media (hover: none) and (pointer: coarse) {
+        cursor: default;
+      }
+    }
 
-    .my-conversation__list {
+    .my-conversation__container__list {
+      @include m.fader-top;
+      & {
         overflow-y: auto;
         -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
         touch-action: pan-y;
         scrollbar-width: none;
-        width: 100%;
-        max-width: 40%;
         margin: 0 0.1rem;
-        height: 100%;
+        // height: 100%;
+      }
 
-        &::-webkit-scrollbar {
-            display: none;
-            /* For Chrome, Safari and Opera */
-        }
+      &::-webkit-scrollbar {
+        display: none;
+        /* For Chrome, Safari and Opera */
+      }
 
-        &.no-req {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            margin: 0.5rem auto;
-            border-radius: 0.5rem;
-            box-shadow: none;
-            max-width: 90%;
-            color: v.$color-primary-orange;
-            text-align: center;
-
-        }
-
-        .my-conversation__list__fetch-button {
-            @include m.fetch-button;
-
-            & {
-                display: flex;
-                justify-content: center;
-            }
-        }
-
-        .my-conversation__list__detail {
-            padding-left: 0;
-            .my-conversation__list__detail__item {
-                overflow: hidden;
-                scrollbar-width: none;
-                display: flex;
-                flex-direction: column;
-                position: relative;
-                margin: 1rem;
-                background-color: white;
-                border-radius: 0.5rem;
-                box-shadow: -5px 0 10px #6666661c,
-                    -5px 0 10px #ffffff17,
-                    5px 0 10px #6666661c;
-
-                /* For mouse */
-                @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer;
-                }
-
-                /* For touch */
-                @media (hover: none) and (pointer: coarse) {
-                    cursor: default;
-                }
-
-
-                &::-webkit-scrollbar {
-                    display: none;
-                    /* For Chrome, Safari and Opera */
-                }
-
-                &.true {
-                    @include m.urgent-item;
-                }
-
-                &.urgent {
-                    border: none;
-                    margin: auto;
-                    background-color: transparent;
-                    box-shadow: none;
-                    color: red;
-
-                }
-
-                &.not-viewed {
-                    @include m.not-viewed
-                }
-
-                &.deleted {
-                    @include m.deleted;
-
-                    & {
-                        z-index: 1;
-                    }
-
-                    .my-conversation__list__detail__item__deleted {
-                        position: absolute;
-                        top: 50%;
-                        left: 55%;
-                        transform: translate(-50%, -50%);
-                        color: v.$color-error;
-                        font-size: 1.5rem;
-                        font-weight: 500;
-                        z-index: 0;
-                    }
-
-                    .my-conversation__list__detail__item__header,
-                    .my-conversation__list__detail__item {
-                        opacity: 0.4;
-                    }
-
-
-                }
-
-
-
-                .my-conversation__list__detail__item__header {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: baseline;
-
-
-                    &.city {
-                        display: flex;
-                        flex-direction: row;
-                        margin-left: 0.3rem;
-                        font-size: 1rem;
-                        font-weight: 400;
-                    }
-
-                    &.city-span {
-                        color: v.$color-primary-orange;
-                        font-weight: 500;
-                    }
-
-                    &.job {
-                        display: flex;
-                        flex-direction: row;
-                        margin-left: 0.3rem;
-                        font-size: 1rem;
-                        font-weight: 400;
-                        color: black
-                    }
-
-                    &.job-span {
-                        color: v.$color-primary-orange;
-                        font-weight: 500;
-                    }
-
-                    &.name {
-                        display: flex;
-                        flex-direction: row;
-
-                        margin: 0 0.3rem 0 0.3rem;
-                        font-size: 1rem;
-                        font-weight: 400;
-
-                    }
-
-                    &.name-span {
-                        color: v.$color-primary-orange;
-                        font-weight: 500;
-                    }
-
-                    &.date {
-                        display: flex;
-                        flex-direction: row;
-                        margin-top: 0.5rem;
-                        margin-left: 0.3rem;
-                        font-size: 0.9rem;
-                        font-weight: 400;
-                    }
-
-                    &.date-span {
-                        color: v.$color-primary-orange;
-                        font-weight: 500;
-                    }
-                }
-
-                &.title {
-                    border: none;
-                    background-color: transparent;
-                    box-shadow: none;
-                    margin: 0.5rem auto 0.2rem 0.2rem;
-                    font-size: 1.2rem;
-                    font-weight: 500;
-                    color: v.$color-primary-blue;
-                }
-
-                &.message {
-                    display: block;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                    width: inherit;
-                    border: none;
-                    padding-left: 0.3rem;
-                    padding-right: 0.3rem;
-                    border-radius: 0;
-                    background-color: transparent;
-                    box-shadow: none;
-                    margin: 0;
-                    font-size: 1rem;
-                    font-weight: 400;
-                    background-color: v.$color-light-blue;
-                    z-index: 2;
-
-                    /* For mouse */
-                    @media (hover: hover) and (pointer: fine) {
-                        cursor: pointer;
-                    }
-
-                    /* For touch */
-                    @media (hover: none) and (pointer: coarse) {
-                        cursor: default;
-                    }
-
-                }
-
-                &.expanded {
-                    white-space: normal;
-                    max-width: none;
-                }
-
-                &.false.selected {
-                    @include m.selected;
-                }
-
-                .my-conversation__list__detail__item__footer {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: baseline;
-                    margin-top: 0.5rem;
-                }
-
-                .my-conversation__list__detail__item__picture {
-                    display: flex;
-                    flex-wrap: wrap;
-
-                    &.deleted {
-                        opacity: 0.3;
-                    }
-
-                    &.img {
-                        margin: 1rem 0.5rem 0 0.5rem;
-                        border-radius: 0.5rem;
-                        width: 70px;
-                        height: 70px;
-                        z-index: 10;
-                        object-fit: cover;
-
-                        /* For mouse */
-                        @media (hover: hover) and (pointer: fine) {
-                            cursor: pointer;
-                        }
-
-                        /* For touch */
-                        @media (hover: none) and (pointer: coarse) {
-                            cursor: default;
-                        }
-
-
-                    }
-                }
-
-                .my-conversation__list__detail__item__delete {
-                    display: none;
-
-                }
-
-                .my-conversation__list__detail__item__delete-FaTrashAlt {
-                    font-size: 1.5rem;
-                    margin: 1rem 1rem 1rem auto;
-                    color: v.$color-error;
-                    z-index: 2;
-
-                    /* For mouse */
-                    @media (hover: hover) and (pointer: fine) {
-                        cursor: pointer;
-                    }
-
-                    /* For touch */
-                    @media (hover: none) and (pointer: coarse) {
-                        cursor: default;
-                    }
-
-                }
-            }
-
-            .my-conversation__list__detail__item.false.selected {
-                @include m.selected;
-            }
-
-            .my-conversation__list__detail__item.true.selected {
-                @include m.selected;
-            }
-        }
-
-
-    }
-
-
-
-
-    .my-conversation__message-list {
+      &.no-req {
         display: flex;
-        flex-direction: column;
+        justify-content: center;
         width: 100%;
-        margin: 0 0.1rem;
-        max-width: 45%;
-        height: 100%;
-
-
-        &.loading {
-            position: relative;
-        }
-
-        .my-conversation__message-list__user {
-
-            .my-conversation__message-list__user__header {
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                box-shadow: 0 1px 6px -2px rgba(0, 0, 0, 0.2);
-                background-color: white;
-                position: relative;
-                border-radius: 0.3rem 0.3rem 0;
-
-                /* For mouse */
-                @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer;
-                }
-
-                /* For touch */
-                @media (hover: none) and (pointer: coarse) {
-                    cursor: default;
-                }
-
-
-                .my-conversation__message-list__user__header__detail {
-                    display: flex;
-                    align-items: center;
-                    background-color: white;
-                    border-radius: 0.3rem 0.3rem 0;
-
-                    &.return {
-                        display: none;
-                    }
-
-                    &.img {
-                        @include m.border;
-                        margin: 0.5rem 1rem;
-                        border-radius: 0.5rem;
-                        width: 50px;
-                        height: 50px;
-                        box-shadow: 5px 5px 10px #ebebeb,
-                            -5px -5px 10px #ffffff;
-                        object-fit: cover;
-                    }
-
-                    &.name {
-                        display: block;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                        box-shadow: none;
-                        margin: 0rem 0.3rem 0.3rem 0.3rem;
-                        font-size: 1rem;
-                        font-weight: 500;
-
-                        &.deployed {
-                            margin: 0.3rem 1rem;
-                            font-size: 0.8rem;
-                        }
-                    }
-
-                    &.deploy-arrow {
-                        color: v.$color-primary-blue;
-                        font-size: 2.5rem;
-                        font-weight: 600;
-                        margin-left: 0.5rem;
-                        margin-right: 0.5rem;
-                    }
-
-                }
-
-                .my-conversation__message-list__user__header__request {
-                    background-color: white;
-
-                    &.title {
-                        width: 98%;
-                        padding: 0 0.5rem;
-                        box-shadow: none;
-                        margin: 0 0.5rem 0.5rem 0.5rem;
-                        background-color: white;
-                        color: v.$color-primary-blue;
-                        font-size: 0.8rem;
-                        font-weight: 500;
-                    }
-                }
-
-            }
-
-        }
-
-        /* .my-conversation__container {
-            position: relative;
-            width: 100%;
-            flex-grow: 1;
-            overflow: auto;
-            height: 100%;
-
-            .my-conversation__background {
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 0;
-
-            }
-
-            .my-conversation__background::before {
-                content: "";
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: url('/izipro-logo.svg') no-repeat center center;
-                background-size: contain;
-                opacity: 0.1;
-                z-index: -1;
-            }
-
-            .my-conversation__message-list__message {
-                display: flex;
-                flex-direction: column;
-                margin: 0rem;
-                padding: 0 1rem;
-                overflow-y: auto;
-                scrollbar-width: none;
-                flex-grow: 1;
-                position: relative;
-                z-index: 1;
-                background: transparent;
-                height: 100%;
-                width: 100%;
-                padding-bottom: 0.5rem;
-
-                &::-webkit-scrollbar {
-                    display: none;
-                
-                }
-
-                .my-conversation__message-list__message__detail {
-                    display: flex;
-                    flex-direction: column;
-                    // margin: 0.5rem 0;
-                    background: transparent;
-                    height: auto;
-                    width: 100%;
-
-                    &.me {
-                        justify-content: flex-end;
-
-                        .my-conversation__message-list__message__detail__date {
-                            display: flex;
-                            justify-content: flex-end;
-                            margin-right: 0.5rem;
-                            font-size: 0.8rem;
-                            font-weight: 500;
-                            color: v.$color-primary-orange;
-                        }
-                    }
-
-
-
-                    .my-conversation__message-list__message__detail__date {
-                        display: flex;
-                        justify-content: flex-start;
-                        margin-left: 0.5rem;
-                        font-size: 0.8rem;
-                        font-weight: 500;
-                        color: v.$color-primary-blue;
-                        scrollbar-width: none;
-
-                        &::-webkit-scrollbar {
-                            display: none;
-                  
-                        }
-                    }
-
-                    .content {
-                        display: flex;
-                        align-self: flex-start;
-                        flex-direction: column;
-                        background-color: v.$color-chat-blue;
-                        border-radius: 0 1rem 1rem 1rem;
-                        margin-top: 1rem;
-                        width: 80%;
-                        max-width: fit-content;
-                        scrollbar-width: none;
-
-                        &::-webkit-scrollbar {
-                            display: none;
-                   
-                        }
-
-
-
-                        .my-conversation__message-list__message__detail__image-container {
-                            width: 100%;
-                            max-width: fit-content;
-
-                            .map {
-                                display: flex;
-                                flex-wrap: wrap;
-                                background-color: transparent;
-                                gap: 0.3rem;
-                                margin: 0.5rem 0.5rem;
-                                justify-content: flex-start;
-                                max-width: fit-content;
-
-                                .a-pdf {
-                                    display: flex;
-                                    justify-content: end;
-                                    width: auto;
-                                    border-radius: 0.5rem;
-
-                                    .my-conversation__message-list__message__detail__image-pdf {
-                                        border-radius: 0.5rem;
-                                        object-fit: cover;
-                                        flex: 1;
-                                        width: auto;
-                                        min-width: 5rem;
-                                        height: auto;
-
-                                  
-                                        @media (hover: hover) and (pointer: fine) {
-                                            cursor: pointer;
-                                        }
-
-                                 
-                                        @media (hover: none) and (pointer: coarse) {
-                                            cursor: default;
-                                        }
-
-
-                                        &.single {
-                                            width: fit-content;
-                                            max-width: 5rem;
-                                            height: auto;
-                                            border-radius: 0.5rem;
-                                        }
-
-                                        &.multiple {
-                                            width: 5rem;
-                                            height: auto;
-                                            object-fit: cover;
-                                        }
-
-                                        &.loading {
-                                            position: relative;
-                                        }
-
-
-                                    }
-                                }
-
-                                .my-conversation__message-list__message__detail__image {
-                                    border-radius: 0.5rem;
-                                    object-fit: cover;
-                                    flex: 1;
-                                    width: auto;
-                                    min-width: 5rem;
-                                    height: auto;
-
-            
-                                    @media (hover: hover) and (pointer: fine) {
-                                        cursor: pointer;
-                                    }
-
-
-                                    @media (hover: none) and (pointer: coarse) {
-                                        cursor: default;
-                                    }
-
-
-
-                                    &.single {
-                                        width: fit-content;
-                                        max-width: 100%;
-                                        height: auto;
-                                        max-height: 20rem;
-                                        border-radius: 0.5rem;
-                                    }
-
-                                    &.multiple {
-                                        width: 5rem;
-                                        height: 5rem;
-                                        object-fit: cover;
-                                    }
-
-                                    &.loading {
-                                        position: relative;
-                                    }
-                                }
-
-
-                                &.message {
-                                    margin-bottom: 0;
-                                }
-
-                            }
-
-                        }
-
-                        &.me {
-                            border-radius: 1rem 1rem 0rem 1rem;
-                            align-self: flex-end;
-                            background-color: black;
-                            background-color: v.$color-chat-orange;
-                            margin-top: 1rem;
-
-
-                            .my-conversation__message-list__message__detail__image-container {
-                                // background-color: red;
-                                display: flex;
-                                justify-content: flex-end;
-
-                                .map {
-
-                                    justify-content: flex-end;
-
-                                }
-                            }
-
-                            .my-conversation__message-list__message__detail__texte {
-                                word-wrap: break-word;
-                                overflow-wrap: break-word;
-
-                            }
-                        }
-
-                        .my-conversation__message-list__message__detail__texte {
-                            padding: 0.2rem 0.5rem;
-                            word-wrap: break-word;
-                            overflow-wrap: break-word;
-
-                        }
-                    }
-                }
-
-            }
-        }
-
-        .my-conversation__container::before,
-        .my-conversation__container::after {
-            content: "";
-            position: absolute;
-            //top: 0;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
-        }
-
-        .my-conversation__container::before {
-            top: 0;
-            z-index: 2;
-        }
-
-        .my-conversation__container::after {
-            bottom: 0;
-            z-index: 2;
-        } */
-
-
-        .my-conversation__message-list__form {
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-            bottom: 0;
-            width: 100%;
-
-            .my-conversation__message-list__form__preview {
-                max-width: 100%;
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                background-color: transparent;
-                margin: 0;
-                padding: 0.5rem;
-                gap: 1rem;
-
-
-                .my-conversation__message-list__form__preview__container {
-                    display: flex;
-                    flex-wrap: wrap;
-
-
-                    .my-conversation__message-list__form__preview__container__image {
-                        box-shadow: -5px 0 10px #6666661e,
-                            -5px 0 10px #ffffff62,
-                            5px 0 10px #66666680;
-                        border-radius: 0.5rem;
-                        width: 100px;
-                        height: 100px;
-                        object-fit: cover;
-
-
-                    }
-
-                    .my-conversation__message-list__form__preview__container__remove {
-                        margin: 0 0.3rem;
-                        width: 0.8rem;
-                        height: 1.5rem;
-                        border: none;
-                        background-color: transparent;
-                        color: red;
-                        font-size: 1rem;
-                        font-weight: 600;
-                        transition: transform 0.1s ease;
-
-                        /* For mouse */
-                        @media (hover: hover) and (pointer: fine) {
-                            cursor: pointer;
-                        }
-
-                        /* For touch */
-                        @media (hover: none) and (pointer: coarse) {
-                            cursor: default;
-                        }
-
-
-                        &:hover {
-                            transform: scale(1.5);
-                        }
-                    }
-
-
-                }
-            }
-
-        }
-
-        .my-conversation__message-list__form__label {
-            display: flex;
-            align-items: center;
-            margin: 0;
-            padding: 0.5rem;
-            background: white;
-            box-shadow: 0 -1px 6px 1px rgba(0, 0, 0, 0.2);
-            font-size: 1rem;
-            font-weight: 500;
-            color: v.$color-primary-orange;
-            border-radius: 0 0 0.3rem 0.3rem;
-
-
-            .my-conversation__message-list__form__label__attach {
-                font-size: 2rem;
-                margin: 0.2rem 0.3rem;
-
-                /* For mouse */
-                @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer;
-                }
-
-                /* For touch */
-                @media (hover: none) and (pointer: coarse) {
-                    cursor: default;
-                }
-            }
-
-            .my-conversation__message-list__form__label__camera {
-                font-size: 2rem;
-                margin: 0.2rem 0.3rem;
-
-                /* For mouse */
-                @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer;
-                }
-
-                /* For touch */
-                @media (hover: none) and (pointer: coarse) {
-                    cursor: default;
-                }
-            }
-
-            .my-conversation__message-list__form__label__input {
-                overflow: hidden;
-                scrollbar-width: none;
-                border-radius: 0.5rem;
-                width: 100%;
-                margin: 0 0.3rem;
-                color: black;
-                font-weight: 400;
-                border: none;
-                background-color: transparent;
-                resize: none;
-
-                &::-webkit-scrollbar {
-                    display: none;
-                    /* For Chrome, Safari and Opera */
-                }
-
-                &:focus {
-                    outline: none;
-                }
-            }
-
-            .my-conversation__message-list__form__label__send {
-                margin: auto;
-                font-size: 2.5rem;
-                margin-right: 0.5rem;
-                z-index: 10;
-
-                /* For mouse */
-                @media (hover: hover) and (pointer: fine) {
-                    cursor: pointer;
-                }
-
-                /* For touch */
-                @media (hover: none) and (pointer: coarse) {
-                    cursor: default;
-                }
-
-            }
-        }
-
-        .my-conversation__message-list__form__input {
-
-            display: none;
-
-        }
-
-        .my-conversation__message-list__form__button {
-            display: none;
-        }
-
-
+        margin: 1rem auto;
+        border-radius: 0.5rem;
+        box-shadow: none;
+        max-width: 90%;
+        color: v.$color-primary-orange;
+        text-align: center;
+      }
+
+      .my-conversation__container__list__detail {
+        padding-left: 0;
+      }
     }
+  }
+
+  .my-conversation__message-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0 0.1rem;
+    max-width: 45%;
+    height: 100%;
+
+    &.loading {
+      position: relative;
+    }
+  }
 }
 
 @media (max-width: 900px) {
-    .my-conversation {
-        justify-content: center;
+  .my-conversation {
+    justify-content: center;
+    .my-conversation__container {
+      max-width: 50%;
 
+      .my-conversation__list {
+        display: none;
+
+        &.open {
+          display: block;
+          margin: 0 auto;
+          // height: 97%;
+        }
+      }
     }
+  }
 }
 
 @media (max-width: 780px) {
-    .my-conversation {
-        width: 100%;
-        // height: 100%;
+  .my-conversation {
+    width: 100%;
 
-        .my-conversation__list {
-            display: none;
+    // height: 100%;
+    .my-conversation__container {
+      max-width: 100%;
 
-            &.open {
-                display: block;
-                margin: 0 auto;
-                max-width: 98%;
-                // height: 97%;
-            }
+      .my-conversation__list {
+        display: none;
 
-
-
+        &.open {
+          display: block;
+          margin: 0 auto;
+          // height: 97%;
         }
-
-        .my-conversation__message-list {
-            display: none;
-
-            &.open {
-                display: flex;
-                margin: 0 auto;
-                width: 80%;
-                max-width: 80%;
-
-
-                .my-conversation__message-list__user {
-
-                    .my-conversation__message-list__user__header {
-
-                        .my-conversation__message-list__user__header__detail {
-
-                            &.return {
-                                display: block;
-                                font-size: 4rem;
-                                color: v.$color-primary-orange;
-
-                                /* For mouse */
-                                @media (hover: hover) and (pointer: fine) {
-                                    cursor: pointer;
-                                }
-
-                                /* For touch */
-                                @media (hover: none) and (pointer: coarse) {
-                                    cursor: default;
-                                }
-                            }
-                        }
-                    }
-                }
-
-            }
-
-        }
-
+      }
     }
+
+    .my-conversation__message-list {
+      display: none;
+
+      &.open {
+        display: flex;
+        margin: 0 auto;
+        width: 80%;
+        max-width: 80%;
+      }
+    }
+  }
 }
 
 @media (max-width: 480px) {
+  .my-conversation {
+    padding-top: 0;
 
-    .my-conversation {
-        padding-top: 0;
+    .my-conversation__container {
+      max-width: 100%;
+      width: 100%;
 
-        .my-conversation__message-list {
-            &.open {
-                margin-top: 0;
-                width: 100%;
-                max-width: 100%;
-                border-radius: 0;
-
-                .my-conversation__message-list__user {
-                    border-radius: 0;
-
-                    .my-conversation__message-list__user__header {
-                        border-radius: 0;
-
-                        .my-conversation__message-list__user__header__detail {
-                            border-radius: 0;
-
-                            &.return {
-                                font-size: 4rem;
-                            }
-
-                            &.img {
-                                border-radius: 0.5rem;
-                                margin: 0.5rem 0.5rem 0.5rem 0.2rem;
-                            }
-                        }
-                    }
-                }
-
-   /*              .my-conversation__container {
-                    flex-grow: 1;
-               
-                    overflow: auto;
-                } */
-
-                .my-conversation__message-list__form__label {
-                    border-radius: 0;
-
-                }
-            }
-        }
-
-        .my-conversation__message-list__form__preview__container__image {
-            width: 50px;
-            height: 50px;
-
-        }
+      .my-conversation__container__deploy {
+        margin-top: 0.5rem;
+        margin-bottom: 0.2rem;
+      }
     }
+
+    .my-conversation__message-list {
+      &.open {
+        margin-top: 0;
+        border-radius: 0;
+        width: 100%;
+        max-width: 100%;
+      }
+    }
+
+    .my-conversation__message-list__form__preview__container__image {
+      width: 50px;
+      height: 50px;
+    }
+  }
 }

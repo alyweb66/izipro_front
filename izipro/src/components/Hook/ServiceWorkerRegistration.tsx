@@ -2,8 +2,8 @@ import { useMutation } from "@apollo/client";
 import { CREATE_NOTIFICATION_PUSH_MUTATION, DELETE_NOTIFICATION_PUSH_MUTATION } from "../GraphQL/notificationMutation";
 import { useQueryVAPIDKey } from "./Query";
 import { userDataStore } from "../../store/UserData";
-import { useNotificationStore } from "../../store/Notification";
-
+import { userNotificationStore } from "../../store/Notification";
+import { useShallow } from 'zustand/shallow';
 
 type SubscriptionData = {
     endpoint: string;
@@ -15,8 +15,8 @@ type SubscriptionData = {
 
 const serviceWorkerRegistration = () => {
     // Store
-    const id = userDataStore((state) => state.id);
-    const setEnpointStore = useNotificationStore((state) => state.setEndpoint);
+    const id = userDataStore(useShallow((state) => state.id));
+    const setEnpointStore = userNotificationStore(useShallow((state) => state.setEndpoint));
     // Mutation
     const [createNotification, { error: notificationError }] = useMutation(CREATE_NOTIFICATION_PUSH_MUTATION);
     const [deleteNotification, { error: deleteNotificationError }] = useMutation(DELETE_NOTIFICATION_PUSH_MUTATION);

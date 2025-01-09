@@ -11,8 +11,8 @@ export default defineConfig({
 	plugins: [
 		react(),
 		legacy({
-			targets: ['defaults', 'not IE 11', 'safari >= 9'], // Définition des navigateurs cibles
-			additionalLegacyPolyfills: ['regenerator-runtime/runtime'], // Polyfills supplémentaires pour Safari 10
+			targets: ['defaults', 'not IE 11', 'safari >= 9'], // Target IE11 and Safari 9
+			additionalLegacyPolyfills: ['regenerator-runtime/runtime'], // Polyfills for Safari 10
 			modernPolyfills: true,
 		}),
 		VitePWA({
@@ -27,28 +27,13 @@ export default defineConfig({
 				clientsClaim: true,
 				cleanupOutdatedCaches: true,
 				globPatterns: ['**/*.{tsx,js,scss,html,png,jpg,svg,webp}'],
-				//runtimeCaching: [{
-				//	urlPattern: /^https:\/\/back\.betapoptest\.online\/.*/i,
-				//	handler: 'NetworkFirst',
-				//	options: {
-				//		cacheName: 'api-back-cache',
-				//		expiration: {
-				//			maxEntries: 30,
-				//			maxAgeSeconds: 60 * 60 * 24 * 30, // 30 Days
-				//		},
-				//		cacheableResponse: {
-				//			statuses: [0, 200],
-				//		},
-				//	},
-				//}],
+
 			},
 		}),
 	],
 	build: {
-		sourcemap: true,
-		/* rollupOptions: {
-			external: ['workbox-window']
-		  } */
+		sourcemap: false,
+
 	},
 	resolve: {
 		alias: {

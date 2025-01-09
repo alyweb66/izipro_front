@@ -7,7 +7,7 @@ type NotificationStore = NotificationProps & {
     resetNotification: () => void;
 }
 
-export const useNotificationStore = create<NotificationStore>((set) => ({
+export const userNotificationStore = create<NotificationStore>((set) => ({
     email_notification: null,
     endpoint: null,
     setEmailNotification: (data) => set({ email_notification: data }),

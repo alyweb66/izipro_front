@@ -1,39 +1,52 @@
 {
-    "name": "POP",
-    "short_name": "POP",
-    "description": "Trouvez facilement un professionnel avec POP",
+    "name": "Toupro",
+    "short_name": "Toupro",
+    "lang": "fr",
+    "description": "Trouvez facilement un professionnel avec Toupro",
     "start_url": "/",
     "display": "standalone",
+    "categories": ["business", "productivity", "utilities"],
     "theme_color": "#ffffff",
     "background_color": "#ffffff",
     "icons": [
         {
-            "src": "android-chrome-192x192.png",
+            "src": "/logos/web-app-manifest-192x192.png",
             "sizes": "192x192",
+            "type": "image/png"
+          },
+        {
+            "src": "/logos/maskable-icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+          },
+        {
+            "src": "/logos/favicon-96x96.png",
+            "sizes": "96x96",
             "type": "image/png"
         },
         {
-            "src": "android-chrome-512x512.png",
+            "src": "/ios/apple-touch-icon-512x512.png",
             "sizes": "512x512",
-            "type": "image/png",
-            "form_factor": "wide"
+            "type": "image/png"
         },
         {
-            "src": "apple-touch-icon.png",
+            "src": "/ios/apple-touch-icon-180x180.png",
             "sizes": "180x180",
             "type": "image/png"
         }
+       
     ],
     "screenshots": [
         {
-            "src": "mobile.png",
-            "sizes": "540x720",
+            "src": "/images/mobile.png",
+            "sizes": "362x783",
             "type": "image/png",
             "label": "Wonder widgets"
         },
         {
-            "src": "desktop.png",
-            "sizes": "1200x800",
+            "src": "/images/desktop.png",
+            "sizes": "1751x949",
             "type": "image/png",
             "form_factor": "wide",
             "label": "Wonder widgets"

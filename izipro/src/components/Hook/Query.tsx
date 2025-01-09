@@ -1,18 +1,16 @@
 import { useLazyQuery, useQuery } from '@apollo/client';
-import { GET_JOBS_BY_CATEGORY, GET_JOB_CATEGORY, GET_REQUEST_BY_ID, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
+import { GET_ALL_JOBS, GET_JOB_CATEGORY, GET_REQUEST_BY_ID, GET_REQUEST_BY_JOB, GET_USER_REQUESTS } from '../GraphQL/RequestQueries';
 import { GET_JOB_DATA } from '../GraphQL/Job';
 import { GET_COOKIE_CONSENTS, GET_USERS_CONVERSATION, GET_USER_DATA, GET_USER_NOTIFICATION, GET_USER_NOT_VIEWED_REQUESTS, GET_USER_REQUEST_BY_CONVERSATIONS, GET_USER_SUBSCRIPTION, RULES, VAPID_PUBLIC_KEY } from '../GraphQL/UserQueries';
 import { GET_CONVERSATION, GET_CONVERSATION_ID, NOT_VIEWED_CONVERSATIONS } from '../GraphQL/ConversationQueries';
 import { GET_MESSAGES_BY_CONVERSATION, GET_MY_MESSAGES_BY_CONVERSATION } from '../GraphQL/MessageQueries';
 
 
-import '../../styles/spinner.scss';
-
-
 // fetch user data
-export const useQueryUserData = (getData: boolean) => {
+export const useQueryUserData = (skip: boolean) => {
+
 	const { loading, error: getUserError, data: getUserData } = useQuery(GET_USER_DATA, {
-		skip: !getData
+		skip: skip
 	});
 	
 	if (getUserError) {
@@ -36,6 +34,7 @@ export const useQueryRules = (getData: boolean) => {
 };
 
 export const useQueryCookieConsents = (skip: boolean) => {
+
 	const { loading, error: cookieError, data: cookieData } = useQuery(GET_COOKIE_CONSENTS, {
 		skip
 	
@@ -48,8 +47,10 @@ export const useQueryCookieConsents = (skip: boolean) => {
 };
 
 // fetch categories 
-export const useQueryCategory = () => {
-	const { loading, error: categoryError, data: categoriesData } = useQuery(GET_JOB_CATEGORY);
+export const useQueryCategory = (skip: boolean) => {
+	const { loading, error: categoryError, data: categoriesData } = useQuery(GET_JOB_CATEGORY, {
+		skip
+	});
 	if (categoryError) {
 		throw new Error('Error while fetching categories data');
 	}
@@ -58,14 +59,11 @@ export const useQueryCategory = () => {
 };
 
 // fetch jobs
-export const useQueryJobs = (selectedCategory: number) => {
-	
-	const { loading, error: jobError, data: jobData } = useQuery(GET_JOBS_BY_CATEGORY,
+export const useQueryJobs = (skip: boolean) => {
+
+	const { loading, error: jobError, data: jobData } = useQuery(GET_ALL_JOBS,
 		{
-			variables: {
-				categoryId: Number(selectedCategory)
-			},
-			skip: !selectedCategory
+			skip
 		});
 
 	if (jobError) {
@@ -98,7 +96,7 @@ export const useQueryJobData = (jobId:{job_id: number}[], skip: boolean ) => {
 
 // fetch user requests
 export const  useQueryUserRequests = (id: number, offset: number, limit: number, skip: boolean) => {
-	
+
 	const { loading, error: getUserRequestsError, data: getUserRequestsData, fetchMore } = useQuery(GET_USER_REQUESTS, {
 		fetchPolicy: 'no-cache',
 		variables: {
@@ -119,7 +117,7 @@ export const  useQueryUserRequests = (id: number, offset: number, limit: number,
 
 // fetch requests by job
 export const useQueryRequestByJob = (jobId:{job_id: number}[], offset: number, limit: number, skip: boolean) => {
-	
+
 	const jobIdArray = jobId.map((job) => job.job_id);
 
 	const { loading, subscribeToMore, error: requestError, data: getRequestsByJob, fetchMore } = useQuery(GET_REQUEST_BY_JOB, {
@@ -254,8 +252,10 @@ export const useQueryNotViewedRequests = (skip: boolean) => {
 	return {loading, viewedData};
 };
 
-export const useQueryNotViewedConversations = () => {
-	const { loading, error: viewedError, data: notViewedConversationQuery } = useQuery(NOT_VIEWED_CONVERSATIONS);
+export const useQueryNotViewedConversations = (skip: boolean) => {
+	const { loading, error: viewedError, data: notViewedConversationQuery } = useQuery(NOT_VIEWED_CONVERSATIONS, {
+		skip
+	});
 
 	if (viewedError) {
 		throw new Error('Error while fetching viewed requests');

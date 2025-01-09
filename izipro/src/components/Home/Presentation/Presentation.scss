@@ -76,7 +76,9 @@
             font-family: "fredoka", sans-serif;
             font-size: 1.5rem;
             font-weight: 500;
-            color: #028eef;
+            color: v.$color-primary-blue;
+
+           
         }
 
     }
@@ -116,7 +118,10 @@
             font-size: 1.5rem;
             font-weight: 500;
             color: v.$color-primary-blue;
-
+            
+            &.pro {
+                color: v.$color-primary-orange;
+            }
         }
     }
 

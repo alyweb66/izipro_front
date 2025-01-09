@@ -1,5 +1,5 @@
 
-import { RouterProvider } from 'react-router-dom';
+import { RouterProvider } from 'react-router/dom';
 import { ApolloClient, InMemoryCache, ApolloProvider, DefaultOptions, ApolloLink, ServerError } from '@apollo/client';
 // @ts-expect-error - no types available
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
@@ -14,14 +14,14 @@ import { ErrorResponse, onError } from "@apollo/client/link/error";
 import './styles/index.scss';
 import { serverErrorStore } from './store/LoginRegister';
 import { setContext } from '@apollo/client/link/context';
-import { userDataStore } from './store/UserData';
+import { isLoggedOutStore, userDataStore } from './store/UserData';
 //import ReloadPrompt from './Prompt';
 import { registerSW } from 'virtual:pwa-register'
 
 // Register the service worker PWA
 //registerSW({ immediate: true })
 let updateNotified = false;
-// Enregistre le service worker avec des événements de feedback
+// Record the service worker registration
 registerSW({
 	onNeedRefresh() {
 		//console.log("Nouvelle version disponible ! Mise à jour en cours...");
@@ -39,7 +39,7 @@ registerSW({
 						if (newWorker.state === 'installed') {
 							// Le nouveau service worker est installé
 							if (navigator.serviceWorker.controller && !updateNotified) {
-								alert('Votre applicaiton a été mise à jour');
+								alert('Votre application a été mise à jour');
 								updateNotified = true;
 							}
 						}
@@ -52,8 +52,9 @@ registerSW({
 		console.error("Erreur lors de l'enregistrement du Service Worker:", error);
 	},
 });
+
 // store
-const setServerError = (serverError: { status: number; statusText: string }) => {
+const setServerError = (serverError: { status: number; statusText: string, message: string }) => {
 	serverErrorStore.getState().setServerError(serverError);
 };
 
@@ -84,21 +85,30 @@ const defaultOptions: DefaultOptions = {
 		fetchPolicy: 'network-only',
 		errorPolicy: 'all',
 	},
+	mutate: {
+		errorPolicy: 'all',
+	},
 };
 // Global flag to indicate if the user is logged out
 let isLoggedOut = false;
 // Middleware to check if the user has a 401 error from the server
 const errorLink = onError((error: ErrorResponse) => {
-	const statusCode = (error.networkError as ServerError)?.statusCode;
+	const statusCode = Number(error?.graphQLErrors?.[0]?.extensions?.code) 
+		|| (error.networkError as ServerError)?.statusCode 
+		|| 500;
+	console.error('error', error);
 
 	setServerError({
-		status: (statusCode || 500),
+		status: statusCode,
 		statusText: (
-			(error.networkError as ServerError)?.response?.headers.get('message')
+			(error.graphQLErrors && error.graphQLErrors[0]?.extensions?.code?.toString())
+			|| (error.networkError && (error.networkError as ServerError).response?.headers.get('message'))
 			|| (error.networkError && (error.networkError as ServerError).response?.statusText)
-			|| (error.graphQLErrors && error.graphQLErrors[0]?.extensions?.code?.toString())
 			|| ''
-		)
+		),
+		message: error?.graphQLErrors?.[0]?.message
+			?? (error.networkError && (error.networkError as ServerError).response?.statusText)
+			?? '',
 	});
 
 	if (statusCode === 401) {
@@ -111,6 +121,35 @@ const errorLink = onError((error: ErrorResponse) => {
 	}
 	console.error('Error', serverErrorStore.getState(), error.response);
 });
+
+// get X-Session-ID cookie in headers to compare with navigator session-id cookie
+// if they are different, the user is logged out
+// Custom link to intercept responses and get headers
+// Middleware pour capturer le header X-Session-ID
+const captureSessionIdLink = new ApolloLink((operation, forward) => {
+	return forward(operation).map((response) => {
+		const context = operation.getContext();
+		// Verify that the context has a response
+		const { response: httpResponse } = context;
+		if (httpResponse && httpResponse.headers) {
+			// Get le X-Session-ID from the headers
+			const sessionId = httpResponse.headers.get('X-Session-ID');
+
+			if (sessionId) {
+				const sessionCookie = document.cookie.split(';').find(cookie => cookie.includes('session-id'));
+				const sessionIdCookie = sessionCookie?.split('=')[1].trim();
+
+				if (sessionIdCookie !== sessionId) {
+					isLoggedOutStore.setState({ isLoggedOut: true });
+					isLoggedOut = true;
+				}
+			}
+		}
+
+		return response;
+	});
+});
+
 
 // Middleware to check if the user is logged out before making requests
 const authMiddleware = new ApolloLink((operation, forward) => {
@@ -139,7 +178,7 @@ let wsLink = navigator.onLine
 	)
 	: null;
 
-// Écoute les changements d'état de connexion
+// Listen for online and offline events
 window.addEventListener('online', () => {
 	wsLink = new GraphQLWsLink(
 		createClient({
@@ -159,7 +198,7 @@ window.addEventListener('offline', () => {
 //console.log('Initial navigator.onLine:', navigator.onLine);
 //console.log('Initial wsLink:', wsLink);
 //const httpLinkWithLogout = errorLink.concat(httpLink);
-const httpLinkWithMiddleware = ApolloLink.from([userIdMiddleware, authMiddleware, errorLink, httpLink]);
+const httpLinkWithMiddleware = ApolloLink.from([userIdMiddleware, authMiddleware, errorLink, captureSessionIdLink, httpLink]);
 // The split function takes three parameters:
 // * A function that's called for each operation to execute
 // * The Link to use for an operation if the function returns a "truthy" value
@@ -227,22 +266,24 @@ const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
 
-/* if ('serviceWorker' in navigator) {
-	navigator.serviceWorker.addEventListener('controllerchange', () => {
-	  console.log('Nouveau service worker activé, rechargement de la page...');
-	  window.location.reload(); // Recharge la page pour utiliser la nouvelle version
-	});
-  } */
-// register the service worker
-/* if ('serviceWorker' in navigator) {
-	window.addEventListener('load', () => {
-		navigator.serviceWorker.register('/serviceWorker.js', {type: 'module'}).then((registration) => {
-			console.log('Service Worker registered with scope:', registration.scope);
-		}, (error) => {
-			console.error('Service Worker registration failed:', error);
-		});
-	});
-} */
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/serviceWorker.js').then(registration => {
+        registration.onupdatefound = () => {
+            const installingWorker = registration.installing;
+            if (installingWorker) {
+                installingWorker.onstatechange = () => {
+                    if (installingWorker.state === 'installed') {
+                        if (navigator.serviceWorker.controller) {
+                            // New update available
+                            installingWorker.postMessage({ type: 'SKIP_WAITING' });
+							installingWorker.postMessage({ type: 'CLEAR_CACHE' });
+                        }
+                    }
+                };
+            }
+        };
+    });
+}
 
 // render element in the DOM
 root.render(

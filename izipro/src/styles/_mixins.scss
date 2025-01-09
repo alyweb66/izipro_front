@@ -14,7 +14,7 @@
   font-weight: 500;
   box-shadow: none;
   letter-spacing: 0.02rem;
-  
+
 
   /* For mouse */
   @media (hover: hover) and (pointer: fine) {
@@ -170,7 +170,7 @@
   display: flex;
   flex-direction: column;
   top: auto;
-  transform: translate(-50%, -50%);
+ // transform: translate(-50%, -50%);
   width: 80vw;
   height: 80vh;
   background-color: white;
@@ -192,7 +192,7 @@
 
 @mixin not-viewed {
   background-color: #FFFFFF;
-  border: 1px solid rgb(19, 209, 19);
+  border: 1px solid rgb(71, 168, 71);
   border-radius: 0.5rem;
   position: relative;
 
@@ -351,7 +351,7 @@
 
     .custom-options {
       max-height: 50vh;
-      scrollbar-width: none;
+      scrollbar-width: thin;
       overflow: auto;
       position: absolute;
       display: block;
@@ -362,7 +362,7 @@
       margin: 0.5rem 0;
       border-radius: 0.5rem;
       box-sizing: border-box;
-      box-shadow: 0 2px 1px rgba(0, 0, 0, .07);
+      box-shadow: 0  6px 5px rgba(0, 0, 0, 0.288);
       background: #fff;
       transition: all .4s ease-in-out;
       z-index: 5;
@@ -371,10 +371,10 @@
       pointer-events: none;
       transform: translateY(-15px);
 
-      &::-webkit-scrollbar {
+      /* &::-webkit-scrollbar {
         display: none;
-        /* For Chrome, Safari and Opera */
-      }
+        
+      } */
     }
 
     .custom-select.opened .custom-options {
@@ -451,22 +451,23 @@
     .center {
       width: 100%;
 
+
       .custom-options {
         position: fixed;
-        top: 3.7rem;
+        top: 3.8rem;
         left: 0;
         width: 100%;
         margin-top: 0;
         height: fit-content;
         max-height: 70dvh;
         display: block;
-        z-index: 1000;
         overflow-y: auto;
         background-color: white;
+        border-radius: 0 0 0.5rem 0.5rem;
+        //box-shadow: 0 4px 6px 5px rgba(0, 0, 0, 0.15);
       }
 
-
-      .custom-options::before,
+      /* .custom-options::before,
       .custom-options::after {
         content: "";
         position: absolute;
@@ -476,6 +477,7 @@
         background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
       }
 
+
       .custom-options::before {
         transform: none;
         top: 0;
@@ -483,10 +485,13 @@
 
       .custom-options::after {
         bottom: 0;
-      }
+      } */
+
+      
     }
 
   }
+
 }
 
 @mixin urgent-item {
@@ -561,5 +566,29 @@
       cursor: default;
     }
   }
+
+}
+
+@mixin fader-top {
+   // fader top for list
+   mask-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 1) 99%,
+    rgba(0, 0, 0, 0)
+  );
+  -webkit-mask-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 1) 99%,
+    rgba(0, 0, 0, 0)
+  );
+
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+
+  mask-position: top;
+  -webkit-mask-position: top;
 
 }

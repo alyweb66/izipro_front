@@ -1,6 +1,6 @@
 import Logout from './Logout/Logout';
 import './Header.scss';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import { useEffect, useState } from 'react';
 
 
@@ -52,13 +52,13 @@ function Header() {
 			<div className="header__container">
 				<img
 					className='header__container image'
-					src="/izipro-logo.svg"
+					src="/logos/logo-toupro-250x250.png"
 					alt="Izipro logo"
 					role="button"
 					aria-label="Recharger la page"
 					onClick={() => window.location.reload()}
 				/>
-				<h1 className="header__container title">POP</h1>
+				<h1 className="header__container title">Toupro</h1>
 			</div>
 			{isLogged && <Logout />}
 		</header>

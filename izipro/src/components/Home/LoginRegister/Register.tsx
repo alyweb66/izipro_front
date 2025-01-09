@@ -15,11 +15,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // Styles
 import './Register.scss';
-import Spinner from '../../Hook/Spinner';
+import Spinner from '../../Hook/Components/Spinner/Spinner';
+
+type RegisterProps = {
+	loginVisibility: boolean;
+	setLoginVisibility: (value: boolean) => void;
+}
 
 
-
-function Register() {
+function Register({ setLoginVisibility, loginVisibility }: RegisterProps) {
 	// State
 	const [email, setEmail] = useState('');
 	const [proEmail, setProEmail] = useState('');
@@ -38,14 +42,16 @@ function Register() {
 	const [showProPassword, setShowProPassword] = useState(false);
 	const [showProConfirmPassword, setShowProConfirmPassword] = useState(false);
 
+
 	// function to toggle the visibility of the register form
 	const toggleRegisterVisibility = () => {
 		setIsRegisterVisible(!isRegisterVisible);
 	};
 
+
 	// Mutation to register a user
-	const [createUser, {loading: userLoading, error: userError }] = useMutation(REGISTER_USER_MUTATION);
-	const [createProUser, {loading: proUserLoading, error: proUserError }] = useMutation(REGISTER_PRO_USER_MUTATION);
+	const [createUser, { loading: userLoading, error: userError }] = useMutation(REGISTER_USER_MUTATION);
+	const [createProUser, { loading: proUserLoading/* , error: proUserError */ }] = useMutation(REGISTER_PRO_USER_MUTATION);
 
 	// function to handle the registration of a pro user
 	const handleProRegister = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -93,7 +99,7 @@ function Register() {
 		}
 
 		try {
-			const response = await createProUser({
+			createProUser({
 				variables: {
 					input: {
 						email: DOMPurify.sanitize(proEmail),
@@ -101,23 +107,31 @@ function Register() {
 						siret: Number(DOMPurify.sanitize(siret))
 					}
 				}
-			})
-
-			if (response.data.createProUser.id) {
-				setProCreated(true);
-			}
-			setProEmail('');
-			setProPassword('');
-			setProConfirmPassword('');
-			setSiret('');
-			setIsProError('');
-
-			if (proUserError) {
+			}).then((response) => {
+				if (response?.errors && response?.errors?.length > 0) {
+					setIsProError('Erreur lors de la création de l\'utilisateur');
+					setTimeout(() => {
+						setIsProError('');
+					}, 15000);
+				}
+				if (response.data.createProUser.__typename === 'ExistingSiret') {
+					setIsProError('Erreur de SIRET');
+				}
+				if (response.data.createProUser.id) {
+					setProCreated(true);
+					setProEmail('');
+					setProPassword('');
+					setProConfirmPassword('');
+					setSiret('');
+					setIsProError('');
+				}
+			});
+			/* if (proUserError) {
 				setIsProError('Erreur lors de la création de l\'utilisateur');
 				setTimeout(() => {
 					setIsProError('');
 				}, 15000);
-			}
+			} */
 
 
 		} catch (error) {
@@ -165,22 +179,32 @@ function Register() {
 		}
 
 		try {
-			const response = await createUser({
+			//setUserRegisterLoading(true);
+			createUser({
 				variables: {
 					input: {
 						email: DOMPurify.sanitize(email),
 						password: DOMPurify.sanitize(password)
 					}
 				}
-			});
+			}).then((response) => {
+				
+				if (response?.errors && response?.errors?.length > 0) {
+					setError('Erreur lors de la création de l\'utilisateur');
+					setTimeout(() => {
+						setError('');
+					}, 15000);
+				}
 
-			if (response.data.createUser.id) {
-				setUserCreated(true);
-			}
-			setEmail('');
-			setPassword('');
-			setConfirmPassword('');
-			setError('');
+				if (response.data.createUser.id) {
+					setUserCreated(true);
+				}
+				setEmail('');
+				setPassword('');
+				setConfirmPassword('');
+				setError('');
+				//setUserRegisterLoading(false);
+			})
 
 			if (userError) {
 				setError('Erreur lors de la création de l\'utilisateur');
@@ -198,10 +222,11 @@ function Register() {
 		}
 	};
 
+
 	return (
-		<div className="register-container" >
-			<p className="register-container title" ><span onClick={toggleRegisterVisibility}> Créer un compte </span></p>
-			<AnimatePresence>
+        (<div className="register-container" >
+            <p className="register-container title" ><span onClick={() => { toggleRegisterVisibility(); (window.innerWidth < 480 && setLoginVisibility(!loginVisibility)); }}> Créer un compte </span></p>
+            <AnimatePresence>
 				{isRegisterVisible && (
 					<motion.div
 						className="register-container__form"
@@ -211,7 +236,7 @@ function Register() {
 						transition={{ duration: 0.1, type: 'tween' }}
 					>
 						<form className="register-container__form__form" onSubmit={(event) => handleRegister(event)}>
-						{userLoading && <Spinner />}
+							{(userLoading) && <Spinner />}
 							<p className="register-container__form__form category">Particulier</p>
 							<input
 								type="email"
@@ -219,7 +244,7 @@ function Register() {
 								value={email}
 								className="register-container__form__form input"
 								placeholder="Adresse e-mail"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value.toLowerCase())}
 								aria-label="Adresse e-mail"
 								maxLength={50}
 								required
@@ -274,7 +299,7 @@ function Register() {
 								<Stack sx={{ width: '100%' }} spacing={2}>
 									{userCreated && (
 										<Fade in={!!userCreated} timeout={300}>
-											<Alert variant="filled" severity="success">Utilisateur créé avec succès, un email de validation vous a été envoyé</Alert>
+											<Alert variant="filled" severity="success">Utilisateur créé avec succès, un email de validation vous a été envoyé (pas de mail? vérifiez vos spams)</Alert>
 										</Fade>
 									)}
 								</Stack>
@@ -282,7 +307,7 @@ function Register() {
 							<button type="submit" className="register-container__form__form button">Enregistrer</button>
 						</form>
 						<form className="register-container__form__form" onSubmit={(event) => handleProRegister(event)}>
-						{proUserLoading && <Spinner />}
+							{(proUserLoading) && <Spinner />}
 							<p className="register-container__form__form category">Professionnel</p>
 							<input
 								type="email"
@@ -290,7 +315,7 @@ function Register() {
 								value={proEmail}
 								className="register-container__form__form input"
 								placeholder="Adresse e-mail"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProEmail(event.target.value)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setProEmail(event.target.value.toLowerCase())}
 								aria-label="Adresse e-mail"
 								maxLength={50}
 								required
@@ -340,7 +365,7 @@ function Register() {
 								value={siret}
 								className="register-container__form__form input siret"
 								placeholder="Siret (14 chiffres)"
-								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value)}
+								onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSiret(event.target.value.replace(/\s+/g, ''))}
 								aria-label="Siret"
 								maxLength={14}
 								required
@@ -356,7 +381,7 @@ function Register() {
 								<Stack sx={{ width: '100%' }} spacing={2}>
 									{proCreated && (
 										<Fade in={!!proCreated} timeout={300}>
-											<Alert variant="filled" severity="success">Utilisateur créé avec succès, un email de validation vous a été envoyé</Alert>
+											<Alert variant="filled" severity="success">Utilisateur créé avec succès, un email de validation vous a été envoyé (pas de mail? vérifiez vos spams)</Alert>
 										</Fade>
 									)}
 								</Stack>
@@ -366,8 +391,8 @@ function Register() {
 					</motion.div>
 				)}
 			</AnimatePresence>
-		</div>
-	);
+        </div>)
+    );
 }
 
 export default Register;

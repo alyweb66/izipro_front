@@ -1,7 +1,7 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router';
 import  Root  from './routes/Root/Root';
 import  Home  from './components/Home/Home';
-//import PrivateRoute  from './components/Hook/PrivateRoute';
+import PrivateRoute  from './components/Hook/PrivateRoute';
 import ConfirmEmail  from './components/ConfirmEmail/ConfirmEmail';
 import ForgotPassword  from './components/ForgotPassword/ForgotPassword';
 import DisplayError  from './components/DisplayError/DisplayError';
@@ -17,7 +17,10 @@ export const router = createBrowserRouter([
 				children: [
 					{
 						index: true,
-						element: <Home />,
+						element: 
+						<PrivateRoute>
+							<Home />,
+						</PrivateRoute>
 					},
 					{
 						path: '/dashboard',

@@ -3,11 +3,11 @@ import { SubscriptionProps } from '../../Type/Subscription';
 import { subscriptionDataStore } from '../../store/subscription';
 import { MESSAGE_SUBSCRIPTION } from '../GraphQL/Subscription';
 import { MessageProps } from '../../Type/message';
-
+import { useShallow } from 'zustand/shallow';
 
 export const useMyRequestMessageSubscriptions = () => {
 	// store
-	const [subscriptionStore] = subscriptionDataStore((state) => [state.subscription, state.setSubscription]);
+	const [subscriptionStore] = subscriptionDataStore(useShallow((state) => [state.subscription, state.setSubscription]));
 
 	// get the subscription
 	const request = subscriptionStore.find((subscription: SubscriptionProps) => subscription.subscriber === 'request');

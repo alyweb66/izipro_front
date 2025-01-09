@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 
 // Apollo Client
 import { useMutation } from '@apollo/client';
@@ -12,6 +12,7 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
+import { useShallow } from 'zustand/shallow';
 
 // State management and stores
 import { changeForgotPasswordStore } from '../../store/UserData';
@@ -34,16 +35,18 @@ function ForgotPassword() {
 	const [isLogo, setIsLogo] = useState(false);
 
 	// store
-	const setIsChangePassword = changeForgotPasswordStore((state) => state.setIsChangePassword);
+	const setIsChangePassword = changeForgotPasswordStore(useShallow((state) => state.setIsChangePassword));
 
 	// mutation
 	const [validateForgotPassword, { error: validateForgotPasswordError }] = useMutation(VALIDATE_FORGOT_PASSWORD_MUTATION);
 
-	const navigate = useNavigate();
+	let navigate = useNavigate();
 
 	// useEffect to check the size of the window
 	useEffect(() => {
+	
 		if (!token) {
+
 			navigate('/', { replace: true });
 		}
 		const handleResize = () => {
@@ -109,8 +112,8 @@ function ForgotPassword() {
 	return (
 		<div className="forgot-password-container">
 			{isLogo && <div className="login-container__logo">
-				<img className='__image' src="/izipro-logo.svg" alt="Izipro logo" />
-				<h1 className="__title">POP</h1>
+				<img className='__image' src="/logos/logo-toupro-800x800.webp" alt="Izipro logo" />
+				<h1 className="__title">Toupro</h1>
 			</div>}
 			<form className="forgot-password-container__form" onSubmit={handleSubmitForm} aria-label="Formulaire de réinitialisation de mot de passe">
 				<h1 className="forgot-password-container__form__title">Réinitialisez votre mot de passe</h1>

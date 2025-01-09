@@ -1,28 +1,32 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import { CONFIRM_EMAIL_MUTATION } from '../GraphQL/UserMutations';
 import { useMutation } from '@apollo/client';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { confirmEmailStore } from '../../store/LoginRegister';
-import Spinner from '../Hook/Spinner';
+import Spinner from '../Hook/Components/Spinner/Spinner';
+import { useShallow } from 'zustand/shallow';
 
 function ConfirmEmail() {
-	const navigate = useNavigate();
+	let navigate = useNavigate();
 	const location = useLocation();
 	const token = new URLSearchParams(location.search).get('token');
 	
 	//store
-	const setIsEmailConfirmed = confirmEmailStore((state) => state.setIsEmailConfirmed);
+	const setIsEmailConfirmed = confirmEmailStore(useShallow((state) => state.setIsEmailConfirmed));
 	// Mutation
 	const [confirmRegisterEmail, {loading: confirmEmailLoading, error: confirmMailError}] = useMutation(CONFIRM_EMAIL_MUTATION);
 
 	
 	// send token to confirm email
 	useEffect(() =>{
+		// Remove login from local storage
+		localStorage.removeItem('login');
 		//if no token redirect to home
 		if (!token){
 			navigate('/', { replace: true });
 		}
+
 		confirmRegisterEmail({
 			variables:{
 				input:{
@@ -45,7 +49,6 @@ function ConfirmEmail() {
 	return (
 		<div>
 			{confirmEmailLoading && <Spinner />}
-			{/* <h1>Confirm Email</h1> */}
 		</div>
 	);
 }
