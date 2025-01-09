@@ -96,7 +96,7 @@ const errorLink = onError((error: ErrorResponse) => {
 	const statusCode = Number(error?.graphQLErrors?.[0]?.extensions?.code) 
 		|| (error.networkError as ServerError)?.statusCode 
 		|| 500;
-	console.log('error', error);
+	console.error('error', error);
 
 	setServerError({
 		status: statusCode,

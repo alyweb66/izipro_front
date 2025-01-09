@@ -72,7 +72,7 @@ const useCookieConsent = (handleAcceptCookies: () => void) => {
   
   // Apply cookies based on current consent
   const applyCookies = (currentConsent: Consent) => {
-    console.log('Applying cookies', currentConsent);
+
     /* window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: 'update_consent',
@@ -89,7 +89,6 @@ const useCookieConsent = (handleAcceptCookies: () => void) => {
       deleteCookie('_ga_V908390R5K');
     }
   };
-  console.log(window.dataLayer);
 
   interface HandleConsentChange {
     (type: 'adsense' | 'analytics', value: boolean): void;

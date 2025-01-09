@@ -146,7 +146,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
               id="contact-modal-description"
               className="contact-modal__container__content__subtitle"
             >
-              Veuillez remplir votre nom et prénom ou votre société
+              Veuillez remplir votre nom et prénom ou votre société*
             </p>
           </header>
           <section className="contact-modal__container__content__section">
@@ -197,7 +197,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
               />
             </label>
             <label className="contact-modal__container__content__label email">
-              Email
+              Email*
               <input
                 className="contact-modal__container__content__label__input "
                 type="text"
@@ -213,7 +213,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
               />
             </label>
             <label className="contact-modal__container__content__label textarea">
-              Message
+              Message*
               <TextareaAutosize
                 className="contact-modal__container__content__label__input textarea"
                 name="description"
@@ -225,6 +225,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
                 }
                 aria-label="Exprimez-vous 1000 caractères maximum"
                 maxLength={1000}
+                //required
               ></TextareaAutosize>
               <p>{description?.length}/1000</p>
             </label>

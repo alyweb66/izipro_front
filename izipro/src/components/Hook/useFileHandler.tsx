@@ -79,7 +79,6 @@ export function useFileHandler() {
     });
 
     if (validFiles) {
-      console.log(validFiles);
 
       const urls = validFiles.map((file) => ({
         url: URL.createObjectURL(file),

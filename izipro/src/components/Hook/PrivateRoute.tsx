@@ -29,8 +29,7 @@ const PrivateRoute = ({children}: {children: ReactNode}) => {
   
       // check if user is logged in and if cookie consents are accepted
    //
-   console.log('PrivateRoute');
-   
+  
     // condition if user not logged in
     const getItem = localStorage.getItem('login');
     if (!getItem) {
@@ -45,14 +44,12 @@ const PrivateRoute = ({children}: {children: ReactNode}) => {
       isLogged = JSON.parse(decodeData || '{}');
     }
     if (isLogged) {
-      console.log('User logged in');
-      
+   
      // navigate('/dashboard', { replace: true });
      return <Navigate to="/dashboard" replace />;
      //setIsAuthenticated(true);
     }else {
-      console.log('User not logged in');
-      
+   
       localStorage.removeItem('login');
       
     }

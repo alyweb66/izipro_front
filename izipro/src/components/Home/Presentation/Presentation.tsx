@@ -10,8 +10,8 @@ function Presentation() {
   const [imagePosition, setImagePosition] = useState(false);
 
   const imageParticular = [
-    '/images/Familly.webp',
     '/images/Fix-washing-machine.webp',
+    '/images/Familly.webp',
     '/images/Hurry.webp',
   ];
 

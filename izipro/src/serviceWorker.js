@@ -83,10 +83,8 @@ function updateUnreadCount(count) {
 
 // Function to update badge
 function updateBadge(count) {
-  console.log('setAppBadge', navigator);
 
   if ('setAppBadge' in navigator) {
-    console.log('count', count);
 
     navigator.setAppBadge(count).catch((error) => {
       console.error('Erreur lors de la mise à jour du badge:', error);
@@ -112,7 +110,6 @@ self.addEventListener('activate', (event) => {
           .filter((cacheName) => cacheName !== CACHE_NAME)
           .map((cacheName) => caches.delete(cacheName)) */
           cacheNames.map((cacheName) => {
-            console.log(`Suppression du cache : ${cacheName}`);
             return caches.delete(cacheName); // Supprime tous les caches
           })
       );
@@ -176,11 +173,9 @@ self.addEventListener('message', (event) => {
   // listen for page visibility change
   if (event.data && event.data.action) {
     if (event.data.action === 'page-hidden') {
-      console.log('page-hidden');
 
       isPageVisible = false;
     } else if (event.data.action === 'page-visible') {
-      console.log('page-visible');
 
       isPageVisible = true;
     }
@@ -217,7 +212,6 @@ self.addEventListener('message', (event) => {
       .then(() => {
         unreadCount = 0;
         updateBadge(0);
-        console.log('unreadCount', 0);
         return self.registration.getNotifications();
       })
       .then((notifications) => {
@@ -238,9 +232,6 @@ self.addEventListener('message', (event) => {
 // listen for push event and show notification
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
-  console.log('isPageVisible', isPageVisible);
-  console.log('data', data);
-  console.log('selectedConversationId', selectedConversationId);
 
   // Check if the conversation ID matches the selected conversation ID
   if (
@@ -257,20 +248,15 @@ self.addEventListener('push', (event) => {
     // Do not show notification if the user is already viewing the conversation
     return;
   }
-  console.log('data', data);
 
   if (data.silent) {
-    console.log('silent');
 
     return;
   } else {
-    console.log('not silent');
     // add count to notification badge
     unreadCount++;
-    console.log('unreadCount', unreadCount);
     updateUnreadCount(unreadCount)
       .then(() => {
-        console.log('unreadCount', unreadCount);
       })
       .catch((error) => {
         console.error(

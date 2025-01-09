@@ -112,7 +112,6 @@ function Footer() {
         !clickCookie &&
         isCreate
       ) {
-        console.log('createCookieConsents', isGetCookie, cookieConsentsIdStore);
 
         createCookieConsents({
           variables: {
@@ -128,8 +127,7 @@ function Footer() {
           setClickCookie(false);
         });
       } else if (cookieConsentsIdStore > 0) {
-        console.log('updateCookieConsents');
-
+  
         updateCookieConsents({
           variables: {
             createCookieConsentsId: id,
@@ -189,7 +187,6 @@ function Footer() {
   // set the cookie consents to the store and database
   useEffect(() => {
     if (cookieData) {
-      console.log('cookieData', cookieData);
 
       if (
         cookieData.user.cookieConsents &&
@@ -250,7 +247,6 @@ function Footer() {
   useEffect(() => {
     // update
     const localConsents = localStorage.getItem('cookieConsent');
-    console.log('after fetch cookie', localConsents);
 
     if (localConsents && id > 0 && cookieConsentsIdStore > 0) {
       const parsedConsents = JSON.parse(localConsents);
@@ -259,8 +255,7 @@ function Footer() {
         parsedConsents.adsense !== cookiesMarketing ||
         parsedConsents.analytics !== cookiesAnalytics
       ) {
-        console.log('call handleAcceptCookies');
-
+  
         handleAcceptCookies();
       }
     }

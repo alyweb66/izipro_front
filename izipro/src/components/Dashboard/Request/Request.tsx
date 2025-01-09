@@ -134,8 +134,6 @@ function Request() {
   const { loading: JobDataLoading, jobData } = useQueryJobs(
     jobStore.length > 0
   );
-  console.log('selectedJob', selectedJob);
-console.log('selectedJobByCategory', selectedJobByCategory);
 
   // remove file
   const handleRemove = (index: number) => {

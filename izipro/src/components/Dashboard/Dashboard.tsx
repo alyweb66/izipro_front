@@ -200,7 +200,6 @@ function Dashboard() {
   const [isMultipleLogout, setIsMultipleLogout] = useState<boolean>(false);
   const [isOffLine, setIsOffLine] = useState<boolean>(false);
 
-  console.log('id', id);
 
   //*state for myRequest
   const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(
@@ -1293,7 +1292,6 @@ function Dashboard() {
   //* Notification push
   // Function to update the selected tab in the service worker
   function updateSelectedTab(selectedTab: string) {
-    console.log('selectedTab', selectedTab);
 
     if (navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({
@@ -1315,7 +1313,7 @@ function Dashboard() {
           event_label: selectedTab,
         });
       }
-      console.log(`User clicked on tab: ${selectedTab}`);
+
     }
   }, [selectedTab]);
 

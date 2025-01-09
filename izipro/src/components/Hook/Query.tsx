@@ -34,8 +34,7 @@ export const useQueryRules = (getData: boolean) => {
 };
 
 export const useQueryCookieConsents = (skip: boolean) => {
-	console.log('skip in request', skip);
-	
+
 	const { loading, error: cookieError, data: cookieData } = useQuery(GET_COOKIE_CONSENTS, {
 		skip
 	
@@ -61,8 +60,7 @@ export const useQueryCategory = (skip: boolean) => {
 
 // fetch jobs
 export const useQueryJobs = (skip: boolean) => {
-	console.log('skip', skip);
-	
+
 	const { loading, error: jobError, data: jobData } = useQuery(GET_ALL_JOBS,
 		{
 			skip
