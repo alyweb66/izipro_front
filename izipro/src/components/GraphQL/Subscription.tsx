@@ -12,6 +12,8 @@ export const REQUEST_SUBSCRIPTION = gql`
             city
             first_name
             last_name
+            image
+            denomination
             range
             user_id
             job_id
@@ -46,6 +48,7 @@ export const MESSAGE_SUBSCRIPTION = gql`
                 id
                 url
                 name
+                thumbnail
             }
         }
     }
@@ -53,10 +56,12 @@ export const MESSAGE_SUBSCRIPTION = gql`
 
 export const LOGOUT = gql`
     subscription Logout($user_id: Int!) {
-    logout(user_id: $user_id) {
-        id
-        value
-    }
+        logout(user_id: $user_id) {
+            id
+            value
+            multiple
+            session
+        }
     }
 `;
 

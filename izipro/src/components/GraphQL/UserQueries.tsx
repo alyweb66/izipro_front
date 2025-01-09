@@ -37,7 +37,6 @@ export const GET_COOKIE_CONSENTS = gql`
         user_id
         cookies_analytics
         cookies_marketing
-        cookies_necessary
       }
     }
   }
@@ -110,10 +109,12 @@ export const GET_USERS_CONVERSATION = gql`
       id
       first_name
       last_name
+      email
       city
       image
       description
       denomination
+      siret
       deleted_at
     }
   }
@@ -145,6 +146,7 @@ export const GET_USER_NOTIFICATION = gql`
         id
         user_id
         email_notification
+        endpoint
       }
     }
   }

@@ -64,25 +64,23 @@ export const UPDATE_USER_MUTATION = gql`
 `;
 
 export const COOKIE_CONSENTS_MUTATION = gql`
-    mutation Mutation($input: CookieConsentInput!, $createCookieConsentsId: Int!) {
+    mutation CookieConsents($input: CookieConsentInput!, $createCookieConsentsId: Int!) {
     createCookieConsents(input: $input, id: $createCookieConsentsId) {
         id
         user_id
         cookies_analytics
         cookies_marketing
-        cookies_necessary
     }
     }
 `;
 
 export const UPDATE_COOKIE_CONSENTS_MUTATION = gql`
-    mutation Mutation($input: CookieConsentInput!, $createCookieConsentsId: Int!) {
+    mutation UpdateCookieConsents($input: CookieConsentInput!, $createCookieConsentsId: Int!) {
     updateCookieConsents(input: $input, id: $createCookieConsentsId) {
         id
         user_id
         cookies_analytics
         cookies_marketing
-        cookies_necessary
     }
     }
 `;
@@ -94,7 +92,7 @@ export const CONFIRM_EMAIL_MUTATION = gql`
 `;
 
 export const FORGOT_PASSWORD_MUTATION = gql`
-    mutation ChangePassword($input: ForgotPasswordInput!) {
+    mutation ForgotPassword($input: ForgotPasswordInput!) {
         forgotPassword(input: $input)
 }
 `;
@@ -113,21 +111,13 @@ export const CHANGE_PASSWORD_MUTATION = gql`
 
 export const USER_HAS_JOB_MUTATION = gql`
     mutation UserHasJob($input: UserJobInput!) {
-        createUserJob(input: $input) {
-            id
-            user_id
-            job_id
-        }
+        createUserJob(input: $input) 
     }
 `;
 
 export const DELETE_USER_HAS_JOB_MUTATION = gql`
     mutation DeleteUserHasJob($input: UserJobInput!) {
-        deleteUserJob(input: $input) {
-            id
-            user_id
-            job_id
-        }
+        deleteUserJob(input: $input) 
     }
 `;
 
@@ -141,10 +131,7 @@ export const USER_SETTING_MUTATION = gql`
 
 export const USER_HAS_HIDDEN_CLIENT_REQUEST_MUTATION = gql`
     mutation CreateHiddenClientRequest($input: UserHasHiddenClientRequestInput!) {
-        createHiddenClientRequest(input: $input) {
-            user_id
-            request_id
-        }
+        createHiddenClientRequest(input: $input) 
     }
 `;
 

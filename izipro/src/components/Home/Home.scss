@@ -2,6 +2,7 @@
 
 .home {
     height: auto;
+    
 }
 
 .create-account {
@@ -19,4 +20,10 @@
     font-size: 2rem;
     font-weight: 500;
     color: v.$color-primary-orange;
+}
+
+@media (max-width: 480px) {
+    .home {
+     height: 100%;
+    }
 }

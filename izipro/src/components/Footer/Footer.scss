@@ -4,23 +4,54 @@
   width: 100%;
   position: relative;
   height: 5vh;
-  //background-color: rgba(224, 132, 11, 0.192);
-  //background-image: linear-gradient(to right, transparent 0%, rgba(224, 132, 11, 0.26) 10%, rgba(224, 132, 11, 0.26) 90%, transparent 100%);
-  //border-top: 2px solid v.$color-primary-orange;
+  height: 5dvh;
+
+  background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.527) 10%, rgba(255, 255, 255, 0.527) 90%, transparent 100%);
+
 
   .footer-container {
-    display: flex;
-    justify-content: space-around;
-    padding: 0.5rem;
-    text-align: center;
-    font-size: 1rem;
-    bottom: 0;
     width: 100%;
-    background-color: transparent;
+    //height: 100%;
+    height: 5dvh;
+
+    &__nav {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      //padding: 0.5rem 0.5rem 0 0.5rem;
+      text-align: center;
+      font-size: 1rem;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      background-color: transparent;
+    }
 
     .footer-container__link {
       color: v.$color-primary-blue;
       font-size: 0.9rem;
+      font-weight: 400;
+      background-color: transparent;
+      margin-bottom: 0.3rem;
+    }
+
+    .footer-container__version {
+      position: absolute;
+      right: 2rem;
+      bottom: 0;
+      color: v.$color-primary-blue;
+      font-size: 0.5rem;
+      font-weight: 400;
+      background-color: transparent;
+    }
+
+    
+    .footer-container__copyright {
+      position: absolute;
+      left: 2rem;
+      bottom: 0;
+      color: v.$color-primary-blue;
+      font-size: 0.6rem;
       font-weight: 400;
       background-color: transparent;
     }
@@ -33,7 +64,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 2px; 
+  height: 2px;
   background: linear-gradient(to right, transparent 0%, v.$color-primary-blue, v.$color-primary-orange, transparent 100%);
 }
 
@@ -44,9 +75,32 @@
     justify-content: space-between;
     background-color: white;
     background-image: none;
+/*     height: 5vh;
+    height: 5dvh; */
+
+    .footer-container {
+   
+      &__nav {
+        height: auto;
+        padding-top: 0.2rem;
+      }
+      .footer-container__link {
+        font-size: 0.8rem;
+        margin-bottom: 0.4rem;
+      }
+      .footer-container__version {
+        right: 0.2rem;
+      }
+
+      .footer-container__copyright {
+        left: 0.2rem;
+        font-size: 0.5rem;
+      }
+    }
 
   }
+
   .footer::before {
-    height: 1px; 
+    height: 1px;
   }
 }

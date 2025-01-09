@@ -1,18 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
-
+import { useShallow } from 'zustand/shallow';
 // State management and stores
-import { cookieConsents, rulesStore, userDataStore } from '../../store/UserData';
+import {
+  cookieConsents,
+  rulesStore,
+  userDataStore,
+} from '../../store/UserData';
 
 // Custom hooks and components
-import { RulesModal } from '../Hook/RulesModal';
-import { ContactModal } from '../Hook/ContactModal';
+import { RulesModal } from '../Hook/Modal/RulesModal/RulesModal';
+import { ContactModal } from '../Hook/Modal/ContactModal/ContactModal';
 
 // Apollo Client
 import { useMutation, FetchResult } from '@apollo/client';
 import {
-	COOKIE_CONSENTS_MUTATION,
-	UPDATE_COOKIE_CONSENTS_MUTATION,
-	UPDATE_USER_MUTATION
+  COOKIE_CONSENTS_MUTATION,
+  UPDATE_COOKIE_CONSENTS_MUTATION,
+  UPDATE_USER_MUTATION,
 } from '../GraphQL/UserMutations';
 
 // Custom hooks and queries
@@ -23,246 +27,354 @@ import { CookieConsentsProps } from '../../Type/CookieConsents';
 
 // Utility hook
 import useHandleLogout from '../Hook/HandleLogout';
-
+import CookieConsentModal from '../Hook/Cookie/CMPModal';
 // Styles
 import './Footer.scss';
 
 
+
 type ResponseCookieConsents = {
-	data: {
-		createCookieConsents: CookieConsentsProps;
-		updateCookieConsents: CookieConsentsProps;
-	}
-}
+  data: {
+    createCookieConsents: CookieConsentsProps;
+    updateCookieConsents: CookieConsentsProps;
+  };
+};
 
 function Footer() {
-	
-	//state
-	const [cookiesModal, setCookiesModal] = useState<boolean>(false);
-	//const [isGetCookieConsents, setIsGetCookieConsents] = useState<boolean>(false);
-	const [clickCookie, setClickCookie] = useState<boolean>(false);
-	const [CGUModal, setCGUModal] = useState<boolean>(false);
-	const [contactModal, setContactModal] = useState<boolean>(false);
-	const [renderForce, setRenderForce] = useState<boolean>(true);
-	
-	//useRef
-	const isGetRulesRef = useRef<boolean>(false);
-	const isGetCookieConsentsRef = useRef<boolean>(true);
+  //state
+  const [cookiesModal, setCookiesModal] = useState<boolean>(false);
+  const [clickCookie, setClickCookie] = useState<boolean>(false);
+  const [rulesModal, setRulesModal] = useState<boolean>(false);
+  const [contactModal, setContactModal] = useState<boolean>(false);
+  const [isGetCookie, setIsGetCookie] = useState<boolean>(true);
+  const [isLegalNotices, setIsLegalNotices] = useState<boolean>(false);
 
-	//store
-	const [id, CGU] = userDataStore((state) => [state.id, state.CGU]);
-	const [CGUStore, cookieStore] = rulesStore((state) => [state.CGU, state.cookies]);
-	const [cookieConsentsId, cookiesNecessaryStore] = cookieConsents((state) => [state.id, state.cookies_necessary]);
+  //useRef
+  const isGetRulesRef = useRef<boolean>(false);
+  // const isGetCookieConsentsRef = useRef<boolean>(true);
 
-	//custom hooks Logout
-	const handleLogout = useHandleLogout();
+  //store
+  const [id, CGU] = userDataStore(useShallow((state) => [state.id, state.CGU]));
+  const [CGUStore/* , cookieStore */] = rulesStore(
+    useShallow((state) => [state.CGU, state.cookies])
+  );
+  const [cookieConsentsIdStore, cookiesAnalytics, cookiesMarketing] =
+    cookieConsents(
+      useShallow((state) => [
+        state.id,
+        state.cookies_analytics,
+        state.cookies_marketing,
+      ])
+    );
 
-	//Query
-	const { loading: rulesLoading, rulesData } = useQueryRules(isGetRulesRef.current);
-	const { loading: getCookieConsentsLoading, cookieData } = useQueryCookieConsents(renderForce);
+  //custom hooks Logout
+  const handleLogout = useHandleLogout();
 
-	//Mutation
-	const [createCookieConsents, { loading: createCookieConsentsLoading, error: createCookieConsentsError }] = useMutation(COOKIE_CONSENTS_MUTATION);
-	const [updateCookieConsents, { loading: updateCookieConsentsLoading, error: updateCookieConsentsError }] = useMutation(UPDATE_COOKIE_CONSENTS_MUTATION);
-	const [updateUser, { loading: updateUserLoading, error: updateUserError }] = useMutation(UPDATE_USER_MUTATION);
+  //Query
+  const { loading: rulesLoading, rulesData } = useQueryRules(
+    isGetRulesRef.current
+  );
+  const { /* loading: getCookieConsentsLoading, */ cookieData } =
+    useQueryCookieConsents(isGetCookie);
 
+  //Mutation
+  const [
+    createCookieConsents,
+    { /* loading: createCookieConsentsLoading, */ error: createCookieConsentsError },
+  ] = useMutation(COOKIE_CONSENTS_MUTATION);
+  const [
+    updateCookieConsents,
+    { /* loading: updateCookieConsentsLoading, */ error: updateCookieConsentsError },
+  ] = useMutation(UPDATE_COOKIE_CONSENTS_MUTATION);
+  const [updateUser, { loading: updateUserLoading, error: updateUserError }] =
+    useMutation(UPDATE_USER_MUTATION);
 
-	// function to transform the result to match ResponseCookieConsents structure of response data
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	function transformResultToResponseCookieConsents(result: FetchResult<any>): ResponseCookieConsents {
-		// Transform the result to match ResponseCookieConsents structure
-		return {
-			data: result.data
-		};
-	}
-
-	// handle accept cookies to set the cookie consents to the store and database
-	function handleAcceptCookies(localConsents?: string, acceptAll?: boolean | null) {
-
-		if (acceptAll) {
-			localStorage.setItem('cookieConsents', 'all');
-
-		} else {
-			localStorage.setItem('cookieConsents', 'necessary');
-
-		}
-
-		if (id !== 0) {
-			if (cookieConsentsId === 0 && !clickCookie) {
-				
-				createCookieConsents({
-					variables: {
-						createCookieConsentsId: id,
-						input: {
-							cookies_analytics: localConsents === 'all' || acceptAll || false,
-							cookies_marketing: localConsents === 'all' || acceptAll || false,
-							cookies_necessary: true,
-						}
-					}
-				}).then(result => handleResponse(transformResultToResponseCookieConsents(result)));
-
-			} else {
-
-				
-				updateCookieConsents({
-					variables: {
-						createCookieConsentsId: id,
-						input: {
-							id: cookieConsentsId,
-							cookies_analytics: localConsents === 'all' || acceptAll || false,
-							cookies_marketing: localConsents === 'all' || acceptAll || false,
-							cookies_necessary: true,
-						}
-					}
-				}).then(result => handleResponse(transformResultToResponseCookieConsents(result)));
-
-				if (createCookieConsentsError || updateCookieConsentsError) {
-					throw new Error('Error while creating cookie consents');
-				}
-			}
-		}
-	}
-
-	// handle response from create or update cookie consents
-	function handleResponse(response: ResponseCookieConsents) {
-		let cookieConsent;
-		if (response.data.createCookieConsents) {
-			cookieConsent = response.data.createCookieConsents;
-		} else if (response.data.updateCookieConsents) {
-			cookieConsent = response.data.updateCookieConsents;
-		}
-
-		cookieConsents.setState({
-			id: cookieConsent?.id,
-			user_id: id,
-			cookies_analytics: cookieConsent?.cookies_analytics,
-			cookies_marketing: cookieConsent?.cookies_marketing,
-			cookies_necessary: cookieConsent?.cookies_necessary,
-		});
-	}
-
-	// function to set true CGU userData
-	const handleAcceptCGU = () => {
-
-		updateUser({
-			variables: {
-				updateUserId: id,
-				input: {
-					CGU: true
-				},
-			}
-		}).then(() => {
-			//setTimeout(() => setCGUModal(false), 300);
-			//setCGUModal(false);
-			userDataStore.setState({ CGU: true });
-		});
-
-		if (updateUserError) {
-			throw new Error('Error while updating user');
-		}
-	};
+  // function to transform the result to match ResponseCookieConsents structure of response data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function transformResultToResponseCookieConsents(
+    result: FetchResult<any>
+  ): ResponseCookieConsents {
+    // Transform the result to match ResponseCookieConsents structure
+    return {
+      data: result.data,
+    };
+  }
 
 
-	// set the cookie consents to the store and database
-	useEffect(() => {
-		if (cookieData) {
-			
-			if (cookieData.user.cookieConsents && cookieData.user.cookieConsents.user_id === id) {
-			// set cookie consents to the store
-				const { id, cookies_analytics, cookies_marketing, cookies_necessary } = cookieData.user.cookieConsents;
-				cookieConsents.setState({
-					id,
-					user_id: id,
-					cookies_analytics,
-					cookies_marketing,
-					cookies_necessary
-				});
+  // handle accept cookies to set the cookie consents to the store and database
+  function handleAcceptCookies(isCreate = false) {
+    const localConsents = localStorage.getItem('cookieConsent');
 
-				setRenderForce(true);
-			} else {
-			// set cookie consents to the database and store
-				const localConsents = localStorage.getItem('cookieConsents');
+    if (id !== 0 && localConsents) {
+      // if id > 0 and localConsents exist, create or update the cookie consents to the database
+      if (
+        cookieConsentsIdStore === 0 &&
+        !clickCookie &&
+        isCreate
+      ) {
 
-				if (id !== 0 && (localConsents === 'all' || localConsents === 'necessary') && !cookiesNecessaryStore && !isGetCookieConsentsRef.current) {
-					handleAcceptCookies(localConsents);
-					setRenderForce(true);
-				}
-			}
-		}
-	}, [cookieData, renderForce]);
+        createCookieConsents({
+          variables: {
+            createCookieConsentsId: id,
+            input: {
+              cookies_analytics: JSON.parse(localConsents).analytics,
+              cookies_marketing: JSON.parse(localConsents).adsense,
+            },
+          },
+        }).then((result) => {
+          // transform the result to match ResponseCookieConsents structure
+          handleResponse(transformResultToResponseCookieConsents(result));
+          setClickCookie(false);
+        });
+      } else if (cookieConsentsIdStore > 0) {
+  
+        updateCookieConsents({
+          variables: {
+            createCookieConsentsId: id,
+            input: {
+              id: cookieConsentsIdStore,
+              cookies_analytics: JSON.parse(localConsents).analytics,
+              cookies_marketing: JSON.parse(localConsents).adsense,
+            },
+          },
+        }).then((result) => {
+          handleResponse(transformResultToResponseCookieConsents(result));
+          setClickCookie(false);
+      });
 
-	// get rules data and set it to the store
-	useEffect(() => {
+        if (createCookieConsentsError || updateCookieConsentsError) {
+          throw new Error('Error while creating cookie consents');
+        }
+      }
+    }
+  }
 
-		if (rulesData && rulesData.rules) {
-			// set rules to the store
-			rulesStore.setState({ CGU: rulesData.rules.CGU, cookies: rulesData.rules.cookies });
-			isGetRulesRef.current = false;
-		}
-	}, [rulesData]);
+  // handle response from create or update cookie consents
+  function handleResponse(response: ResponseCookieConsents) {
+    let cookieConsent;
+    if (response.data.createCookieConsents) {
+      cookieConsent = response.data.createCookieConsents;
+    } else if (response.data.updateCookieConsents) {
+      cookieConsent = response.data.updateCookieConsents;
+    }
 
-	useEffect(() => {
-		if (window.location.pathname === '/dashboard' && cookiesNecessaryStore === null && id > 0) {
-			setRenderForce(false);
-		}
-	}, [id]);
+    cookieConsents.setState({
+      id: cookieConsent?.id,
+      user_id: id,
+      cookies_analytics: cookieConsent?.cookies_analytics,
+      cookies_marketing: cookieConsent?.cookies_marketing,
+    });
+  }
+
+  // function to set true CGU userData
+  const handleAcceptCGU = () => {
+    updateUser({
+      variables: {
+        updateUserId: id,
+        input: {
+          CGU: true,
+        },
+      },
+    }).then(() => {
+      userDataStore.setState({ CGU: true });
+    });
+
+    if (updateUserError) {
+      throw new Error('Error while updating user');
+    }
+  };
+
+  // set the cookie consents to the store and database
+  useEffect(() => {
+    if (cookieData) {
+
+      if (
+        cookieData.user.cookieConsents &&
+        cookieData.user.cookieConsents.user_id === id
+      ) {
+        // set cookie consents to the store
+        const { id, cookies_analytics, cookies_marketing } =
+          cookieData.user.cookieConsents;
+        cookieConsents.setState({
+          id,
+          user_id: id,
+          cookies_analytics,
+          cookies_marketing,
+        });
+
+        setIsGetCookie(true);
+      } else {
+        // set cookie consents to the database and store
+        if (id !== 0 && cookieData.user.cookieConsents === null) {
+          setIsGetCookie(true);
+          handleAcceptCookies(true);
+        }
+      }
+    }
+  }, [cookieData]);
+
+  // get rules data and set it to the store
+  useEffect(() => {
+    if (rulesData && rulesData.rules) {
+      // set rules to the store
+      rulesStore.setState({
+        CGU: rulesData.rules.CGU,
+        cookies: rulesData.rules.cookies,
+      });
+      isGetRulesRef.current = false;
+    }
+  }, [rulesData]);
+
+  // check if cookie consents are already accepted in the database
+  useEffect(() => {
+    if (window.location.pathname === '/dashboard' && id > 0) {
+      setIsGetCookie(false);
+    }
+
+    if (window.location.pathname === '/') {
+      setIsGetCookie(true);
+    }
+    // check if cookie consents are accepted to open the modal
+    if (!localStorage.getItem('cookieConsent') && id > 0) {
+      if (!CGUStore) {
+        isGetRulesRef.current = true;
+      }
+      setCookiesModal(true);
+    }
+  }, [id]);
+
+  // update cookie consents if the user change the cookie consents
+  useEffect(() => {
+    // update
+    const localConsents = localStorage.getItem('cookieConsent');
+
+    if (localConsents && id > 0 && cookieConsentsIdStore > 0) {
+      const parsedConsents = JSON.parse(localConsents);
+      
+      if (
+        parsedConsents.adsense !== cookiesMarketing ||
+        parsedConsents.analytics !== cookiesAnalytics
+      ) {
+  
+        handleAcceptCookies();
+      }
+    }
+  }, [cookieConsentsIdStore]);
+
+  // check if cookie consents are accepted to open the modal
+  useEffect(() => {
+    if (!localStorage.getItem('cookieConsent')) {
+      if (!CGUStore) {
+        isGetRulesRef.current = true;
+      }
+      setCookiesModal(true);
+    }
+
+  }, []);
+
+  // check if user accept CGU if not show the modal
+  useEffect(() => {
+    if (!rulesLoading) {
+      if (id !== 0 && CGU === false) {
+        if (!CGUStore) {
+          isGetRulesRef.current = true;
+        }
+        if (rulesModal === false) {
+          setRulesModal(true);
+        }
+      }
+    }
+  }, [CGU, CGUStore, id]);
 
 
-	// check if cookie consents are accepted
-	useEffect(() => {
-		if (!localStorage.getItem('cookieConsents')) {
-			if(!CGUStore) {
-				isGetRulesRef.current = true;
-			}
-			setCookiesModal(true);
-		}
-	},[]);
+  return (
+    <div className="footer">
+      <footer className="footer-container">
+        <nav
+          className="footer-container__nav"
+          aria-label="Liens de pied de page"
+        >
+          <a
+            className="footer-container__link"
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              setIsLegalNotices(true);
+              setRulesModal(true);
+              !CGUStore && (isGetRulesRef.current = true);
+            }}
+            aria-label="Mentions légales"
+          >
+            Mentions légales
+          </a>
+          <a
+            className="footer-container__link"
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              setRulesModal(true);
+              !CGUStore && (isGetRulesRef.current = true);
+            }}
+            aria-label="Conditions Générales d'Utilisation"
+          >
+            CGU
+          </a>
+          <a
+            className="footer-container__link"
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              setContactModal(true);
+            }}
+            aria-label="Contactez-nous"
+          >
+            Contact
+          </a>
+          <a
+            className="footer-container__link"
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+              setCookiesModal(true);
+              document.body.classList.remove('menu-open');
+              setClickCookie(true);
+            }}
+            aria-label="Politique de Cookies"
+          >
+            Cookies
+          </a>
+          <span className="footer-container__version">
+            {import.meta.env.VITE_VERSION}
+          </span>
+          <span className="footer-container__copyright">
+            © {new Date().getFullYear()} Toupro. Tous droits réservés.
+          </span>
+        </nav>
+      </footer>
 
-	// check if user accept CGU if not show the modal
-	useEffect(() => {
-		if (!rulesLoading) {
-			if (id !== 0 && CGU === false) {
-				if (!CGUStore) {
-					isGetRulesRef.current = true;
-				}
-				if (CGUModal === false) {
-					setCGUModal(true);
-				}
-			}
-		}
-	}, [CGU, CGUStore, id]);
+      <RulesModal
+        content={CGUStore}
+        setIsOpenModal={setRulesModal}
+        isLegalNotices={isLegalNotices}
+        setContactModal={setContactModal}
+        setIsLegalNotices={setIsLegalNotices}
+        isOpenModal={rulesModal}
+        handleAccept={handleAcceptCGU}
+        handleLogout={handleLogout}
+        loading={rulesLoading || updateUserLoading}
+      />
+      <ContactModal
+        setIsOpenModal={setContactModal}
+        isOpenModal={contactModal}
+      />
 
-	return (
-
-		<div className="footer">
-			<footer className="footer-container">
-				<a className="footer-container__link" href="#" onClick={() => {setCGUModal(true), isGetRulesRef.current = true;}}>CGU</a>
-				<a className="footer-container__link" href="#" onClick={() => setContactModal(true)} >Contact</a>
-				<a className="footer-container__link" href="#" onClick={() => {setCookiesModal(true), isGetRulesRef.current = true, setClickCookie(true);}}>Cookies</a>
-			</footer>
-
-			<RulesModal
-				isCookie={true}
-				content={cookieStore}
-				setIsOpenModal={setCookiesModal}
-				isOpenModal={cookiesModal}
-				handleAccept={handleAcceptCookies}
-				loading={createCookieConsentsLoading || updateCookieConsentsLoading || rulesLoading || getCookieConsentsLoading}
-			/>
-			<RulesModal
-				content={CGUStore}
-				setIsOpenModal={setCGUModal}
-				isOpenModal={CGUModal}
-				handleAccept={handleAcceptCGU}
-				handleLogout={handleLogout}
-				loading={rulesLoading || updateUserLoading}
-			/>
-			<ContactModal
-				setIsOpenModal={setContactModal}
-				isOpenModal={contactModal}
-			/>
-		</div>
-	);
+      <CookieConsentModal
+        isOpen={cookiesModal}
+        setIsOpen={setCookiesModal}
+        handleAcceptCookies={handleAcceptCookies}
+      />
+    </div>
+  );
 }
 
 export default Footer;

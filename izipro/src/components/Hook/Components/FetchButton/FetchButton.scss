@@ -1,0 +1,12 @@
+
+@use '../../../../styles/variables' as v;
+@use '../../../../styles/mixins' as m;
+
+.fetch-button {
+    @include m.fetch-button;
+
+    & {
+        display: flex;
+        justify-content: center;
+    }
+}

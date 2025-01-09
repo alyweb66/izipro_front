@@ -1,6 +1,9 @@
 $color: #666;
-$backgroud-color-blue: #3da3ec36;
-$backgroud-color-orange: #ffb16344;
+$backgroud-color-blue: #3da3ec50;
+$backgroud-color-orange: #ffb1635d;
+/* $backgroud-color-blue: #3da3ec36;
+$backgroud-color-orange: #ffb16344; */
+$disabled-color: #8b8b8b;
 $color-primary-blue:  #028eef;
 $color-secondary-blue: #3da3ec60;
 $color-chat-blue: #7bbbe9;
@@ -12,6 +15,7 @@ $color-darkest: #101010;
 $color-lightest: #fff;
 $color-validation: green;
 $color-error: red;
+$color-pdf: #da0a0a65;
 $color-deleted-grey: rgba(128, 128, 128, 0.267);
 
 $font: 'fredoka', sans-serif;
@@ -20,5 +24,3 @@ $font-weight: 300;
 $font-title-weight: 500;
 
 $gutter: 1.5rem;
-/* #028eef
-#f37c04 */
