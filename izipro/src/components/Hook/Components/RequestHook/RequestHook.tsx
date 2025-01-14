@@ -206,7 +206,7 @@ const RequestItem = ({
             layout
             style={{ overflow: 'hidden' }}
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: isMyConversation && requestByDate?.deleted_at ? 0.3 : 0, height: 'auto' }}
+            animate={{ opacity: isMyConversation && requestByDate?.deleted_at ? 0.3 : 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.1, type: 'tween' }}
           >

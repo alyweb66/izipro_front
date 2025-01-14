@@ -116,7 +116,7 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
                     ADRESSE : 90 cami del borreller, 66300 MONTAURIOL
                     <br />
                     EMAIL : <a href="mailto:[contact@alyweb.fr]">contact@alyweb.fr</a>
-                    <br /> TEL : [Votre Numéro de Téléphone]{' '}
+                    <br /> TEL : 0763800517
                   </p>
                   <h2 className="rules-subtitle legal-notice">Hébergeur du Site</h2>
                   <p className="rules-description legal-notice">

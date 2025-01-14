@@ -48,7 +48,7 @@ const useCookieConsent = (handleAcceptCookies: () => void) => {
       script.async = true;
       script.src = `https://www.googletagmanager.com/gtag/js?id=${id}`;
       document.head.appendChild(script);
-  
+
       const inlineScript = document.createElement('script');
       inlineScript.id = 'google-analytics-inline';
       inlineScript.innerHTML = `
@@ -69,25 +69,31 @@ const useCookieConsent = (handleAcceptCookies: () => void) => {
     if (script) document.head.removeChild(script);
     if (inlineScript) document.head.removeChild(inlineScript);
   };
-  
+
+  // Update AdSense settings
+  const updateAdSettings = (personalized: boolean) => {
+    const settingsScript = document.getElementById('adsense-settings');
+    if (settingsScript) {
+      (settingsScript as HTMLScriptElement).src =
+        `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7655972453112205${personalized ? '' : '&npa=1'}`;
+    }
+  };
   // Apply cookies based on current consent
   const applyCookies = (currentConsent: Consent) => {
-
-    /* window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: 'update_consent',
-      ad_storage: currentConsent.adsense ? 'granted' : 'denied',
-      analytics_storage: currentConsent.analytics ? 'granted' : 'denied',
-    }); */
+    // Inject or remove Google Analytics script based on consent
     if (currentConsent.analytics) {
       injectAnalyticsScript('G-V908390R5K');
     } else {
-    // delete cookie and script if consent is false
+      // delete cookie and script if consent is false
       removeAnalyticsScript();
       deleteCookie('_ga');
       deleteCookie('_gid');
       deleteCookie('_ga_V908390R5K');
     }
+
+    // update AdSense settings based on consent
+    updateAdSettings(currentConsent.adsense); // Remplacez 'ca-pub-XXXXXXXXXX' par votre ID client AdSense
+
   };
 
   interface HandleConsentChange {
