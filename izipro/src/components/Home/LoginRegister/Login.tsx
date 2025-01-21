@@ -260,11 +260,11 @@ function Login() {
         <div className="login-container__logo">
           <img
             className="__image"
-            src="/logos/logo-toupro-250x250.png"
-            alt="Izipro logo"
+            src="/logos/logo-izipro-250x250.png"
+            alt="izipro logo"
             onClick={() => window.location.reload()}
           />
-          <h1 className="__title">Toupro</h1>
+          <h1 className="__title">izipro</h1>
         </div>
       )}
       <p className="login-container__title"> Se connecter</p>

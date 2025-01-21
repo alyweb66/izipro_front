@@ -5,6 +5,8 @@ import { StaleWhileRevalidate } from 'workbox-strategies';
 // Version du service worker pour gérer le versioning
 const SW_VERSION = '0.0.111';
 const CACHE_NAME = `my-app-cache-${SW_VERSION}`;
+
+const domain = 'https://izipro.fr';
 //console.log(`Service Worker Version: ${SW_VERSION}`);
 const urlsToCache = [
   '/',
@@ -144,7 +146,7 @@ precacheAndRoute(self.__WB_MANIFEST || [{ url: '/assets/FetchButton-CmI3IYuX.css
 
 // ======= dynamical cache for API call =======
 registerRoute(
-  ({ url }) => url.origin === 'https://back.betapoptest.online',
+  ({ url }) => url.origin === domain,
   new StaleWhileRevalidate({
     cacheName: 'api-back-cache',
     plugins: [
@@ -269,8 +271,8 @@ self.addEventListener('push', (event) => {
     event.waitUntil(
       self.registration.showNotification(data.title, {
         body: data.body,
-        icon: 'https://betapoptest.online/logos/logo-toupro-250x250.png',
-        badge: 'https://betapoptest.online/android/badge.png',
+        icon: `${domain}/logos/logo-izipro-250x250.png`,
+        badge: `${domain}/android/badge.png`,
         tag: data.tag,
         renotify: data.renotify,
       })
@@ -281,7 +283,7 @@ self.addEventListener('push', (event) => {
 // open client url when notification is clicked
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  event.waitUntil(openUrl('https://betapoptest.online/dashboard'));
+  event.waitUntil(openUrl(`${domain}/dashboard`));
 });
 
 // listen for push subscription change

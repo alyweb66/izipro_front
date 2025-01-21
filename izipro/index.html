@@ -2,7 +2,7 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <title>Toupro</title>
+    <title>Izipro</title>
 
     <!-- If change manifest version change it in service worker too -->
     <link
@@ -12,20 +12,24 @@
     />
 
     <!--Open Graph-->
-    <meta property="og:title" content="Toupro" />
+    <meta property="og:title" content="izipro" />
     <meta
       property="og:description"
       content="La solution pour trouver un professionnel."
     />
-    <meta property="og:image" content="/logos/logo-toupro-800x800.webp" />
+    <meta property="og:image" content="/logos/logo-izipro-800x800.webp" />
     <meta property="og:image:width" content="800" />
     <meta property="og:image:height" content="800" />
     <!--End Open Graph-->
 
     <meta
       name="description"
-      content="Toupro - La solution pour trouver un professionnel."
+      content="izipro - La solution pour trouver un professionnel."
     />
+
+    <!-- Preload first picture of presentation -->
+<!--     <link rel="preload" href="/images/Fix-washing-machine.webp" as="image" />
+    <link rel="preload" href="/images/Welding.webp" as="image" /> -->
 
     <!-- Apple -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -251,7 +255,7 @@
       media="screen and (device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
       href="splash_screens/iPhone_16_Pro_Max_portrait.png"
     />
-    <meta name="apple-mobile-web-app-title" content="Toupro" />
+    <meta name="apple-mobile-web-app-title" content="Izipro" />
     <!-- End Apple -->
 
     <!-- Icon -->
@@ -276,26 +280,28 @@
     <!-- PWA -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="theme-color" content="#ffffff" />
+    <!-- ServiceWorker -->
     <script
       src="/src/components/Hook/ServiceWorkerRegistration.tsx"
       type="module"
       defer
     ></script>
+    <!-- End ServiceWorker -->
     <!-- End PWA -->
     <!-- Google adsense -->
-    <script
+    <!-- <script
       id="adsense-settings"
       async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7655972453112205"
       crossorigin="anonymous"
-    ></script>
+    ></script> -->
     <!-- End Google adsense -->
-    <script
+   <!--  <script
       async
       src="https://fundingchoicesmessages.google.com/i/pub-7655972453112205?ers=1"
-    ></script>
+    ></script> -->
     <!-- AdBlock message -->
-    <script>
+    <!-- <script>
       (function () {
         function signalGooglefcPresent() {
           if (!window.frames['googlefcPresent']) {
@@ -1498,8 +1504,8 @@
       window.__h82AlnkH6D91__(
         'WyJwdWItNzY1NTk3MjQ1MzExMjIwNSIsW251bGwsbnVsbCxudWxsLCJodHRwczovL2Z1bmRpbmdjaG9pY2VzbWVzc2FnZXMuZ29vZ2xlLmNvbS9iL3B1Yi03NjU1OTcyNDUzMTEyMjA1Il0sbnVsbCxudWxsLCJodHRwczovL2Z1bmRpbmdjaG9pY2VzbWVzc2FnZXMuZ29vZ2xlLmNvbS9lbC9BR1NLV3hYYUQtc2JmcGs3ZV9zSjd5cWhJMlJhMlpYX1ZyN1NHVGd1WENXLS1WSkdlOHhSbUtBWmY4b2FZbGY1b1lxMm0wQnMzQUJiQmJXcXZCbUFVd05sbmtQSmNRXHUwMDNkXHUwMDNkP3RlXHUwMDNkVE9LRU5fRVhQT1NFRCIsImh0dHBzOi8vZnVuZGluZ2Nob2ljZXNtZXNzYWdlcy5nb29nbGUuY29tL2VsL0FHU0tXeFdBOXVCUmFWSFI1ZHFjV0JEZjU0Q2F3MTV2aHVEUnZHb2ZwcWcyd1ZEc3BLa1paYUFXTnJReTRPYWxHbExBN3BBU2RJWmRxZl9UY2tMUnBOWHY1QlNZLVFcdTAwM2RcdTAwM2Q/YWJcdTAwM2QxXHUwMDI2c2JmXHUwMDNkMSIsImh0dHBzOi8vZnVuZGluZ2Nob2ljZXNtZXNzYWdlcy5nb29nbGUuY29tL2VsL0FHU0tXeFhESVBXc1ZPTUxEZWRXZExlOUVrUVdSd24zQUJCLWNkSGN2T19Kci1pRFJOWFRPRUxUeFpZQ3JsOGMwQjlpVlpNc3lEZUN0TktfSzFPc0FfbG9ZUjFWX2dcdTAwM2RcdTAwM2Q/YWJcdTAwM2QyXHUwMDI2c2JmXHUwMDNkMSIsImh0dHBzOi8vZnVuZGluZ2Nob2ljZXNtZXNzYWdlcy5nb29nbGUuY29tL2VsL0FHU0tXeFhHR3RLR0pSOW1CdjJxcFJ1U1pwRlVWd0YxcS1sSUc0VWc4VHpHMkh5bkNYWHNvTXhPT2ZneC1MMTZPV0hGVHg1cy1hdVFHaHF5MEhRMnRkaEhwQXBYS1FcdTAwM2RcdTAwM2Q/c2JmXHUwMDNkMiIsImRpdi1ncHQtYWQiLDIwLDEwMCwiY0hWaUxUYzJOVFU1TnpJME5UTXhNVEl5TURVXHUwMDNkIixbbnVsbCxudWxsLG51bGwsImh0dHBzOi8vd3d3LmdzdGF0aWMuY29tLzBlbW4vZi9wL3B1Yi03NjU1OTcyNDUzMTEyMjA1LmpzP3VzcXBcdTAwM2RDQU0iXSwiaHR0cHM6Ly9mdW5kaW5nY2hvaWNlc21lc3NhZ2VzLmdvb2dsZS5jb20vZWwvQUdTS1d4WHJuRVlCNWNWUk04aHpBTm1aNG42U3pFakhMUEYzRW5fa0JVMHM3X1ZWSVJqMDdSZGgzU2pGODJMaWJoNmNqdXFDbVR3ZWFoWnRFMjl3cDRwY1MtNEtQUVx1MDAzZFx1MDAzZCJd'
       );
-    </script>
-     <!-- End AdBlock message -->
+    </script> -->
+    <!-- End AdBlock message -->
   </head>
   <body>
     <div id="root"></div>

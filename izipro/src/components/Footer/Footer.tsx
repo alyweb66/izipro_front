@@ -347,7 +347,7 @@ function Footer() {
             {import.meta.env.VITE_VERSION}
           </span>
           <span className="footer-container__copyright">
-            © {new Date().getFullYear()} Toupro. Tous droits réservés.
+            © {new Date().getFullYear()} izipro. Tous droits réservés.
           </span>
         </nav>
       </footer>

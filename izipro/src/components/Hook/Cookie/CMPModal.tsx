@@ -196,7 +196,7 @@ const CookieConsentModal = ({
                     </Link>
                   </Typography>
                 </Box>
-                <Box className="item">
+               {/*  <Box className="item">
                   <div className="item-container">
                     <Typography
                       variant="subtitle1"
@@ -233,15 +233,15 @@ const CookieConsentModal = ({
                       En savoir plus sur Google Adsense
                     </Link>
                   </Typography>
-                </Box>
+                </Box> */}
               </div>
 
               <Box className="button-container">
-                <button className="button" onClick={handleAcceptAll}>
-                  Tout accepter
-                </button>
                 <button className="button decline" onClick={handleDeclineAll}>
                   Tout refuser
+                </button>
+                <button className="button" onClick={handleAcceptAll}>
+                  Tout accepter
                 </button>
                 <button
                   className="button preferences"

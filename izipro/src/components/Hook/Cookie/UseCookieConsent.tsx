@@ -71,13 +71,13 @@ const useCookieConsent = (handleAcceptCookies: () => void) => {
   };
 
   // Update AdSense settings
-  const updateAdSettings = (personalized: boolean) => {
+  /* const updateAdSettings = (personalized: boolean) => {
     const settingsScript = document.getElementById('adsense-settings');
     if (settingsScript) {
       (settingsScript as HTMLScriptElement).src =
         `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7655972453112205${personalized ? '' : '&npa=1'}`;
     }
-  };
+  }; */
   // Apply cookies based on current consent
   const applyCookies = (currentConsent: Consent) => {
     // Inject or remove Google Analytics script based on consent
@@ -92,7 +92,7 @@ const useCookieConsent = (handleAcceptCookies: () => void) => {
     }
 
     // update AdSense settings based on consent
-    updateAdSettings(currentConsent.adsense); // Remplacez 'ca-pub-XXXXXXXXXX' par votre ID client AdSense
+    //updateAdSettings(currentConsent.adsense); // Remplacez 'ca-pub-XXXXXXXXXX' par votre ID client AdSense
 
   };
 
