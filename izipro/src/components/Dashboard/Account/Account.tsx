@@ -18,6 +18,7 @@ import { UAParser } from 'ua-parser-js';
 import DOMPurify from 'dompurify';
 import validator from 'validator';
 
+
 //import ReactModal from 'react-modal';
 import { useShallow } from 'zustand/shallow';
 // Local component imports
@@ -55,6 +56,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { Grow } from '@mui/material';
 import { serverErrorStore } from '../../../store/LoginRegister';
 import InfoPop from '../../Hook/Components/InfoPop/InfoPop';
+//import { ProfilePictureManager } from '../../Hook/GetMediaManager';
 
 //import '../../../styles/spinner.scss';
 
@@ -64,6 +66,7 @@ function Account() {
   // Navigate
   // let navigate = useNavigate();
   const handleLogout = useHandleLogout();
+
 
   const { askPermission, disableNotifications } = serviceWorkerRegistration();
   // useRef for profile picture
@@ -167,7 +170,7 @@ function Account() {
   const [errorPassword, setErrorPassword] = useState('');
   // Set the changing user data
   const [userData, setUserData] = useState({} as UserAccountDataProps);
-
+  // const [isBadIOS, setIsBadIOS] = useState(false);
   // Ref
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -481,73 +484,76 @@ function Account() {
 
     setErrorPicture('');
     resetServerError();
-    const file = event.target.files;
+    setTimeout(() => {
+      const file = event.target.files;
 
-    // Check if the file is .jpg, .jpeg or .png
-    if (file && file[0]) {
-      const extension = file[0].name.split('.').pop()?.toLowerCase();
+      // Check if the file is .jpg, .jpeg or .png
+      if (file && file[0]) {
+        const extension = file[0].name.split('.').pop()?.toLowerCase();
 
-      if (
-        extension &&
-        !['jpg', 'jpeg', 'png'].includes(extension) &&
-        !['image/png', 'image/jpeg', 'image/jpg'].includes(file[0].type)
-      ) {
+        if (
+          extension &&
+          !['jpg', 'jpeg', 'png'].includes(extension) &&
+          !['image/png', 'image/jpeg', 'image/jpg'].includes(file[0].type)
+        ) {
+          setErrorPicture(
+            'Seuls les fichiers .jpg, .jpeg, et .png sont autorisés'
+          );
+          setTimeout(() => {
+            setErrorAccount('');
+          }, 3000);
+          return;
+        }
+      }
+
+      // check file size
+      if (file && file[0] && file[0].size > 1.5e7) {
         setErrorPicture(
-          'Seuls les fichiers .jpg, .jpeg, et .png sont autorisés'
+          'Fichier trop volumineux, veuillez choisir un fichier de moins de 15MB'
         );
         setTimeout(() => {
-          setErrorAccount('');
+          setErrorPicture('');
         }, 3000);
         return;
       }
-    }
 
-    // check file size
-    if (file && file[0] && file[0].size > 1.5e7) {
-      setErrorPicture(
-        'Fichier trop volumineux, veuillez choisir un fichier de moins de 15MB'
-      );
-      setTimeout(() => {
-        setErrorPicture('');
-      }, 3000);
-      return;
-    }
-
-    if ((file?.length ?? 0) > 0) {
-      setIsImgLoading(true);
-      updateUser({
-        variables: {
-          updateUserId: id,
-          input: {
-            image: file,
+      if ((file?.length ?? 0) > 0) {
+        setIsImgLoading(true);
+        updateUser({
+          variables: {
+            updateUserId: id,
+            input: {
+              image: file,
+            },
           },
-        },
-      }).then((response): void => {
-        setIsImgLoading(false);
-        if (response.errors && response.errors.length > 0) {
-          setErrorPicture(
-            'Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png'
-          );
-          setTimeout(() => {
-            setErrorPicture('');
-          }, 3000);
-        }
+        }).then((response): void => {
+          setIsImgLoading(false);
+          if (response.errors && response.errors.length > 0) {
+            setErrorPicture(
+              'Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png'
+            );
+            setTimeout(() => {
+              setErrorPicture('');
+            }, 3000);
+          }
 
-        const { updateUser } = response.data;
-        // Set the new user data to the store
-        setImage(updateUser.image);
-        setErrorPicture('');
-        resetServerError();
-      });
-    }
+          const { updateUser } = response.data;
+          // Set the new user data to the store
+          setImage(updateUser.image);
+          setErrorPicture('');
+          resetServerError();
+        });
+      }
 
-    if (updateUserError) {
-      setErrorPicture(
-        'Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png'
-      );
-      throw new Error('Error while updating user picture');
-    }
+      if (updateUserError) {
+        setErrorPicture(
+          'Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png'
+        );
+        throw new Error('Error while updating user picture');
+      }
+    }, 100);
   };
+
 
   // Handle the profile picture delete
   const handleDeletePicture = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -582,7 +588,6 @@ function Account() {
         resetUserData();
         handleLogout(id);
         setModalIsOpen(false);
-
       }
     });
 
@@ -791,20 +796,21 @@ function Account() {
               />
               {isImgLoading && <Spinner delay={0} />}
             </div>
-            <input
+             <input
+              id="uploadPhotoInput"
               className="account__profile__picture__input"
               type="file"
+              name="uploadPhotoInput"
               ref={fileInput}
-              onClick={(event) => {
-                event.currentTarget.value = '';
-              }}
               onChange={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
                 handleProfilePicture(event);
               }}
               style={{ display: 'none' }}
-              accept="image/png, image/jpeg, image/jpg"
+              accept="image/*"
               aria-label="Sélectionner une nouvelle photo de profil"
-            />
+            /> 
             <div className="message">
               <Stack sx={{ width: '100%' }} spacing={2}>
                 {errorPicture && (

@@ -52,13 +52,13 @@ function Header() {
 			<div className="header__container">
 				<img
 					className='header__container image'
-					src="/logos/logo-toupro-250x250.png"
-					alt="Izipro logo"
+					src="/logos/logo-izipro-250x250.png"
+					alt="izipro logo"
 					role="button"
 					aria-label="Recharger la page"
 					onClick={() => window.location.reload()}
 				/>
-				<h1 className="header__container title">Toupro</h1>
+				<h1 className="header__container title">izipro</h1>
 			</div>
 			{isLogged && <Logout />}
 		</header>

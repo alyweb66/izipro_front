@@ -90,7 +90,6 @@ function Request() {
   // State
   const [urgent, setUrgent] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(0);
-  const [selectedJob, setSelectedJob] = useState<JobProps | null>(null);
   const [searchedJob, setSearchedJob] = useState<JobProps | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [selectedJobByCategory, setSelectedJobByCategory] =
@@ -253,7 +252,6 @@ function Request() {
           setRadius(0);
           setSelectedCategory(0);
           setErrorMessage('');
-          setSelectedJob(null);
           setUrgent(false);
         }
       });
@@ -398,18 +396,10 @@ function Request() {
     }
   }, [categoriesData]);
 
-  // reset selected job when category changes
-  useEffect(() => {
-    if (selectedCategory) {
-      setSelectedJob(null);
-    }
-  }, [selectedCategory]);
-
 
   // clear and set state when searchedJob is set
   useEffect(() => {
     if (searchedJob) {
-      setSelectedJob(searchedJob);
       const categoryId = categoriesJobsStore.find(category => category.id === searchedJob.category_id)?.id;
       setSelectedCategory(categoryId ?? 0);
       setSelectedJobByCategory(searchedJob);

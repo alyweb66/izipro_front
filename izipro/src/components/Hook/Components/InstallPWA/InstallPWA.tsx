@@ -81,7 +81,7 @@ const InstallPWA: React.FC = () => {
           setIsInstalled(true);
         }
         setIsLoading(false);
-      }, 1000); // 1 secondes
+      }, 500); 
     } else {
       setIsCompatible(false);
     }

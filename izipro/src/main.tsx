@@ -96,7 +96,7 @@ const errorLink = onError((error: ErrorResponse) => {
 	const statusCode = Number(error?.graphQLErrors?.[0]?.extensions?.code) 
 		|| (error.networkError as ServerError)?.statusCode 
 		|| 500;
-	console.error('error', error);
+	//console.error('error', error);
 
 	setServerError({
 		status: statusCode,
@@ -119,7 +119,7 @@ const errorLink = onError((error: ErrorResponse) => {
 			window.location.href = '/';
 		}
 	}
-	console.error('Error', serverErrorStore.getState(), error.response);
+	//console.error('Error', serverErrorStore.getState(), error.response);
 });
 
 // get X-Session-ID cookie in headers to compare with navigator session-id cookie
