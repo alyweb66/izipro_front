@@ -18,6 +18,7 @@ import { UAParser } from 'ua-parser-js';
 import DOMPurify from 'dompurify';
 import validator from 'validator';
 
+
 //import ReactModal from 'react-modal';
 import { useShallow } from 'zustand/shallow';
 // Local component imports
@@ -55,6 +56,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { Grow } from '@mui/material';
 import { serverErrorStore } from '../../../store/LoginRegister';
 import InfoPop from '../../Hook/Components/InfoPop/InfoPop';
+//import { ProfilePictureManager } from '../../Hook/GetMediaManager';
 
 //import '../../../styles/spinner.scss';
 
@@ -64,6 +66,7 @@ function Account() {
   // Navigate
   // let navigate = useNavigate();
   const handleLogout = useHandleLogout();
+
 
   const { askPermission, disableNotifications } = serviceWorkerRegistration();
   // useRef for profile picture
@@ -551,6 +554,7 @@ function Account() {
     }, 100);
   };
 
+
   // Handle the profile picture delete
   const handleDeletePicture = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -792,16 +796,12 @@ function Account() {
               />
               {isImgLoading && <Spinner delay={0} />}
             </div>
-            <input
+             <input
               id="uploadPhotoInput"
               className="account__profile__picture__input"
               type="file"
               name="uploadPhotoInput"
               ref={fileInput}
-              onClick={(event) => {
-                event.stopPropagation();
-                event.currentTarget.value = '';
-              }}
               onChange={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -810,7 +810,7 @@ function Account() {
               style={{ display: 'none' }}
               accept="image/*"
               aria-label="Sélectionner une nouvelle photo de profil"
-            />
+            /> 
             <div className="message">
               <Stack sx={{ width: '100%' }} spacing={2}>
                 {errorPicture && (
