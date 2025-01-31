@@ -25,7 +25,7 @@ let updateNotified = false;
 registerSW({
 	onNeedRefresh() {
 		//console.log("Nouvelle version disponible ! Mise à jour en cours...");
-		// Optionnel : Afficher une notification si nécessaire
+		
 	},
 	onOfflineReady() {
 		//	console.log("L'application est prête à fonctionner hors ligne !");

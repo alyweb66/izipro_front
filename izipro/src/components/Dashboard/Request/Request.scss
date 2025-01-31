@@ -2,17 +2,20 @@
 @use '../../../styles/mixins' as m;
 
 .request {
-  position: relative;
-  font-family: v.$font;
-  height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
-  touch-action: pan-y;
-  scrollbar-width: none;
 
-  &::-webkit-scrollbar {
-    display: none;
-    /* For Chrome, Safari and Opera */
+  & {
+    position: relative;
+    font-family: v.$font;
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+    touch-action: pan-y;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+      /* For Chrome, Safari and Opera */
+    }
   }
 
   &.no-req {
@@ -26,7 +29,6 @@
     color: v.$color-primary-orange;
     text-align: center;
     height: fit-content;
-
   }
 
   .request__form {

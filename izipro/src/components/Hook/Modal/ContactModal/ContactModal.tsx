@@ -22,6 +22,10 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import { userDataStore } from '../../../../store/UserData';
 import Backdrop from '@mui/material/Backdrop';
+import Altcha from '../../Components/Altcha/Altcha';
+import { AltchaStore } from '../../../../store/Altcha';
+
+
 
 type DeleteItemModalProps = {
   isOpenModal: boolean;
@@ -35,7 +39,7 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
   // Mutation
   const [
     contactEmail,
-    { loading: contactEmailLoading, error: contactEmailError },
+    { loading: contactEmailLoading },
   ] = useMutation(CONTACT_MUTATION);
   const [firstName, lastName, denomination, emailStore] = userDataStore(
     useShallow((state) => [
@@ -54,14 +58,24 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [confirmationMessage, setConfirmationMessage] = useState<string>('');
 
+  // Store
+  const payload = AltchaStore(useShallow((state) => state.payload));
+  const altchaStatus = AltchaStore(useShallow((state) => state.status));
+
   const handleAccept = (
     event: React.FormEvent<HTMLFormElement> /* description: string, email: string, first_name?: string, last_name?: string, enterprise?: string */
   ) => {
     event.preventDefault();
+    setErrorMessage('');
 
     if (((first_name && last_name) || enterprise) && description && email) {
       if (!validator.isEmail(email)) {
         setErrorMessage('Email invalide');
+        return;
+      }
+
+      if (!payload && altchaStatus !== 'verified') {
+        setErrorMessage('Veuillez compléter le captcha');
         return;
       }
 
@@ -73,9 +87,20 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
             enterprise: DOMPurify.sanitize(enterprise),
             email: DOMPurify.sanitize(email),
             description: DOMPurify.sanitize(description),
+            payload: payload,
           },
         },
-      }).then(() => {
+      }).then((response) => {
+
+
+        if (response.errors) {
+          if (response.errors[0].message === 'Error altcha') {
+            setErrorMessage('Erreur lors de la vérification de sécurité');
+          } else {
+          setErrorMessage('Erreur lors de l\'envoi du message');
+          }
+          throw new Error('Error sending message');
+        }
         setDescription('');
         setFirstName('');
         setLastName('');
@@ -85,9 +110,6 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
         setConfirmationMessage('Message envoyé');
       });
 
-      if (contactEmailError) {
-        throw new Error('Error sending message');
-      }
     } else {
       setErrorMessage(
         'Veuillez remplir tous les champs (nom, prénom et/ou société, email, message)'
@@ -108,7 +130,6 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
   const closeModal = () => {
     setConfirmationMessage('');
     setErrorMessage('');
-    // setIsVisible(false);
     setIsOpenModal(false);
   };
 
@@ -252,18 +273,21 @@ export const ContactModal: React.FC<DeleteItemModalProps> = ({
             </Stack>
           </div>
           <footer className="contact-modal__container__button">
-            <button
-              className="contact-modal__close"
-              type="button"
-              onClick={() => {
-                closeModal();
-              }}
-            >
-              Fermer
-            </button>
-            <button className="contact-modal__accept" type="submit">
-              Envoyer
-            </button>
+          <Altcha  onSubmit={true}/>
+            <div className="button__container">
+              <button
+                className="contact-modal__close"
+                type="button"
+                onClick={() => {
+                  closeModal();
+                }}
+              >
+                Fermer
+              </button>
+              <button className="contact-modal__accept" type="submit">
+                Envoyer
+              </button>
+            </div>
           </footer>
         </form>
       </Fade>

@@ -18,7 +18,6 @@ import { UAParser } from 'ua-parser-js';
 import DOMPurify from 'dompurify';
 import validator from 'validator';
 
-
 //import ReactModal from 'react-modal';
 import { useShallow } from 'zustand/shallow';
 // Local component imports
@@ -56,17 +55,14 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { Grow } from '@mui/material';
 import { serverErrorStore } from '../../../store/LoginRegister';
 import InfoPop from '../../Hook/Components/InfoPop/InfoPop';
-//import { ProfilePictureManager } from '../../Hook/GetMediaManager';
+import { AltchaStore } from '../../../store/Altcha';
+import Altcha from '../../Hook/Components/Altcha/Altcha';
 
-//import '../../../styles/spinner.scss';
-
-//ReactModal.setAppElement('#root');
 
 function Account() {
   // Navigate
   // let navigate = useNavigate();
   const handleLogout = useHandleLogout();
-
 
   const { askPermission, disableNotifications } = serviceWorkerRegistration();
   // useRef for profile picture
@@ -189,6 +185,8 @@ function Account() {
   const resetUserData = userDataStore(
     useShallow((state) => state.resetUserData)
   );
+  const payload = AltchaStore(useShallow((state) => state.payload));
+  const altchaStatus = AltchaStore(useShallow((state) => state.status));
 
   // Mutation to update the user data
   const [updateUser, { loading: updateUserLoading, error: updateUserError }] =
@@ -391,6 +389,19 @@ function Account() {
 
     // if there are changed values, use mutation
     if (keys.length > 0) {
+      // Check if the user has passed the altcha verification
+      if (!payload && altchaStatus === 'error') {
+        setErrorAccount('Erreur lors de la vérification de sécurité');
+        setTimeout(() => {
+          setErrorAccount('');
+        }, 15000);
+        return;
+      }
+      // add payload to the changed fields
+      if (payload) {
+        changedFields.payload = payload;
+      }
+
       updateUser({
         variables: {
           updateUserId: id,
@@ -398,7 +409,11 @@ function Account() {
         },
       }).then((response): void => {
         if (response.errors && response.errors.length > 0) {
-          setErrorAccount('Erreur lors de la modification');
+          if (response.errors[0].message === 'Error altcha') {
+            setErrorAccount('Erreur lors de la vérification de sécurité');
+          } else {
+            setErrorAccount('Erreur lors de la modification');
+          }
         }
         const { updateUser } = response.data;
 
@@ -435,7 +450,8 @@ function Account() {
   // Handle the new password submit
   const handleSubmitNewPassword = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+    setErrorPassword('');
+    setMessagePassword('');
     // Check if the new password and the confirm new password are the same
     if (newPassword !== confirmNewPassword) {
       setErrorPassword('Les mots de passe ne correspondent pas');
@@ -448,6 +464,14 @@ function Account() {
       );
       return;
     }
+
+    if (!payload && altchaStatus === 'error') {
+      setErrorPassword('Erreur lors de la vérification de sécurité');
+      setTimeout(() => {
+        setErrorPassword('');
+      }, 15000);
+      return;
+    }
     // Change the password
     changePassword({
       variables: {
@@ -455,11 +479,16 @@ function Account() {
         input: {
           oldPassword: DOMPurify.sanitize(oldPassword),
           newPassword: DOMPurify.sanitize(newPassword),
+          payload: payload,
         },
       },
     }).then((response) => {
       if (response.errors && response.errors.length > 0) {
-        setErrorPassword('Erreur lors de la modification du mot de passe');
+        if (response.errors[0].message === 'Error altcha') {
+          setErrorPassword('Erreur lors de la vérification de sécurité');
+        } else {
+          setErrorPassword('Erreur lors de la modification du mot de passe');
+        }
       }
       if (response.data?.changePassword) {
         setMessagePassword('Mot de passe modifié');
@@ -553,7 +582,6 @@ function Account() {
       }
     }, 100);
   };
-
 
   // Handle the profile picture delete
   const handleDeletePicture = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -796,7 +824,7 @@ function Account() {
               />
               {isImgLoading && <Spinner delay={0} />}
             </div>
-             <input
+            <input
               id="uploadPhotoInput"
               className="account__profile__picture__input"
               type="file"
@@ -810,7 +838,7 @@ function Account() {
               style={{ display: 'none' }}
               accept="image/*"
               aria-label="Sélectionner une nouvelle photo de profil"
-            /> 
+            />
             <div className="message">
               <Stack sx={{ width: '100%' }} spacing={2}>
                 {errorPicture && (
@@ -1090,6 +1118,7 @@ function Account() {
               >
                 Valider
               </button>
+              <Altcha onSubmit={true} />
               <div className="request__form__map">
                 <p className="request__title-map">
                   Vérifiez votre adresse sur la carte (après validation)
@@ -1246,6 +1275,7 @@ function Account() {
                 >
                   Valider
                 </button>
+                <Altcha onSubmit={true} />
               </form>
             </div>
             <button
