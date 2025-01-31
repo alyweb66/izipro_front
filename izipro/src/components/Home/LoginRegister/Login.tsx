@@ -120,24 +120,11 @@ function Login() {
   const altchaStatus = AltchaStore(useShallow((state) => state.status));
 
   // Mutation
-  const [login, { error }] = useMutation(LOGIN_USER_MUTATION);
+  const [login] = useMutation(LOGIN_USER_MUTATION);
   const [forgotPassword, { error: forgotPasswordError }] = useMutation(
     FORGOT_PASSWORD_MUTATION
   );
 
-  // Error login message
-  useEffect(() => {
-    let timer: number | undefined;
-    if (error) {
-      setMessageError('Adresse e-mail ou mot de passe incorrect');
-      setTimeout(() => {
-        setMessageError('');
-      }, 15000);
-    }
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [error]);
 
   // To reset the message when the email is confirmed
   useEffect(() => {
@@ -212,12 +199,17 @@ function Login() {
         },
       },
     }).then((response) => {
+      console.log('response', response);
       const userId = response.data?.login;
       // if login is successful, redirect to dashboard
       if (response.errors && response.errors.length > 0) {
-        if (response.errors[0].message === 'Error altcha') {
+        if (response.errors[0].message.toString() === 'Error altcha') {
+          console.log('Error altcha', response.errors[0].message);
+          
           setMessageError('Erreur lors de la vérification de sécurité');
         } else {
+          console.log('Adresse e-mail ou mot de passe incorrect');
+          
         setMessageError('Adresse e-mail ou mot de passe incorrect');
         }
         setTimeout(() => {
@@ -271,6 +263,7 @@ function Login() {
         },
       },
     }).then((response) => {
+
       if (response.errors && response.errors.length > 0) {
         if (response.errors[0].message === 'Error altcha') {
           setErrorForgotPassword('Erreur lors de la vérification de sécurité');

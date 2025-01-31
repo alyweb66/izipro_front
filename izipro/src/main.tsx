@@ -4,12 +4,12 @@ import { ApolloClient, InMemoryCache, ApolloProvider, DefaultOptions, ApolloLink
 // @ts-expect-error - no types available
 import createUploadLink from 'apollo-upload-client/createUploadLink.mjs';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { GraphQLFormattedError } from 'graphql';
 import { split } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient } from 'graphql-ws';
 import ReactDOM from 'react-dom/client';
 import { router } from './routes';
-//import { onError } from "apollo-link-error";
 import { ErrorResponse, onError } from "@apollo/client/link/error";
 import './styles/index.scss';
 import { serverErrorStore } from './store/LoginRegister';
@@ -89,26 +89,28 @@ const defaultOptions: DefaultOptions = {
 		errorPolicy: 'all',
 	},
 };
+
+// Étendre le type GraphQLFormattedError pour inclure httpStatus
+interface CustomGraphQLFormattedError extends GraphQLFormattedError {
+	httpStatus?: number;
+	code?: string;
+  }
 // Global flag to indicate if the user is logged out
 let isLoggedOut = false;
 // Middleware to check if the user has a 401 error from the server
 const errorLink = onError((error: ErrorResponse) => {
-	const statusCode = Number(error?.graphQLErrors?.[0]?.extensions?.code) 
-		|| (error.networkError as ServerError)?.statusCode 
-		|| 500;
-	//console.error('error', error);
+	const formattedErrors: CustomGraphQLFormattedError[] = [...(error.graphQLErrors || [])];	
+
+	const statusCode = formattedErrors[0]?.httpStatus || (error.networkError as ServerError)?.statusCode || 500;
+
 
 	setServerError({
 		status: statusCode,
-		statusText: (
-			(error.graphQLErrors && error.graphQLErrors[0]?.extensions?.code?.toString())
-			|| (error.networkError && (error.networkError as ServerError).response?.headers.get('message'))
-			|| (error.networkError && (error.networkError as ServerError).response?.statusText)
-			|| ''
+		statusText: (formattedErrors[0]?.code?.toString() || ''
+	
 		),
-		message: error?.graphQLErrors?.[0]?.message
-			?? (error.networkError && (error.networkError as ServerError).response?.statusText)
-			?? '',
+		message: formattedErrors[0]?.message
+	
 	});
 
 	if (statusCode === 401) {
