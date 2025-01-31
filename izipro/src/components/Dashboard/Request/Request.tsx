@@ -303,6 +303,12 @@ function Request() {
         dragPan: false, // Disable dragging to pan the map
         scrollZoom: false, // Disable scroll zoom
         attributionControl: false,
+        canvasContextAttributes: {
+          antialias: false,
+          preserveDrawingBuffer: false,
+          failIfMajorPerformanceCaveat: false,
+          contextType: 'webgl2', // Spécifie WebGL2 si disponible
+        },
       });
 
       // Disable map interactions
