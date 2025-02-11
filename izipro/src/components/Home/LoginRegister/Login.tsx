@@ -199,17 +199,13 @@ function Login() {
         },
       },
     }).then((response) => {
-      console.log('response', response);
       const userId = response.data?.login;
       // if login is successful, redirect to dashboard
       if (response.errors && response.errors.length > 0) {
-        if (response.errors[0].message.toString() === 'Error altcha') {
-          console.log('Error altcha', response.errors[0].message);
-          
+        if (response.errors[0].message.toString() === 'Error altcha') {  
           setMessageError('Erreur lors de la vérification de sécurité');
         } else {
-          console.log('Adresse e-mail ou mot de passe incorrect');
-          
+
         setMessageError('Adresse e-mail ou mot de passe incorrect');
         }
         setTimeout(() => {
