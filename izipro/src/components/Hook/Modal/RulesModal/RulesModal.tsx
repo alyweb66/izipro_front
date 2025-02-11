@@ -117,6 +117,8 @@ export const RulesModal: React.FC<DeleteItemModalProps> = ({
                     <br />
                     EMAIL : <a href="mailto:[contact@alyweb.fr]">contact@alyweb.fr</a>
                     <br /> TEL : 0763800517
+                    <br /> SIRET : 52090245300023
+                    <br /> WEB : <a href="https://alyweb.fr" target="_blank">https://alyweb.fr</a>
                   </p>
                   <h2 className="rules-subtitle legal-notice">Hébergeur du Site</h2>
                   <p className="rules-description legal-notice">

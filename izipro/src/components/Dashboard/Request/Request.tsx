@@ -61,18 +61,20 @@ function Request() {
     first_name,
     last_name,
     postal_code,
-  } = userDataStore(useShallow((state) => ({
-    id: state.id,
-    role: state.role,
-    address: state.address,
-    city: state.city,
-    lng: state.lng,
-    denomination: state.denomination,
-    lat: state.lat,
-    first_name: state.first_name,
-    last_name: state.last_name,
-    postal_code: state.postal_code,
-  })));
+  } = userDataStore(
+    useShallow((state) => ({
+      id: state.id,
+      role: state.role,
+      address: state.address,
+      city: state.city,
+      lng: state.lng,
+      denomination: state.denomination,
+      lat: state.lat,
+      first_name: state.first_name,
+      last_name: state.last_name,
+      postal_code: state.postal_code,
+    }))
+  );
   const [myRequestsStore, setMyRequestsStore] = myRequestStore(
     useShallow((state) => [state.requests, state.setMyRequestStore])
   );
@@ -112,7 +114,7 @@ function Request() {
   // Ref
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement | null>(null); // Ref to close the keyboard on mobile
-  
+
   // Mutation
   const [createRequest, { loading: createLoading, error: requestError }] =
     useMutation(REQUEST_MUTATION, {
@@ -402,18 +404,19 @@ function Request() {
     }
   }, [categoriesData]);
 
-
   // clear and set state when searchedJob is set
   useEffect(() => {
     if (searchedJob) {
-      const categoryId = categoriesJobsStore.find(category => category.id === searchedJob.category_id)?.id;
+      const categoryId = categoriesJobsStore.find(
+        (category) => category.id === searchedJob.category_id
+      )?.id;
       setSelectedCategory(categoryId ?? 0);
       setSelectedJobByCategory(searchedJob);
     }
   }, [searchedJob]);
 
   return (
-    (<Grow in={true} timeout={200}>
+    <Grow in={true} timeout={200}>
       <div className="request">
         {categoryLoading && <Spinner />}
 
@@ -463,7 +466,7 @@ function Request() {
               <h1 className="request__form__container__title">
                 Séléctionnez le métier concerné*
               </h1>
-              <InfoPop isRequestJob={true}/>
+              <InfoPop isRequestJob={true} />
             </div>
             <Stack
               spacing={2}
@@ -490,20 +493,20 @@ function Request() {
                   );
                 }}
                 renderInput={(params) => (
-                  <TextField 
-                  {...params} 
-                  label={searchedJob ? '' : 'Rechercher' }
-                  inputRef={(node) => {
-                    // Assign the input element to the inputRef to close the keyboard on mobile
-                    inputRef.current = node; // input element to reference
-                    if (typeof params.inputProps.ref === 'function') {
-                      params.inputProps.ref(node); // Connect the input element to the Autocomplete
-                    }
-                  }}
+                  <TextField
+                    {...params}
+                    label={searchedJob ? '' : 'Rechercher'}
+                    inputRef={(node) => {
+                      // Assign the input element to the inputRef to close the keyboard on mobile
+                      inputRef.current = node; // input element to reference
+                      if (typeof params.inputProps.ref === 'function') {
+                        params.inputProps.ref(node); // Connect the input element to the Autocomplete
+                      }
+                    }}
                   />
                 )}
                 className="custom-autocomplete"
-                sx={autocompleteSx({isValidate:!!searchedJob})}
+                sx={autocompleteSx({ isValidate: !!searchedJob })}
                 onInputChange={(event, newInputValue) => {
                   event.preventDefault();
                   setInputValue(newInputValue);
@@ -535,7 +538,7 @@ function Request() {
                       ]}
                       sx={popperSx}
                     />
-                  )
+                  ),
                 }}
               />
             </Stack>
@@ -683,7 +686,9 @@ function Request() {
                         title={`Prévisualisation du fichier ${index + 1}`}
                       />
                       {file.file.type === 'application/pdf' && (
-                        <p className="pdf-name">{file.file.name}</p>
+                        <div className="pdf-name-container">
+                          <p className="pdf-name">{file.file.name}</p>
+                        </div>
                       )}
                     </div>
                     <button
@@ -848,7 +853,7 @@ function Request() {
           </form>
         )}
       </div>
-    </Grow>)
+    </Grow>
   );
 }
 

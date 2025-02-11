@@ -324,12 +324,12 @@ function Account() {
       newUserData = { ...userData };
     }
 
-    // Récupérer les clés communes entre userDataStore et userData
+    // Get the common keys between userDataStore and userData
     const commonKeys = Object.keys(userDataStore.getState()).filter(
       (key) => key in newUserData
     ) as Array<keyof UserDataProps>;
 
-    // Comparer les valeurs de ces clés pour voir si elles ont changé
+    // Compare keys values between userDataStore and userData
     const changedFields = commonKeys.reduce(
       (result: any, key: keyof UserDataProps) => {
         const storeValue = userDataStore.getState()[key];
@@ -401,6 +401,12 @@ function Account() {
       if (payload) {
         changedFields.payload = payload;
       }
+
+      //remove the image field if there is one
+      if (changedFields.image) {
+        delete changedFields.image;
+      }
+
 
       updateUser({
         variables: {
