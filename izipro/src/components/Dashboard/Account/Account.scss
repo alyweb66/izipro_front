@@ -2,19 +2,21 @@
 @use '../../../styles/mixins' as m;
 
 .account {
-  //position for spinner
-  position: relative;
-  width: 80rem;
-  max-width: 100%;
-  margin: 0 auto;
-  background-color: transparent;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
-  touch-action: pan-y;
-  height: 100%;
+  & {
+    //position for spinner
+    position: relative;
+    width: 80rem;
+    max-width: 100%;
+    margin: 0 auto;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; // for iOS momentum scrolling
+    touch-action: pan-y;
+    height: 100%;
+  }
 
   .account__profile {
     position: relative;
@@ -190,7 +192,7 @@
 
             &.textarea {
               max-width: 100%;
-              min-height: 1.7rem; 
+              min-height: 1.7rem;
               overflow: hidden;
             }
 

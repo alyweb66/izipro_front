@@ -27,6 +27,9 @@ import {
   requestConversationIds,
 } from '../../store/Viewed';
 import { userNotificationStore } from '../../store/Notification';
+import { AltchaStore } from '../../store/Altcha';
+import { useShallow } from 'zustand/shallow';
+
 
 const useHandleLogout = () => {
   let navigate = useNavigate();
@@ -34,46 +37,48 @@ const useHandleLogout = () => {
   const [logout, { error: logoutError }] = useMutation(LOGOUT_USER_MUTATION);
 
   // Store
-  const resetUserData = userDataStore((state) => state.resetUserData);
-  const resetRequest = requestDataStore((state) => state.resetRequest);
-  const resetMessage = messageDataStore((state) => state.resetMessage);
-  const resetMyMessage = myMessageDataStore((state) => state.resetMessage);
+  const resetUserData = userDataStore(useShallow((state) => state.resetUserData));
+  const resetRequest = requestDataStore(useShallow((state) => state.resetRequest));
+  const resetMessage = messageDataStore(useShallow((state) => state.resetMessage));
+  const resetMyMessage = myMessageDataStore(useShallow((state) => state.resetMessage));
   const resetRequestConversation = requestConversationStore(
-    (state) => state.resetRequestConversation
+    useShallow((state) => state.resetRequestConversation)
   );
-  const resetMyrequest = myRequestStore((state) => state.resetMyRequest);
+  const resetMyrequest = myRequestStore(useShallow((state) => state.resetMyRequest));
   const resetSubscription = subscriptionDataStore(
-    (state) => state.resetSubscription
+    useShallow((state) => state.resetSubscription)
   );
   const resetClientRequest = clientRequestStore(
-    (state) => state.resetClientRequest
+    useShallow((state) => state.resetClientRequest)
   );
-  const resetUsers = userConversation((state) => state.resetUsers);
+  const resetUsers = userConversation(useShallow((state) => state.resetUsers));
   const resetCookieConsents = cookieConsents(
-    (state) => state.resetCookieConsents
+    useShallow((state) => state.resetCookieConsents)
   );
   const resetrequestConversationIds = requestConversationIds(
-    (state) => state.resetBotViewed
+    useShallow((state) => state.resetBotViewed)
   );
   const resetNotViewedConv = notViewedConversation(
-    (state) => state.resetBotViewed
+    useShallow((state) => state.resetBotViewed)
   );
   const resetNotViewedRequestRef = notViewedRequestRef(
-    (state) => state.resetBotViewed
+    useShallow((state) => state.resetBotViewed)
   );
   const resetNotViewedRequest = notViewedRequest(
-    (state) => state.resetBotViewed
+    useShallow((state) => state.resetBotViewed)
   );
   const resetMessageMyConvId = messageConvIdMyConvStore(
-    (state) => state.resetMessageMyConvId
+    useShallow((state) => state.resetMessageMyConvId)
   );
   const resetMessageMyReqConvId = messageConvIdMyreqStore(
-    (state) => state.resetMessageMyReqConvId
+    useShallow((state) => state.resetMessageMyReqConvId)
   );
   const resetNotification = userNotificationStore(
-    (state) => state.resetNotification
+    useShallow((state) => state.resetNotification)
   );
   const resetIsLoggedOut = isLoggedOutStore((state) => state.resetIsLoggedOut);
+  const setPayload = AltchaStore(useShallow((state) => state.setPayload));
+  const setAltchaStatus = AltchaStore(useShallow((state) => state.setStatus));
 
   // Return a function that will handle the logout
   return async (userId?: number) => {
@@ -101,7 +106,8 @@ const useHandleLogout = () => {
       resetIsLoggedOut();
       resetMessageMyReqConvId && resetMessageMyReqConvId();
       resetMessageMyConvId && resetMessageMyConvId();
-
+      setPayload(null);
+      setAltchaStatus(null);
 
       localStorage.removeItem('login');
 
@@ -125,6 +131,3 @@ const useHandleLogout = () => {
   };
 };
 export default useHandleLogout;
-
-
-

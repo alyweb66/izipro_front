@@ -192,7 +192,9 @@ const RequestItem = ({
             ) : (
               <p className="item__header name">
                 <span className="item__header name-span">Nom:</span>&nbsp;
-                {requestByDate?.first_name} {requestByDate?.last_name}
+                {
+                  requestByDate?.first_name
+                } {requestByDate?.last_name}
               </p>
             )}
           </motion.div>
@@ -206,7 +208,10 @@ const RequestItem = ({
             layout
             style={{ overflow: 'hidden' }}
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: isMyConversation && requestByDate?.deleted_at ? 0.3 : 1, height: 'auto' }}
+            animate={{
+              opacity: isMyConversation && requestByDate?.deleted_at ? 0.3 : 1,
+              height: 'auto',
+            }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.1, type: 'tween' }}
           >
@@ -248,7 +253,11 @@ const RequestItem = ({
                         src={pdfLogo}
                         alt={media.name}
                       />
-                      <p className="pdf-name">{extractFileName(media.name)}</p>
+                      <div className="pdf-name-container">
+                        <p className="pdf-name">
+                          {extractFileName(media.name)}
+                        </p>
+                      </div>
                     </a>
                   ) : (
                     <img
