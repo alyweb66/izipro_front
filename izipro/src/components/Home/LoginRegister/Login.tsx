@@ -17,6 +17,8 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Fade from '@mui/material/Fade';
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from 'react-icons/md';
+/* import 'altcha'; */
+
 
 // State management and stores
 import { confirmEmailStore } from '../../../store/LoginRegister';
@@ -49,6 +51,8 @@ import {
 
 import './Login.scss';
 import { userNotificationStore } from '../../../store/Notification';
+import { AltchaStore } from '../../../store/Altcha';
+import Altcha from '../../Hook/Components/Altcha/Altcha';
 
 function Login() {
   let navigate = useNavigate();
@@ -87,41 +91,40 @@ function Login() {
     (state) => state.resetClientRequest
   );
   const resetUsers = userConversation((state) => state.resetUsers);
-  const resetCookieConsents = cookieConsents((state) => state.resetCookieConsents);
+  const resetCookieConsents = cookieConsents(
+    (state) => state.resetCookieConsents
+  );
   const resetrequestConversationIds = requestConversationIds(
     (state) => state.resetBotViewed
   );
-  const resetNotViewedConv = notViewedConversation((state) => state.resetBotViewed);
-  const resetNotViewedRequestRef = notViewedRequestRef((state) => state.resetBotViewed);
-  const resetNotViewedRequest = notViewedRequest((state) => state.resetBotViewed);
+  const resetNotViewedConv = notViewedConversation(
+    (state) => state.resetBotViewed
+  );
+  const resetNotViewedRequestRef = notViewedRequestRef(
+    (state) => state.resetBotViewed
+  );
+  const resetNotViewedRequest = notViewedRequest(
+    (state) => state.resetBotViewed
+  );
   const resetMessageMyConvId = messageConvIdMyConvStore(
     (state) => state.resetMessageMyConvId
   );
   const resetMessageMyReqConvId = messageConvIdMyreqStore(
     (state) => state.resetMessageMyReqConvId
   );
-  const resetNotification = userNotificationStore((state) => state.resetNotification);
+  const resetNotification = userNotificationStore(
+    (state) => state.resetNotification
+  );
   const resetIsLoggedOut = isLoggedOutStore((state) => state.resetIsLoggedOut);
+  const payload = AltchaStore(useShallow((state) => state.payload));
+  const altchaStatus = AltchaStore(useShallow((state) => state.status));
 
   // Mutation
-  const [login, { error }] = useMutation(LOGIN_USER_MUTATION);
+  const [login] = useMutation(LOGIN_USER_MUTATION);
   const [forgotPassword, { error: forgotPasswordError }] = useMutation(
     FORGOT_PASSWORD_MUTATION
   );
 
-  // Error login message
-  useEffect(() => {
-    let timer: number | undefined;
-    if (error) {
-      setMessageError('Adresse e-mail ou mot de passe incorrect');
-      setTimeout(() => {
-        setMessageError('');
-      }, 15000);
-    }
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [error]);
 
   // To reset the message when the email is confirmed
   useEffect(() => {
@@ -178,19 +181,33 @@ function Login() {
     resetMessageMyReqConvId && resetMessageMyReqConvId();
     resetMessageMyConvId && resetMessageMyConvId();
 
+    if (!payload && altchaStatus === 'error') {
+      setMessageError('Erreur lors de la vérification de sécurité');
+      setTimeout(() => {
+        setMessageError('');
+      }, 15000);
+      return;
+    }
+
     login({
       variables: {
         input: {
           email: DOMPurify.sanitize(email),
           password: DOMPurify.sanitize(password),
           activeSession: activeSession,
+          payload: payload,
         },
       },
     }).then((response) => {
       const userId = response.data?.login;
       // if login is successful, redirect to dashboard
       if (response.errors && response.errors.length > 0) {
+        if (response.errors[0].message.toString() === 'Error altcha') {  
+          setMessageError('Erreur lors de la vérification de sécurité');
+        } else {
+
         setMessageError('Adresse e-mail ou mot de passe incorrect');
+        }
         setTimeout(() => {
           setMessageError('');
         }, 15000);
@@ -226,15 +243,29 @@ function Login() {
       return;
     }
 
+    if (!payload && altchaStatus === 'error') {
+      setErrorForgotPassword('Erreur lors de la vérification de sécurité');
+      setTimeout(() => {
+        setErrorForgotPassword('');
+      }, 15000);
+      return;
+    }
+
     forgotPassword({
       variables: {
         input: {
           email: DOMPurify.sanitize(forgotPasswordEmail),
+          payload: payload,
         },
       },
     }).then((response) => {
+
       if (response.errors && response.errors.length > 0) {
+        if (response.errors[0].message === 'Error altcha') {
+          setErrorForgotPassword('Erreur lors de la vérification de sécurité');
+        } else {
         setErrorForgotPassword('Adresse e-mail invalide');
+        }
         setTimeout(() => {
           setErrorForgotPassword('');
         }, 15000);
@@ -251,7 +282,6 @@ function Login() {
       throw new Error('Bad request');
     }
 
-    //setEmailModal(false);
   };
 
   return (
@@ -260,11 +290,11 @@ function Login() {
         <div className="login-container__logo">
           <img
             className="__image"
-            src="/logos/logo-toupro-250x250.png"
-            alt="Izipro logo"
+            src="/logos/logo-izipro-250x250.png"
+            alt="izipro logo"
             onClick={() => window.location.reload()}
           />
-          <h1 className="__title">Toupro</h1>
+          <h1 className="__title">izipro</h1>
         </div>
       )}
       <p className="login-container__title"> Se connecter</p>
@@ -291,6 +321,7 @@ function Login() {
         </Stack>
       </div>
       <form className="login-container__form" onSubmit={handleLogin}>
+
         <input
           type="email"
           name="email"
@@ -329,11 +360,13 @@ function Login() {
             )}
           </span>
         </div>
-
+    
         <button type="submit" className="login-container__form button">
           Se connecter
         </button>
+        <Altcha onSubmit={true}/>
       </form>
+    
       <div className="message">
         <Stack sx={{ width: '100%' }} spacing={2}>
           {messageError && (
@@ -407,6 +440,7 @@ function Login() {
             >
               Valider
             </button>
+            <Altcha onSubmit={true}/>
           </form>
         </div>
       )}

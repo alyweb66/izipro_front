@@ -6,7 +6,7 @@ const Intro: React.FC = () => {
   const role = userDataStore(useShallow((state) => state.role));
   return (
     <div className="intro-container">
-      <h1 className="intro-title">Bienvenue sur Toupro</h1>
+      <h1 className="intro-title">Bienvenue sur izipro</h1>
       <p className="intro-description">
         Vous êtes actuellement sur l'onglet{' '}
         <strong className="intro-list-item__strong">

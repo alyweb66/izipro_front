@@ -209,7 +209,8 @@ function MyConversation({
     requestId?: number
   ) {
     event.preventDefault();
-
+    setUploadFileError('');
+    
     if (fileError) {
       setFile([]);
       setUrlFile([]);
@@ -432,6 +433,7 @@ function MyConversation({
       setUploadFileError(
         'Nombre de fichiers maximum atteint (maximum 4 fichiers)'
       );
+      
     }
 
     if (event.target.files) {

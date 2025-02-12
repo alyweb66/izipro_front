@@ -55,10 +55,9 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { Grow } from '@mui/material';
 import { serverErrorStore } from '../../../store/LoginRegister';
 import InfoPop from '../../Hook/Components/InfoPop/InfoPop';
+import { AltchaStore } from '../../../store/Altcha';
+import Altcha from '../../Hook/Components/Altcha/Altcha';
 
-//import '../../../styles/spinner.scss';
-
-//ReactModal.setAppElement('#root');
 
 function Account() {
   // Navigate
@@ -167,7 +166,7 @@ function Account() {
   const [errorPassword, setErrorPassword] = useState('');
   // Set the changing user data
   const [userData, setUserData] = useState({} as UserAccountDataProps);
-
+  // const [isBadIOS, setIsBadIOS] = useState(false);
   // Ref
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -186,6 +185,8 @@ function Account() {
   const resetUserData = userDataStore(
     useShallow((state) => state.resetUserData)
   );
+  const payload = AltchaStore(useShallow((state) => state.payload));
+  const altchaStatus = AltchaStore(useShallow((state) => state.status));
 
   // Mutation to update the user data
   const [updateUser, { loading: updateUserLoading, error: updateUserError }] =
@@ -323,12 +324,12 @@ function Account() {
       newUserData = { ...userData };
     }
 
-    // Récupérer les clés communes entre userDataStore et userData
+    // Get the common keys between userDataStore and userData
     const commonKeys = Object.keys(userDataStore.getState()).filter(
       (key) => key in newUserData
     ) as Array<keyof UserDataProps>;
 
-    // Comparer les valeurs de ces clés pour voir si elles ont changé
+    // Compare keys values between userDataStore and userData
     const changedFields = commonKeys.reduce(
       (result: any, key: keyof UserDataProps) => {
         const storeValue = userDataStore.getState()[key];
@@ -388,6 +389,25 @@ function Account() {
 
     // if there are changed values, use mutation
     if (keys.length > 0) {
+      // Check if the user has passed the altcha verification
+      if (!payload && altchaStatus === 'error') {
+        setErrorAccount('Erreur lors de la vérification de sécurité');
+        setTimeout(() => {
+          setErrorAccount('');
+        }, 15000);
+        return;
+      }
+      // add payload to the changed fields
+      if (payload) {
+        changedFields.payload = payload;
+      }
+
+      //remove the image field if there is one
+      if (changedFields.image) {
+        delete changedFields.image;
+      }
+
+
       updateUser({
         variables: {
           updateUserId: id,
@@ -395,7 +415,11 @@ function Account() {
         },
       }).then((response): void => {
         if (response.errors && response.errors.length > 0) {
-          setErrorAccount('Erreur lors de la modification');
+          if (response.errors[0].message === 'Error altcha') {
+            setErrorAccount('Erreur lors de la vérification de sécurité');
+          } else {
+            setErrorAccount('Erreur lors de la modification');
+          }
         }
         const { updateUser } = response.data;
 
@@ -432,7 +456,8 @@ function Account() {
   // Handle the new password submit
   const handleSubmitNewPassword = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+    setErrorPassword('');
+    setMessagePassword('');
     // Check if the new password and the confirm new password are the same
     if (newPassword !== confirmNewPassword) {
       setErrorPassword('Les mots de passe ne correspondent pas');
@@ -445,6 +470,14 @@ function Account() {
       );
       return;
     }
+
+    if (!payload && altchaStatus === 'error') {
+      setErrorPassword('Erreur lors de la vérification de sécurité');
+      setTimeout(() => {
+        setErrorPassword('');
+      }, 15000);
+      return;
+    }
     // Change the password
     changePassword({
       variables: {
@@ -452,11 +485,16 @@ function Account() {
         input: {
           oldPassword: DOMPurify.sanitize(oldPassword),
           newPassword: DOMPurify.sanitize(newPassword),
+          payload: payload,
         },
       },
     }).then((response) => {
       if (response.errors && response.errors.length > 0) {
-        setErrorPassword('Erreur lors de la modification du mot de passe');
+        if (response.errors[0].message === 'Error altcha') {
+          setErrorPassword('Erreur lors de la vérification de sécurité');
+        } else {
+          setErrorPassword('Erreur lors de la modification du mot de passe');
+        }
       }
       if (response.data?.changePassword) {
         setMessagePassword('Mot de passe modifié');
@@ -481,72 +519,74 @@ function Account() {
 
     setErrorPicture('');
     resetServerError();
-    const file = event.target.files;
+    setTimeout(() => {
+      const file = event.target.files;
 
-    // Check if the file is .jpg, .jpeg or .png
-    if (file && file[0]) {
-      const extension = file[0].name.split('.').pop()?.toLowerCase();
+      // Check if the file is .jpg, .jpeg or .png
+      if (file && file[0]) {
+        const extension = file[0].name.split('.').pop()?.toLowerCase();
 
-      if (
-        extension &&
-        !['jpg', 'jpeg', 'png'].includes(extension) &&
-        !['image/png', 'image/jpeg', 'image/jpg'].includes(file[0].type)
-      ) {
+        if (
+          extension &&
+          !['jpg', 'jpeg', 'png'].includes(extension) &&
+          !['image/png', 'image/jpeg', 'image/jpg'].includes(file[0].type)
+        ) {
+          setErrorPicture(
+            'Seuls les fichiers .jpg, .jpeg, et .png sont autorisés'
+          );
+          setTimeout(() => {
+            setErrorAccount('');
+          }, 3000);
+          return;
+        }
+      }
+
+      // check file size
+      if (file && file[0] && file[0].size > 1.5e7) {
         setErrorPicture(
-          'Seuls les fichiers .jpg, .jpeg, et .png sont autorisés'
+          'Fichier trop volumineux, veuillez choisir un fichier de moins de 15MB'
         );
         setTimeout(() => {
-          setErrorAccount('');
+          setErrorPicture('');
         }, 3000);
         return;
       }
-    }
 
-    // check file size
-    if (file && file[0] && file[0].size > 1.5e7) {
-      setErrorPicture(
-        'Fichier trop volumineux, veuillez choisir un fichier de moins de 15MB'
-      );
-      setTimeout(() => {
-        setErrorPicture('');
-      }, 3000);
-      return;
-    }
-
-    if ((file?.length ?? 0) > 0) {
-      setIsImgLoading(true);
-      updateUser({
-        variables: {
-          updateUserId: id,
-          input: {
-            image: file,
+      if ((file?.length ?? 0) > 0) {
+        setIsImgLoading(true);
+        updateUser({
+          variables: {
+            updateUserId: id,
+            input: {
+              image: file,
+            },
           },
-        },
-      }).then((response): void => {
-        setIsImgLoading(false);
-        if (response.errors && response.errors.length > 0) {
-          setErrorPicture(
-            'Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png'
-          );
-          setTimeout(() => {
-            setErrorPicture('');
-          }, 3000);
-        }
+        }).then((response): void => {
+          setIsImgLoading(false);
+          if (response.errors && response.errors.length > 0) {
+            setErrorPicture(
+              'Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png'
+            );
+            setTimeout(() => {
+              setErrorPicture('');
+            }, 3000);
+          }
 
-        const { updateUser } = response.data;
-        // Set the new user data to the store
-        setImage(updateUser.image);
-        setErrorPicture('');
-        resetServerError();
-      });
-    }
+          const { updateUser } = response.data;
+          // Set the new user data to the store
+          setImage(updateUser.image);
+          setErrorPicture('');
+          resetServerError();
+        });
+      }
 
-    if (updateUserError) {
-      setErrorPicture(
-        'Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png'
-      );
-      throw new Error('Error while updating user picture');
-    }
+      if (updateUserError) {
+        setErrorPicture(
+          'Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png'
+        );
+        throw new Error('Error while updating user picture');
+      }
+    }, 100);
   };
 
   // Handle the profile picture delete
@@ -582,7 +622,6 @@ function Account() {
         resetUserData();
         handleLogout(id);
         setModalIsOpen(false);
-
       }
     });
 
@@ -792,17 +831,18 @@ function Account() {
               {isImgLoading && <Spinner delay={0} />}
             </div>
             <input
+              id="uploadPhotoInput"
               className="account__profile__picture__input"
               type="file"
+              name="uploadPhotoInput"
               ref={fileInput}
-              onClick={(event) => {
-                event.currentTarget.value = '';
-              }}
               onChange={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
                 handleProfilePicture(event);
               }}
               style={{ display: 'none' }}
-              accept="image/png, image/jpeg, image/jpg"
+              accept="image/*"
               aria-label="Sélectionner une nouvelle photo de profil"
             />
             <div className="message">
@@ -1084,6 +1124,7 @@ function Account() {
               >
                 Valider
               </button>
+              <Altcha onSubmit={true} />
               <div className="request__form__map">
                 <p className="request__title-map">
                   Vérifiez votre adresse sur la carte (après validation)
@@ -1240,6 +1281,7 @@ function Account() {
                 >
                   Valider
                 </button>
+                <Altcha onSubmit={true} />
               </form>
             </div>
             <button

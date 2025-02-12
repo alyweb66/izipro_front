@@ -1378,8 +1378,8 @@ function Dashboard() {
             <div className="__container">
               <img
                 className="__logo"
-                src="/logos/logo-toupro-250x250.png"
-                alt="Izipro logo"
+                src="/logos/logo-izipro-250x250.png"
+                alt="izipro logo"
                 role="button"
                 aria-label="Recharger la page"
                 onClick={() => window.location.reload()}

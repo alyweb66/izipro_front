@@ -15,7 +15,6 @@
   box-shadow: none;
   letter-spacing: 0.02rem;
 
-
   /* For mouse */
   @media (hover: hover) and (pointer: fine) {
     cursor: pointer;
@@ -72,7 +71,7 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    transition-duration: .3s;
+    transition-duration: 0.3s;
     margin-bottom: 0.5rem;
 
     /* For mouse */
@@ -84,7 +83,6 @@
     @media (hover: none) and (pointer: coarse) {
       cursor: default;
     }
-
   }
 
   .svgIcon {
@@ -110,14 +108,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition-duration: .2s;
+    transition-duration: 0.2s;
     pointer-events: none;
     letter-spacing: 0.5px;
   }
 
   .tooltip::before {
     position: absolute;
-    content: "";
+    content: '';
     width: 10px;
     height: 10px;
     background-color: rgb(12, 12, 12);
@@ -125,7 +123,7 @@
     background-position: center;
     transform: rotate(45deg);
     left: -5%;
-    transition-duration: .3s;
+    transition-duration: 0.3s;
   }
 
   /* .Btn:hover .tooltip {
@@ -135,7 +133,7 @@
 
   .Btn:hover {
     background-color: v.$color-primary-orange;
-    transition-duration: .3s;
+    transition-duration: 0.3s;
   }
 
   .Btn:hover .icon2 {
@@ -146,7 +144,7 @@
 
   .Btn:hover .svgIcon {
     fill: rgb(255, 255, 255);
-    animation: slide-in-top 0.6s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+    animation: slide-in-top 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
   }
 
   @keyframes slide-in-top {
@@ -160,7 +158,6 @@
       opacity: 1;
     }
   }
-
 }
 
 @mixin modal-container {
@@ -170,7 +167,7 @@
   display: flex;
   flex-direction: column;
   top: auto;
- // transform: translate(-50%, -50%);
+  // transform: translate(-50%, -50%);
   width: 80vw;
   height: 80vh;
   background-color: white;
@@ -180,7 +177,8 @@
   border-bottom: 1px solid v.$color-primary-orange;
   border-left: 1px solid v.$color-primary-orange;
   border-right: 1px solid v.$color-primary-blue;
-  box-shadow: -5px 0 10px #66666610,
+  box-shadow:
+    -5px 0 10px #66666610,
     -5px 0 10px #ffffff05,
     5px 0 10px #6666660e;
 
@@ -191,13 +189,13 @@
 }
 
 @mixin not-viewed {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border: 1px solid rgb(71, 168, 71);
   border-radius: 0.5rem;
   position: relative;
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
@@ -211,13 +209,13 @@
 }
 
 @mixin selected {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border: 1px solid v.$color-primary-blue;
   border-radius: 0.5rem;
   position: relative;
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
@@ -231,13 +229,13 @@
 }
 
 @mixin selected-user {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border: 1px solid v.$color-primary-orange;
   border-radius: 0.5rem;
   position: relative;
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
@@ -251,13 +249,13 @@
 }
 
 @mixin deleted {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border: 1px solid v.$color-deleted-grey;
   border-radius: 0.5rem;
   position: relative;
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
@@ -308,7 +306,8 @@
       overflow: hidden;
       text-overflow: ellipsis;
       border-radius: 0.5rem;
-      box-shadow: -5px 0 10px #66666610,
+      box-shadow:
+        -5px 0 10px #66666610,
         -5px 0 10px #ffffff05,
         5px 0 10px #6666660e;
 
@@ -340,7 +339,7 @@
       border-bottom: 2px solid v.$color-primary-orange;
       border-right: 2px solid v.$color-primary-orange;
       transform: rotate(45deg) translateY(-50%);
-      transition: all .4s ease-in-out;
+      transition: all 0.4s ease-in-out;
       transform-origin: 50% 0;
     }
 
@@ -362,9 +361,9 @@
       margin: 0.5rem 0;
       border-radius: 0.5rem;
       box-sizing: border-box;
-      box-shadow: 0  6px 5px rgba(0, 0, 0, 0.288);
+      box-shadow: 0 6px 5px rgba(0, 0, 0, 0.288);
       background: #fff;
-      transition: all .4s ease-in-out;
+      transition: all 0.4s ease-in-out;
       z-index: 5;
       opacity: 0;
       visibility: hidden;
@@ -395,7 +394,7 @@
       margin-bottom: -4px;
       background: #fff;
       transform: rotate(45deg);
-      transition: all .4s ease-in-out;
+      transition: all 0.4s ease-in-out;
     }
 
     .option-hover:before {
@@ -411,7 +410,7 @@
       font-weight: 400;
       color: #5c5a5a;
       line-height: 2rem;
-      transition: all .1s ease-in-out;
+      transition: all 0.1s ease-in-out;
 
       /* For mouse */
       @media (hover: hover) and (pointer: fine) {
@@ -422,7 +421,6 @@
       @media (hover: none) and (pointer: coarse) {
         cursor: default;
       }
-
     }
 
     .custom-option:first-of-type {
@@ -444,13 +442,11 @@
     .center {
       width: 80%;
     }
-
   }
 
   @media (max-width: 480px) {
     .center {
       width: 100%;
-
 
       .custom-options {
         position: fixed;
@@ -486,22 +482,18 @@
       .custom-options::after {
         bottom: 0;
       } */
-
-      
     }
-
   }
-
 }
 
 @mixin urgent-item {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border: 1px solid red;
   border-radius: 0.5rem;
   position: relative;
 
   &::before {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
@@ -566,29 +558,25 @@
       cursor: default;
     }
   }
-
 }
 
-@mixin fader-top {
-   // fader top for list
-   mask-image: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 1) 99%,
-    rgba(0, 0, 0, 0)
-  );
-  -webkit-mask-image: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 1) 99%,
-    rgba(0, 0, 0, 0)
-  );
+@mixin fader-top($enabled: true) {
+  @if $enabled {
+    // fader top for list
+    mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 99%, rgba(0, 0, 0, 0));
+    -webkit-mask-image: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 1) 99%,
+      rgba(0, 0, 0, 0)
+    );
 
-  mask-size: 100% 100%;
-  -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-size: 100% 100%;
 
-  mask-repeat: no-repeat;
-  -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
 
-  mask-position: top;
-  -webkit-mask-position: top;
-
+    mask-position: top;
+    -webkit-mask-position: top;
+  }
 }

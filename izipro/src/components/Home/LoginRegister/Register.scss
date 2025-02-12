@@ -105,6 +105,13 @@
        
       }
 
+      .message {
+        margin-bottom: 0;
+        &.user {
+          margin-bottom: 0.5rem;
+        }
+      }
+
       &.category {
         box-shadow: none;
         text-align: center;

@@ -112,8 +112,8 @@ function ForgotPassword() {
 	return (
 		<div className="forgot-password-container">
 			{isLogo && <div className="login-container__logo">
-				<img className='__image' src="/logos/logo-toupro-800x800.webp" alt="Izipro logo" />
-				<h1 className="__title">Toupro</h1>
+				<img className='__image' src="/logos/logo-izipro-800x800.webp" alt="izipro logo" />
+				<h1 className="__title">izipro</h1>
 			</div>}
 			<form className="forgot-password-container__form" onSubmit={handleSubmitForm} aria-label="Formulaire de réinitialisation de mot de passe">
 				<h1 className="forgot-password-container__form__title">Réinitialisez votre mot de passe</h1>

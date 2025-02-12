@@ -1,8 +1,8 @@
 {
-    "name": "Toupro",
-    "short_name": "Toupro",
+    "name": "Izipro",
+    "short_name": "Izipro",
     "lang": "fr",
-    "description": "Trouvez facilement un professionnel avec Toupro",
+    "description": "Trouvez facilement un professionnel avec izipro",
     "start_url": "/",
     "display": "standalone",
     "categories": ["business", "productivity", "utilities"],
@@ -39,16 +39,16 @@
     ],
     "screenshots": [
         {
-            "src": "/images/mobile.png",
-            "sizes": "362x783",
-            "type": "image/png",
+            "src": "/images/izipro-desktop.webp",
+            "sizes": "1343x918",
+            "type": "image/webp",
+            "form_factor": "wide",
             "label": "Wonder widgets"
         },
         {
-            "src": "/images/desktop.png",
-            "sizes": "1751x949",
-            "type": "image/png",
-            "form_factor": "wide",
+            "src": "/images/izipro-mobile.webp",
+            "sizes": "371x664",
+            "type": "image/webp",
             "label": "Wonder widgets"
         }
     ]
