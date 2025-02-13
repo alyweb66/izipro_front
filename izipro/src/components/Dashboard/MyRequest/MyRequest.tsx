@@ -146,7 +146,7 @@ function MyRequest({
   //const idRef = useRef<number>(0);
   const selectedRequestRef = useRef<RequestProps | null>(null);
 
-  const limit = 5;
+  const limit = 10;
 
   // file upload
   const { urlFile, setUrlFile, fileError, file, setFile, handleFileChange } =
