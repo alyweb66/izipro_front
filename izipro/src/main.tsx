@@ -103,7 +103,6 @@ const errorLink = onError((error: ErrorResponse) => {
 
 	const statusCode = formattedErrors[0]?.httpStatus || (error.networkError as ServerError)?.statusCode || 500;
 
-
 	setServerError({
 		status: statusCode,
 		statusText: (formattedErrors[0]?.code?.toString() || ''

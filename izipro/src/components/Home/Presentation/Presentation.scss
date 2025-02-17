@@ -178,5 +178,26 @@
     font-weight: 500;
 }
 
+.social-media {
+    width: 100%;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-evenly;
+
+    .social-media-icons {
+        width: 50px;
+        height: auto;
+           /* For mouse */
+           @media (hover: hover) and (pointer: fine) {
+            cursor: pointer; 
+        }
+
+        /* For touch */
+        @media (hover: none) and (pointer: coarse) {
+            cursor: default; 
+        }
+    }
+}
+
 
 
