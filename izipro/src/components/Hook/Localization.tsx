@@ -25,7 +25,7 @@ export const Localization = async (address: string, city: string, postal_code: s
 			let data;
 			try {
 				const response = await fetch(url);
-			  
+
 				// Vérifiez si la réponse est correcte
 				if (!response.ok) {
 				  throw new Error(`HTTP error! status: ${response.status}`);
