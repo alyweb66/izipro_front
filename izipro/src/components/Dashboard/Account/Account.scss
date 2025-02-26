@@ -77,6 +77,56 @@
       margin-top: 2rem;
       text-align: center;
 
+      .crop-modal {
+        z-index: 100;
+        position: fixed;
+        background-color: rgb(255, 255, 255);
+        top: 50%;
+        left: 50%;
+        width: 80%;
+        height: 80%;
+        display: flex;
+        flex-direction: column;
+        justify-content: end;
+        align-items: center;
+        transform: translate(-50%, -50%);
+        border-radius: 1rem;
+
+        .reactEasyCrop_Container {
+          border-radius: 1rem;
+        }
+        .reactEasyCrop_CropAreaGrid {
+          border-radius: 1rem;
+        }
+
+        .button-crop-container {
+          width: 100%;
+          display: flex;
+          margin-bottom: 1rem;
+          justify-content: space-evenly;
+
+          .confirm-crop,
+          .cancel-crop {
+            & {
+              z-index: 101;
+            }
+          }
+
+          .confirm-crop {
+            @include m.blue-button;
+          }
+
+          .cancel-crop {
+            @include m.orange-button;
+
+            & {
+              margin: auto;
+              margin-bottom: 0;
+            }
+          }
+        }
+      }
+
       .spinner-container {
         position: relative;
 
@@ -390,6 +440,12 @@
 @media (max-width: 830px) {
   .account {
     .account__profile {
+      .account__picture {
+        .crop-modal {
+          width: 90%;
+          height: 90%;
+        }
+      }
       .account_profile_container {
         width: 100%;
         display: flex;
@@ -435,6 +491,28 @@
 @media (max-width: 480px) {
   .account {
     .account__profile {
+      .account__picture {
+        .crop-modal {
+          z-index: 100;
+          border-radius: 0;
+          width: 100%;
+          height: 100%;
+        
+          .reactEasyCrop_Container {
+            border-radius: 0;
+          }
+          .reactEasyCrop_CropAreaGrid {
+            border-radius: 1rem;
+          }
+          .button-crop-container {
+            margin-bottom: 3rem;
+            .confirm-crop,
+            .cancel-crop {
+              z-index: 101;
+            }
+          }
+        }
+      }
       .account_profile_container {
         width: 100%;
 

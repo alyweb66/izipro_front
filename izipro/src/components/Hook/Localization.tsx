@@ -26,7 +26,7 @@ export const Localization = async (address: string, city: string, postal_code: s
 			try {
 				const response = await fetch(url);
 
-				// Vérifiez si la réponse est correcte
+				// Check if the response is OK
 				if (!response.ok) {
 				  throw new Error(`HTTP error! status: ${response.status}`);
 				}
@@ -44,12 +44,12 @@ export const Localization = async (address: string, city: string, postal_code: s
 
 				const { city: cityAPI, postcode: postcodeAPI, name: nameAPI } = feature.properties;
 				
-				// Comparer les valeurs extraites avec celles fournies
+				// Compare the values to check if they match
 				if (postcodeAPI.trim() === postal_code.trim() &&
 				normalizeString(cityAPI.trim()) === normalizeString(city.trim()) &&
 				normalizeString(nameAPI.trim()) === normalizeString(address.trim())) {
 
-					return { lng: longitude, lat: latitude };
+					return { lng: longitude, lat: latitude, city: cityAPI };
 				} else {
 					//setError(`Adresse non valide, voulez vous dire : "${feature.properties.label}" ?`)
 					return { city: cityAPI, postcode: postcodeAPI, name: nameAPI, label: feature.properties.label };

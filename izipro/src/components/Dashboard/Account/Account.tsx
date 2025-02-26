@@ -1,5 +1,12 @@
 // React and React Router imports
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 //import { useNavigate } from 'react-router';
 
 // State management and GraphQL imports
@@ -57,7 +64,22 @@ import { serverErrorStore } from '../../../store/LoginRegister';
 import InfoPop from '../../Hook/Components/InfoPop/InfoPop';
 import { AltchaStore } from '../../../store/Altcha';
 import Altcha from '../../Hook/Components/Altcha/Altcha';
+import Cropper from 'react-easy-crop';
+import getCroppedImg from '../../Hook/HandleCrop';
 
+type CroppedArea = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+type CroppedAreaPixels = CroppedArea & {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
 function Account() {
   // Navigate
@@ -155,7 +177,23 @@ function Account() {
   });
   const [errorLocation, setErrorLocation] = useState('');
   const [isIOS, setIsIOS] = useState(false);
-  //const [anchorEl, setAnchorEl] = useState<SVGElement | null>(null);
+
+    // State for image cropping
+    const [growIn, setGrowIn] = useState(true);
+    const [cropModalOpen, setCropModalOpen] = useState(false);
+    const [imageSrc, setImageSrc] = useState('');
+    const [imageName, setImageName] = useState('');
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState<CroppedAreaPixels>(
+      {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+      }
+    );
+
   // state for mapBox
   const [map, setMap] = useState<Map | null>(null);
   // Message modification account
@@ -166,7 +204,7 @@ function Account() {
   const [errorPassword, setErrorPassword] = useState('');
   // Set the changing user data
   const [userData, setUserData] = useState({} as UserAccountDataProps);
-  // const [isBadIOS, setIsBadIOS] = useState(false);
+
   // Ref
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -317,6 +355,8 @@ function Account() {
         newUserData = { ...userData };
         newUserData.lng = location?.lng;
         newUserData.lat = location?.lat;
+        newUserData.city = location?.city;
+        setCityState(location?.city);
         setLngState(location?.lng);
         setLatState(location?.lat);
       }
@@ -406,7 +446,6 @@ function Account() {
       if (changedFields.image) {
         delete changedFields.image;
       }
-
 
       updateUser({
         variables: {
@@ -513,80 +552,100 @@ function Account() {
     }
   };
 
-  // Handle the profile picture change
-  const handleProfilePicture = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
+ 
+  // Fonction appelée à la fin du recadrage pour récupérer la zone (en pixels)
+  const onCropComplete = useCallback(
+    (_croppedArea: CroppedArea, croppedAreaPixels: CroppedAreaPixels) => {
+      setCroppedAreaPixels(croppedAreaPixels);
+    },
+    []
+  );
 
+  // Manage the file change
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
     setErrorPicture('');
     resetServerError();
-    setTimeout(() => {
-      const file = event.target.files;
 
-      // Check if the file is .jpg, .jpeg or .png
-      if (file && file[0]) {
-        const extension = file[0].name.split('.').pop()?.toLowerCase();
-
-        if (
-          extension &&
-          !['jpg', 'jpeg', 'png'].includes(extension) &&
-          !['image/png', 'image/jpeg', 'image/jpg'].includes(file[0].type)
-        ) {
-          setErrorPicture(
-            'Seuls les fichiers .jpg, .jpeg, et .png sont autorisés'
-          );
-          setTimeout(() => {
-            setErrorAccount('');
-          }, 3000);
-          return;
-        }
+    const files = event.target.files;
+    if (!files) return;
+    const file = files[0];
+    if (file) {
+      // get the name of the image without the extension
+      const name = file.name.split('.').shift();
+      setImageName(name || '');
+      //Check if the file is .jpg, .jpeg or .png
+      const extension = file.name.split('.').pop()?.toLowerCase();
+ 
+      if (
+        extension &&
+        !['jpg', 'jpeg', 'png'].includes(extension) &&
+        !['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)
+      ) {
+        setErrorPicture(
+          'Seuls les fichiers .jpg, .jpeg, et .png sont autorisés'
+        );
+        setTimeout(() => setErrorPicture(''), 3000);
+        return;
       }
-
-      // check file size
-      if (file && file[0] && file[0].size > 1.5e7) {
+      if (file.size > 1.5e7) {
         setErrorPicture(
           'Fichier trop volumineux, veuillez choisir un fichier de moins de 15MB'
         );
-        setTimeout(() => {
-          setErrorPicture('');
-        }, 3000);
+        setTimeout(() => setErrorPicture(''), 3000);
         return;
       }
 
-      if ((file?.length ?? 0) > 0) {
-        setIsImgLoading(true);
-        updateUser({
-          variables: {
-            updateUserId: id,
-            input: {
-              image: file,
-            },
-          },
-        }).then((response): void => {
-          setIsImgLoading(false);
-          if (response.errors && response.errors.length > 0) {
-            setErrorPicture(
-              'Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png'
-            );
-            setTimeout(() => {
-              setErrorPicture('');
-            }, 3000);
-          }
+      // Read and open the crop modal
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        if (reader.result) {
+          setImageSrc(reader.result as string);
+        }
+        setCropModalOpen(true);
+      });
+      reader.readAsDataURL(file);
+    }
+  };
 
-          const { updateUser } = response.data;
-          // Set the new user data to the store
-          setImage(updateUser.image);
-          setErrorPicture('');
-          resetServerError();
-        });
-      }
+  // update user with new image
+  const handleCropConfirm = async () => {
+    try {
+      setIsImgLoading(true);
+      
+      // Get blob of cropped image
+      const croppedImageBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
 
-      if (updateUserError) {
-        setErrorPicture(
-          'Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png'
-        );
-        throw new Error('Error while updating user picture');
-      }
-    }, 100);
+      // convert blob to file
+      const croppedFile = new File([croppedImageBlob], `${imageName}.jpg`, {
+        type: croppedImageBlob.type,
+      });
+
+      // update user with new image
+      updateUser({
+        variables: {
+          updateUserId: id,
+          input: { image: [croppedFile] },
+        },
+      }).then((response) => {
+        setIsImgLoading(false);
+        if (response.errors && response.errors.length > 0) {
+          setErrorPicture(
+            'Erreur avec ce fichier, tentez un autre format de fichier type .jpg, .jpeg, .png'
+          );
+          setTimeout(() => setErrorPicture(''), 3000);
+          return;
+        }
+        const { updateUser: updatedUser } = response.data;
+        setImage(updatedUser.image);
+        resetServerError();
+        setCropModalOpen(false);
+      });
+    } catch (error) {
+      setIsImgLoading(false);
+      console.error(error);
+    }
   };
 
   // Handle the profile picture delete
@@ -641,6 +700,7 @@ function Account() {
     setIsNotificationEnabled(!isNotificationEnabled);
   };
 
+  // Update the adress with the location
   const addressCorrection = () => {
     if (location.city && location.postcode && location.name) {
       setAddressState(location.name);
@@ -834,17 +894,48 @@ function Account() {
               id="uploadPhotoInput"
               className="account__profile__picture__input"
               type="file"
+              onClick={(event) => { event.currentTarget.value = '';} }
               name="uploadPhotoInput"
               ref={fileInput}
               onChange={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                handleProfilePicture(event);
+                handleFileChange(event);
               }}
               style={{ display: 'none' }}
               accept="image/*"
               aria-label="Sélectionner une nouvelle photo de profil"
             />
+            {cropModalOpen && (
+            <Fade in={growIn} timeout={500} onExited={() => {setCropModalOpen(false), setGrowIn(true)}}>
+              <div className="crop-modal">
+       
+                  <Cropper
+                    image={imageSrc || ''}
+                    crop={crop}
+                    zoom={zoom}
+                    aspect={1} // Pour un recadrage carré
+                    minZoom={0.55}
+                    restrictPosition={false}
+                    onCropChange={setCrop}
+                    onZoomChange={setZoom}
+                    onCropComplete={onCropComplete}
+                  />
+
+                <div className="button-crop-container">
+                  <button
+                    className="cancel-crop"
+                    onClick={() => setGrowIn(false)}
+                  >
+                    Annuler
+                  </button>
+                  <button className="confirm-crop" onClick={handleCropConfirm}>
+                    Confirmer
+                  </button>
+                </div>
+              </div>
+              </Fade>
+           )} 
             <div className="message">
               <Stack sx={{ width: '100%' }} spacing={2}>
                 {errorPicture && (
