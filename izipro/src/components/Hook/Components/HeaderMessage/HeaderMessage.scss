@@ -43,7 +43,7 @@
                 height: 50px;
                 box-shadow: 2px 2px 9px #c9c9c9,
                     -5px -5px 10px #ffffff;
-                object-fit: cover;
+                object-fit: contain;
             }
 
             &.name {

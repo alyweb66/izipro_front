@@ -15,6 +15,11 @@ function Home() {
   const [isFooter, setIsFooter] = useState(false);
   const [loginVisibility, setLoginVisibility] = useState(true);
 
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isInAppBrowser =
+    userAgent.includes('instagram') ||
+    userAgent.includes('fbav') ||
+    userAgent.includes('fban');
 
   // useEffect to check the size of the window
   useEffect(() => {
@@ -37,6 +42,7 @@ function Home() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+
   // send a message to the service worker
   function sendMessageToServiceWorker(message: { type: string }) {
     if (navigator.serviceWorker.controller) {
@@ -44,8 +50,9 @@ function Home() {
     }
   }
 
+
   // clear the cache if the user is not logged in
-  if (!localStorage.getItem('login')) {
+  if (!localStorage.getItem('login') && !isInAppBrowser) {
     sendMessageToServiceWorker({ type: 'CLEAR_CACHE' });
   }
 

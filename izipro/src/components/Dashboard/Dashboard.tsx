@@ -31,6 +31,7 @@ import { useMyConversationSubscriptions } from '../GraphQL/MyConversationSubscri
 import { useLogoutSubscription } from '../GraphQL/LogoutSubscription';
 import OffLine from '../Hook/Components/Offline/OffLine';
 
+
 // Mutation
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
 
@@ -66,7 +67,6 @@ import Badge, { BadgeProps } from '@mui/material/Badge';
 import { styled } from '@mui/material/styles';
 import { Grow } from '@mui/material';
 
-
 const Request = lazy(() => import('./Request/Request'));
 const MyRequest = lazy(() => import('./MyRequest/MyRequest'));
 const MyConversation = lazy(() => import('./MyConversation/MyConversation'));
@@ -82,6 +82,7 @@ type useQueryUserConversationsProps = {
 
 function Dashboard() {
   let navigate = useNavigate();
+
 
   // Store at the top for id to use in the sendBeacon
   const [id, role, lng, lat, settings, jobs, setAll] = userDataStore(
@@ -200,7 +201,6 @@ function Dashboard() {
   const [isMultipleLogout, setIsMultipleLogout] = useState<boolean>(false);
   const [isOffLine, setIsOffLine] = useState<boolean>(false);
 
-
   //*state for myRequest
   const [selectedRequest, setSelectedRequest] = useState<RequestProps | null>(
     null
@@ -221,20 +221,21 @@ function Dashboard() {
     useState<boolean>(true);
 
   //store
-  const isLoggedOut = isLoggedOutStore(useShallow((state) => state.isLoggedOut));
+  const isLoggedOut = isLoggedOutStore(
+    useShallow((state) => state.isLoggedOut)
+  );
   const [subscriptionStore, setSubscriptionStore] = subscriptionDataStore(
     useShallow((state) => [state.subscription, state.setSubscription])
   );
   const [notViewedConversationStore, setNotViewedConversationStore] =
-    notViewedConversation(useShallow((state) => [
-      state.notViewed,
-      state.setNotViewedStore,
-    ]));
+    notViewedConversation(
+      useShallow((state) => [state.notViewed, state.setNotViewedStore])
+    );
   const [requestConversationIdStore, setRequestConversationsIdStore] =
-    requestConversationIds(useShallow((state) => [
-      state.notViewed,
-      state.setNotViewedStore,
-    ]));
+    requestConversationIds(
+      useShallow((state) => [state.notViewed, state.setNotViewedStore])
+    );
+
 
   // Limit
   const myRequestLimit = 5;
@@ -242,32 +243,37 @@ function Dashboard() {
   const myconversationLimit = 5;
 
   //* MyRequest store
-  const [userConvStore] = userConversation(useShallow((state) => [
-    state.users,
-    state.setUsers,
-  ]));
-  myMessageDataStore(useShallow((state) => [state.messages, state.setMessageStore]));
-  const [requestStore] = myRequestStore(useShallow((state) => [
-    state.requests,
-    state.setMyRequestStore,
-  ]));
-  myMessageDataStore(useShallow((state) => [state.messages, state.setMessageStore]));
+  const [userConvStore] = userConversation(
+    useShallow((state) => [state.users, state.setUsers])
+  );
+  myMessageDataStore(
+    useShallow((state) => [state.messages, state.setMessageStore])
+  );
+  const [requestStore] = myRequestStore(
+    useShallow((state) => [state.requests, state.setMyRequestStore])
+  );
+  myMessageDataStore(
+    useShallow((state) => [state.messages, state.setMessageStore])
+  );
 
   //* MyConversation store
   const [clientRequestsStore, setClientRequestsStore] = clientRequestStore(
     useShallow((state) => [state.requests, state.setClientRequestStore])
   );
-  const [requestsConversationStore] = requestConversationStore(useShallow((state) => [
-    state.requests,
-    state.setRequestConversation,
-  ]));
-  messageDataStore(useShallow((state) => [state.messages, state.setMessageStore]));
+  const [requestsConversationStore] = requestConversationStore(
+    useShallow((state) => [state.requests, state.setRequestConversation])
+  );
+  messageDataStore(
+    useShallow((state) => [state.messages, state.setMessageStore])
+  );
 
   //* ClientRequest store
   const [notViewedRequestStore, setNotViewedRequestStore] = notViewedRequest(
     useShallow((state) => [state.notViewed, state.setNotViewedStore])
   );
-  const [resetRequest] = requestDataStore(useShallow((state) => [state.resetRequest]));
+  const [resetRequest] = requestDataStore(
+    useShallow((state) => [state.resetRequest])
+  );
 
   //useRef
   const clientRequestOffset = useRef<number>(0);
@@ -489,6 +495,7 @@ function Dashboard() {
       };
     }
   }, [isOpen]);
+
   // useEffect to check the size of the window
   useEffect(() => {
     // function to check the size of the window
@@ -1292,7 +1299,6 @@ function Dashboard() {
   //* Notification push
   // Function to update the selected tab in the service worker
   function updateSelectedTab(selectedTab: string) {
-
     if (navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({
         type: 'UPDATE_SELECTED_TAB',
@@ -1313,7 +1319,6 @@ function Dashboard() {
           event_label: selectedTab,
         });
       }
-
     }
   }, [selectedTab]);
 
@@ -1358,10 +1363,10 @@ function Dashboard() {
         const result = parser.getResult();
         const nameBrowser: string =
           result.browser.name || 'un navigateur non supporté';
-          //if the browser is safari, reload the page
-          if (nameBrowser === 'Safari' || nameBrowser === 'Mobile Safari') {
-            window.location.reload();
-          }
+        //if the browser is safari, reload the page
+        if (nameBrowser === 'Safari' || nameBrowser === 'Mobile Safari') {
+          window.location.reload();
+        }
       });
     }
   });

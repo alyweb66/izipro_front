@@ -15,12 +15,7 @@ function Root() {
   const isConfirmEmailRoute = location.pathname === '/confirm-email';
   // disable background image on home page
   useEffect(() => {
-    // check whitch page is active
-    /* if (window.location.pathname === '/') {
-      //add className to root
-      document.querySelector('.root')?.classList.add('no-background-image');
-    } */
-
+ 
     if (
       localStorage.getItem('login') === null &&
       window.location.pathname !== '/forgot-password' &&
