@@ -282,7 +282,7 @@ function SettingAccount() {
       },
     }).then(() => {
       setSettings([{ range: radius }]);
-      setMessage('distance validée');
+      setMessage('Distance validée');
       setTimeout(() => {
         setMessage('');
       }, 5000);

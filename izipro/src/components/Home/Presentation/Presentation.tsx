@@ -95,7 +95,6 @@ function Presentation() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 2 }}
                 loading={index === 0 ? 'eager' : 'lazy'}
-
               />
             </AnimatePresence>
           </div>
@@ -131,7 +130,6 @@ function Presentation() {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 2 }}
                   loading={index === 0 ? 'eager' : 'lazy'}
- 
                 />
               </AnimatePresence>
             </div>
@@ -175,13 +173,30 @@ function Presentation() {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 2 }}
                   loading={index === 0 ? 'eager' : 'lazy'}
-
                 />
               </AnimatePresence>
             </div>
           </section>
         </>
       )}
+      <div className="social-media">
+        <img
+          onClick={() =>
+            window.open('https://www.facebook.com/share/15rZXLWAsb/')
+          }
+          className="social-media-icons"
+          src="/logos/facebook.svg"
+          alt="Facebook"
+          aria-label="Share on Facebook"
+        />
+        <img
+          onClick={() => window.open('https://www.instagram.com/izipro.fr/')}
+          className="social-media-icons"
+          src="/logos/instagram.svg"
+          alt="Instagram"
+          aria-label="Visit our Instagram"
+        />
+      </div>
     </div>
   );
 }

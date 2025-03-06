@@ -125,7 +125,7 @@ function MyConversation({
   const [isMessageLoading, setIsMessageLoading] = useState(false);
 
   // limit of requests to fetch
-  const limit = 4;
+  const limit = 10;
 
   //store
   const id = userDataStore(useShallow((state) => state.id));

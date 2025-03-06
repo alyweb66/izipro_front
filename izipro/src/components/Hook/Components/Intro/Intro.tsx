@@ -10,7 +10,7 @@ const Intro: React.FC = () => {
       <p className="intro-description">
         Vous êtes actuellement sur l'onglet{' '}
         <strong className="intro-list-item__strong">
-          {role === 'pro' ? 'MES\u00A0CLIENTS' : 'MES\u00A0DEMANDES'}
+          {role === 'pro' ? 'MES\u00A0CONTACTS' : 'MES\u00A0DEMANDES'}
         </strong>{' '}
         qui sera votre page d'accueil
       </p>
@@ -55,7 +55,7 @@ const Intro: React.FC = () => {
         )}
         {role === 'pro' && (
           <li className="intro-list-item">
-            <strong className="intro-list-item__strong">MES CLIENTS</strong>
+            <strong className="intro-list-item__strong">MES CONTACTS</strong>
             <p>
               Vous permet de voir la liste des demandes auxquelles vous avez
               répondu
