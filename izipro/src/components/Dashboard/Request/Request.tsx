@@ -657,10 +657,10 @@ function Request() {
                     onChange={(event) =>
                       setIsOtherAddress(event.target.checked)
                     }
-                    inputProps={{ 'aria-label': 'Autre adresse' }}
+                    inputProps={{ 'aria-label': 'Adresse différente du compte' }}
                   />
                 }
-                label="Autre adresse"
+                label="Adresse différente du compte"
                 labelPlacement="start"
                 classes={{ label: 'custom-label' }}
               />
