@@ -175,24 +175,25 @@ function Account() {
     postcode: '',
     name: '',
   });
+  const [isCorrectionLocation, setIsCorrectionLocation] = useState(false);
   const [errorLocation, setErrorLocation] = useState('');
   const [isIOS, setIsIOS] = useState(false);
 
-    // State for image cropping
-    const [growIn, setGrowIn] = useState(true);
-    const [cropModalOpen, setCropModalOpen] = useState(false);
-    const [imageSrc, setImageSrc] = useState('');
-    const [imageName, setImageName] = useState('');
-    const [crop, setCrop] = useState({ x: 0, y: 0 });
-    const [zoom, setZoom] = useState(1);
-    const [croppedAreaPixels, setCroppedAreaPixels] = useState<CroppedAreaPixels>(
-      {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-      }
-    );
+  // State for image cropping
+  const [growIn, setGrowIn] = useState(true);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [imageSrc, setImageSrc] = useState('');
+  const [imageName, setImageName] = useState('');
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<CroppedAreaPixels>(
+    {
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+    }
+  );
 
   // state for mapBox
   const [map, setMap] = useState<Map | null>(null);
@@ -552,7 +553,6 @@ function Account() {
     }
   };
 
- 
   // Fonction appelée à la fin du recadrage pour récupérer la zone (en pixels)
   const onCropComplete = useCallback(
     (_croppedArea: CroppedArea, croppedAreaPixels: CroppedAreaPixels) => {
@@ -577,7 +577,7 @@ function Account() {
       setImageName(name || '');
       //Check if the file is .jpg, .jpeg or .png
       const extension = file.name.split('.').pop()?.toLowerCase();
- 
+
       if (
         extension &&
         !['jpg', 'jpeg', 'png'].includes(extension) &&
@@ -613,7 +613,7 @@ function Account() {
   const handleCropConfirm = async () => {
     try {
       setIsImgLoading(true);
-      
+
       // Get blob of cropped image
       const croppedImageBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
 
@@ -700,16 +700,35 @@ function Account() {
     setIsNotificationEnabled(!isNotificationEnabled);
   };
 
+
+
   // Update the adress with the location
   const addressCorrection = () => {
     if (location.city && location.postcode && location.name) {
       setAddressState(location.name);
       setCityState(location.city);
       setPostalCodeState(location.postcode);
+      setIsCorrectionLocation(true);
 
       setErrorLocation('');
     }
   };
+
+  // Update location when address is corrected
+  useEffect(() => {
+    const updateLocation = async () => {
+      if (isCorrectionLocation) {
+        await handleAccountSubmit({
+          preventDefault: () => {},
+          stopPropagation: () => {},
+        } as React.FormEvent<HTMLFormElement>);
+
+        setIsCorrectionLocation(false);
+      }
+    };
+
+    updateLocation();
+  }, [isCorrectionLocation]);
 
   if (emailNotification === null) {
     isGetNotificationRef.current = false;
@@ -894,7 +913,9 @@ function Account() {
               id="uploadPhotoInput"
               className="account__profile__picture__input"
               type="file"
-              onClick={(event) => { event.currentTarget.value = '';} }
+              onClick={(event) => {
+                event.currentTarget.value = '';
+              }}
               name="uploadPhotoInput"
               ref={fileInput}
               onChange={(event) => {
@@ -907,9 +928,14 @@ function Account() {
               aria-label="Sélectionner une nouvelle photo de profil"
             />
             {cropModalOpen && (
-            <Fade in={growIn} timeout={500} onExited={() => {setCropModalOpen(false), setGrowIn(true)}}>
-              <div className="crop-modal">
-       
+              <Fade
+                in={growIn}
+                timeout={500}
+                onExited={() => {
+                  setCropModalOpen(false), setGrowIn(true);
+                }}
+              >
+                <div className="crop-modal">
                   <Cropper
                     image={imageSrc || ''}
                     crop={crop}
@@ -922,20 +948,23 @@ function Account() {
                     onCropComplete={onCropComplete}
                   />
 
-                <div className="button-crop-container">
-                  <button
-                    className="cancel-crop"
-                    onClick={() => setGrowIn(false)}
-                  >
-                    Annuler
-                  </button>
-                  <button className="confirm-crop" onClick={handleCropConfirm}>
-                    Confirmer
-                  </button>
+                  <div className="button-crop-container">
+                    <button
+                      className="cancel-crop"
+                      onClick={() => setGrowIn(false)}
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      className="confirm-crop"
+                      onClick={handleCropConfirm}
+                    >
+                      Confirmer
+                    </button>
+                  </div>
                 </div>
-              </div>
               </Fade>
-           )} 
+            )}
             <div className="message">
               <Stack sx={{ width: '100%' }} spacing={2}>
                 {errorPicture && (

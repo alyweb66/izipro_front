@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import maplibregl, { Map } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -48,6 +48,7 @@ import { CategoryProps, JobProps } from '../../../Type/Request';
 import { popperSx, autocompleteSx } from '../../Hook/SearchStyle';
 import InfoPop from '../../Hook/Components/InfoPop/InfoPop';
 import { Localization } from '../../Hook/Localization';
+
 
 function Request() {
   // Store
@@ -118,6 +119,7 @@ function Request() {
   const [errorLocation, setErrorLocation] = useState('');
   const [successLocation, setSuccessLocation] = useState('');
   const [otherAddressLoading, setOtherAddressLoading] = useState(false);
+  const [isCorrectionLocation, setIsCorrectionLocation] = useState(false);
   const [location, setLocation] = useState({
     city: '',
     postcode: '',
@@ -315,11 +317,13 @@ function Request() {
     }
   };
 
-  const updateAdress = async (event: React.MouseEvent<HTMLButtonElement>) => {
+  // Update address
+  const updateAdress = async (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     event.stopPropagation();
     setErrorMessage('');
     setSuccessLocation('');
+    setErrorLocation('');
 
     // fetch the location
     if (addressOther && cityOther && postalCodeOther) {
@@ -329,6 +333,7 @@ function Request() {
         cityOther,
         postalCodeOther
       );
+ 
 
       if (location && location.label) {
         setOtherAddressLoading(false);
@@ -365,11 +370,29 @@ function Request() {
 
   // Address correction if click on error message
   const addressCorrection = () => {
+    setErrorLocation('');
     setAddressOther(location.name);
     setCityOther(location.city);
     setPostalCodeOther(location.postcode);
-    setErrorLocation('');
+    setOtherAddressLoading(true);
+    setIsCorrectionLocation(true);
   };
+
+  // Update location when address is corrected
+  useEffect(() => {
+    const updateLocation = async () => {
+      if (isCorrectionLocation) {
+        await updateAdress({
+          preventDefault: () => {},
+          stopPropagation: () => {},
+        } as React.MouseEvent<HTMLButtonElement>);
+
+        setIsCorrectionLocation(false);
+      }
+    };
+
+    updateLocation();
+  }, [isCorrectionLocation]);
 
   // Map instance
   useEffect(() => {
@@ -657,7 +680,9 @@ function Request() {
                     onChange={(event) =>
                       setIsOtherAddress(event.target.checked)
                     }
-                    inputProps={{ 'aria-label': 'Adresse différente du compte' }}
+                    inputProps={{
+                      'aria-label': 'Adresse différente du compte',
+                    }}
                   />
                 }
                 label="Adresse différente du compte"
@@ -677,7 +702,7 @@ function Request() {
                   transition={{ duration: 0.1, type: 'tween' }}
                 >
                   <div className="request__form__other-address__form">
-                  {otherAddressLoading && <Spinner />}
+                    {otherAddressLoading && <Spinner />}
                     <label className="request__form__label other-address">
                       <input
                         className="request__form__label__input title"
