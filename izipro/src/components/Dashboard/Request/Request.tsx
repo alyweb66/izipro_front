@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import maplibregl, { Map } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -47,6 +47,8 @@ import TextField from '@mui/material/TextField';
 import { CategoryProps, JobProps } from '../../../Type/Request';
 import { popperSx, autocompleteSx } from '../../Hook/SearchStyle';
 import InfoPop from '../../Hook/Components/InfoPop/InfoPop';
+import { Localization } from '../../Hook/Localization';
+
 
 function Request() {
   // Store
@@ -90,6 +92,9 @@ function Request() {
   );
 
   // State
+  const [cityState, setCityState] = useState(city);
+  const [lngState, setLngState] = useState(lng);
+  const [latState, setLatState] = useState(lat);
   const [urgent, setUrgent] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(0);
   const [searchedJob, setSearchedJob] = useState<JobProps | null>(null);
@@ -106,6 +111,20 @@ function Request() {
   const [map, setMap] = useState<Map | null>(null);
   // Map
   const [radius, setRadius] = useState(0); // Radius in meters
+  // Other adresse
+  const [isOtherAddress, setIsOtherAddress] = useState(false);
+  const [addressOther, setAddressOther] = useState('');
+  const [cityOther, setCityOther] = useState('');
+  const [postalCodeOther, setPostalCodeOther] = useState('');
+  const [errorLocation, setErrorLocation] = useState('');
+  const [successLocation, setSuccessLocation] = useState('');
+  const [otherAddressLoading, setOtherAddressLoading] = useState(false);
+  const [isCorrectionLocation, setIsCorrectionLocation] = useState(false);
+  const [location, setLocation] = useState({
+    city: '',
+    postcode: '',
+    name: '',
+  });
 
   // File upload
   const { fileError, file, setFile, setUrlFile, urlFile, handleFileChange } =
@@ -177,9 +196,9 @@ function Request() {
             urgent: urgent,
             title: DOMPurify.sanitize(titleRequest ?? ''),
             message: DOMPurify.sanitize(descriptionRequest ?? ''),
-            city: city,
-            lng: lng,
-            lat: lat,
+            city: cityState,
+            lng: lngState,
+            lat: latState,
             range: radius,
             job_id: Number(selectedJobByCategory.id),
             user_id: id,
@@ -255,6 +274,10 @@ function Request() {
           setSelectedCategory(0);
           setErrorMessage('');
           setUrgent(false);
+          setIsOtherAddress(false);
+          setAddressOther('');
+          setCityOther('');
+          setPostalCodeOther('');
         }
       });
       clearTimeout(timer);
@@ -294,13 +317,90 @@ function Request() {
     }
   };
 
+  // Update address
+  const updateAdress = async (event: React.MouseEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setErrorMessage('');
+    setSuccessLocation('');
+    setErrorLocation('');
+
+    // fetch the location
+    if (addressOther && cityOther && postalCodeOther) {
+      setOtherAddressLoading(true);
+      const location = await Localization(
+        addressOther,
+        cityOther,
+        postalCodeOther
+      );
+ 
+
+      if (location && location.label) {
+        setOtherAddressLoading(false);
+        setErrorLocation(
+          `Adresse non valide, voulez vous dire : "${location?.label}" ?`
+        );
+        setLocation({
+          city: location.city,
+          postcode: location.postcode,
+          name: location.name,
+        });
+        return;
+      }
+      if (!location) {
+        setOtherAddressLoading(false);
+        setErrorLocation(
+          'Adresse non valide, veuillez vérifier les informations saisies'
+        );
+        return;
+      }
+
+      if (location) {
+        setOtherAddressLoading(false);
+        setLngState(location.lng);
+        setLatState(location.lat);
+        setCityState(location.city);
+        setSuccessLocation('Adresse valide');
+        setTimeout(() => {
+          setSuccessLocation('');
+        }, 5000);
+      }
+    }
+  };
+
+  // Address correction if click on error message
+  const addressCorrection = () => {
+    setErrorLocation('');
+    setAddressOther(location.name);
+    setCityOther(location.city);
+    setPostalCodeOther(location.postcode);
+    setOtherAddressLoading(true);
+    setIsCorrectionLocation(true);
+  };
+
+  // Update location when address is corrected
+  useEffect(() => {
+    const updateLocation = async () => {
+      if (isCorrectionLocation) {
+        await updateAdress({
+          preventDefault: () => {},
+          stopPropagation: () => {},
+        } as React.MouseEvent<HTMLButtonElement>);
+
+        setIsCorrectionLocation(false);
+      }
+    };
+
+    updateLocation();
+  }, [isCorrectionLocation]);
+
   // Map instance
   useEffect(() => {
     if (mapContainerRef.current) {
       const MapInstance = new maplibregl.Map({
         container: 'map',
         style: import.meta.env.VITE_MAPLIBRE_URL,
-        center: [lng ?? 0, lat ?? 0],
+        center: [lngState ?? 0, latState ?? 0],
         zoom: 10,
         dragPan: false, // Disable dragging to pan the map
         scrollZoom: false, // Disable scroll zoom
@@ -328,7 +428,7 @@ function Request() {
         }
       };
     }
-  }, [lng, lat]);
+  }, [lngState, latState]);
 
   // Adding options to the map
   useLayoutEffect(() => {
@@ -338,13 +438,13 @@ function Request() {
         color: '#f37c04',
         scale: 0.8,
       })
-        .setLngLat([lng ?? 0, lat ?? 0])
+        .setLngLat([lngState ?? 0, latState ?? 0])
         .addTo(map as maplibregl.Map);
 
       // Create a circle around the center point
       let circle = null;
-      if (lng !== null && lat !== null) {
-        const center = turf.point([lng, lat]); // Crate center point
+      if (lngState !== null && latState !== null) {
+        const center = turf.point([lngState, latState]); // Crate center point
         circle = turf.circle(center, radius / 1000, {
           steps: 100,
           units: 'kilometers',
@@ -388,7 +488,7 @@ function Request() {
         }
       }
     }
-  }, [map, radius, lng, lat]);
+  }, [map, radius, lngState, latState]);
 
   // Update jobs when category changes
   useEffect(() => {
@@ -570,7 +670,139 @@ function Request() {
               selectedCategory={selectedCategory}
             />
 
-            {lng && lat && (
+            <FormGroup>
+              <FormControlLabel
+                control={
+                  <Switch
+                    id="push-permission-switch"
+                    color="warning"
+                    checked={isOtherAddress}
+                    onChange={(event) =>
+                      setIsOtherAddress(event.target.checked)
+                    }
+                    inputProps={{
+                      'aria-label': 'Adresse différente du compte',
+                    }}
+                  />
+                }
+                label="Adresse différente du compte"
+                labelPlacement="start"
+                classes={{ label: 'custom-label' }}
+              />
+            </FormGroup>
+            <AnimatePresence>
+              {isOtherAddress && (
+                <motion.div
+                  className="request__form__other-address"
+                  layout
+                  style={{ overflow: 'hidden' }}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.1, type: 'tween' }}
+                >
+                  <div className="request__form__other-address__form">
+                    {otherAddressLoading && <Spinner />}
+                    <label className="request__form__label other-address">
+                      <input
+                        className="request__form__label__input title"
+                        name="adresse"
+                        aria-label="Adresse"
+                        title="adresse"
+                        type="text"
+                        placeholder="Adresse"
+                        value={addressOther}
+                        onChange={(event) =>
+                          setAddressOther(
+                            DOMPurify.sanitize(event.target.value)
+                          )
+                        }
+                        maxLength={100}
+                      />
+                    </label>
+                    <label className="request__form__label other-address">
+                      <input
+                        className="request__form__label__input title"
+                        name="postal_code"
+                        aria-label="Code postal"
+                        title="Code postal"
+                        type="text"
+                        placeholder="Code postal"
+                        value={postalCodeOther}
+                        onChange={(event) =>
+                          setPostalCodeOther(
+                            DOMPurify.sanitize(event.target.value)
+                          )
+                        }
+                        maxLength={10}
+                      />
+                    </label>
+                    <label className="request__form__label other-address">
+                      <input
+                        className="request__form__label__input title"
+                        name="city"
+                        aria-label="Ville"
+                        title="Ville"
+                        type="text"
+                        placeholder="Ville"
+                        value={cityOther}
+                        onChange={(event) =>
+                          setCityOther(DOMPurify.sanitize(event.target.value))
+                        }
+                        maxLength={100}
+                      />
+                    </label>
+                    <AnimatePresence>
+                      {(successLocation || errorLocation) && (
+                        <motion.div
+                          className="message"
+                          layout
+                          style={{ overflow: 'hidden' }}
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.1, type: 'tween' }}
+                        >
+                          <Stack sx={{ width: '100%' }} spacing={2}>
+                            {successLocation && (
+                              <Fade in={!!successLocation} timeout={300}>
+                                <Alert variant="filled" severity="success">
+                                  {successLocation}
+                                </Alert>
+                              </Fade>
+                            )}
+
+                            {errorLocation && (
+                              <Fade in={!!errorLocation} /* timeout={300} */>
+                                <Alert
+                                  className="alert-errorLocation"
+                                  variant="filled"
+                                  severity="warning"
+                                  onClick={addressCorrection}
+                                >
+                                  {errorLocation}
+                                </Alert>
+                              </Fade>
+                            )}
+                          </Stack>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    <button
+                      className="request__form__other-address__button"
+                      type="button"
+                      onClick={updateAdress}
+                      disabled={createLoading}
+                      aria-label="Valider l'adresse"
+                      title="Valider l'adresse"
+                    >
+                      Valider l'adresse
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {lngState && latState && (
               <>
                 <h1 className="request__form__title radius">
                   Dans un rayon autour de*
