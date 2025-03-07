@@ -3,14 +3,14 @@ import { registerRoute } from 'workbox-routing';
 import { StaleWhileRevalidate } from 'workbox-strategies';
 
 // Version du service worker pour gérer le versioning
-const SW_VERSION = '0.0.1';
+const SW_VERSION = '1.0.0';
 const CACHE_NAME = `my-app-cache-${SW_VERSION}`;
 
 const domain = 'https://izipro.fr';
 //console.log(`Service Worker Version: ${SW_VERSION}`);
 const urlsToCache = [
   '/',
-  '/manifest.json?v=0.0.1', //! Change version in HTML too
+  '/manifest.json?v=1.0.0', //! Change version in HTML too
   /* '/assets/FetchButton-CmI3IYuX.css' */
   // add other static assets to force cache
 ];

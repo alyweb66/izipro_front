@@ -17,6 +17,13 @@
     }
   }
 
+  .custom-label {
+    color: v.$color-primary-blue;
+    font-family: v.$font;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
   &.no-req {
     display: flex;
     justify-content: center;
@@ -89,6 +96,51 @@
       font-size: 1rem;
       font-weight: 500;
       color: v.$color-primary-blue;
+    }
+    .request__form__other-address {
+      box-shadow:
+        4px 0 8px -2px rgba(0, 0, 0, 0.1),
+        -4px 0 8px -2px rgba(0, 0, 0, 0.1);
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: fit-content;
+      .request__form__other-address__form {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: transparent;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        width: 100%;
+
+        .message {
+          width: fit-content;
+          max-width: 400px;
+          margin: 0.5rem auto 0 auto;
+    
+          .alert-errorLocation {
+            /* For mouse */
+            @media (hover: hover) and (pointer: fine) {
+              cursor: pointer;
+            }
+    
+            /* For touch */
+            @media (hover: none) and (pointer: coarse) {
+              cursor: default;
+            }
+          }
+        }
+
+        .request__form__other-address__button {
+          @include m.blue-button;
+
+          & {
+            margin: 1rem auto 0.5rem auto;
+            position: relative;
+          }
+        }
+      }
     }
 
     .request__form__container {
@@ -214,6 +266,11 @@
       font-weight: 500;
       color: v.$color-primary-orange;
 
+      &.other-address {
+        width: 400px;
+        margin-top: 1rem;
+      }
+
       .request__form__label__input {
         width: 100%;
         color: black;
@@ -297,7 +354,7 @@
             width: 99px;
             height: 59px;
             .pdf-name {
-        /*       position: absolute;
+              /*       position: absolute;
               top: 2.9rem;
               left: 0.8rem; */
               font-size: 0.9rem;
@@ -355,7 +412,7 @@
       }
 
       &.camera-icone {
-        margin-bottom: 0;
+        margin-bottom: 1rem;
         font-size: 2rem;
         color: v.$color-primary-orange;
 
@@ -405,7 +462,7 @@
       @include m.blue-button;
 
       & {
-        margin: 0rem auto 1rem auto;
+        margin: 1rem auto 1rem auto;
         position: relative;
       }
     }
