@@ -9,7 +9,25 @@
             "request": "launch",
             "name": "Launch Chrome against localhost",
             "url": "http://localhost:5173",
-            "webRoot": "${workspaceFolder}"
+            "webRoot": "${workspaceFolder}",
+            "skipFiles": [
+                "**/node_modules/**",
+                "**/*.js", // Ignore tous les fichiers JavaScript
+                "<node_internals>/**"
+            ],
+            "smartStep": true,
+            "sourceMaps": true,
+        },
+        {
+            "type": "firefox",
+            "request": "launch",
+            "name": "Launch firefox against localhost",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}",
+            "skipFiles": [
+                "**/node_modules/**",
+                "<node_internals>/**"
+            ],
         }
     ]
 }
