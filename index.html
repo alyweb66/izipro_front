@@ -291,6 +291,11 @@
     <!-- PWA -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="theme-color" content="#ffffff" />
+    <script>
+      if (navigator.userAgent.includes("Firefox")) {
+    document.querySelector("meta[name='theme-color']").setAttribute("content", "#ffffff");
+}
+    </script>
     <!-- ServiceWorker -->
     <script
       src="/src/components/Hook/ServiceWorkerRegistration.tsx"
