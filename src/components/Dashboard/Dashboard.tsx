@@ -31,7 +31,6 @@ import { useMyConversationSubscriptions } from '../GraphQL/MyConversationSubscri
 import { useLogoutSubscription } from '../GraphQL/LogoutSubscription';
 import OffLine from '../Hook/Components/Offline/OffLine';
 
-
 // Mutation
 import { DELETE_NOT_VIEWED_CONVERSATION_MUTATION } from '../GraphQL/ConversationMutation';
 
@@ -82,7 +81,6 @@ type useQueryUserConversationsProps = {
 
 function Dashboard() {
   let navigate = useNavigate();
-
 
   // Store at the top for id to use in the sendBeacon
   const [id, role, lng, lat, settings, jobs, setAll] = userDataStore(
@@ -235,7 +233,7 @@ function Dashboard() {
     requestConversationIds(
       useShallow((state) => [state.notViewed, state.setNotViewedStore])
     );
-
+  const [isServiceWorker, setIsServiceWorker] = useState(false);
 
   // Limit
   const myRequestLimit = 5;
@@ -1299,7 +1297,7 @@ function Dashboard() {
   //* Notification push
   // Function to update the selected tab in the service worker
   function updateSelectedTab(selectedTab: string) {
-    if (navigator.serviceWorker.controller) {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({
         type: 'UPDATE_SELECTED_TAB',
         tab: selectedTab,
@@ -1324,7 +1322,7 @@ function Dashboard() {
 
   // Function to update the selected conversation ID in the service worker
   function updateSelectedConversationId(conversationId: number) {
-    if (navigator.serviceWorker.controller) {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({
         type: 'UPDATE_SELECTED_CONVERSATION',
         conversationId: conversationId,
@@ -1344,32 +1342,64 @@ function Dashboard() {
   }, [conversationIdState, myConversationIdState]);
   //* End notification push
 
-  // get the visibility of the page and send it to the service worker
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-      navigator.serviceWorker.ready.then((registration) => {
-        if (registration.active) {
-          registration.active.postMessage({ action: 'page-hidden' });
-        }
-      });
-    } else {
-      navigator.serviceWorker.ready.then((registration) => {
-        if (registration.active) {
-          registration.active.postMessage({ action: 'page-visible' });
-        }
-        // Detect type of browser
+  // check if a serviceworker is registered
+  useEffect(() => {
+    const checkServiceWorker = async () => {
+      if (!('serviceWorker' in navigator)) {
+        setIsServiceWorker(false);
+        return;
+      }
 
-        const parser = new UAParser();
-        const result = parser.getResult();
-        const nameBrowser: string =
-          result.browser.name || 'un navigateur non supporté';
-        //if the browser is safari, reload the page
-        if (nameBrowser === 'Safari' || nameBrowser === 'Mobile Safari') {
-          window.location.reload();
-        }
-      });
-    }
-  });
+      try {
+        // 1. Vérifier les inscriptions existantes
+        const registrations = await navigator.serviceWorker.getRegistrations();
+
+        // 2. Vérifier si au moins un SW contrôle la page
+        const isActive = registrations.some(
+          (reg) => reg.active && reg.active.state === 'activated'
+        );
+
+        // 3. Vérifier via le controller
+        const hasController = !!navigator.serviceWorker.controller;
+
+        setIsServiceWorker(isActive || hasController);
+      } catch (error) {
+        // console.error('Erreur de vérification:', error);
+        setIsServiceWorker(false);
+      }
+    };
+
+    checkServiceWorker();
+  }, []);
+
+  if (isServiceWorker) {
+    // get the visibility of the page and send it to the service worker
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        navigator.serviceWorker.ready.then((registration) => {
+          if (registration.active) {
+            registration.active.postMessage({ action: 'page-hidden' });
+          }
+        });
+      } else {
+        navigator.serviceWorker.ready.then((registration) => {
+          if (registration.active) {
+            registration.active.postMessage({ action: 'page-visible' });
+          }
+          // Detect type of browser
+
+          const parser = new UAParser();
+          const result = parser.getResult();
+          const nameBrowser: string =
+            result.browser.name || 'un navigateur non supporté';
+          //if the browser is safari, reload the page
+          if (nameBrowser === 'Safari' || nameBrowser === 'Mobile Safari') {
+            window.location.reload();
+          }
+        });
+      }
+    });
+  }
 
   return (
     <>
@@ -1389,7 +1419,13 @@ function Dashboard() {
                 aria-label="Recharger la page"
                 onClick={() => window.location.reload()}
               />
-              <button className="__menu" onClick={toggleMenu}>
+              <button
+                title="Menu"
+                aria-label="Ouvrir le menu"
+                type="button"
+                className="__menu"
+                onClick={toggleMenu}
+              >
                 <div className="burger-icon">
                   <div className="burger-icon__line"></div>
                   <div

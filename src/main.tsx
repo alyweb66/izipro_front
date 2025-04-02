@@ -23,93 +23,88 @@ import { setContext } from '@apollo/client/link/context';
 import { isLoggedOutStore, userDataStore } from './store/UserData';
 //import ReloadPrompt from './Prompt';
 import { registerSW } from 'virtual:pwa-register';
-// import { UAParser } from 'ua-parser-js';
 
-/* const parser = new UAParser();
-const result = parser.getResult();
-const nameBrowser: string = result.browser.name || 'un navigateur non supporté';
- */
-// Register the service worker PWA
-//registerSW({ immediate: true })
-let updateNotified = false;
-// Record the service worker registration
 
-const userAgent = navigator.userAgent.toLowerCase();
-const isInAppBrowser =
-  userAgent.includes('instagram') ||
-  userAgent.includes('fbav') ||
-  userAgent.includes('fban');
+// Show message to the user if the app is opened in an in-app browser
+async function redirectToCompatibleBrowser() {
+  const isInAppBrowser = () => {
+    const ua = navigator.userAgent.toLowerCase();
+    // Verify if the user agent is in an in-app browser
+    return /fban|fbav|Instagram|gsa|line|whatsapp|twitter/.test(ua);
+  };
 
-if (!isInAppBrowser && 'serviceWorker' in navigator) {
-  registerSW({
-    onNeedRefresh() {
-      /* ... */
-    },
-    onRegistered(registration) {
-      if (registration) {
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed') {
-                if (navigator.serviceWorker.controller && !updateNotified) {
-                  alert('Votre application a été mise à jour');
-                  updateNotified = true;
-                }
-              }
-            });
-          }
-        });
+  if (isInAppBrowser()) {
+    if ('serviceWorker' in navigator) {
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((r) => r.unregister()));
+        const cacheKeys = await caches.keys();
+        await Promise.all(cacheKeys.map((key) => caches.delete(key)));
+        // Attendre un petit délai pour être sûr que tout est fini
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      } catch (error) {
+        console.error('Error during cleanup:', error);
       }
-    },
-    onRegisterError(error) {
-      console.error(
-        "Erreur lors de l'enregistrement du Service Worker:",
-        error
-      );
-    },
-  });
-} else {
-  const url = window.location.href; // L'URL actuelle
+    }
 
-  // open the app in the browser if it's instagram or facebook app
-  if (/android/i.test(userAgent)) {
-    window.location.href = `intent://${url.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end;`;
-  } else if (/iphone|ipad|ipod/i.test(userAgent)) {
-    setTimeout(() => {
-      window.open(url, '_blank') // Si ça ne fonctionne pas, recharge la page normale
-    }, 500);
-  }
-}
-/* registerSW({
-  onNeedRefresh() {
-    //console.log("Nouvelle version disponible ! Mise à jour en cours...");
-  },
-  onOfflineReady() {
-    //	console.log("L'application est prête à fonctionner hors ligne !");
-  },
-  onRegistered(registration) {
-    if (registration) {
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed') {
-              // Le nouveau service worker est installé
-              if (navigator.serviceWorker.controller && !updateNotified) {
-                alert('Votre application a été mise à jour');
-                updateNotified = true;
-              }
+    alert(
+      'Vous devez ouvrir ce lien dans un autre navigateur (Chrome, Safari...) pour une meilleure expérience.'
+    );
+  } else {
+    // if it's not in an in-app browser, register the service worker
+    let updateNotified = false;
+ 
+    registerSW({
+      onNeedRefresh() {},
+      onRegistered(registration) {
+        if (registration) {
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed') {
+                  if (navigator.serviceWorker.controller && !updateNotified) {
+                    alert('Votre application a été mise à jour');
+                    updateNotified = true;
+                  }
+                }
+              });
             }
           });
         }
-      });
+      },
+      onRegisterError(error) {
+        console.error(
+          "Erreur lors de l'enregistrement du Service Worker:",
+          error
+        );
+      },
+    });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/serviceWorker.js')
+        .then((registration) => {
+          registration.onupdatefound = () => {
+            const installingWorker = registration.installing;
+            if (installingWorker) {
+              installingWorker.onstatechange = () => {
+                if (
+                  installingWorker.state === 'installed' &&
+                  navigator.serviceWorker.controller
+                ) {
+                  installingWorker.postMessage({ type: 'SKIP_WAITING' });
+                  installingWorker.postMessage({ type: 'CLEAR_CACHE' });
+                }
+              };
+            }
+          };
+        });
     }
-  },
-  onRegisterError(error) {
-    console.error("Erreur lors de l'enregistrement du Service Worker:", error);
-  },
-}); */
+  }
+}
+
+redirectToCompatibleBrowser();
 
 // store
 const setServerError = (serverError: {
@@ -152,10 +147,10 @@ const defaultOptions: DefaultOptions = {
 };
 
 // Étendre le type GraphQLFormattedError pour inclure httpStatus
-interface CustomGraphQLFormattedError extends GraphQLFormattedError {
+type CustomGraphQLFormattedError = GraphQLFormattedError & {
   httpStatus?: number;
   code?: string;
-}
+};
 // Global flag to indicate if the user is logged out
 let isLoggedOut = false;
 // Middleware to check if the user has a 401 error from the server
@@ -269,9 +264,7 @@ window.addEventListener('offline', () => {
   wsLink = null;
   //console.log('wsLink (offline)', wsLink);
 });
-//console.log('Initial navigator.onLine:', navigator.onLine);
-//console.log('Initial wsLink:', wsLink);
-//const httpLinkWithLogout = errorLink.concat(httpLink);
+
 const httpLinkWithMiddleware = ApolloLink.from([
   userIdMiddleware,
   authMiddleware,
@@ -344,37 +337,6 @@ if (!client) {
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
-
-/* function isInAppBrowser() {
-    const ua = navigator.userAgent.toLowerCase();
-    return ua.includes("instagram") || ua.includes("fbav") || ua.includes("fban");
-} */
-
-// Vérification directe via userAgent
-/* const userAgent = navigator.userAgent.toLowerCase(); */
-/* const isInAppBrowser = userAgent.includes("instagram") || userAgent.includes("fbav") || userAgent.includes("fban");
- */
-
-if (!isInAppBrowser && 'serviceWorker' in navigator) {
-  /* 	alert(JSON.stringify(result, null, 2)); */
-} else if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/serviceWorker.js').then((registration) => {
-    registration.onupdatefound = () => {
-      const installingWorker = registration.installing;
-      if (installingWorker) {
-        installingWorker.onstatechange = () => {
-          if (installingWorker.state === 'installed') {
-            if (navigator.serviceWorker.controller) {
-              // New update available
-              installingWorker.postMessage({ type: 'SKIP_WAITING' });
-              installingWorker.postMessage({ type: 'CLEAR_CACHE' });
-            }
-          }
-        };
-      }
-    };
-  });
-}
 
 // render element in the DOM
 root.render(

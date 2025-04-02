@@ -14,12 +14,15 @@ function Home() {
   /* let navigate = useNavigate(); */
   const [isFooter, setIsFooter] = useState(false);
   const [loginVisibility, setLoginVisibility] = useState(true);
+  const [isServiceWorker, setIsServiceWorker] = useState(false);
 
   const userAgent = navigator.userAgent.toLowerCase();
   const isInAppBrowser =
     userAgent.includes('instagram') ||
     userAgent.includes('fbav') ||
-    userAgent.includes('fban');
+    userAgent.includes('fban') ||
+    userAgent.includes('gsa') ||
+    userAgent.includes('GSA');
 
   // useEffect to check the size of the window
   useEffect(() => {
@@ -41,20 +44,44 @@ function Home() {
     // remove the event listener when the component unmount
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-
   // send a message to the service worker
   function sendMessageToServiceWorker(message: { type: string }) {
-    if (navigator.serviceWorker.controller) {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage(message);
     }
   }
+  useEffect(() => {
+    const checkServiceWorker = async () => {
+      if (!('serviceWorker' in navigator)) {
+        setIsServiceWorker(false);
+        return;
+      }
 
+      try {
+        // 1. Vérifier les inscriptions existantes
+        const registrations = await navigator.serviceWorker.getRegistrations();
 
-  // clear the cache if the user is not logged in
-  if (!localStorage.getItem('login') && !isInAppBrowser) {
-    sendMessageToServiceWorker({ type: 'CLEAR_CACHE' });
-  }
+        // 2. Vérifier si au moins un SW contrôle la page
+        const isActive = registrations.some(
+          (reg) => reg.active && reg.active.state === 'activated'
+        );
+
+        // 3. Vérifier via le controller
+        const hasController = !!navigator.serviceWorker.controller;
+
+        setIsServiceWorker(isActive || hasController);
+      } catch (error) {
+        // console.error('Erreur de vérification:', error);
+        setIsServiceWorker(false);
+      }
+    };
+
+    checkServiceWorker();
+    // clear the cache if the user is not logged in
+    if (isServiceWorker && !localStorage.getItem('login') && !isInAppBrowser) {
+      sendMessageToServiceWorker({ type: 'CLEAR_CACHE' });
+    }
+  }, []);
 
   return (
     <div className="home">
