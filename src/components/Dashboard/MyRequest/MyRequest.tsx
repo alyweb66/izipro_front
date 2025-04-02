@@ -743,7 +743,7 @@ function MyRequest({
 
   // Function to update the selected conversation ID in the service worker
   function updateSelectedConversationId(conversationId: number) {
-    if (navigator.serviceWorker.controller) {
+    if ('servicWorker' in navigator && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({
         type: 'UPDATE_SELECTED_CONVERSATION',
         conversationId: conversationId,
